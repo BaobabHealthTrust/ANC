@@ -1,0 +1,95 @@
+<style type="text/css">
+  .selected{
+    border: 1px solid #00f;
+    -moz-border-radius: 10px;
+    width:20px;
+  }
+</style>
+
+<table width="100%" border="0" cellpadding="5">
+    <tr>
+        <th style="height: 30px; font-size: 1.4em;" align="left">
+            Examination
+            <div style="float: right; color: #f00;
+                 font-weight: normal; padding-right: 30px;">
+                Refer*
+            </div>
+        </th>
+    </tr>
+    <tr>
+        <td valign="top" align="center">
+            <table width="90%" cellspacing="0">
+                <tr>
+                    <td style="padding-left: 30px;">
+                        Height
+                    </td>
+                    <td style="border-top: 1px solid #000;
+                        border-left: 1px solid #000;
+                        border-bottom: 1px solid #000;"
+                        align="center" colspan="2">
+                      <div class="<%= "#{(@height >= 150 ? "selected" : "")}"  %>" >
+                        150cm +
+                      </div>
+                    </td>
+                    <td style="color: #f00; border-top: 1px solid #000;
+                        border-bottom: 1px solid #000;
+                        border-right: 1px solid #000;" colspan="2"
+                        align="center">
+                      <div class="<%= "#{(@height < 150 ? "selected" : "")}"  %>" >
+                        < 150cm
+                      </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 30px;">
+                        Multiple pregnancy
+                    </td>
+                    <td style="border-left: 1px solid #000;
+                        border-bottom: 1px solid #000;"
+                        align="center" colspan="2">
+                      <div class="<%= "#{(@multiple == "NO" ? "selected" : "")}"  %>" >
+                        N
+                      </div>
+                    </td>
+                    <td style="color: #f00; border-bottom: 1px solid #000;
+                        border-right: 1px solid #000;" colspan="2"
+                        align="center">
+                      <div class="<%= "#{(@multiple == "YES" ? "selected" : "")}"  %>" >
+                        Y
+                      </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 30px;">
+                        WHO clinical stage
+                    </td>
+                    <td style="border-left: 1px solid #000;
+                        border-bottom: 1px solid #000;"
+                        align="center">
+                      <div class="<%= "#{(@who == 1 ? "selected" : "")}"  %>" >
+                        1
+                      </div>
+                    </td>
+                    <td style="border-bottom: 1px solid #000;"
+                        align="center">
+                      <div class="<%= "#{(@who == 2 ? "selected" : "")}"  %>" >
+                        2
+                      </div>
+                    </td>
+                    <td style="border-bottom: 1px solid #000;"
+                        align="center">
+                      <div class="<%= "#{(@who == 3 ? "selected" : "")}"  %>" >
+                        3
+                      </div>
+                    </td>
+                    <td style="border-bottom: 1px solid #000;
+                        border-right: 1px solid #000;" align="center">
+                      <div class="<%= "#{(@who == 4 ? "selected" : "")}"  %>" >
+                        4
+                      </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

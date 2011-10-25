@@ -10,7 +10,7 @@
             tt_cancel_destination = 'dashboard.html';
             tt_cancel_show = 'dashboard.html';
         </script>
-        <link href="stylesheets/mateme.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
+        <link href="stylesheets/form.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
         <link href="stylesheets/touch-fancy.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
         <script src="javascripts/preload.js?1266397276" type="text/javascript"></script>
         <!-- Uncomment/Comment the line below to enable/disable the Touchscreen Toolkit-->
@@ -22,7 +22,7 @@
         <div id='container'>
             <div id='content'>
                 <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
-                    <form action='dashboard.html' method="get">
+                    <form action='dashboard.html'>
                         <table cellpadding=10>
                             <tr>
                                 <th colspan=2>Observations</th>
@@ -34,9 +34,9 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Enter Para</td>
+                                <td>Enter Parity</td>
                                 <td>
-                                    <input type='text' value='' name='enter_para' id='enter_para' helptext='Enter Para' />
+                                    <input type='text' value='' name='enter_parity' id='enter_parity' helptext='Enter Parity' />
                                 </td>
                             </tr>
                             <tr>
@@ -99,6 +99,7 @@
                                 <td>Enter Syphilis Result</td>
                                 <td>
                                     <select style='width: 100%' name='enter_syphilis_result' id='enter_syphilis_result' helptext='Enter Syphilis Result'>
+                                        <option></option>
                                         <option>Not Done</option>
                                         <option>Positive</option>
                                         <option>Negative</option>
