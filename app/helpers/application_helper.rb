@@ -57,11 +57,11 @@ module ApplicationHelper
   def version
     #"Bart Version: #{BART_VERSION}#{' ' + BART_SETTINGS['installation'] if BART_SETTINGS}, #{File.ctime(File.join(RAILS_ROOT, 'config', 'environment.rb')).strftime('%d-%b-%Y')}"
     style = "style='background-color:red;'" unless session[:datetime].blank?
-    "Bart Version: #{BART_VERSION} - <span #{style}>#{(session[:datetime].to_date rescue Date.today).strftime('%A, %d-%b-%Y')}</span>"
+    "ANC Version: #{BART_VERSION} - <span #{style}>#{(session[:datetime].to_date rescue Date.today).strftime('%A, %d-%b-%Y')}</span>"
   end
   
   def welcome_message
-    "Muli bwanji, enter your user information or scan your id card. <span style='font-size:0.6em;float:right'>(#{version})</span>"  
+    "Muli bwanji, enter your user information. <span style='font-size:0.6em;float:right'>(#{version})</span>"  
   end
   
   def show_identifiers(location_id, patient)

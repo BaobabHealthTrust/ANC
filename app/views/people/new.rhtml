@@ -57,6 +57,10 @@
 
 <% form_for :person, @person, :url => { :action => "create" } do |f| %>
 
+  <%= hidden_field_tag "encounter[encounter_type_name]", "REGISTRATION" %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", (session[:datetime] ? session[:datetime].to_date : Date.today) %>
+  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+
   <%= text_field_tag "person[names][given_name]", params[:given_name], {:id => 'given_name', :field_type => 'alpha', :helpText => 'First name', :ajaxURL => '/person_names/given_names?search_string=', :allowFreeText => true, :condition => '$("given_name").value == "" || skipped[tstCurrentPage] == 1', :tt_onLoad => 'seen(tstCurrentPage);' } %>
   
   <%= text_field_tag "person[names][family_name]", params[:family_name], {:id => 'family_name', :field_type => 'alpha', :helpText => 'Last name', :ajaxURL => '/person_names/family_names?search_string=', :allowFreeText => true, :condition => '$("family_name").value == "" || skipped[tstCurrentPage] == 1', :tt_onLoad => 'seen(tstCurrentPage);' } %>
@@ -65,7 +69,7 @@
 
   <%= text_field_tag "person[names][family_name2]", params[:family_name2], {:id => 'family_name2', :field_type => 'alpha', :helpText => 'Maiden Name', :ajaxURL => '/person_names/family_name2?search_string=', :allowFreeText => true, :condition => '$("family_name2").value == "" || skipped[tstCurrentPage] == 1', :tt_onLoad => 'seen(tstCurrentPage);' } if ask_mothers_surname %>
 
-  <%= text_field_tag "person[birth_year]", nil, {:helpText => 'Year of Birth', :field_type => 'number', :absoluteMin => "1890", :min => (Date.today.year-50), :max => (Date.today.year-10), :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly", :tt_onLoad => 'seen(tstCurrentPage);' }  %>
+  <%= text_field_tag "person[birth_year]", nil, {:helpText => 'Year of Birth', :field_type => 'number', :absoluteMin => "1890", :min => (Date.today.year-50), :max => (Date.today.year-10), :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnlyWithUnknown", :tt_onLoad => 'seen(tstCurrentPage);' }  %>
 
   <%= select_tag "person[birth_month]", month_name_options, {:helpText => 'Month of Birth', :condition => '$("person_birth_year").value.toLowerCase() != "unknown"'}%>
 
