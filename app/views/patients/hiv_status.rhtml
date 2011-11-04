@@ -33,48 +33,86 @@
     return false;
   }
 
+  function getSelected(){
+    var choices = "";
+
+    for(var o = 0; o < __$('choice').options.length; o++){
+      if(__$('choice').options[o].selected == true){
+        choices += __$('choice').options[o].innerHTML + " ";
+      }
+    }
+
+    return choices;
+  }
+  
   //-->
 </script>
 
 <% form_tag :controller => "encounters", :action => "create" do |f| %>
-  <%= hidden_field_tag "encounter[encounter_type_name]", "UPDATE HIV STATUS" %>
+  <%= hidden_field_tag "encounter[encounter_type_name]", "CURRENT PREGNANCY" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%  session_date = session[:datetime] || Time.now() %>
 
-  <%= touch_select_tag "Previous HIV Test Status From Before Current Facility Visit", @patient,
-    options_for_select([["Negative in the last 3 months", "Negative in the last 3 months"],
-      ["Positive Ever", "Positive Ever"], ["Unknown", "Unknown"]]),
-    {:id => "previous_test_status_from_before_currrent_facility_visit",
-    :helptext => "Previous HIV Test Status From Before Currrent Facility Visit" } %>
+  <%= select_tag("choice", options_for_select(["", "HIV Status", 
+        "Planned delivery place", "Multiple Pregnancy", "Syphilis Result"]), 
+    {:helpText => 'Select Task(s)', :id => "choice", :multiple => true})%>
+
+  <%#= touch_select_tag "Previous HIV Test Status From Before Current Facility Visit", @patient,
+  options_for_select([["Negative in the last 3 months", "Negative in the last 3 months"],
+  ["Positive Ever", "Positive Ever"], ["Unknown", "Unknown"]]),
+  {:id => "previous_test_status_from_before_currrent_facility_visit",
+  :helptext => "Previous HIV Test Status From Before Currrent Facility Visit" } %>
 
   <%= touch_select_tag "HIV Status", @patient,
     options_for_select([["", ""], ["Negative", "Negative"], ["Positive", "Positive"], ["Not Done", "Not Done"]]),
     {:id => "new_test_result_at_current_facility",
     :helptext => "New Test Result At Current Facility",
-    :condition => '$("previous_test_status_from_before_currrent_facility_visit").value == "Unknown"',
+    :condition => "getSelected().match(/HIV\sStatus/)",
     :tt_BeforeUnload => "checkHIVTestUnkown()" } %>
 
   <%= touch_date_tag "HIV test date", @patient, nil,
     {:id => "enter_date_result_given",
     :helptext => "Date Result Given",
-    :condition => "__$('previous_test_status_from_before_currrent_facility_visit').value != 'Unknown'",
-    :tt_BeforeUnload => "checkHIVTestDate()",
+    :condition => "getSelected().match(/HIV\sStatus/)",
+    # :tt_BeforeUnload => "checkHIVTestDate()",
     :maxDate => "#{(Date.today + 2.month + 5.day).strftime("%Y-%m-%d")}"
   } %>
 
   <%= touch_select_tag "Is on CPT", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "on_cpt?",
     :helptext => "On CPT?",
-    :condition => "__$('previous_test_status_from_before_currrent_facility_visit').value == 'Positive Ever' || " +
-      "__$('new_test_result_at_current_facility').value == 'Positive'" } %>
+    :condition => "getSelected().match(/HIV\sStatus/)" } %>
 
   <%= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "on_art?",
     :helptext => "On Art?",
-    :condition => "__$('previous_test_status_from_before_currrent_facility_visit').value == 'Positive Ever' || " +
-      "__$('new_test_result_at_current_facility').value == 'Positive'" } %>
+    :condition => "getSelected().match(/HIV\sStatus/)" } %>
+
+  <%= touch_text_field_tag "Planned delivery place", @patient, nil,
+    {:id => "planned_delivery_place",
+    :helptext => "Planned delivery place",
+    :condition => "getSelected().match(/Planned\sdelivery\splace/)",
+    :ajaxURL => "/encounters/static_locations?search_string=" } %>
+
+  <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "week_of_first_visit",
+    :condition => "getSelected().match(/Multiple\sPregnancy/)",
+    :helptext => "Multiple Pregnancy?" } %>
+
+  <%= touch_select_tag "Syphilis Test Result", @patient,
+    options_for_select([["", ""], ["Positive", "Positive"], 
+      ["Negative", "Negative"], ["Inconclusive", "Inconclusive"]]),
+    {:id => "syphilis_result",
+    :condition => "getSelected().match(/Syphilis\sResult/)",
+    :helptext => "Syphilis Result" } %>
+
+  <%= touch_date_tag "Syphilis Test Result Date", @patient, "#{session[:datetime].to_date rescue Date.today}",
+    {:id => "enter_date_syphilis_result_given",
+    :helptext => "Date Syphilis Test Result Given",
+    :condition => "getSelected().match(/Syphilis\sResult/)",
+    :max => "#{session[:datetime].to_date rescue Date.today}" } %>
 
   <%= submit_tag 'Finish' %>
 

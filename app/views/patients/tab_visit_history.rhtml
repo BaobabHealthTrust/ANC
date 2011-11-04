@@ -171,10 +171,10 @@
             <%= @encounters[encounter[0]]["OBSERVATIONS"]["URINE PROTEIN"] rescue "&nbsp;" %>
           </td>
           <td class="topic leftTop" align="center">
-            &nbsp;
+            <%= @encounters[encounter[0]]["CURRENT PREGNANCY"]["TT STATUS"].to_i rescue "&nbsp;" %>
           </td>
           <td class="topic leftTop" align="center">
-            &nbsp;
+            <%= @drugs[encounter[0]]["Tetanus"] rescue "&nbsp;" %>&nbsp;
           </td>
           <td class="leftTop" align="center">
             <%= @drugs[encounter[0]]["SP"].to_i rescue "&nbsp;" %>
@@ -201,7 +201,7 @@
             <%= (@encounters[encounter[0]]["CURRENT PREGNANCY"]["ON ART"].upcase == "YES" ? "Y" : "N") rescue "&nbsp;" %>
           </td>
           <td class="leftTop">
-            &nbsp;
+            <%= @encounters[encounter[0]]["DIAGNOSIS"]["DIAGNOSIS"] rescue "&nbsp;" %>
           </td>
           <td class="leftTop">
             <%= @encounters[encounter[0]]["APPOINTMENT"]["APPOINTMENT DATE"] rescue "&nbsp;" %>

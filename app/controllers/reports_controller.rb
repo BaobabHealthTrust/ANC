@@ -213,6 +213,7 @@ class ReportsController < ApplicationController
 	end
 
 	def select
+    render :layout => "application"
 	end
 
 end

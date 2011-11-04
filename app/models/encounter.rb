@@ -76,15 +76,13 @@ class Encounter < ActiveRecord::Base
         observation_string =  observation.answer_string
         child_ob = observation.child_observation
         while child_ob != nil
-          observation_string += " #{child_ob.answer_string}" if !child_ob.answer_string.blank? && (!Date.parse(child_ob.answer_string) rescue true)
-          child_ob = child_ob.child_observation if !child_ob.answer_string.blank? && (!Date.parse(child_ob.answer_string) rescue true)
+          observation_string += " #{child_ob.answer_string}"
+          child_ob = child_ob.child_observation
         end
-        if !observation_string.nil?
-          diagnosis_array << observation_string if !observation_string.blank? && (!Date.parse(observation_string) rescue true)
-          diagnosis_array << " : " if !observation_string.blank? && (!Date.parse(observation_string) rescue true)
-        end
+        diagnosis_array << observation_string
+        diagnosis_array << " : "
       }
-      diagnosis_array.uniq.compact.to_s.gsub(/ : $/, "").titleize    
+      diagnosis_array.compact.to_s.gsub(/ : $/, "")    
     else  
       observations.collect{|observation| observation.to_s.titleize}.join(", ")
     end  

@@ -1,10 +1,16 @@
 class PatientsController < ApplicationController
   before_filter :find_patient, :except => [:void]
   
-  def show
+  def show  
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    @encounters = @patient.encounters.current.active rescue []
-    @encounter_names = @patient.encounters.current.active.map{|encounter| encounter.name}.uniq rescue []
+    
+    @current_range = active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today))
+
+    @encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]) rescue []
+    
+    @encounter_names = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).map{|encounter| encounter.name}.uniq rescue []
 
     @names = @encounters.collect{|e|
       e.name
@@ -330,7 +336,7 @@ class PatientsController < ApplicationController
     @age = @patient.age rescue 0
 
     render :layout => false
-  end
+  end    
 
   def tab_examinations_management
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
@@ -409,7 +415,11 @@ class PatientsController < ApplicationController
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
       e.observations.each{|o| 
-        @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name][o.to_a[0]] = o.to_a[1]
+        if o.to_a[0] == "DIAGNOSIS" && @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name][o.to_a[0]]
+          @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name][o.to_a[0]] += "; " + o.to_a[1]
+        else
+          @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name][o.to_a[0]] = o.to_a[1]
+        end
       }
     }
 
@@ -595,7 +605,7 @@ class PatientsController < ApplicationController
     pregnancies = {}; 
     
     patient.encounters.active.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
-      if e.name == "CURRENT PREGNANCY"
+      if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]
         pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}  
         e.observations.each{|o| 
           if o.concept.name.name == "DATE OF LAST MENSTRUAL PERIOD"         
