@@ -57,7 +57,7 @@
       :validationMessage => "Please enter a proper year in the form 'YYYY'",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>
 
-    <%= touch_select_tag "Place of Birth", @patient, options_for_select([["", ""]]),
+    <%= touch_text_field_tag "Place of Birth", @patient, nil,
     {:id => "delivery#{e}",
       :helptext => "Place of Birth #{e}#{indice} Child",
       :ajaxURL => "/encounters/static_locations?search_string=",
@@ -68,7 +68,8 @@
       :helptext => "Gestation #{e}#{indice} Child",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>
 
-    <%= touch_text_field_tag "Labour Duration", @patient, nil,
+    <%= touch_select_tag "Labour Duration", @patient, 
+    options_for_select([["", ""], ["Short", "Short"], ["Long", "Long"], ["Very Long", "Very Long"]]),
     {:id => "labour_duration#{e}",
       :helptext => "Labour Duration #{e}#{indice} Child",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>

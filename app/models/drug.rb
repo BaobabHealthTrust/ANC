@@ -35,9 +35,9 @@ class Drug < ActiveRecord::Base
     frequencies = ConceptName.drug_frequency
     collection = []
 
-    self.find(:all, :conditions => ["concept_id = ?", generic_drug_concept_id]).each {|d|
+    self.find(:all, :conditions => ["concept_id = ? AND retired = 0", generic_drug_concept_id]).each {|d|
       frequencies.each {|freq|
-        collection << ["#{d.dose_strength.to_i rescue 1}#{d.units.upcase rescue ""}", "#{freq}"]
+        collection << ["#{d.dose_strength rescue 1}#{d.units.upcase rescue ""}", "#{freq}"]
       }
     }.uniq.compact rescue []
 

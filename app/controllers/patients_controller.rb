@@ -6,17 +6,10 @@ class PatientsController < ApplicationController
     @encounters = @patient.encounters.current.active rescue []
     @encounter_names = @patient.encounters.current.active.map{|encounter| encounter.name}.uniq rescue []
 
-    # raise @encounter_names.to_yaml
-    
-=begin
-    @past_diagnoses = @patient.previous_visits_diagnoses.collect{|o|
-      o.diagnosis_string
-    }.delete_if{|x|
-      x == ""
+    @names = @encounters.collect{|e|
+      e.name
     }
-
-    @past_treatments = @patient.visit_treatments
-=end
+    
     render :layout => 'dynamic-dashboard'
   end
 
@@ -236,20 +229,35 @@ class PatientsController < ApplicationController
    
   def tab_visit_summary
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    @encounters = @patient.encounters.current.active rescue []
-    @encounter_names = @patient.encounters.current.active.map{|encounter| encounter.name}.uniq rescue []
+    
+    @encounters = @patient.encounters.active.find(:all, 
+      :conditions => ["DATE(encounter_datetime) = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]) rescue []
+    
+    @encounter_names = @encounters.map{|encounter| encounter.name}.uniq rescue []
 
     render :layout => false
   end
 
   def tab_obstetric_history
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+     
+    @pregnancies = active_range(@patient.id)
+    
+    @range = []
+    
+    @pregnancies = @pregnancies[1]
+    
+    @pregnancies.each{|preg|
+      @range << preg[0].to_date
+    }
     
     @deliveries = Observation.find(:last,
       :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
         Encounter.active.find(:all).collect{|e| e.encounter_id},
         ConceptName.find_by_name('PARITY').concept_id]).answer_string.to_i rescue 0
 
+    @deliveries = @deliveries + @range.length
+    
     @abortions = Observation.find(:last,
       :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
         Encounter.active.find(:all).collect{|e| e.encounter_id},
@@ -343,58 +351,79 @@ class PatientsController < ApplicationController
   def tab_lab_results
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 
-    @syphilis = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('SYPHILIS RESULT').concept_id]).answer_string rescue nil
+    syphil = {}
+    @patient.encounters.find(:all, :conditions => ["encounter_type IN (?)", 
+        EncounterType.find_by_name("CURRENT PREGNANCY").id]).each{|e| 
+      e.observations.active.each{|o| 
+        syphil[o.concept.name.name] = o.answer_string
+      }      
+    }
+    
+    @syphilis = syphil["SYPHILIS TEST RESULT"].titleize rescue nil
 
-    @syphilis_date = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('SYPHILIS RESULT TEST DATE').concept_id]).answer_string rescue nil
+    @syphilis_date = syphil["SYPHILIS TEST RESULT DATE"] rescue nil
 
-    @hb1 = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('HB 1 RESULT').concept_id]).answer_string rescue nil
+    hb = {}; pos = 1; 
+    
+    @patient.encounters.active.find(:all, 
+      :order => "encounter_datetime DESC", :conditions => ["encounter_type = ?", 
+        EncounterType.find_by_name("LAB RESULTS").id]).each{|e| 
+      e.observations.active.each{|o| hb[o.concept.name.name + " " + 
+            pos.to_s] = o.answer_string; pos += 1 if o.concept.name.name == "HB TEST RESULT DATE";
+      }      
+    }
+    
+    @hb1 = hb["HB TEST RESULT 1"] rescue nil
 
-    @hb1_date = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('HB 1 RESULT TEST DATE').concept_id]).answer_string rescue nil
+    @hb1_date = hb["HB TEST RESULT DATE 1"] rescue nil
 
-    @hb2 = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('HB 2 RESULT').concept_id]).answer_string rescue nil
+    @hb2 = hb["HB TEST RESULT 2"] rescue nil
 
-    @hb2_date = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('HB 2 RESULT TEST DATE').concept_id]).answer_string rescue nil
+    @hb2_date = hb["HB TEST RESULT DATE 2"] rescue nil
 
-    @cd4 = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('CD4 COUNT').concept_id]).answer_string rescue nil
+    @cd4 = syphil['CD4 COUNT'] rescue nil
 
-    @cd4_date = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('CD4 COUNT TEST DATE').concept_id]).answer_string rescue nil
+    @cd4_date = syphil['CD4 COUNT DATETIME'] rescue nil
 
     render :layout => false
   end
 
   def tab_visit_history
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+  
+    @current_range = active_range(@patient.id, (params[:target_date] ? 
+          params[:target_date].to_date : (session[:datetime] ? session[:datetime].to_date : Date.today)))
 
     @encounters = {}
 
-    @patient.encounters.collect{|e| @encounters[e.encounter_datetime.strftime("%Y-%m-%d")] = {}}
+    @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
+      @encounters[e.encounter_datetime.strftime("%Y-%m-%d")] = {"USER" => User.find(e.creator).name}    
+    }
 
-    @patient.encounters.collect{|e| 
+    @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
       @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name] = {}
     }
 
-    @patient.encounters.collect{|e| 
+    @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
       e.observations.each{|o| 
         @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name][o.to_a[0]] = o.to_a[1]
       }
     }
 
+    @drugs = {}; 
+    
+    @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
+      :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
+        EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e| 
+      @drugs[e.encounter_datetime.strftime("%Y-%m-%d")] = {}; 
+      e.orders.each{|o| 
+        @drugs[e.encounter_datetime.strftime("%Y-%m-%d")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+      }      
+    }
+    
     # raise @encounters.to_yaml
 
     render :layout => false
@@ -434,6 +463,21 @@ class PatientsController < ApplicationController
 
   def pregnancy_history
     @patient = Patient.find(params[:patient_id]) rescue nil
+    
+    @pregnancies = active_range(@patient.id)
+    
+    @range = []
+    
+    @pregnancies = @pregnancies[1]
+    
+    @pregnancies.each{|preg|
+      @range << preg[0].to_date
+    }
+    
+    @range = @range.sort.reverse
+    
+    # raise @range.to_yaml
+    
     render :layout => 'dashboard'
   end
 
@@ -451,9 +495,10 @@ class PatientsController < ApplicationController
     @encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_type IN (?) AND " + 
           "DATE_FORMAT(encounter_datetime, '%Y-%m-%d') = ?",
         EncounterType.find(:all, :conditions => ["name in ('OBSERVATIONS', 'VITALS', 'TREATMENT', 'LAB RESULTS', " +
-              "'DIAGNOSIS', 'APPOINTMENT')"]).collect{|t| t.id}, Date.today.strftime("%Y-%m-%d")]).collect{|e|
+              "'DIAGNOSIS', 'APPOINTMENT')"]).collect{|t| t.id}, 
+        (session[:datetime] ? session[:datetime].to_date.strftime("%Y-%m-%d") : Date.today.strftime("%Y-%m-%d"))]).collect{|e|              
       e.type.name
-    }.join(", ") rescue ""
+    }.join(", ") # rescue ""
 
   end
 
@@ -491,9 +536,93 @@ class PatientsController < ApplicationController
   end
 
   def patient_history
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     
+    @encounters = @patient.encounters.active.collect{|e| e.name}
   end
 
+  def tab_detailed_obstetric_history
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    
+    @obstetrics = {}
+    search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "PREGNANCY", "LABOUR DURATION", 
+      "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", "AGE AT DEATH"]
+    current_level = 0
+    
+    @patient.encounters.active.collect{|e| 
+      e.observations.active.collect{|obs| 
+        if search_set.include?(obs.concept.name.name)
+          if obs.concept.name.name.eql?("YEAR OF BIRTH")
+            current_level += 1
+            
+            @obstetrics[current_level] = {}
+          end
+          
+          @obstetrics[current_level][obs.concept.name.name] = obs.answer_string
+        end
+      }      
+    }
+        
+    @pregnancies = active_range(@patient.id)
+    
+    @range = []
+    
+    @pregnancies = @pregnancies[1]
+    
+    @pregnancies.each{|preg|
+      @range << preg[0].to_date
+    }
+    
+    @range = @range.sort    
+    
+    @range.each{|y|
+      current_level += 1
+      @obstetrics[current_level] = {}
+      @obstetrics[current_level]["YEAR OF BIRTH"] = y.year
+      @obstetrics[current_level]["PLACE OF BIRTH"] = "<b>(Here)</b>"
+    }
+    
+    render :layout => false
+  end
+  
+  def active_range(patient_id, date = (session[:datetime] ? session[:datetime].to_date : Date.today))    
+    patient = Patient.find(patient_id) rescue nil
+    
+    current_range = {}
+    
+    active_date = date
+      
+    pregnancies = {}; 
+    
+    patient.encounters.active.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
+      if e.name == "CURRENT PREGNANCY"
+        pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}  
+        e.observations.each{|o| 
+          if o.concept.name.name == "DATE OF LAST MENSTRUAL PERIOD"         
+            pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.name.name] = o.answer_string 
+          end
+        } 
+      end      
+    }    
+    
+    pregnancies.each{|preg|
+      if preg[1]["DATE OF LAST MENSTRUAL PERIOD"]
+        preg[1]["START"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date
+        preg[1]["END"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 45.week
+      else
+        preg[1]["START"] = preg[0].to_date
+        preg[1]["END"] = preg[0].to_date + 45.week
+      end
+      
+      if active_date >= preg[1]["START"] && active_date <= preg[1]["END"]
+        current_range["START"] = preg[1]["START"]
+        current_range["END"] = preg[1]["END"]
+      end
+    }
+    
+    return [current_range, pregnancies]
+  end
+  
   private
 
 end

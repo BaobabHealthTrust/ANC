@@ -15,18 +15,18 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%session_date = session[:datetime] || Time.now() %>
 
-  <%= touch_select_tag "Syphilis Test Result", @patient,
+  <%#= touch_select_tag "Syphilis Test Result", @patient,
     options_for_select([["", ""], ["Positive", "Positive"], 
       ["Negative", "Negative"], ["Inconclusive", "Inconclusive"]]),
     {:id => "syphilis_result",
     :helptext => "Syphilis Result" } %>
 
-  <%= touch_date_tag "Syphilis Test Result Date", @patient, nil,
+  <%#= touch_date_tag "Syphilis Test Result Date", @patient, nil,
     {:id => "enter_date_syphilis_result_given",
     :helptext => "Date Syphilis Test Result Given" } %>
 
   <%= touch_text_field_tag "HB Test Result", @patient, nil,
-    {:id => "syphilis_result",
+    {:id => "hb_result",
     :helptext => "HB Test Result",
     :field_type => "number",
     :tt_pageStyleClass => "NumbersWithUnknownAndDecimal" } %>

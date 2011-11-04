@@ -29,6 +29,9 @@
   <select id="links">
     <option value='/logout' link='/logout'>Logout</option>
     <option value='/people/search' link='/people/search' ttSize="290px">Find / Register Patient</option>
+    <option value='<%= ((session[:datetime].to_date rescue '') != '' ?
+                          "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="100px">
+                <%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
   </select>
 
 </div>

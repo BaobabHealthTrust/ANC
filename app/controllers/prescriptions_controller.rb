@@ -61,17 +61,15 @@ class PrescriptionsController < ApplicationController
         prescription[:strength],
         prescription[:units]]
 
-      drug_info = prescription[:dosage].scan(/(\d+)(\w+)?/)
+      drug_info = prescription[:dosage].scan(/(\d+(\.\d+)?)(\w+)?/)
 
       drug_info[0] << ConceptName.find_by_name(prescription[:drug], :joins => :concept,
         :conditions => ["retired = 0"]).concept_id rescue nil
 
-      @drug = Drug.find(:last, :conditions => ["concept_id = ? AND COALESCE(dose_strength, 0) = " +
-            " ? AND COALESCE(units, '') LIKE ?", drug_info[0][2],
+      @drug = Drug.find(:last, :conditions => ["retired = 0 AND concept_id = ? AND COALESCE(dose_strength, 0) = " +
+            " ? AND COALESCE(units, '') LIKE ?", drug_info[0][3],
           (drug_info[0][0].nil? ? "" : drug_info[0][0]),
-          (drug_info[0][1].nil? ? "" : drug_info[0][1]) + "%"]) rescue nil
-
-      # raise @drug.to_yaml
+          (drug_info[0][2].nil? ? "" : drug_info[0][2]) + "%"]) rescue nil
 
       unless @drug
         flash[:notice] = "No matching drugs found for formulation #{prescription[:formulation]}"
@@ -205,7 +203,7 @@ class PrescriptionsController < ApplicationController
   end
 
   def load_frequencies_and_dosages
-    @drugs = Drug.drugs(params[:concept_id]).to_json
+    @drugs = Drug.drugs(params[:concept_id]).to_json        
     render :text => @drugs
   end
   

@@ -1,221 +1,115 @@
 <style type="text/css">
   .selected{
-    border: 1px solid #00f;
-    -moz-border-radius: 10px;
-    width:20px;
+    color: #f00;
+    font-weight: bold;
+  }
+
+  #tbl1 td {
+    padding: 1px;
+    padding-top: 5.4px;
+    padding-bottom: 5px;
+  }
+
+  #tbl2 th {
+    font-weight: bold;
+    font-size: 0.9em;
+    border: 1px solid #000;
+    padding: 2px;
+    background-color: #333;
+    color: #fff;
+  }
+
+  #tbl2 td {
+    border: 1px solid #ccc;
+    padding: 2px;
+    font-style: italic;
   }
 </style>
 
-<table width="100%" border="0" style="height: 100%" cellpadding="5">
+<table width="100%" border="0" style="height: 100%" cellpadding="0">
   <tr>
-    <th style="height: 30px; font-size: 1.4em;" align="left">
+    <th style="height: 30px; font-size: 1.4em;" align="left" colspan="2">
       Obstetric History
-      <div style="float: right; color: #f00;
-           font-weight: normal; padding-right: 30px;">
-        Refer*
-      </div>
-    </th>
-  </tr>
-  <tr>
-    <td valign="top" align="center">
-      <table width="90%" cellspacing="0">
-        <tr>
-          <td style="padding-left: 30px;">
-            Deliveries
-          </td>
-          <td style="border-top: 1px solid #000;
-              border-left: 1px solid #000;
-              border-bottom: 1px solid #000;" align="center">
-            <div class="<%= "#{(@deliveries == 1 ? "selected" : "")}"  %>" >
-              1
-            </div>
-          </td>
-          <td style="border-top: 1px solid #000;
-              border-bottom: 1px solid #000;" align="center">
-            <div class="<%= "#{(@deliveries == 2 ? "selected" : "")}"  %>" >
-              2
-            </div>
-          </td>
-          <td style="border-top: 1px solid #000;
-              border-bottom: 1px solid #000;" align="center">
-            <div class="<%= "#{(@deliveries == 3 ? "selected" : "")}"  %>" >
-              3
-            </div>
-          </td>
-          <td style="border-top: 1px solid #000;
-              border-bottom: 1px solid #000;" align="center">
-            <div class="<%= "#{(@deliveries == 4 ? "selected" : "")}"  %>" >
-              4
-            </div>
-          </td>
-          <td style="border-top: 1px solid #000;
-              border-bottom: 1px solid #000;" align="center">
-            <div class="<%= "#{(@deliveries == 0 ? "selected" : "")}"  %>" >
-              0
-            </div>
-          </td>
-          <td style="color: #f00; border-top: 1px solid #000;
-              border-bottom: 1px solid #000;
-              border-right: 1px solid #000;" align="center">
-            <div class="<%= "#{(@deliveries >= 5 ? "selected" : "")}"  %>" >
-              5+
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding-left: 30px;">
-            Abortions
-          </td>
-          <td style="border-left: 1px solid #000;
-              border-bottom: 1px solid #000;" align="center">
-            &nbsp;
-          </td>
-          <td style="border-bottom: 1px solid #000;" align="center">
-            &nbsp;
-          </td>
-          <td style="border-bottom: 1px solid #000;" align="center">
-            <div class="<%= "#{(@abortions == 0 ? "selected" : "")}"  %>" >
-              0
-            </div>
-          </td>
-          <td style="border-bottom: 1px solid #000;" align="center">
-            <div class="<%= "#{(@abortions == 1 ? "selected" : "")}"  %>" >
-              1
-            </div>
-          </td>
-          <td style="color: #f00; border-bottom: 1px solid #000;" align="center">
-            <div class="<%= "#{(@abortions == 2 ? "selected" : "")}"  %>" >
-              2
-            </div>
-          </td>
-          <td style="color: #f00; border-bottom: 1px solid #000;
-              border-right: 1px solid #000;" align="center">
-            <div class="<%= "#{(@abortions >= 3 ? "selected" : "")}"  %>" >
-              3+
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding-left: 30px;">
-            Stillbirths
-          </td>
-          <td style="border-left: 1px solid #000;
-              border-bottom: 1px solid #000;"
-              align="center" colspan="3">
-            <div class="<%= "#{(@stillbirths == "NO" ? "selected" : "")}"  %>" >
-              N
-            </div>
-          </td>
-          <td style="color: #f00; border-bottom: 1px solid #000;
-              border-right: 1px solid #000;" colspan="3"
-              align="center">
-            <div class="<%= "#{(@stillbirths == "YES" ? "selected" : "")}"  %>" >
-              Y
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding-left: 30px;">
-            C-sections
-          </td>
-          <td style="border-left: 1px solid #000;
-              border-bottom: 1px solid #000;"
-              align="center" colspan="3">
-            <div class="<%= "#{(@csections == "NO" ? "selected" : "")}"  %>" >
-              N
-            </div>
-          </td>
-          <td style="color: #f00; border-bottom: 1px solid #000;
-              border-right: 1px solid #000;" colspan="3"
-              align="center">
-            <div class="<%= "#{(@csections == "YES" ? "selected" : "")}"  %>" >
-              Y
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding-left: 30px;">
-            Vacuum extraction
-          </td>
-          <td style="border-left: 1px solid #000;
-              border-bottom: 1px solid #000;"
-              align="center" colspan="3">
-            <div class="<%= "#{(@vacuum == "NO" ? "selected" : "")}"  %>" >
-              N
-            </div>
-          </td>
-          <td style="color: #f00; border-bottom: 1px solid #000;
-              border-right: 1px solid #000;" colspan="3"
-              align="center">
-            <div class="<%= "#{(@vacuum == "YES" ? "selected" : "")}"  %>" >
-              Y
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding-left: 30px;">
-            Symphysiotomy
-          </td>
-          <td style="border-left: 1px solid #000;
-              border-bottom: 1px solid #000;"
-              align="center" colspan="3">
-            <div class="<%= "#{(@symphosio == "NO" ? "selected" : "")}"  %>" >
-              N
-            </div>
-          </td>
-          <td style="color: #f00; border-bottom: 1px solid #000;
-              border-right: 1px solid #000;" colspan="3"
-              align="center">
-            <div class="<%= "#{(@symphosio == "YES" ? "selected" : "")}"  %>" >
-              Y
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding-left: 30px;">
-            Haemorrhage
-          </td>
-          <td style="border-left: 1px solid #000;
-              border-bottom: 1px solid #000;"
-              align="center" colspan="2">
-            <div class="<%= "#{(@haemorrhage == "NO" ? "selected" : "")}"  %>" >
-              N
-            </div>
-          </td>
-          <td style="border-bottom: 1px solid #000;"
-              align="center" colspan="2">
-            <div class="<%= "#{(@haemorrhage == "APH" ? "selected" : "")}"  %>" >
-              APH
-            </div>
-          </td>
-          <td style="color: #f00; border-bottom: 1px solid #000;
-              border-right: 1px solid #000;" colspan="2"
-              align="center">
-            <div class="<%= "#{(@haemorrhage == "PPH" ? "selected" : "")}"  %>" >
-              PPH
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding-left: 30px;">
-            (Pre)Eclampsia
-          </td>
-          <td style="border-left: 1px solid #000;
-              border-bottom: 1px solid #000;"
-              align="center" colspan="3">
-            <div class="<%= "#{(@preeclampsia == "NO" ? "selected" : "")}"  %>" >
-              N
-            </div>
-          </td>
-          <td style="color: #f00; border-bottom: 1px solid #000;
-              border-right: 1px solid #000;" colspan="3"
-              align="center">
-            <div class="<%= "#{(@preeclampsia == "YES" ? "selected" : "")}"  %>" >
-              Y
-            </div>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
+  <div style="float: right; color: #f00;
+       font-weight: normal; padding-right: 10px;">
+    Refer*
+  </div>
+</th>
+</tr>
+<tr>
+  <td valign="top" align="center">
+    <table id="tbl1" width="90%" cellspacing="2">
+      <tr>
+        <td style="padding-left: 10px;">
+          Deliveries
+        </td>
+        <td style="border: 1px solid #000;" align="center" <%= (@deliveries > 4 ? "class='selected'" : "") %>>
+          &nbsp;<%= @deliveries %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          Abortions
+        </td>
+        <td style="border: 1px solid #000;" align="center" <%= (@abortions > 1 ? "class='selected'" : "") %>>
+          &nbsp;<%= @abortions %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          Stillbirths
+        </td>
+        <td style="border: 1px solid #000;"
+            align="center" <%= (@stillbirths != "NO" ? "class='selected'" : "") %>>
+          &nbsp;<%= (@stillbirths == "NO" ? "NO" : "YES") %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          C-sections
+        </td>
+        <td style="border: 1px solid #000;"
+            align="center" <%= (@csections != "NO" ? "class='selected'" : "") %>>
+          &nbsp;<%= (@csections == "NO" ? "NO" : "YES") %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          Vacuum extraction
+        </td>
+        <td style="border: 1px solid #000;"
+            align="center" <%= (@vacuum != "NO" ? "class='selected'" : "") %>>
+          &nbsp;<%= (@vacuum == "NO" ? "NO" : "YES") %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          Symphysiotomy
+        </td>
+        <td style="border: 1px solid #000;"
+            align="center" <%= (@symphosio != "NO" ? "class='selected'" : "") %>>
+          &nbsp;<%= (@symphosio == "NO" ? "NO" : "YES") %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          Haemorrhage
+        </td>
+        <td style="border: 1px solid #000;"
+            align="center" <%= (@haemorrhage == "PPH" ? "class='selected'" : "") %>>
+          &nbsp;<%= @haemorrhage %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          (Pre)Eclampsia
+        </td>
+        <td style="border: 1px solid #000;"
+            align="center" <%= (@preeclampsia != "NO" ? "class='selected'" : "") %>>
+          &nbsp;<%= (@preeclampsia == "NO" ? "NO" : "YES") %>&nbsp;
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
 </table>

@@ -7,17 +7,22 @@
 <div id="general_dashboard" style="margin: 2px; border: 1px #ccc solid; padding: 10px;">
   <h2 style="margin-top: 5px; margin-left: 15px;">Pregnancy Visit History</h2>
   <select id="tabs">
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>11<sup>th</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>10<sup>th</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>9<sup>th</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>8<sup>th</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>7<sup>th</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>6<sup>th</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>5<sup>th</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>4<sup>th</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>3<sup>rd</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>2<sup>nd</sup></option>
-    <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>1<sup>st</sup></option>
+
+    <%     
+    pos = @range.length
+
+    @range.each do |yr|
+    %>
+
+      <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>&target_date=<%= yr.strftime("%Y-%m-%d") %>'>
+        <%= pos %><sup><%= case pos when 1: "st" when 2: "nd" when 3: "rd" else "th" end %></sup>
+      </option>  
+
+    <% 
+      pos -= 1
+      end 
+    %>
+  
   </select>
 
   <div id="tabBucket" style="height: 526px;">

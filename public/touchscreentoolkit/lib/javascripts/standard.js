@@ -181,7 +181,7 @@ function createInputPage(pageNumber){
     // create back button if not on first page
     if (pageNumber>0) {
         var prevPageNo = pageNumber-1;
-        backButton.setAttribute("onMouseDown", "gotoPage("+prevPageNo+")");
+        backButton.setAttribute("onMouseDown", "gotoPage("+prevPageNo+", null, true)");
         backButton.style.display = 'block';
     } else {
         backButton.style.display = 'none';
@@ -635,9 +635,11 @@ function getOptions() {
             if(tstFormElements[i].tagName == "SELECT") {
                 var selectOptions = tstFormElements[i].getElementsByTagName("option");
 
-                // Append an empty option first
-                if(selectOptions[0].innerHTML.trim().length > 0){
-                    tstFormElements[i].innerHTML = "<option></option>" + tstFormElements[i].innerHTML;
+                if(selectOptions.length > 0){
+                    // Append an empty option first
+                    if(selectOptions[0].innerHTML.trim().length > 0){
+                        tstFormElements[i].innerHTML = "<option></option>" + tstFormElements[i].innerHTML;
+                    }
                 }
 
                 if(tstFormElements[i].getAttribute("dualView") != undefined &&
@@ -751,7 +753,13 @@ function toggleShowProgress() {
 }
 
 function loadSelectOptions(selectOptions, options, dualViewOptions) {
-    var optionsList = "<ul id='tt_currentUnorderedListOptions'><li id='default'> </li>";
+    
+    if(dualViewOptions != undefined) {
+        tstDualViewOptions = eval(dualViewOptions);
+        setTimeout("addSummary(" + selected + ")", 0);
+    }
+
+    var optionsList = "<ul id='tt_currentUnorderedListOptions'>";  // <li id='default'> </li>";
     var selectOptionCount = selectOptions.length;
     var selected = -1;
 
@@ -776,15 +784,10 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
     optionsList += "</ul>";
     options.innerHTML = optionsList;
 
-    if(dualViewOptions != undefined) {
-        tstDualViewOptions = eval(dualViewOptions);
-        setTimeout("addSummary(" + selected + ")", 200);
-    }
-
 }
 
 function addSummary(position){
-    tstTimerHandle = setTimeout("hideKeyBoard()", 200);
+    tstTimerHandle = setTimeout("hideKeyBoard()", 0);
     
     if(__$("viewport")) {
         __$("viewport").style.height = "250px";
@@ -851,7 +854,10 @@ function changeSummary(position){
             var cell1 = document.createElement("div");
             cell1.style.display = "table-cell";
             cell1.style.padding = "10px";
-            cell1.innerHTML = "<b style='color: #333;'>" + item.replace(/_/g, " ").toProperCase() + "</b>";
+            // cell1.innerHTML = "<b style='color: #333;'>" + (item == "ta" ? "T/A" :
+            //    item.replace(/_/g, " ").toProperCase()) + "</b>";
+
+            cell1.innerHTML = "<b style='color: #333;'>" + item + "</b>";
 
             row.appendChild(cell1);
 
@@ -918,10 +924,12 @@ function updateTouchscreenInputForSelect(element){
         if (inputTarget.value.indexOf(tstMultipleSplitChar) == 0)
             inputTarget.value = inputTarget.value.substring(1, inputTarget.value.length);
     } else {
-        if (element.value.length>1)
+        if (element.value.length>1){
             inputTarget.value = element.value;
-        else if (element.innerHTML.length>1)
+		}
+        else if (element.innerHTML.length>0){
             inputTarget.value = element.innerHTML;
+		}
     }
 
     highlightSelection(element.parentNode.childNodes, inputTarget)
@@ -1058,17 +1066,30 @@ function handleResult(optionsList, aXMLHttpRequest) {
     }
 }
 
-function tt_update(sourceElement){
+function tt_update(sourceElement, navback){
     var sourceValue = null;
     if (!sourceElement) return;
 
-    if (sourceElement.getAttribute("tstValue")) {
-        sourceValue = sourceElement.getAttribute("tstValue");
+    var condition = sourceElement.getAttribute("condition");
+        
+    if (sourceElement.getAttribute("tstValue")) {        
+        // skip destination page when a condition is false
+        if (condition && navback == true) {
+            sourceValue = "";            
+        } else {
+            sourceValue = sourceElement.getAttribute("tstValue");
+        }                
     } else {
-        sourceValue = sourceElement.value;
+        if (condition && navback == true) {
+            sourceValue = "";            
+        } else {
+            sourceValue = sourceElement.value;
+        }
     }
+
     var targetElement = returnElementWithAttributeValue("touchscreenInputID", sourceElement.getAttribute("refersToTouchscreenInputID"), tstFormElements);
     targetElement.focus();
+    
     switch (sourceElement.tagName){
         // switch (targetElement.tagName){
         case "INPUT":
@@ -1218,9 +1239,11 @@ function joinDateValues(aDateElement) {
 
 // This detour has been added to capture alert messages that need to be displayed
 // before the next page is viewed
-function gotoPage(destPage, validate){
+function gotoPage(destPage, validate, navback){
     var currentPage = tstCurrentPage;
     var currentInput = __$("touchscreenInput"+currentPage);
+
+    var navback = (navback ? navback : false);    
 
     //	tt_BeforeUnload
     var unloadElementId = 'touchscreenInput';
@@ -1239,23 +1262,23 @@ function gotoPage(destPage, validate){
             if(result == true){
                 // Set a global handle for the timer function and the
                 // corresponding function for earlier cancelling when required
-                tstTimerHandle = setTimeout("navigateToPage(" + destPage + ", " + validate + ");", 3000);
-                tstTimerFunctionCall = "navigateToPage(" + destPage + ", " + validate + ");";
+                tstTimerHandle = setTimeout("navigateToPage(" + destPage + ", " + validate + ", " + navback + ");", 3000);
+                tstTimerFunctionCall = "navigateToPage(" + destPage + ", " + validate + ", " + navback + ");";
             } else {
-                navigateToPage(destPage, validate);
+                navigateToPage(destPage, validate, navback);
             }
         } else {
-            navigateToPage(destPage, validate);
+            navigateToPage(destPage, validate, navback);
         }
     } else {
-        navigateToPage(destPage, validate);
+        navigateToPage(destPage, validate, navback);
     }
 }
 
 //args: page number to load, validate: true/false
-function navigateToPage(destPage, validate){
+function navigateToPage(destPage, validate, navback){    
     clearTimeout(tstTimerHandle);
-
+    
     var currentPage = tstCurrentPage;
     var currentInput = __$("touchscreenInput"+currentPage);
 
@@ -1268,9 +1291,11 @@ function navigateToPage(destPage, validate){
 
             if(dispatchFlag()) return;
         }
-        tt_update(currentInput);
-        tstPageValues[currentPage] = currentInput.value;
-
+        
+        tstPageValues[currentPage] = currentInput.value;        
+        
+        tt_update(currentInput, navback);
+        
     // Progress Indicator -- disabled
     /*
 		 * var currentPageIndex = __$("progressAreaPage"+currentPage); if
@@ -1702,7 +1727,7 @@ function getQwertyKeyboard(){
     keyboard = keyboard +
     "</span><span style='padding-left:0px' class='buttonLine'>" +
     getButtons("ZXCVBNM,.") + (tstFormElements[tstCurrentPage].tagName == "TEXTAREA" ? "" :
-    getButtonString('whitespace','&nbsp', 'width: 85px;')) +
+    getButtonString('whitespace','Space', 'width: 85px;')) +
     getButtonString('abc','A-Z') +
     getButtonString('SHIFT','aA') +
     "</span>";
@@ -1710,7 +1735,7 @@ function getQwertyKeyboard(){
     if(tstFormElements[tstCurrentPage].tagName == "TEXTAREA") {
         keyboard = keyboard +
         "</span><span style='padding-left:0px' class='buttonLine'>" +
-        getButtonString('whitespace','&nbsp', 'width: 520px;') +
+        getButtonString('whitespace','Space', 'width: 520px;') +
         getButtonString('return',"ENTER", 'width: 120px;') +
         "</span>";
     }
@@ -1744,13 +1769,13 @@ function getABCKeyboard(){
     getButtonString('na','N/A') +
     "</span><span class='buttonLine'>" +
     getButtons("QRSTUVWXYZ") + (tstFormElements[tstCurrentPage].tagName == "TEXTAREA" ? "" : 
-    getButtonString('whitespace','&nbsp', 'width: 85px;')) +
+    getButtonString('whitespace','Space', 'width: 85px;')) +
     "</span>";
 
     if(tstFormElements[tstCurrentPage].tagName == "TEXTAREA") {
         keyboard = keyboard +
         "</span><span style='padding-left:0px' class='buttonLine'>" +
-        getButtonString('whitespace','&nbsp', 'width: 520px;') +
+        getButtonString('whitespace','Space', 'width: 520px;') +
         getButtonString('return',"ENTER", 'width: 120px;') +
         "</span>";
     }
@@ -1849,7 +1874,8 @@ function getDatePicker() {
     }
 
     var defaultDate = joinDateValues(inputElement);
-    // defaultDate = defaultDate.replace("-", "/", "g");
+
+    defaultDate = defaultDate.replace("/", "-", "g");
     var arrDate = defaultDate.split('-');
     __$("touchscreenInput"+tstCurrentPage).value = defaultDate;
 
@@ -1878,7 +1904,8 @@ function getDatePicker() {
         ds = new DateSelector({
             element: keyboardDiv,
             target: tstInputTarget,
-            format: "dd-MMM-yyyy"
+            format: "dd-MMM-yyyy",
+            max: (maxDate ? maxDate : new Date())
         });
     }
 
@@ -2323,7 +2350,9 @@ TTInput.prototype = {
         this.shouldConfirm = false;
 
         if (isDateElement(this.formElement)) {
-            this.value.match(/(\d+)\/(\d+)\/(\d+)/);
+            // this.value.match(/(\d+)\/(\d+)\/(\d+)/);
+            
+            this.value = this.value.replace(/\//g, '-');
             var thisDate = new Date(this.value);
             // var thisDate = new Date(RegExp.$3,parseFloat(RegExp.$2)-1, RegExp.$1);
             minValue = this.element.getAttribute("min");
@@ -2332,7 +2361,7 @@ TTInput.prototype = {
             absMaxValue = this.element.getAttribute("absoluteMax");
 
             if (absMinValue) {
-                absMinValue = absMinValue.replace(/-/g, '/');
+                absMinValue = absMinValue.replace(/\//g, '-');
                 var minDate = new Date(absMinValue);
                 if (minDate && (thisDate.valueOf() < minDate.valueOf())) {
                     tooSmall = true;
@@ -2340,8 +2369,9 @@ TTInput.prototype = {
                 }
             }
             if (absMaxValue) {
-                absMaxValue = absMaxValue.replace(/-/g, '/');
+                absMaxValue = absMaxValue.replace(/\//g, '-');
                 var maxDate = new Date(absMaxValue);
+
                 if (maxDate && (thisDate.valueOf() > maxDate.valueOf())) {
                     tooBig = true;
                     maxValue = absMaxValue;
@@ -2349,7 +2379,7 @@ TTInput.prototype = {
             }
             if (!tooSmall && !tooBig) {
                 if (minValue) {
-                    minValue = minValue.replace(/-/g, '/');
+                    minValue = minValue.replace(/\//g, '-');
                     var minDate = new Date(minValue);
                     if (minDate && (thisDate.valueOf() < minDate.valueOf())) {
                         tooSmall = true;
@@ -2357,8 +2387,9 @@ TTInput.prototype = {
                     }
                 }
                 if (maxValue) {
-                    maxValue = maxValue.replace(/-/g, '/');
+                    maxValue = maxValue.replace(/\//g, '-');
                     var maxDate = new Date(maxValue);
+
                     if (maxDate && (thisDate.valueOf() > maxDate.valueOf())) {
                         tooBig = true;
                         this.shouldConfirm = true;
@@ -2926,19 +2957,27 @@ var DateSelector = function() {
         maxDate: arguments[0].max || this.date
     };
 
-    if (typeof(tstCurrentDate) != "undefined" && tstCurrentDate) {
+    if (!isNaN(Date.parse(new Date(this.options.year, (stripZero(this.options.month) -1), stripZero(this.options.date))))){
+        
+        this.date = new Date(this.options.year, (stripZero(this.options.month) -1), stripZero(this.options.date));
+
+    } else if (typeof(tstCurrentDate) != "undefined" && tstCurrentDate) {
+
         var splitDate = tstCurrentDate.split("-");
+
         if (splitDate.length == 3) {
             this.date = new Date(splitDate[0], splitDate[1]-1, splitDate[2]);
         } else {
             var splitDate2 = tstCurrentDate.split("/");
+
             if (splitDate2.length == 3) {
                 this.date = new Date(splitDate2[0], splitDate2[1]-1, splitDate2[2]);
             }
         }
     }	else {
-        this.date = new Date(this.options.year, this.options.month -1, this.options.date);
+        this.date = new Date();
     }
+
     this.element = this.options.element;
     this.format = this.options.format;
 
@@ -2956,6 +2995,7 @@ var DateSelector = function() {
     this.currentYear.value = this.date.getFullYear();
     this.currentMonth.value = this.getMonth();
     this.currentDay.value = this.date.getDate();
+
 };
 
 DateSelector.prototype = {
@@ -3391,3 +3431,11 @@ var TimeUtil = {
     }
 }
 
+function stripZero(value){
+    try {
+      if(value.match(/^0/)){
+          return eval(value.substr(1));
+      }
+    }catch(e) {}
+    return value;
+}

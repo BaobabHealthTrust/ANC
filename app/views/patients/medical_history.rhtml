@@ -29,12 +29,6 @@
 	<%= touch_select_tag "RENAL DISEASE", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
 		{:id => "ever_had_renal_disease?",
 		 :helptext => "Ever Had Renal Disease?" } %>
-	<%= touch_select_tag "FISTULA REPAIR", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-		{:id => "ever_had_a_fistula_repair?",
-		 :helptext => "Ever Had A Fistula Repair?" } %>
-	<%= touch_select_tag "Spine or Leg Deform", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-		{:id => "do_you_have_a_spine_or_leg_deform?",
-		 :helptext => "Do You Have A Spine Or Leg Deform?" } %>
 
 	<%= submit_tag 'Finish' %>
 <% end %>
