@@ -14,12 +14,11 @@
   <%  session_date = session[:datetime] || Time.now() %>
 
   <%= touch_select_tag "OUTCOME", @patient,
-    options_for_select([["", ""], ["Discharged", "Discharged"], ["Admitted", "Admitted"], 
-      ["Referred", "Referred"], ["Abortion", "Abortion"], ["Patient Died", "Patient Died"]]),
+    options_for_select([["", ""], ["Admitted", "Admitted"], ["Referred", "Referred"]]),
     {:id => "outcome",
     :helptext => "Outcome" } %>
 
-  <%= touch_select_tag "Admission Section", @patient,
+  <%#= touch_select_tag "Admission Section", @patient,
     options_for_select([["", ""], ["Labour Ward", "Labour Ward"], ["AnteNatal Ward", "AnteNatal Ward"],
       ["Gynaecology Ward", "Gynaecology Ward"], ["Theatre", "Theatre"]]),
     {:id => "section",

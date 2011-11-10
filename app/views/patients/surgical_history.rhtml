@@ -1,25 +1,68 @@
 # medical_history.rhtml
 
 <script type="text/javascript" language="javascript">
-	<!--
-		tt_cancel_show = "/patients/show/<%= @patient.id %>";
-		tt_cancel_destination = "/patients/show/<%= @patient.id %>";
-	//-->
+  <!--
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+  
+  // Every 500 milliseconds update the Next/Finish button
+  function updateNextFinish(){
+    if (tstInputTarget.value == '')
+      $('nextButton').innerHTML = '<span>Finish</span>';
+    else
+      $('nextButton').innerHTML = '<span>Next</span>';
+    setTimeout(updateNextFinish, 500)
+  }
 </script>
 
 <% form_tag :controller => "encounters", :action => "create" do %>
-	<%= hidden_field_tag "encounter[encounter_type_name]", "SURGICAL HISTORY" %>
-	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-	<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
-	<%session_date = session[:datetime] || Time.now() %>
+  <%= hidden_field_tag "encounter[encounter_type_name]", "SURGICAL HISTORY" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%session_date = session[:datetime] || Time.now() %>
 
-	<%= touch_select_tag "FISTULA REPAIR", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-		{:id => "ever_had_a_fistula_repair?",
-		 :helptext => "Ever Had A Fistula Repair?" } %>
-	<%= touch_select_tag "Spine or Leg Deform", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-		{:id => "do_you_have_a_spine_or_leg_deform?",
-		 :helptext => "Do You Have A Spine Or Leg Deform?" } %>
+  <%= touch_text_field_tag "Procedure Done", @patient, nil,
+    {:id => "surgical1",
+    :helptext => "Surgical procedure done before" } %>
 
-	<%= submit_tag 'Finish' %>
+  <%= touch_date_tag "Date", @patient, nil,
+    {:id => "date_done",
+    :helptext => "Date Procedure Done" } %>
+
+  <% (2..8).each do |e| %>
+
+    <%
+    indice = ""
+    case e
+    when 1
+      indice = "<sup>st</sup>"
+    when 2
+      indice = "<sup>nd</sup>"
+    when 3
+      indice = "<sup>rd</sup>"
+    else
+      indice = "<sup>th</sup>"
+    end
+
+    @procedures = ["", "Spontaneous vaginal delivery", "Caesarean Section", "Vacuum Extraction"]
+  %>
+
+    <%= touch_text_field_tag "Procedure Done", @patient, nil,
+      {:id => "surgical#{e}",
+      :helptext => "#{e}#{indice} Surgical procedure done before",
+      :condition => "__$('surgical#{e - 1}').value != ''",
+      :tt_onLoad => "setTimeout(updateNextFinish, 20)",
+      :optional => "true"
+    } %>
+
+    <%= touch_date_tag "Date", @patient, nil,
+      {:id => "date_done",
+      :helptext => "Date #{e}#{indice} Procedure Done",
+      :condition => "__$('surgical#{e}').value != ''"
+    } %>
+
+  <% end %>
+
+  <%= submit_tag 'Finish' %>
 <% end %>

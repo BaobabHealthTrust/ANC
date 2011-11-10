@@ -41,7 +41,7 @@
 
     $("expected_date_of_delivery").innerHTML = "Expected Date Of Delivery: <i style='font-size: 1.2em; float: right;'>" +
       edod + "</i><br /><br />Gestation Weeks: " + (gestation < 32 &&
-      gestation.trim().length > 0 ? "<i style='color: red'>(Premature)</i>" : 
+      gestation.trim().length > 0 ? "" : 
       (gestation > 42 && gestation.trim().length > 0 ? "<i style='color: red'>(Abnormal)</i>" : "")) +
       "<i style='font-size: 1.2em; float: right; width: 100px;'>" + gestation + "</i>";
 
@@ -96,104 +96,35 @@
     :allowFreeText => 'true',
   } %>
 
-  <%= touch_select_tag "Week of First Visit", @patient, options_for_select([["", ""], ["0-12", "0-12"], ["13+", "13+"]]),
-    {:id => "week_of_first_visit",
-    :helptext => "Week of First Visit" } %>
-
   <%= touch_date_tag "LAST MENSTRUAL PERIOD", @patient, nil,
     {:id => "lmp",
     :helptext => "Last Menstrual Period",
     :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100);",
     :tt_onUnLoad => "clearTimeout(timedEvent);" } %>
 
+  <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "week_of_first_visit",
+    :helptext => "Is This a Multiple Pregnancy?" } %>
+
+  <%= touch_select_tag "Week of First Visit", @patient, 
+    options_for_select(["", "0-12", "13-24", "25-28", "28+"]),
+    {:id => "week_of_first_visit",
+    :helptext => "Week of First Visit" } %>
+
   <%= touch_text_field_tag "Planned delivery place", @patient, nil,
     {:id => "planned_delivery_place",
     :helptext => "Planned delivery place",
     :ajaxURL => "/encounters/static_locations?search_string=" } %>
 
-  <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "week_of_first_visit",
-    :helptext => "Multiple Pregnancy?" } %>
+  <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "bed_net",
+    :helptext => "Bed Net Given?" } %>
 
-  <% options = default.merge({
-      :id => "tt_status_value",
-      :helptext => "TT status",
-      :field_type => "number",
-      :absoluteMin => "0",
-      :max => "5",
-      :flag => '{"condition":"^1$|^0$","message":"TT is inadequate"}',
-      :tt_pageStyleClass => "NumbersOnly"
-    }) %>
-
-  <%= hidden_field_tag("observations[][concept_name]",  "TT STATUS", {:id => 'tt_status_concept_name'}) %>
-  <%= text_field_tag("observations[][value_numeric]",   nil, options) %>
-  <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
-
-  <%= touch_select_tag "Syphilis Test Result", @patient,
-    options_for_select([["", ""], ["Positive", "Positive"], 
-      ["Negative", "Negative"], ["Inconclusive", "Inconclusive"]]),
-    {:id => "syphilis_result",
-    :helptext => "Syphilis Result" } %>
-
-  <%= touch_date_tag "Syphilis Test Result Date", @patient, "#{session[:datetime].to_date rescue Date.today}",
-    {:id => "enter_date_syphilis_result_given",
-    :helptext => "Date Syphilis Test Result Given",
-    :max => "#{session[:datetime].to_date rescue Date.today}" } %>
-
-  <%= touch_select_tag "Previous HIV Test Status From Before Current Facility Visit", @patient,
-    options_for_select([["Negative in the last 3 months", "Negative in the last 3 months"],
-      ["Positive Ever", "Positive Ever"], ["Unknown", "Unknown"]]),
-    {:id => "previous_test_status_from_before_currrent_facility_visit",
-    :helptext => "Previous HIV Test Status From Before Currrent Facility Visit" } %>
-
-  <%= touch_select_tag "HIV Status", @patient,
-    options_for_select([["", ""], ["Negative", "Negative"], ["Positive", "Positive"], ["Not Done", "Not Done"]]),
-    {:id => "new_test_result_at_current_facility",
-    :helptext => "New Test Result At Current Facility",
-    :condition => '$("previous_test_status_from_before_currrent_facility_visit").value == "Unknown"',
-    :tt_BeforeUnload => "checkHIVTestUnkown()" } %>
-
-  <%= touch_date_tag "HIV test date", @patient, "#{session[:datetime].to_date rescue Date.today}",
-    {:id => "enter_date_result_given",
-    :helptext => "Date Result Given",
-    :condition => "__$('previous_test_status_from_before_currrent_facility_visit').value != 'Unknown'",
-    :tt_BeforeUnload => "checkHIVTestDate()",
-    :maxDate => "#{(Date.today + 2.month + 5.day).strftime("%Y-%m-%d")}"
+  <%= touch_date_tag "Date", @patient, nil,
+    {:id => "bed_date",
+    :helptext => "Date Bet Net Given",
+    :condition => "__$('bed_net').value == 'Yes'"
   } %>
-
-  <%= touch_select_tag "Is on CPT", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "on_cpt?",
-    :helptext => "On CPT?",
-    :condition => "__$('previous_test_status_from_before_currrent_facility_visit').value == 'Positive Ever' || " +
-      "__$('new_test_result_at_current_facility').value == 'Positive'" } %>
-
-  <%= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "on_art?",
-    :helptext => "On Art?",
-    :condition => "__$('previous_test_status_from_before_currrent_facility_visit').value == 'Positive Ever' || " +
-      "__$('new_test_result_at_current_facility').value == 'Positive'" } %>
-
-  <%= touch_location_tag "CD4 COUNT LOCATION", @patient, nil,
-    {:id => "cd4_count_location",
-    :condition => '$("previous_test_status_from_before_currrent_facility_visit").value == "Positive Ever" || ' +
-      '$("new_test_result_at_current_facility").value == "Positive"',
-    :helpText => "CD4 Count Location"} %>
-
-  <%= touch_date_tag "CD4 COUNT DATETIME", @patient, "#{session[:datetime].to_date rescue Date.today}",
-    {:id => "cd4_count_date",
-    :condition => '$("previous_test_status_from_before_currrent_facility_visit").value == "Positive Ever" || ' +
-      '$("new_test_result_at_current_facility").value == "Positive"',
-    :helpText => "CD4 Count Date",
-    :max => "#{session[:datetime].to_date rescue Date.today}"} %>
-
-  <%= touch_numeric_tag "CD4 COUNT", @patient, nil,
-    {:id => "cd4_count",
-    :condition => '$("previous_test_status_from_before_currrent_facility_visit").value == "Positive Ever" || ' +
-      '$("new_test_result_at_current_facility").value == "Positive"',
-    :helpText => "CD4 Count",
-    :max => 1000 ,
-    :min => 1} %>
 
   <%= submit_tag 'Finish' %>
 <% end %>

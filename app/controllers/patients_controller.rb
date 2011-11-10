@@ -4,7 +4,7 @@ class PatientsController < ApplicationController
   def show  
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     
-    @current_range = active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today))
+    @current_range = active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today)) rescue nil
 
     @encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]) rescue []
@@ -560,7 +560,7 @@ class PatientsController < ApplicationController
     current_level = 0
     
     @patient.encounters.active.collect{|e| 
-      e.observations.active.collect{|obs| 
+      e.observations.active.collect{|obs|         
         if search_set.include?(obs.concept.name.name)
           if obs.concept.name.name.eql?("YEAR OF BIRTH")
             current_level += 1

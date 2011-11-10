@@ -1,10 +1,61 @@
-
+<style type="text/css">
+  td #Unknown {
+    display: none;
+  }
+</style>
 <script type="text/javascript" language="javascript">
   <!--
   tt_cancel_show = "/patients/current_visit/?patient_id=<%= @patient.patient_id %>";
   tt_cancel_destination = "/patients/current_visit/?patient_id=<%= @patient.patient_id %>";
   var timedEvent;
 
+  function checkHIVTestUnknown(){
+    if($("new_test_result_at_current_facility").value.toLowerCase() == "not done"){
+
+      showMessage("Patient needs to be tested now!", true);
+      return true;
+    }
+    return false;
+  }
+
+  function checkHIVTestDate(){
+    
+    var hiv_test_date_str = __$("touchscreenInput" + tstCurrentPage).value.replace(/-/g, '/');
+
+    var hiv_test_date     = new Date(hiv_test_date_str);
+    var today             = new Date("<%= (session[:datetime] ? session[:datetime].to_date : Date.today).strftime("%Y-%m-%d") %>");
+
+    var weeks_ago = parseInt((today.getTime()- hiv_test_date.getTime())/ (1000 * 60 * 60 * 24 * 7));
+
+    if (weeks_ago > 12){
+      showMessage("Patient needs to be tested again");
+      return true;
+    }
+          
+    return false;
+  }
+
+  function unknownToNotDone(){
+    __$("Unknown").innerHTML = "<span>Not Done</span>";
+    __$("Unknown").onmousedown = function(){
+      press("Not Done");
+    }
+  }
+  
+  function getSelected(){
+    var choices = "";
+
+    if(__$('choice')){
+      for(var o = 0; o < __$('choice').options.length; o++){
+        if(__$('choice').options[o].selected == true){
+          choices += __$('choice').options[o].innerHTML + " ";
+        }
+      }
+    }
+    
+    return choices;
+  }
+  
   //-->
 </script>
 
@@ -15,25 +66,89 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%session_date = session[:datetime] || Time.now() %>
 
-  <%#= touch_select_tag "Syphilis Test Result", @patient,
-    options_for_select([["", ""], ["Positive", "Positive"], 
-      ["Negative", "Negative"], ["Inconclusive", "Inconclusive"]]),
-    {:id => "syphilis_result",
-    :helptext => "Syphilis Result" } %>
+  <% if params[:update] %>
 
-  <%#= touch_date_tag "Syphilis Test Result Date", @patient, nil,
-    {:id => "enter_date_syphilis_result_given",
-    :helptext => "Date Syphilis Test Result Given" } %>
+    <%= select_tag("choice", options_for_select(["", "HB Test Result", 
+          "HIV Test Result", "Syphilis Test Result", "Urine Protein"]), 
+      {:helpText => 'Select Test(s)', :id => "choice", :multiple => true})%>
+
+  <% end %>
 
   <%= touch_text_field_tag "HB Test Result", @patient, nil,
     {:id => "hb_result",
     :helptext => "HB Test Result",
     :field_type => "number",
-    :tt_pageStyleClass => "NumbersWithUnknownAndDecimal" } %>
+    :tt_pageStyleClass => "NumbersWithUnknownAndDecimal",
+    :min => 2,
+    :max => 16,
+    :tt_onLoad => "unknownToNotDone()",
+    :condition => "#{ (params[:update] ? "getSelected().match(/HB\sTest\sResult/)" : "") }"
+  } %>
 
   <%= touch_date_tag "HB Test Result Date", @patient, nil,
     {:id => "enter_date_hb1_result_given",
-    :helptext => "Date HB Test Result Given" } %>
+    :helptext => "Date HB Test Result Given",
+    :condition => "__$('hb_result').value != 'Not Done'#{ (params[:update] ? 
+    " && getSelected().match(/HB\sTest\sResult/)" : "") }",
+    :max => "#{session[:datetime].to_date rescue Date.today}" } %>
+
+  <%= touch_select_tag "HIV Status", @patient,
+    options_for_select([["", ""], ["Negative", "Negative"], ["Positive", "Positive"], ["Not Done", "Not Done"]]),
+    {:id => "new_test_result_at_current_facility",
+    :helptext => "HIV Test Result",
+    :tt_BeforeUnload => "checkHIVTestUnknown()",
+    :tt_onLoad => "unknownToNotDone()",
+    :condition => "#{ (params[:update] ? "getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
+
+  <%= touch_date_tag "HIV test date", @patient, "#{session[:datetime].to_date rescue Date.today}",
+    {:id => "enter_date_result_given",
+    :helptext => "Date Result Given",
+    :condition => "__$('new_test_result_at_current_facility').value != 'Not Done'#{ (params[:update] ? 
+    " && getSelected().match(/HIV\sTest\sResult/)" : "") }",
+    :tt_BeforeUnload => "checkHIVTestDate()",
+    :max => "#{session[:datetime].to_date rescue Date.today}"
+  } %>
+
+  <%= touch_select_tag "WHO Stage", @patient, options_for_select([["", ""], ["1", "1"], 
+      ["2", "2"], ["3", "3"], ["4", "4"], ["Unknown", "Unknown"]]),
+    {:id => "who_stage",
+    :helptext => "WHO STAGE",
+    :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+    " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
+
+  <%= touch_select_tag "Is on CPT", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "on_cpt?",
+    :helptext => "On CPT?",
+    :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+    " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
+
+  <%= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "on_art?",
+    :helptext => "On Art?",
+    :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+    " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
+
+  <%= touch_select_tag "Syphilis Test Result", @patient,
+    options_for_select([["", ""], ["Positive", "Positive"], 
+      ["Negative", "Negative"], ["Not Done", "Not Done"]]),
+    {:id => "syphilis_result",
+    :helptext => "Syphilis Test Result",
+    :tt_onLoad => "unknownToNotDone()",
+    :condition => "#{ (params[:update] ? "getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
+
+  <%= touch_date_tag "Syphilis Test Result Date", @patient, "#{session[:datetime].to_date rescue Date.today}",
+    {:id => "enter_date_syphilis_result_given",
+    :helptext => "Date Syphilis Test Result Given",
+    :max => "#{session[:datetime].to_date rescue Date.today}",
+    :condition => "__$('syphilis_result').value != 'Not Done'#{ (params[:update] ? 
+    " && getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
+
+  <%= touch_select_tag "URINE PROTEIN", @patient, 
+    options_for_select([["", ""], ["Retrace", "Retrace"], ["+", "+"], ["++", "++"], 
+      ["+++", "+++"], ["++++", "++++"], ["Not Done", "Not Done"]]),
+    {:id => "enter_urine_protein",
+    :helptext => "Urine Protein",
+    :condition => "#{ (params[:update] ? "getSelected().match(/Urine\sProtein/)" : "") }" } %>
 
   <%= submit_tag 'Finish' %>
 <% end %>

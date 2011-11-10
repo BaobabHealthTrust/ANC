@@ -125,7 +125,7 @@
  
 </script>
 <script>
-  var tt_cancel_destination = "/encounters/new/observations/?patient_id=<%=  @patient.id %>"
+  var tt_cancel_destination = "/patients/current_visit/?patient_id=<%=  @patient.id %>"
   var timedEvent;
 
   function calculateBP(pos){
@@ -193,9 +193,9 @@
     :absoluteMin => 0,
     :absoluteMax => 250,
     :units => 'kg',
-    :validationRule => "([0-9]+\\.[0-9])|Unknown$",
-    :validationMessage => "You must enter a decimal between 0 and 9 (for example: 54<b>.6</b>)",
-    :tt_pageStyleClass => "NumbersOnlyWithDecimal"} %>
+    :validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+    :validationMessage => "You must enter a number",
+    :tt_pageStyleClass => "NumbersWithUnknownAndDecimal"} %>
   <%= hidden_field_tag("observations[][concept_name]", "WEIGHT (KG)") %>
   <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
   <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
@@ -281,8 +281,8 @@
 
   <% end %>
 
-  <label for='showSummary'>Summary </label>
-  <%= text_field_tag :showSummary, nil, { :tt_onLoad => "growthIndicators()", :optional => "true", :tt_pageStyleClass => "NoControls" } %>
+  <!--label for='showSummary'>Summary </label-->
+  <%#= text_field_tag :showSummary, nil, { :tt_onLoad => "growthIndicators()", :optional => "true", :tt_pageStyleClass => "NoControls" } %>
 
   <%= submit_tag "Finish" %>
 </form>

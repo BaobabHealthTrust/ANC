@@ -19,7 +19,7 @@
     {:id => "enter_gravida",
     :helptext => "Gravida",
     :absoluteMin => 0,
-    :max => 15,
+    :max => 20,
     :tt_pageStyleClass => "NumbersWithUnknown"} %>
   <%= touch_select_tag "MULTIPLE GESTATION", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "multiple_pregnancy",
@@ -46,7 +46,7 @@
       indice = "<sup>th</sup>"
     end
 
-    @delivery_modes = ["", "Spontaneous vaginal delivery", "Caesarean Section", "Vacuum Extraction", "Symphisiotomy"]
+    @delivery_modes = ["", "Spontaneous vaginal delivery", "Caesarean Section", "Vacuum Extraction"]
   %>
 
     <%= touch_numeric_tag "YEAR OF BIRTH", @patient, nil,
@@ -63,15 +63,15 @@
       :ajaxURL => "/encounters/static_locations?search_string=",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>
 
-    <%= touch_select_tag "Gestation", @patient, options_for_select([["", ""], ["Term", "Term"], ["Preterm", "Preterm"]]),
+    <%= touch_text_field_tag "Gestation", @patient, nil,
     {:id => "gestation#{e}",
-      :helptext => "Gestation #{e}#{indice} Child",
+      :helptext => "Gestation #{e}#{indice} Child (Weeks)",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>
 
     <%= touch_select_tag "Labour Duration", @patient, 
     options_for_select([["", ""], ["Short", "Short"], ["Long", "Long"], ["Very Long", "Very Long"]]),
     {:id => "labour_duration#{e}",
-      :helptext => "Labour Duration #{e}#{indice} Child",
+      :helptext => "Labour Duration #{e}#{indice} Child (Hours)",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>
 
     <%= touch_select_tag "Method of Delivery", @patient, options_for_select(@delivery_modes),
@@ -111,6 +111,52 @@
     :helptext => "Enter Number Of Abortions",
     :tt_pageStyleClass => "NumbersWithUnknown",
     :condition => "__$('enter_gravida').value > 0" } %>
+
+
+  <% (1..8).each{|e| %>
+
+    <%
+    indice = ""
+    case e
+    when 1
+      indice = "<sup>st</sup>"
+    when 2
+      indice = "<sup>nd</sup>"
+    when 3
+      indice = "<sup>rd</sup>"
+    else
+      indice = "<sup>th</sup>"
+    end
+
+    @procedures = ["", "Spontaneous vaginal delivery", "Caesarean Section", "Vacuum Extraction"]
+  %>
+
+    <%= touch_numeric_tag "YEAR OF BIRTH", @patient, nil,
+    {:id => "year_of_birth#{e}",
+      :helptext => "Year of #{e}#{indice} Abortion",
+      :tt_pageStyleClass => "NumbersWithUnknown",
+      :validationRule => "\\d{4}|Unknown",
+      :validationMessage => "Please enter a proper year in the form 'YYYY'",
+      :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
+
+    <%= touch_text_field_tag "Place of Birth", @patient, nil,
+    {:id => "delivery#{e}",
+      :helptext => "Place of Abortion #{e}#{indice} Child",
+      :ajaxURL => "/encounters/static_locations?search_string=",
+      :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
+
+    <%= touch_text_field_tag "Gestation", @patient, nil,
+    {:id => "gestation#{e}",
+      :helptext => "Gestation #{e}#{indice} Child (Weeks)",
+      :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
+
+    <%= touch_select_tag "Procedure Done", @patient, options_for_select(@procedures),
+    {:id => "method_of_delivery#{e}",
+      :helptext => "Procedure Done #{e}#{indice} Abortion",
+      :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
+
+  <% } %>
+
   <%= touch_select_tag "STILL BIRTH", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "ever_had_still_births?",
     :helptext => "Ever Had Still Births?",

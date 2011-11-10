@@ -51,19 +51,23 @@
           </button>
         </div>
         <div style="display: table-cell">
-          <button class="<%= (@encounters.include?("DIAGNOSIS") ? "gray" : "blue") %>"
+          <!--button class="<%= (@encounters.include?("DIAGNOSIS") ? "gray" : "blue") %>"
                   onclick="<%= (@encounters.include?("DIAGNOSIS") ? "" :
-                      "window.location = '/encounters/new/outpatient_diagnosis?patient_id=#{@patient.id}'") %> ">
+              "window.location = '/encounters/new/outpatient_diagnosis?patient_id=#{@patient.id}'") %> ">
             <span>Diagnosis</span>
-          </button>
+          </button-->
+              <button class="blue" onclick="window.location = '/patients/outcome/?patient_id=<%= @patient.id  %>'">
+                <span>Update Outcome</span>
+              </button>
+          &nbsp;
         </div>
       </div>
       <div style="display: table-row">
         <div style="display: table-cell">
-          <button class="<%= (@encounters.include?("LAB RESULTS") ? "gray" : "blue") %>"
-                  onclick="<%= (@encounters.include?("LAB RESULTS") ? "" :
+          <button class="blue" onclick="<%= (@encounters.include?("LAB RESULTS") ? 
+              "window.location = '/encounters/new/lab_results?patient_id=#{@patient.id}&update=true'" :
                       "window.location = '/encounters/new/lab_results?patient_id=#{@patient.id}'") %> ">
-            <span>Lab Results</span>
+            <span><%= (@encounters.include?("LAB RESULTS") ? "Update Lab Results" : "Lab Results") %></span>
           </button>
         </div>
         <div style="display: table-cell">

@@ -299,19 +299,21 @@ form{
 }
 
 .touchscreenPopup {
-    height: 100px;
+    height: 130px;
     width: 450px;
     position: absolute;
     top: 150px;
-    left: 150px;
+    left: 260px;
     font-size: 1.2em;
     float: right;
     text-align: left;
     z-index: 842;
     border: thin solid black;
-    background: white;
+    background: tomato;
     display: none;
-    padding: 10px;
+    padding: 20px;   
+    border: 5px outset tomato;
+    -moz-border-radius: 15px; 
 }
 
 .touchscreenPopup #confirmUsername {
@@ -356,7 +358,7 @@ button, button.blue {
     background:url(../images/buttons/btn_right_blue.png) right no-repeat;
     font-size:1.3em;
     /*line-height:57px;*/
-    min-width:56px;
+    min-width:75px;
 }
 button span, button.blue span { 
     background:url(../images/buttons/btn_left_blue.png) left no-repeat;
@@ -693,7 +695,7 @@ button:hover.dark span {
 .ShortSelectList, 
 .NumbersOnlyWithDecimal,
 .NumbersOnly,
-.DatesOnly { height: 320px !important }
+.DatesOnly { height: 330px !important }
 .NoKeyboard, .NoControls { height: 520px !important } 
 .NoKeyboard .inputFrameClass { height: 440px !important } 
 .NoKeyboard .options { height: 395px !important } 
@@ -882,4 +884,20 @@ button:active {
 
 #na, #Unknown, #backspace, #char, #whitespace, #num {
     float: right;
+}
+
+ul li.odd {
+    background-color: #ddd;
+}
+
+ul li.even {
+    background-color: #eee;
+}
+
+ul li {
+    cursor: pointer;
+}
+
+.selectedOption {
+    background-color: lightblue;
 }
