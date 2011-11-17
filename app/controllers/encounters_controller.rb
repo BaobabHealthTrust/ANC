@@ -89,7 +89,12 @@ class EncountersController < ApplicationController
       (encounter.type.name.upcase rescue "") == "DIAGNOSIS" ||
       (encounter.type.name.upcase rescue "") == "TREATMENT" ||
       (encounter.type.name.upcase rescue "") == "APPOINTMENT")
-  
+      
+    redirect_to "/patients/patient_history?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") ==
+      "OBSTETRIC HISTORY" || (encounter.type.name.upcase rescue "") == "MEDICAL HISTORY" || 
+      (encounter.type.name.upcase rescue "") == "SURGICAL HISTORY" || 
+      (encounter.type.name.upcase rescue "") == "SOCIAL HISTORY")
+    
     # Go to the next task in the workflow (or dashboard)
     redirect_to next_task(@patient) 
   end

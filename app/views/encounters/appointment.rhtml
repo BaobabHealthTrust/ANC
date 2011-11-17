@@ -9,9 +9,26 @@
     top:80px;
   }
 
+  #information {
+    display: none;
+    border: 5px;
+    border-style: solid;
+    border-width: 1px;
+    font-size: 2em;
+    left: 575px;
+    padding: 10px;
+    position: absolute;
+    text-align: center;
+    top: 85px;
+    width: 350px;
+    height: 160px;
+    z-index: 20;
+    -moz-user-select:none;
+  }
 </style>
 
 <%= javascript_include_tag "dateformat" %>
+<%= javascript_include_tag "prototype"%>
 
 <script>
   var tt_cancel_destination = "/patients/current_visit/?patient_id=<%= @patient.patient_id %>";
@@ -127,6 +144,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
 
     new_date = dateCreate(year + '-' + month + '-' + day)
     $('helpText1').innerHTML = 'Next Appointment Date ' + dateFormat(new_date,"dddd, mmmm dS, yyyy");
+    showRecordedAppointments(dateFormat(new_date,"dddd, mmmm dS, yyyy"));
   }
 
   function calculateGivenRange(start_date,end_date) {
@@ -134,6 +152,23 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
       gotoNextPage();
   }
 
+  function showRecordedAppointments(setdate) {    
+    msgBox = $('information')
+    msgBox.style.display = 'block';
+    new Ajax.Request("/patients/number_of_booked_patients?date=" + setdate ,{method:'get',onSuccess: function(transport){
+        count = JSON.parse(transport.responseText) || "";
+        if (count) {
+          msgBox.innerHTML = "Total number of booked patients on this day:<br />" + count ;
+        }else{
+          msgBox.innerHTML = "Total number of booked patients on this day:<br />" + 0 ;
+        }
+      }});
+  }
+  
+  function hideInfo() {
+    $('information').style.display = 'none';
+  }
+  
 </script>
 <form id='appointment' action="/encounters/create" method='post'>
   <%= hidden_field_tag "encounter[encounter_type_name]", "APPOINTMENT" %>
@@ -161,11 +196,16 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
       :field_type => 'date',
       :absoluteMin => absolute_min,
       :absoluteMax => absolute_max,
+      :maxDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
       :tt_pageStyleClass => "Date DatesOnly",
       :tt_onLoad => "calculate_dates('#{params[:start_date]}','#{params[:end_date]}');",
-      :id => 'next_appointment_date'}) %>
+      :id => 'next_appointment_date',
+      :tt_onUnLoad => "hideInfo();"}) %>
 
 
   <%= submit_tag "Finish" %>
 </form>
 
+<div id = 'information'>
+  Total number of booked patients on this day:<br /> 0
+</div>

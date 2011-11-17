@@ -197,14 +197,73 @@ class PrescriptionsController < ApplicationController
 
   def give_drugs
     @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
-    @generics = Drug.generic
-    @frequencies = Drug.frequencies
+    # @generics = Drug.generic
+    # @frequencies = Drug.frequencies
+    
+    @generics = generic
+    @frequencies = drug_frequency
     @diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []
   end
 
   def load_frequencies_and_dosages
-    @drugs = Drug.drugs(params[:concept_id]).to_json        
+    # @drugs = Drug.drugs(params[:concept_id]).to_json        
+    @drugs = drugs(params[:concept_id]).to_json        
     render :text => @drugs
+  end
+    
+  # This method gets all generic drugs in the database
+  def generic
+    generics = []
+    preferred = ConceptName.find_by_name("Maternity Prescriptions").concept.concept_members.collect{|c| c.id} rescue []
+
+    Drug.all.each{|drug|
+      Concept.find(drug.concept_id, :conditions => ["retired = 0 AND concept_id IN (?)", preferred]).concept_names.each{|conceptname|
+        generics << [conceptname.name, drug.concept_id] rescue nil
+      }.compact.uniq rescue []
+    }
+
+    generics.uniq
+  end
+
+  # For a selected generic drug, this method gets all corresponding drug
+  # combinations
+  def drugs(generic_drug_concept_id)
+    frequencies = drug_frequency
+    collection = []
+
+    Drug.find(:all, :conditions => ["concept_id = ? AND retired = 0", generic_drug_concept_id]).each {|d|
+      frequencies.each {|freq|
+        collection << ["#{d.dose_strength rescue 1}#{d.units.upcase rescue ""}", "#{freq}"]
+      }
+    }.uniq.compact rescue []
+
+    collection.uniq
+  end
+
+  def dosages(generic_drug_concept_id)
+
+    Drug.find(:all, :conditions => ["concept_id = ?", generic_drug_concept_id]).collect {|d|
+      ["#{d.dose_strength.to_i rescue 1}#{d.units.upcase rescue ""}", "#{d.dose_strength.to_i rescue 1}", "#{d.units.upcase rescue ""}"]
+    }.uniq.compact rescue []
+
+  end
+
+  def drug_frequency
+    # ConceptName.drug_frequency
+    
+    # This method gets the collection of all short forms of frequencies as used in
+    # the Diabetes Module and returns only no-empty values or an empty array if none
+    # exist
+    ConceptName.find_by_sql("SELECT name FROM concept_name WHERE concept_id IN \
+                        (SELECT answer_concept FROM concept_answer c WHERE \
+                        concept_id = (SELECT concept_id FROM concept_name \
+                        WHERE name = 'DRUG FREQUENCY CODED')) AND concept_name_id \
+                        IN (SELECT concept_name_id FROM concept_name_tag_map \
+                        WHERE concept_name_tag_id = (SELECT concept_name_tag_id \
+                        FROM concept_name_tag WHERE tag = 'preferred_dmht'))").collect {|freq|
+      freq.name rescue nil
+    }.compact rescue []
+  
   end
   
 end

@@ -4,7 +4,49 @@
   <!--
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
-  
+  var timedEvent;
+
+  function calculateEDOD(){
+    var edod = "";
+    var gestation = "";
+    var month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    if(!$('expected_date_of_delivery')){
+      var div = document.createElement("div");
+      div.id = "expected_date_of_delivery";
+      div.className = "statusLabel";
+
+      $("inputFrame" + tstCurrentPage).appendChild(div);
+    }
+
+    if($("touchscreenInput" + tstCurrentPage).value.trim().length > 0 &&
+      $("touchscreenInput" + tstCurrentPage).value.trim() != "Unknown"){
+
+      var theDate = new Date($("touchscreenInput" + tstCurrentPage).value.trim());
+
+      theDate.setDate(theDate.getDate() + 7);
+
+      var today = new Date("<%= (session[:datetime] ? session[:datetime].to_date : Date.today).strftime("%Y-%m-%d") %>");
+
+      var s = today - theDate;
+
+      gestation = String(Math.floor(s / (24 * 60 * 60 * 7 * 1000)));
+
+      theDate.setMonth(theDate.getMonth() + 9);
+
+      edod = (theDate.getDate() + "-" + month[theDate.getMonth()] + "-" + theDate.getFullYear());
+
+    }
+
+    $("expected_date_of_delivery").innerHTML = "Expected Date Of Delivery: <i style='font-size: 1.2em; float: right;'>" +
+      edod + "</i><br /><br />Gestation Weeks: " + (gestation < 32 &&
+      gestation.trim().length > 0 ? "" : 
+      (gestation > 42 && gestation.trim().length > 0 ? "<i style='color: red'>(Abnormal)</i>" : "")) +
+      "<i style='font-size: 1.2em; float: right; width: 100px;'>" + gestation + "</i>";
+
+    timedEvent = setTimeout('calculateEDOD()', 500);
+  }
+
   function checkHIVTestUnkown(){
     if($("new_test_result_at_current_facility").value.toLowerCase() == "not done"){
 
@@ -55,9 +97,16 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%  session_date = session[:datetime] || Time.now() %>
 
-  <%= select_tag("choice", options_for_select(["", "HIV Status", 
-        "Planned delivery place", "Multiple Pregnancy", "Syphilis Result"]), 
+  <%= select_tag("choice", options_for_select(["", "Last Menstrual Period", 
+        "Planned delivery place", "Multiple Pregnancy", "Bed Net Given?"]), 
     {:helpText => 'Select Task(s)', :id => "choice", :multiple => true})%>
+
+  <%= touch_date_tag "LAST MENSTRUAL PERIOD", @patient, nil,
+    {:id => "lmp",
+    :helptext => "Last Menstrual Period",
+    :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100);",
+    :tt_onUnLoad => "clearTimeout(timedEvent);",
+    :condition => "getSelected().match(/Last\sMenstrual\sPeriod/)" } %>
 
   <%#= touch_select_tag "Previous HIV Test Status From Before Current Facility Visit", @patient,
   options_for_select([["Negative in the last 3 months", "Negative in the last 3 months"],
@@ -65,14 +114,14 @@
   {:id => "previous_test_status_from_before_currrent_facility_visit",
   :helptext => "Previous HIV Test Status From Before Currrent Facility Visit" } %>
 
-  <%= touch_select_tag "HIV Status", @patient,
+  <%#= touch_select_tag "HIV Status", @patient,
     options_for_select([["", ""], ["Negative", "Negative"], ["Positive", "Positive"], ["Not Done", "Not Done"]]),
     {:id => "new_test_result_at_current_facility",
     :helptext => "New Test Result At Current Facility",
     :condition => "getSelected().match(/HIV\sStatus/)",
     :tt_BeforeUnload => "checkHIVTestUnkown()" } %>
 
-  <%= touch_date_tag "HIV test date", @patient, nil,
+  <%#= touch_date_tag "HIV test date", @patient, nil,
     {:id => "enter_date_result_given",
     :helptext => "Date Result Given",
     :condition => "getSelected().match(/HIV\sStatus/)",
@@ -80,12 +129,12 @@
     :maxDate => "#{(Date.today + 2.month + 5.day).strftime("%Y-%m-%d")}"
   } %>
 
-  <%= touch_select_tag "Is on CPT", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  <%#= touch_select_tag "Is on CPT", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "on_cpt?",
     :helptext => "On CPT?",
     :condition => "getSelected().match(/HIV\sStatus/)" } %>
 
-  <%= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  <%#= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "on_art?",
     :helptext => "On Art?",
     :condition => "getSelected().match(/HIV\sStatus/)" } %>
@@ -101,18 +150,29 @@
     :condition => "getSelected().match(/Multiple\sPregnancy/)",
     :helptext => "Multiple Pregnancy?" } %>
 
-  <%= touch_select_tag "Syphilis Test Result", @patient,
+  <%#= touch_select_tag "Syphilis Test Result", @patient,
     options_for_select([["", ""], ["Positive", "Positive"], 
       ["Negative", "Negative"], ["Inconclusive", "Inconclusive"]]),
     {:id => "syphilis_result",
     :condition => "getSelected().match(/Syphilis\sResult/)",
     :helptext => "Syphilis Result" } %>
 
-  <%= touch_date_tag "Syphilis Test Result Date", @patient, "#{session[:datetime].to_date rescue Date.today}",
+  <%#= touch_date_tag "Syphilis Test Result Date", @patient, "#{session[:datetime].to_date rescue Date.today}",
     {:id => "enter_date_syphilis_result_given",
     :helptext => "Date Syphilis Test Result Given",
     :condition => "getSelected().match(/Syphilis\sResult/)",
     :max => "#{session[:datetime].to_date rescue Date.today}" } %>
+
+  <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "bed_net",
+    :helptext => "Bed Net Given?",
+    :condition => "getSelected().match(/Bed\sNet\sGiven\?/)" } %>
+
+  <%= touch_date_tag "Date", @patient, nil,
+    {:id => "bed_date",
+    :helptext => "Date Bet Net Given",
+    :condition => "__$('bed_net').value == 'Yes' && getSelected().match(/Bed\sNet\sGiven\?/)"
+  } %>
 
   <%= submit_tag 'Finish' %>
 

@@ -56,9 +56,11 @@
               "window.location = '/encounters/new/outpatient_diagnosis?patient_id=#{@patient.id}'") %> ">
             <span>Diagnosis</span>
           </button-->
-              <button class="blue" onclick="window.location = '/patients/outcome/?patient_id=<%= @patient.id  %>'">
-                <span>Update Outcome</span>
-              </button>
+          <button class="<%= (@encounters.include?("PLAN") || @encounters.include?("APPOINTMENT") ? "gray" : "blue") %>"
+                  onclick="<%= (@encounters.include?("PLAN") || @encounters.include?("APPOINTMENT") ? "" :
+                      "window.location = '/encounters/new/appointment?patient_id=#{@patient.id}'") %> ">
+            <span>Next ANC Visit</span>
+          </button>
           &nbsp;
         </div>
       </div>
@@ -86,12 +88,11 @@
             <span>ANC Examinations</span>
           </button>
         </div>
-        <div style="display: table-cell">
-          <button class="<%= (@encounters.include?("PLAN") || @encounters.include?("APPOINTMENT") ? "gray" : "blue") %>"
-                  onclick="<%= (@encounters.include?("PLAN") || @encounters.include?("APPOINTMENT") ? "" :
-                      "window.location = '/encounters/new/appointment?patient_id=#{@patient.id}'") %> ">
-            <span>Next ANC Visit</span>
+        <div style="display: table-cell">          
+          <button class="blue" onclick="window.location = '/patients/outcome/?patient_id=<%= @patient.id  %>'">
+            <span>Update Outcome</span>
           </button>
+          &nbsp;
         </div>
       </div>
     </div>

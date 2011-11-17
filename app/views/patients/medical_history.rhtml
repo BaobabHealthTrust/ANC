@@ -38,7 +38,7 @@
     {:id => "do_you_have_a_spine_or_leg_deform?",
     :helptext => "Do You Have A Spine Or Leg Deform?" } %>
 
-  <% options = default.merge({
+  <% options = {
       :id => "tt_status_value",
       :helptext => "TT Doses",
       :field_type => "number",
@@ -46,7 +46,7 @@
       :max => "5",
       :flag => '{"condition":"^1$|^0$","message":"TT is inadequate"}',
       :tt_pageStyleClass => "NumbersOnly"
-    }) %>
+    } %>
 
   <%= hidden_field_tag("observations[][concept_name]",  "TT STATUS", {:id => 'tt_status_concept_name'}) %>
   <%= text_field_tag("observations[][value_numeric]",   nil, options) %>

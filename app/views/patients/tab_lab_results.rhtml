@@ -1,90 +1,146 @@
+<style type="text/css">
+  .selected{
+    color: #f00;
+    font-weight: bold;
+  }
+</style>
+
 <table width="100%" border="0" cellpadding="5">
-    <tr>
-        <th style="height: 30px; font-size: 1.4em;" align="left">
-            Labs
-        </th>
-    </tr>
-    <tr>
-        <td valign="top" align="center">
-            <table width="90%" cellspacing="0">
-                <tr>
-                    <td>
-                        &nbsp;
-                    </td>
-                    <th>
-                        Date
-                    </th>
-                    <th>
-                        Result
-                    </th>
-                </tr>
-                <tr>
-                    <td style="padding-left: 30px;">
-                        Syphilis
-                    </td>
-                    <td style="border-top: 1px solid #000;
-                        border-left: 1px solid #000;
-                        border-bottom: 1px solid #000;"
-                        align="center">
-                        &nbsp;<%= @syphilis_date %>&nbsp;
-                    </td>
-                    <td style="color: #000; border-top: 1px solid #000;
-                        border-left: 1px solid #000;
-                        border-bottom: 1px solid #000;
-                        border-right: 1px solid #000;"
-                        align="center">
-                        &nbsp;<%= @syphilis %>&nbsp;
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding-left: 30px;">
-                        Hb1
-                    </td>
-                    <td style="border-left: 1px solid #000;
-                        border-bottom: 1px solid #000;"
-                        align="center">
-                        &nbsp;<%= @hb1_date %>&nbsp;
-                    </td>
-                    <td style="color: #000; border-left: 1px solid #000;
-                        border-bottom: 1px solid #000;
-                        border-right: 1px solid #000;"
-                        align="center">
-                        &nbsp;<%= @hb1 %>&nbsp;
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding-left: 30px;">
-                        Hb2
-                    </td>
-                    <td style="border-left: 1px solid #000;
-                        border-bottom: 1px solid #000;"
-                        align="center">
-                        &nbsp;<%= @hb2_date %>&nbsp;
-                    </td>
-                    <td style="color: #000; border-left: 1px solid #000;
-                        border-bottom: 1px solid #000;
-                        border-right: 1px solid #000;"
-                        align="center">
-                        &nbsp;<%= @hb2 %>&nbsp;
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding-left: 30px;">
-                        CD4
-                    </td>
-                    <td style="border-left: 1px solid #000;
-                        border-bottom: 1px solid #000;"
-                        align="center">
-                        &nbsp;<%= @cd4_date %>&nbsp;
-                    </td>
-                    <td style="color: #000; border-left: 1px solid #000;
-                        border-bottom: 1px solid #000;
-                        border-right: 1px solid #000;"
-                        align="center">
-                        &nbsp;<%= @cd4.to_i %>&nbsp;
-                    </td>
-                </tr>
-            </table>
+  <tr>
+    <th style="height: 30px; font-size: 1.4em;" align="left">
+      Labs
+  <div style="float: right; color: #f00;
+       font-weight: normal; padding-right: 30px;">
+    Refer*
+  </div>
+</th>
+</tr>
+<tr>
+  <td valign="top" align="center">
+    <table width="90%" cellspacing="0">
+      <tr>
+        <td>
+          &nbsp;
         </td>
-    </tr>
+        <th>
+          Date
+        </th>
+        <th>
+          Result
+        </th>
+      </tr>
+      <tr>
+        <td style="padding-left: 30px;">
+          Syphilis
+        </td>
+        <td style="border-top: 1px solid #000;
+            border-left: 1px solid #000;
+            border-bottom: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @syphilis_date %>&nbsp;
+        </td>
+        <td style="color: #000; border-top: 1px solid #000;
+            border-left: 1px solid #000;
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @syphilis %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 30px;">
+          Hb1
+        </td>
+        <td style="border-left: 1px solid #000;
+            border-bottom: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @hb1_date %>&nbsp;
+        </td>
+        <td style="color: #000; border-left: 1px solid #000;
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @hb1 %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 30px;">
+          Hb2
+        </td>
+        <td style="border-left: 1px solid #000;
+            border-bottom: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @hb2_date %>&nbsp;
+        </td>
+        <td style="color: #000; border-left: 1px solid #000;
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @hb2 %>&nbsp;
+        </td>
+      </tr>
+      <!--tr>
+          <td style="padding-left: 30px;">
+              CD4
+          </td>
+          <td style="border-left: 1px solid #000;
+              border-bottom: 1px solid #000;"
+              align="center">
+              &nbsp;<%= @cd4_date %>&nbsp;
+          </td>
+          <td style="color: #000; border-left: 1px solid #000;
+              border-bottom: 1px solid #000;
+              border-right: 1px solid #000;"
+              align="center">
+              &nbsp;<%= @cd4.to_i %>&nbsp;
+          </td>
+      </tr-->
+    </table>
+  </td>
+</tr>
+</table>
+
+<table width="100%" border="0" cellpadding="5">
+  <tr>
+    <th style="height: 30px; font-size: 1.4em;" align="left">
+      Examination
+  <!--div style="float: right; color: #f00;
+       font-weight: normal; padding-right: 30px;">
+    Refer*
+  </div-->
+</th>
+</tr>
+<tr>
+  <td valign="top" align="center">
+    <table width="90%" cellspacing="2">
+      <tr>
+        <td style="padding-left: 30px;">
+          Height
+        </td>
+        <td style="border: 1px solid #000;"
+            align="center" <%= (@height < 150 ? "class='selected'" : "") %>>
+          &nbsp;<%= (@height < 150 ? "< 150cm" : "150cm +") %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 30px;">
+          Multiple pregnancy
+        </td>
+        <td style="border: 1px solid #000;"
+            align="center" <%= (@multiple != "NO" ? "class='selected'" : "") %>>
+          &nbsp;<%= (!@multiple.nil? ? (@multiple == "NO" ? "NO" : "YES") : "") %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 30px;">
+          WHO clinical stage
+        </td>
+        <td style="border: 1px solid #000;"
+            align="center" >
+          &nbsp;<%= @who %>&nbsp;
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
 </table>

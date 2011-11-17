@@ -32,6 +32,13 @@
     timedEvent = setTimeout('calculateBP(' + pos + ')', 500);
   }
 
+  function changeUnknownToNone(){
+    __$("Unknown").innerHTML = "<span>None</span>";
+    __$("Unknown").onmousedown = function(){
+      __$("touchscreenInput" + tstCurrentPage).value = "None";
+    }
+  }
+
   //-->
 </script>
 
@@ -77,13 +84,6 @@
     {:id => "enter_fetal_heart",
     :helptext => "Fetal Heart Rate" } %>
 
-  <%# This options hash allows us to define our options in one place %>
-  <% options = {
-    :helpText => 'Signs/Symptoms',
-    :allowFreeText => 'true',
-    :ajaxURL => "/encounters/diagnoses?search_string=",
-    :textCase => "upper" } %>
- 
 
   <%#--------------------------------------------------------%>
 
@@ -146,19 +146,26 @@
 
   <%#--------------------------------------------------------%>
 
-  <label for='observations[][value_coded_or_text]'>Signs/Symptoms</label>
-  <%= text_field_tag("observations[][value_coded_or_text]", nil, options) %>
-  <%= hidden_field_tag("observations[][value_text]", nil) %>
-  <%= hidden_field_tag("observations[][concept_name]", "DIAGNOSIS", options) %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+  <%# This options hash allows us to define our options in one place %>
+  <% options = {
+    :helpText => 'Signs/Symptoms',
+    :allowFreeText => 'true',
+    :ajaxURL => "/encounters/diagnoses?search_string=",
+    :textCase => "upper",
+    :tt_onLoad => "changeUnknownToNone();"} %>
  
-  <% options[:optional] = 'true' %>
-  <% options[:tt_onLoad] = "setTimeout(updateNextFinish, 20)" %>
+  <label for='observations[][value_coded_or_text]'>Signs/Symptoms</label>
+  <%#= text_field_tag("observations[][value_coded_or_text]", nil, options) %>
+  <%#= hidden_field_tag("observations[][value_text]", nil) %>
+  <%#= hidden_field_tag("observations[][concept_name]", "DIAGNOSIS", options) %>
+  <%#= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+  <%#= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+   
+  <% options[:tt_onLoad] = "setTimeout(updateNextFinish, 20); changeUnknownToNone();" %>
   <script>
     // Every 500 milliseconds update the Next/Finish button
     function updateNextFinish(){
-      if (tstInputTarget.value == '')
+      if (tstInputTarget.value == '' || tstInputTarget.value == "None")
         $('nextButton').innerHTML = '<span>Finish</span>';
       else
         $('nextButton').innerHTML = '<span>Next</span>';
@@ -167,7 +174,8 @@
   </script>
  
   <% 5.times do |counter| %>
-    <% options[:condition] = "tstFormElements[#{counter + 4}].value != ''" if counter > 0 %>
+    <% options[:condition] = "tstFormElements[#{counter + 4}].value != '' && tstFormElements[#{counter + 4}].value != 'None'" if counter > 0 %>
+    <% options[:optional] = 'true' if counter > 0 %>
     <% counter += 1 %>
     <% options[:helpText] = "Signs/Symptoms" %>
     <%= text_field_tag("observations[][value_coded_or_text]", nil, options) %>

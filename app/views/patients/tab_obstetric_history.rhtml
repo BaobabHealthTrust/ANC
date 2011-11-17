@@ -41,6 +41,22 @@
     <table id="tbl1" width="90%" cellspacing="2">
       <tr>
         <td style="padding-left: 10px;">
+          Gravida
+        </td>
+        <td style="border: 1px solid #000;" align="center">
+          &nbsp;<%= @gravida %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          Multiple Pregnancy
+        </td>
+        <td style="border: 1px solid #000;" align="center">
+          &nbsp;<%= @multipreg %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
           Deliveries
         </td>
         <td style="border: 1px solid #000;" align="center" <%= (@deliveries > 4 ? "class='selected'" : "") %>>
@@ -61,7 +77,7 @@
         </td>
         <td style="border: 1px solid #000;"
             align="center" <%= (@stillbirths != "NO" ? "class='selected'" : "") %>>
-          &nbsp;<%= (@stillbirths == "NO" ? "NO" : "YES") %>&nbsp;
+          &nbsp;<%= (!@stillbirths.nil? ? (@stillbirths == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -69,8 +85,8 @@
           C-sections
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@csections != "NO" ? "class='selected'" : "") %>>
-          &nbsp;<%= (@csections == "NO" ? "NO" : "YES") %>&nbsp;
+            align="center" <%= (@csections > 0 ? "class='selected'" : "") %>>
+          &nbsp;<%= (!@csections.nil? ? (@csections > 0 ? "YES" : "NO") : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -78,8 +94,8 @@
           Vacuum extraction
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@vacuum != "NO" ? "class='selected'" : "") %>>
-          &nbsp;<%= (@vacuum == "NO" ? "NO" : "YES") %>&nbsp;
+            align="center" <%= (@vacuum > 0 ? "class='selected'" : "") %>>
+          &nbsp;<%= (!@vacuum.nil? ? (@vacuum > 0 ? "YES" : "NO") : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -88,7 +104,7 @@
         </td>
         <td style="border: 1px solid #000;"
             align="center" <%= (@symphosio != "NO" ? "class='selected'" : "") %>>
-          &nbsp;<%= (@symphosio == "NO" ? "NO" : "YES") %>&nbsp;
+          &nbsp;<%= (!@symphosio.nil? ? (@symphosio == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -106,7 +122,7 @@
         </td>
         <td style="border: 1px solid #000;"
             align="center" <%= (@preeclampsia != "NO" ? "class='selected'" : "") %>>
-          &nbsp;<%= (@preeclampsia == "NO" ? "NO" : "YES") %>&nbsp;
+          &nbsp;<%= (!@preeclampsia.nil? ? (@preeclampsia == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
     </table>
