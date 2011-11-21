@@ -680,6 +680,28 @@ class PatientsController < ApplicationController
     render :text => count
   end
 
+  def tab_social_history
+    @alcohol = nil
+    @smoke = nil
+    @nutrition = nil
+    
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    
+    @alcohol = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Patient currently consumes alcohol').concept_id]).answer_string rescue nil
+
+    @smokes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Patient currently smokes').concept_id]).answer_string rescue nil
+
+    @nutrition = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Nutrition status').concept_id]).answer_string rescue nil
+  
+    render :layout => false
+  end
+  
   private
 
 end

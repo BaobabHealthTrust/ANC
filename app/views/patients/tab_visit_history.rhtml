@@ -86,7 +86,7 @@
           </td>
           <td rowspan="4" class="topic leftTop"
               style="border-right: 1px solid #000">
-            Sign
+            Provider Name
           </td>
         </tr>
         <tr style="font-size: 0.8em; font-weight: normal;">
@@ -168,10 +168,10 @@
             <%= @encounters[encounter[0]]["VITALS"]["SYSTOLIC BLOOD PRESSURE"].to_i rescue "?" %>/<%= @encounters[encounter[0]]["VITALS"]["DIASTOLIC BLOOD PRESSURE"].to_i rescue "?" %>
           </td>
           <td class="leftTop" align="center">
-            <%= @encounters[encounter[0]]["OBSERVATIONS"]["URINE PROTEIN"] rescue "&nbsp;" %>
+            <%= @encounters[encounter[0]]["OBSERVATIONS"]["URINE PROTEIN"] rescue "&nbsp;" %>&nbsp;
           </td>
           <td class="topic leftTop" align="center">
-            <%= @encounters[encounter[0]]["CURRENT PREGNANCY"]["TT STATUS"].to_i rescue "&nbsp;" %>
+            <%= @encounters[encounter[0]]["CURRENT PREGNANCY"]["TT STATUS"].to_i rescue "&nbsp;" %>&nbsp;
           </td>
           <td class="topic leftTop" align="center">
             <%= @drugs[encounter[0]]["Tetanus"] rescue "&nbsp;" %>&nbsp;
