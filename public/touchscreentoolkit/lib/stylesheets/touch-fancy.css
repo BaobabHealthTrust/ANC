@@ -901,3 +901,72 @@ ul li {
 .selectedOption {
     background-color: lightblue;
 }
+
+.ShortSelectList #scrollUp, 
+.ShortSelectList #scrollDown, 
+.ShortSelectList #clearButton,
+.ShortSelectList .touchscreenTextInput {
+  display: none;
+}
+
+.ShortSelectList .keyboard{
+  display: none;
+}
+
+.ShortSelectList #options,
+.ShortSelectList #viewport {
+  height: auto;
+ -moz-user-select:none
+}
+
+.ShortSelectList li {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.longSelectList #options,
+.longSelectList #viewport {
+  height: 580px;
+ -moz-user-select:none;
+}
+
+.longSelectList {
+ -moz-user-select:none
+}
+
+.longSelectList li {
+  margin-bottom: 1px;
+  margin-top: 1px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  font-size: 1.35em;
+}
+
+.longSelectList #scrollUp, 
+.longSelectList #scrollDown, 
+.longSelectList #clearButton,
+.longSelectList .touchscreenTextInput {
+  display: none;
+}
+
+.Numeric #options, 
+.Numeric #viewport{
+  display: none;
+}
+
+.Numeric .helpTextClass{
+  position: relative;
+}
+
+
+.Numeric .touchscreenTextInput{
+  top: auto;
+  position: relative;
+  display: block;
+
+  font-size: 3em;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}

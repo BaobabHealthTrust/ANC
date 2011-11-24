@@ -19,6 +19,9 @@
   }
 
   function checkHIVTestDate(){
+    if (__$('new_test_result_at_current_facility').value == 'Positive'){
+      return false;
+    }
     
     var hiv_test_date_str = __$("touchscreenInput" + tstCurrentPage).value.replace(/-/g, '/');
 

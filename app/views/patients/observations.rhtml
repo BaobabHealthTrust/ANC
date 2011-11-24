@@ -60,7 +60,7 @@
   <%= touch_numeric_tag "FUNDUS", @patient, nil,
     {:id => "enter_fundal_height",
     :helptext => "Fundus (weeks)",
-    :tt_pageStyleClass => "NumbersWithUnknownAndDecimal",
+    :tt_pageStyleClass => "NumbersWithUnknown",
     :max => 42
   } %>
 
@@ -174,7 +174,7 @@
   </script>
  
   <% 5.times do |counter| %>
-    <% options[:condition] = "tstFormElements[#{counter + 4}].value != '' && tstFormElements[#{counter + 4}].value != 'None'" if counter > 0 %>
+    <% options[:condition] = "tstFormElements[#{counter + 3}].value != '' && tstFormElements[#{counter + 3}].value != 'None'" if counter > 0 %>
     <% options[:optional] = 'true' if counter > 0 %>
     <% counter += 1 %>
     <% options[:helpText] = "Signs/Symptoms" %>

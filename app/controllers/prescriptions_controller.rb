@@ -214,10 +214,11 @@ class PrescriptionsController < ApplicationController
   # This method gets all generic drugs in the database
   def generic
     generics = []
-    preferred = ConceptName.find_by_name("Maternity Prescriptions").concept.concept_members.collect{|c| c.id} rescue []
+    # preferred = ConceptName.find_by_name("Maternity Prescriptions").concept.concept_members.collect{|c| c.id} rescue []
 
     Drug.all.each{|drug|
-      Concept.find(drug.concept_id, :conditions => ["retired = 0 AND concept_id IN (?)", preferred]).concept_names.each{|conceptname|
+      #Concept.find(drug.concept_id, :conditions => ["retired = 0 AND concept_id IN (?)", preferred]).concept_names.each{|conceptname|
+      Concept.find(drug.concept_id, :conditions => ["retired = 0"]).concept_names.each{|conceptname|
         generics << [conceptname.name, drug.concept_id] rescue nil
       }.compact.uniq rescue []
     }
@@ -233,7 +234,8 @@ class PrescriptionsController < ApplicationController
 
     Drug.find(:all, :conditions => ["concept_id = ? AND retired = 0", generic_drug_concept_id]).each {|d|
       frequencies.each {|freq|
-        collection << ["#{d.dose_strength rescue 1}#{d.units.upcase rescue ""}", "#{freq}"]
+        dr = d.dose_strength.to_s.match(/(\d+)\.(\d+)/)
+        collection << ["#{(dr ? (dr[2].to_i > 0 ? d.dose_strength : dr[1]) : d.dose_strength.to_i) rescue 1}#{d.units.upcase rescue ""}", "#{freq}"]
       }
     }.uniq.compact rescue []
 
