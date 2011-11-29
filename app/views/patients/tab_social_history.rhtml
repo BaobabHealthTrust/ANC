@@ -30,10 +30,10 @@
   <tr>
     <th style="height: 30px; font-size: 1.4em;" align="left" colspan="2">
       Social History
-  <div style="float: right; color: #f00;
+  <!--div style="float: right; color: #f00;
        font-weight: normal; padding-right: 10px;">
     Refer*
-  </div>
+  </div-->
 </th>
 </tr>
 <tr>
@@ -44,7 +44,7 @@
           Patient Currently Smokes
         </td>
         <td style="border: 1px solid #000;" align="center" 
-            <%= (!@smokes.nil? ? (@smokes == "YES" ? "class='selected'" : "") : "") %>>
+            <%#= (!@smokes.nil? ? (@smokes == "YES" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@smokes.nil? ? (@smokes == "YES" ? "Yes" : "No") : "") %>&nbsp;
         </td>
       </tr>
@@ -53,7 +53,7 @@
           Currently Consumes Alcohol
         </td>
         <td style="border: 1px solid #000;" align="center"
-            <%= (!@alcohol.nil? ? (@alcohol == "YES" ? "class='selected'" : "") : "") %>>
+            <%#= (!@alcohol.nil? ? (@alcohol == "YES" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@alcohol.nil? ? (@alcohol == "YES" ? "Yes" : "No") : "") %>&nbsp;
         </td>
       </tr>
@@ -62,7 +62,7 @@
           Nutrition Status
         </td>
         <td style="border: 1px solid #000;" align="center"
-            <%= (!@nutrition.nil? ? (@nutrition == "Malnourished" ? "class='selected'" : "NO") : "") %>>
+            <%#= (!@nutrition.nil? ? (@nutrition == "Malnourished" ? "class='selected'" : "NO") : "") %>>
           &nbsp;<%= (!@nutrition.nil? ? @nutrition.titleize : "") %>&nbsp;
         </td>
       </tr>

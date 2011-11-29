@@ -20,14 +20,14 @@
 </th>
 </tr>
 <tr>
-  <td valign="top" align="center">
+  <td valign="top" align="left">
     <table width="90%" cellspacing="2">
       <tr>
         <td style="padding-left: 30px;">
           Asthma
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (!@asthma.nil? ? (@asthma != "NO" ? "class='selected'" : "") : "") %>>
+            align="left" <%= (!@asthma.nil? ? (@asthma != "NO" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@asthma.nil? ? (@asthma == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
@@ -36,7 +36,7 @@
           Hypertension
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@hyper != "NO" ? "class='selected'" : "") %>>
+            align="left" <%= (@hyper != "NO" ? "class='selected'" : "") %>>
           &nbsp;<%= (!@hyper.nil? ? (@hyper == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
@@ -45,7 +45,7 @@
           Diabetes
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@diabetes != "NO" ? "class='selected'" : "") %>>
+            align="left" <%= (@diabetes != "NO" ? "class='selected'" : "") %>>
           &nbsp;<%= (!@diabetes.nil? ? (@diabetes == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
@@ -54,7 +54,7 @@
           Epilepsy
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@epilepsy != "NO" ? "class='selected'" : "") %>>
+            align="left" <%= (@epilepsy != "NO" ? "class='selected'" : "") %>>
           &nbsp;<%= (!@epilepsy.nil? ? (@epilepsy == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
@@ -63,7 +63,7 @@
           Renal disease
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@renal != "NO" ? "class='selected'" : "") %>>
+            align="left" <%= (@renal != "NO" ? "class='selected'" : "") %>>
           &nbsp;<%= (!@renal.nil? ? (@renal == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
@@ -72,7 +72,7 @@
           Fistula repair
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@fistula != "NO" ? "class='selected'" : "") %>>
+            align="left" <%= (@fistula != "NO" ? "class='selected'" : "") %>>
           &nbsp;<%= (!@fistula.nil? ? (@fistula == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
@@ -81,7 +81,7 @@
           Leg/Spine deformation
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@deform != "NO" ? "class='selected'" : "") %>>
+            align="left" <%= (@deform != "NO" ? "class='selected'" : "") %>>
           &nbsp;<%= (!@deform.nil? ? (@deform == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
@@ -90,7 +90,7 @@
           Age
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (((@age > 0 && @age < 16) || (@age > 40)) ? "class='selected'" : "") %>>
+            align="left" <%= (((@age > 0 && @age < 16) || (@age > 40)) ? "class='selected'" : "") %>>
           &nbsp;<%= @age rescue "" %>&nbsp;
         </td>
       </tr>

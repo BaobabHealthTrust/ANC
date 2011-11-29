@@ -88,6 +88,7 @@ class EncountersController < ApplicationController
       (encounter.type.name.upcase rescue "") == "OBSERVATIONS" ||
       (encounter.type.name.upcase rescue "") == "DIAGNOSIS" ||
       (encounter.type.name.upcase rescue "") == "TREATMENT" ||
+      (encounter.type.name.upcase rescue "") == "UPDATE OUTCOME" ||
       (encounter.type.name.upcase rescue "") == "APPOINTMENT")
       
     redirect_to "/patients/patient_history?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") ==
@@ -102,7 +103,9 @@ class EncountersController < ApplicationController
   def new
     @patient = Patient.find(params[:patient_id] || session[:patient_id])
 
-    # raise session.to_yaml
+    @current_range = Patient.active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
+    
+    # raise @current_range[0]["START"].to_yaml
     
 =begin
     use_regimen_short_names = GlobalProperty.find_by_property(

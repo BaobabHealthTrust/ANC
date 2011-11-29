@@ -32,7 +32,7 @@
     :tt_pageStyleClass => "NumbersWithUnknown",
     :condition => "__$('enter_gravida').value > 0",
     :tt_onLoad => "if(__$('multiple_pregnancy').value == 'No'){__$('touchscreenInput' + " + 
-      "tstCurrentPage).setAttribute('absoluteMax', __$('enter_gravida').value)}"
+      "tstCurrentPage).setAttribute('absoluteMax', (__$('enter_gravida').value))}"
   } %>
 
   <% (1..8).each{|e| %>
@@ -72,7 +72,8 @@
       :helptext => "Gestation #{e}#{indice} Child (Weeks)",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}",
       :field_type => "number",
-      :tt_pageStyleClass => "NumbersOnly"
+      :tt_pageStyleClass => "NumbersWithUnknown",
+      :max => 42
     } %>
 
     <%= touch_text_field_tag "Labour Duration", @patient, nil,
@@ -80,7 +81,7 @@
       :helptext => "Labour Duration #{e}#{indice} Child (Hours)",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}",
       :field_type => "number",
-      :tt_pageStyleClass => "NumbersOnly" } %>
+      :tt_pageStyleClass => "NumbersWithUnknown" } %>
 
     <%= touch_select_tag "Method of Delivery", @patient, options_for_select(@delivery_modes),
     {:id => "method_of_delivery#{e}",
@@ -95,7 +96,7 @@
     <%= touch_numeric_tag "Birth Weight", @patient, nil,
     {:id => "birth_weight#{e}",
       :helptext => "Birth Weight #{e}#{indice} Child (kg)",
-      :tt_pageStyleClass => "NumbersOnlyWithDecimal",
+      :tt_pageStyleClass => "NumbersWithUnknownAndDecimal",
       :absoluteMin => 0,
       :max => 5,
       :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>

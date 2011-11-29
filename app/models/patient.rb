@@ -442,4 +442,45 @@ EOF
     previous_visits = self.visits.all - self.visits.current
   end
 
+  def self.active_range(patient_id, date = Date.today)
+    patient = self.find(patient_id) rescue nil
+    
+    current_range = {}
+    
+    active_date = date
+      
+    pregnancies = {}; 
+    
+    patient.encounters.active.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
+      if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]
+        pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}  
+        e.observations.each{|o| 
+          concept = o.concept.name rescue nil
+          if concept
+            if o.concept.name.name == "DATE OF LAST MENSTRUAL PERIOD"         
+              pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.name.name] = o.answer_string 
+            end
+          end
+        } 
+      end      
+    }    
+    
+    pregnancies.each{|preg|
+      if preg[1]["DATE OF LAST MENSTRUAL PERIOD"]
+        preg[1]["START"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 7.day
+        preg[1]["END"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 7.day + 45.week
+      else
+        preg[1]["START"] = preg[0].to_date + 7.day
+        preg[1]["END"] = preg[0].to_date + 7.day + 45.week
+      end
+      
+      if active_date >= preg[1]["START"] && active_date <= preg[1]["END"]
+        current_range["START"] = preg[1]["START"]
+        current_range["END"] = preg[1]["END"]
+      end
+    }
+    
+    return [current_range, pregnancies]
+  end
+  
 end

@@ -59,7 +59,8 @@
     <%= touch_date_tag "Date", @patient, nil,
       {:id => "date_done",
       :helptext => "Date #{e}#{indice} Procedure Done",
-      :condition => "__$('surgical#{e}').value != ''"
+      :condition => "__$('surgical#{e}').value != ''",
+      :tt_onBeforeUnload => "__$('observations__value_datetime_surgical#{e}').value = __$('touchscreenInput' + tstCurrentPage).value"
     } %>
 
   <% end %>

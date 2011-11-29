@@ -89,7 +89,9 @@
           </button>
         </div>
         <div style="display: table-cell">          
-          <button class="blue" onclick="window.location = '/patients/outcome/?patient_id=<%= @patient.id  %>'">
+          <button class="<%= (@encounters.include?("UPDATE OUTCOME") ? "gray" : "blue") %>"
+                  onclick="<%= (@encounters.include?("UPDATE OUTCOME") ? "" :
+                      "window.location = '/patients/outcome/?patient_id=#{@patient.id}'") %>">
             <span>Update Outcome</span>
           </button>
           &nbsp;

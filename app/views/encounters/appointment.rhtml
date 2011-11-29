@@ -24,6 +24,14 @@
     height: 160px;
     z-index: 20;
     -moz-user-select:none;
+    -moz-border-radius: 10px;
+    margin-top: 10px;
+  }
+  
+  #expected_date_of_delivery {
+    top: 380px;
+    width: 850px;
+    left: -445px;
   }
 </style>
 
@@ -168,14 +176,53 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   function hideInfo() {
     $('information').style.display = 'none';
   }
-  
+    
+  function calculateEDOD(){
+    var edod = "";
+    var gestation = "";
+    var month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    if(!$('expected_date_of_delivery')){
+      var div = document.createElement("div");
+      div.id = "expected_date_of_delivery";
+      div.className = "statusLabel";
+
+      $("keyboard").appendChild(div);
+    }
+
+    var theDate = new Date($("lmp").value.trim());
+
+    // theDate.setDate(theDate.getDate() + 7);
+
+    var today = new Date("<%= (session[:datetime] ? session[:datetime].to_date : Date.today).strftime("%Y-%m-%d") %>");
+
+    var s = today - theDate;
+
+    gestation = String(Math.floor(s / (24 * 60 * 60 * 7 * 1000)));
+
+    theDate.setMonth(theDate.getMonth() + 9);
+
+    edod = (theDate.getDate() + "-" + month[theDate.getMonth()] + "-" + theDate.getFullYear());    
+
+    $("expected_date_of_delivery").innerHTML = "Expected Date Of Delivery: <i style='font-size: 1.2em; float: right;'>" +
+      edod + "</i><br /><br />Gestation Weeks: " + (gestation < 32 &&
+      gestation.trim().length > 0 ? "" : 
+      (gestation > 42 && gestation.trim().length > 0 ? "<i style='color: red'>(Abnormal)</i>" : "")) +
+      "<i style='font-size: 1.2em; float: right; width: 100px;'>" + gestation + "</i>";
+
+    timedEvent = setTimeout('calculateEDOD()', 500);
+  }
+
 </script>
+
+<%= hidden_field_tag "lmp", "#{@current_range[0]["START"]}" %>
+
 <form id='appointment' action="/encounters/create" method='post'>
   <%= hidden_field_tag "encounter[encounter_type_name]", "APPOINTMENT" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
-
+  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>  
+  
   <label for='time_until_next_visit'>Time Until Next Appointment</label>
   <%= select_tag("time_until_next_visit", options_for_select([["2 weeks", 2],
         ["1 month", 4],
@@ -198,7 +245,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
       :absoluteMax => absolute_max,
       :maxDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
       :tt_pageStyleClass => "Date DatesOnly",
-      :tt_onLoad => "calculate_dates('#{params[:start_date]}','#{params[:end_date]}');",
+      :tt_onLoad => "calculate_dates('#{params[:start_date]}','#{params[:end_date]}'); calculateEDOD();",
       :id => 'next_appointment_date',
       :tt_onUnLoad => "hideInfo();"}) %>
 
