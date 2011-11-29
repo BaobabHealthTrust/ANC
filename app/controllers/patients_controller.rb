@@ -240,6 +240,8 @@ class PatientsController < ApplicationController
       :conditions => ["DATE(encounter_datetime) = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]) rescue []
     
     @encounter_names = @encounters.map{|encounter| encounter.name}.uniq rescue []
+    
+    @encounter_names = @encounter_names.reverse
 
     render :layout => false
   end
@@ -388,6 +390,10 @@ class PatientsController < ApplicationController
 
     @syphilis_date = syphil["SYPHILIS TEST RESULT DATE"] rescue nil
 
+    @hiv_test = syphil["HIV STATUS"].titleize rescue nil
+
+    @hiv_test_date = syphil["HIV TEST DATE"] rescue nil
+
     hb = {}; pos = 1; 
     
     @patient.encounters.active.find(:all, 
@@ -414,7 +420,7 @@ class PatientsController < ApplicationController
 
     @multiple = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('EVER HAD A MULTIPLE PREGNANCY?').concept_id]).answer_string rescue nil
+        ConceptName.find_by_name('Multiple Gestation').concept_id]).answer_string rescue nil
 
     @who = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
@@ -429,41 +435,55 @@ class PatientsController < ApplicationController
     @current_range = Patient.active_range(@patient.id, (params[:target_date] ? 
           params[:target_date].to_date : (session[:datetime] ? session[:datetime].to_date : Date.today)))
 
+    # raise @current_range.to_yaml
+    
     @encounters = {}
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
-      @encounters[e.encounter_datetime.strftime("%Y-%m-%d")] = {"USER" => User.find(e.creator).name}    
+      @encounters[e.encounter_datetime.strftime("%d/%b/%Y")] = {"USER" => User.find(e.creator).name}    
     }
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
-      @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name] = {}
+      @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name] = {}
     }
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
       e.observations.each{|o| 
-        if o.to_a[0] == "DIAGNOSIS" && @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name][o.to_a[0]]
-          @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name][o.to_a[0]] += "; " + o.to_a[1]
+        if o.to_a[0] == "DIAGNOSIS" && @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name][o.to_a[0]]
+          @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name][o.to_a[0]] += "; " + o.to_a[1]
         else
-          @encounters[e.encounter_datetime.strftime("%Y-%m-%d")][e.type.name][o.to_a[0]] = o.to_a[1]
+          @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name][o.to_a[0]] = o.to_a[1]
+          if o.to_a[0] == "PLANNED DELIVERY PLACE"
+            @current_range[0]["PLANNED DELIVERY PLACE"] = o.to_a[1]
+          elsif o.to_a[0] == "MOSQUITO NET"
+            @current_range[0]["MOSQUITO NET"] = o.to_a[1]
+          end
         end
       }
     }
 
     @drugs = {}; 
+    @other_drugs = {}; 
+    main_drugs = ["Tetanus", "SP", "Fefol", "NVP", "TMP/SMX", "TDF/3TC/EFV"]
     
     @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
       :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
         EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e| 
-      @drugs[e.encounter_datetime.strftime("%Y-%m-%d")] = {}; 
+      @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {}; 
+      @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {}; 
       e.orders.each{|o| 
-        @drugs[e.encounter_datetime.strftime("%Y-%m-%d")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])
+          @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        else
+          @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        end
       }      
     }
     
-    # raise @encounters.to_yaml
+    # raise @other_drugs.inspect
 
     render :layout => false
   end

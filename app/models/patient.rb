@@ -29,8 +29,8 @@ class Patient < ActiveRecord::Base
     self.encounters.current.all(:include => [:observations]).map{|encounter| 
       encounter.observations.all(
         :conditions => ["obs.concept_id = ? OR obs.concept_id = ?", 
-        ConceptName.find_by_name("DIAGNOSIS").concept_id,
-        ConceptName.find_by_name("DIAGNOSIS, NON-CODED").concept_id])
+          ConceptName.find_by_name("DIAGNOSIS").concept_id,
+          ConceptName.find_by_name("DIAGNOSIS, NON-CODED").concept_id])
     }.flatten.compact
   end
 
@@ -54,7 +54,7 @@ class Patient < ActiveRecord::Base
   end
   
   def summary
-#    verbiage << "Last seen #{visits.recent(1)}"
+    #    verbiage << "Last seen #{visits.recent(1)}"
     verbiage = []
     verbiage << patient_programs.map{|prog| "Started #{prog.program.name.humanize} #{prog.date_enrolled.strftime('%b-%Y')}" rescue nil }
     verbiage << orders.unfinished.prescriptions.map{|presc| presc.to_s}
@@ -170,12 +170,12 @@ class Patient < ActiveRecord::Base
     "#{self.person.name}"
   end
 
- def self.dead_with_visits(start_date, end_date)
-  national_identifier_id  = PatientIdentifierType.find_by_name('National id').patient_identifier_type_id
-  arv_number_id           = PatientIdentifierType.find_by_name('ARV Number').patient_identifier_type_id
-  patient_died_concept    = ConceptName.find_by_name('PATIENT DIED').concept_id
+  def self.dead_with_visits(start_date, end_date)
+    national_identifier_id  = PatientIdentifierType.find_by_name('National id').patient_identifier_type_id
+    arv_number_id           = PatientIdentifierType.find_by_name('ARV Number').patient_identifier_type_id
+    patient_died_concept    = ConceptName.find_by_name('PATIENT DIED').concept_id
 
-  dead_patients = "SELECT dead_patient_program.patient_program_id,
+    dead_patients = "SELECT dead_patient_program.patient_program_id,
     dead_state.state, dead_patient_program.patient_id, dead_state.date_changed
     FROM patient_state dead_state INNER JOIN patient_program dead_patient_program
     ON   dead_state.patient_program_id = dead_patient_program.patient_program_id
@@ -184,7 +184,7 @@ class Patient < ActiveRecord::Base
         WHERE dead_state.state = program_workflow_state_id AND concept_id = #{patient_died_concept})
           AND dead_state.date_changed >='#{start_date}' AND dead_state.date_changed <= '#{end_date}'"
 
-  living_patients = "SELECT living_patient_program.patient_program_id,
+    living_patients = "SELECT living_patient_program.patient_program_id,
     living_state.state, living_patient_program.patient_id, living_state.date_changed
     FROM patient_state living_state
     INNER JOIN patient_program living_patient_program
@@ -193,13 +193,13 @@ class Patient < ActiveRecord::Base
       (SELECT * FROM program_workflow_state p
         WHERE living_state.state = program_workflow_state_id AND concept_id =  #{patient_died_concept})"
 
-  dead_patients_with_observations_visits = "SELECT death_observations.person_id,death_observations.obs_datetime AS date_of_death, active_visits.obs_datetime AS date_living
+    dead_patients_with_observations_visits = "SELECT death_observations.person_id,death_observations.obs_datetime AS date_of_death, active_visits.obs_datetime AS date_living
     FROM obs active_visits INNER JOIN obs death_observations
     ON death_observations.person_id = active_visits.person_id
     WHERE death_observations.concept_id != active_visits.concept_id AND death_observations.concept_id =  #{patient_died_concept} AND death_observations.obs_datetime < active_visits.obs_datetime
       AND death_observations.obs_datetime >='#{start_date}' AND death_observations.obs_datetime <= '#{end_date}'"
 
-  all_dead_patients_with_visits = " SELECT dead.patient_id, dead.date_changed AS date_of_death, living.date_changed
+    all_dead_patients_with_visits = " SELECT dead.patient_id, dead.date_changed AS date_of_death, living.date_changed
     FROM (#{dead_patients}) dead,  (#{living_patients}) living
     WHERE living.patient_id = dead.patient_id AND dead.date_changed < living.date_changed
     UNION ALL #{dead_patients_with_observations_visits}"
@@ -207,11 +207,11 @@ class Patient < ActiveRecord::Base
     patients = self.find_by_sql([all_dead_patients_with_visits])
     patients_data  = []
     patients.each do |patient_data_row|
-    patient        = Person.find(patient_data_row[:patient_id].to_i)
-    national_id    = PatientIdentifier.identifier(patient_data_row[:patient_id], national_identifier_id).identifier rescue ""
-    arv_number     = PatientIdentifier.identifier(patient_data_row[:patient_id], arv_number_id).identifier rescue ""
-    patients_data <<[patient_data_row[:patient_id], arv_number, patient.name,
-                    national_id,patient.gender,patient.age,patient.birthdate, patient.phone_numbers, patient_data_row[:date_changed]]
+      patient        = Person.find(patient_data_row[:patient_id].to_i)
+      national_id    = PatientIdentifier.identifier(patient_data_row[:patient_id], national_identifier_id).identifier rescue ""
+      arv_number     = PatientIdentifier.identifier(patient_data_row[:patient_id], arv_number_id).identifier rescue ""
+      patients_data <<[patient_data_row[:patient_id], arv_number, patient.name,
+        national_id,patient.gender,patient.age,patient.birthdate, patient.phone_numbers, patient_data_row[:date_changed]]
     end
     patients_data
   end
@@ -226,15 +226,15 @@ class Patient < ActiveRecord::Base
                                    ON obs.person_id = person.person_id
                                    WHERE person.gender = 'M' AND
                                    obs.concept_id = ? AND obs.obs_datetime >= ? AND obs.obs_datetime <= ?",
-                                    pregnant_patient_concept_id, '2008-12-23 00:00:00', end_date])
+        pregnant_patient_concept_id, '2008-12-23 00:00:00', end_date])
 
     patients_data  = []
     patients.each do |patient_data_row|
-    patient        = Person.find(patient_data_row[:person_id].to_i)
-    national_id    = PatientIdentifier.identifier(patient_data_row[:person_id], national_identifier_id).identifier rescue ""
-    arv_number     = PatientIdentifier.identifier(patient_data_row[:person_id], arv_number_id).identifier rescue ""
-    patients_data <<[patient_data_row[:person_id], arv_number, patient.name,
-                    national_id,patient.gender,patient.age,patient.birthdate, patient.phone_numbers, patient_data_row[:obs_datetime]]
+      patient        = Person.find(patient_data_row[:person_id].to_i)
+      national_id    = PatientIdentifier.identifier(patient_data_row[:person_id], national_identifier_id).identifier rescue ""
+      arv_number     = PatientIdentifier.identifier(patient_data_row[:person_id], arv_number_id).identifier rescue ""
+      patients_data <<[patient_data_row[:person_id], arv_number, patient.name,
+        national_id,patient.gender,patient.age,patient.birthdate, patient.phone_numbers, patient_data_row[:obs_datetime]]
     end
     patients_data
   end
@@ -274,11 +274,11 @@ class Patient < ActiveRecord::Base
     patients       = self.find_by_sql(drug_start_dates_less_than_program_enrollment_dates_sql)
     patients_data  = []
     patients.each do |patient_data_row|
-    patient     = Person.find(patient_data_row[:patient_id].to_i)
-    national_id = PatientIdentifier.identifier(patient_data_row[:patient_id], national_identifier_id).identifier rescue ""
-    arv_number  = PatientIdentifier.identifier(patient_data_row[:patient_id], arv_number_id).identifier rescue ""
-    patients_data <<[patient_data_row[:patient_id], arv_number, patient.name,
-                    national_id,patient.gender,patient.age,patient.birthdate, patient.phone_numbers, patient_data_row[:date_started_ARV]]
+      patient     = Person.find(patient_data_row[:patient_id].to_i)
+      national_id = PatientIdentifier.identifier(patient_data_row[:patient_id], national_identifier_id).identifier rescue ""
+      arv_number  = PatientIdentifier.identifier(patient_data_row[:patient_id], arv_number_id).identifier rescue ""
+      patients_data <<[patient_data_row[:patient_id], arv_number, patient.name,
+        national_id,patient.gender,patient.age,patient.birthdate, patient.phone_numbers, patient_data_row[:date_started_ARV]]
     end
     patients_data
   end
@@ -290,9 +290,9 @@ class Patient < ActiveRecord::Base
     appointment_date_concept_id = Concept.find_by_name("APPOINTMENT DATE").concept_id rescue nil
 
     appointments = Patient.find(:all,
-                :joins      => 'INNER JOIN obs ON patient.patient_id = obs.person_id',
-                :conditions => ["DATE(obs.value_datetime) >= ? AND DATE(obs.value_datetime) <= ? AND obs.concept_id = ? AND obs.voided = 0", start_date.to_date, end_date.to_date, appointment_date_concept_id],
-                :group      => "obs.person_id")
+      :joins      => 'INNER JOIN obs ON patient.patient_id = obs.person_id',
+      :conditions => ["DATE(obs.value_datetime) >= ? AND DATE(obs.value_datetime) <= ? AND obs.concept_id = ? AND obs.voided = 0", start_date.to_date, end_date.to_date, appointment_date_concept_id],
+      :group      => "obs.person_id")
 
     appointments
   end
@@ -331,9 +331,9 @@ EOF
     regimen_prescribed = regimen_id.to_i rescue ConceptName.find_by_name('UNKNOWN ANTIRETROVIRAL DRUG').concept_id
     
     if (Observation.find(:first,:conditions => ["person_id = ? AND encounter_id = ? AND concept_id = ?",
-        self.id,encounter.id,ConceptName.find_by_name('ARV REGIMENS RECEIVED ABSTRACTED CONSTRUCT').concept_id])).blank? 
-        regimen_value_text = Concept.find(regimen_prescribed).short_name
-        regimen_value_text = ConceptName.find_by_concept_id(regimen_prescribed).name if regimen_value_text.blank?
+            self.id,encounter.id,ConceptName.find_by_name('ARV REGIMENS RECEIVED ABSTRACTED CONSTRUCT').concept_id])).blank? 
+      regimen_value_text = Concept.find(regimen_prescribed).short_name
+      regimen_value_text = ConceptName.find_by_concept_id(regimen_prescribed).name if regimen_value_text.blank?
       obs = Observation.new(
         :concept_name => "ARV REGIMENS RECEIVED ABSTRACTED CONSTRUCT",
         :person_id => self.id,
@@ -344,7 +344,7 @@ EOF
       obs.save
       return obs.value_text 
     end
- end
+  end
 
   def gender
     self.person.sex
@@ -354,19 +354,19 @@ EOF
     art_encounters = ['ART_INITIAL','HIV RECEPTION','VITALS','HIV STAGING','ART VISIT','ART ADHERENCE','TREATMENT','DISPENSING']
     art_encounter_type_ids = EncounterType.find(:all,:conditions => ["name IN (?)",art_encounters]).map{|e|e.encounter_type_id}
     Encounter.find(:first,
-                   :conditions => ["DATE(encounter_datetime) < ? AND patient_id = ? AND encounter_type IN (?)",date,
-                   self.id,art_encounter_type_ids],
-                   :order => 'encounter_datetime DESC').encounter_datetime.to_date rescue nil
+      :conditions => ["DATE(encounter_datetime) < ? AND patient_id = ? AND encounter_type IN (?)",date,
+        self.id,art_encounter_type_ids],
+      :order => 'encounter_datetime DESC').encounter_datetime.to_date rescue nil
   end
   
   def drug_given_before(date = Date.today)
     encounter_type = EncounterType.find_by_name('TREATMENT')
     Encounter.find(:first,
-               :joins => 'INNER JOIN orders ON orders.encounter_id = encounter.encounter_id
+      :joins => 'INNER JOIN orders ON orders.encounter_id = encounter.encounter_id
                INNER JOIN drug_order ON orders.order_id = orders.order_id', 
-               :conditions => ["quantity IS NOT NULL AND encounter_type = ? AND 
+      :conditions => ["quantity IS NOT NULL AND encounter_type = ? AND 
                encounter.patient_id = ? AND DATE(encounter_datetime) < ?",
-               encounter_type.id,self.id,date.to_date],:order => 'encounter_datetime DESC').orders rescue []
+        encounter_type.id,self.id,date.to_date],:order => 'encounter_datetime DESC').orders rescue []
   end
 
   def prescribe_arv_this_visit(date = Date.today)
@@ -374,9 +374,9 @@ EOF
     yes_concept = ConceptName.find_by_name('YES').concept_id
     refer_concept = ConceptName.find_by_name('PRESCRIBE ARVS THIS VISIT').concept_id
     refer_patient = Encounter.find(:first,
-               :joins => 'INNER JOIN obs USING (encounter_id)', 
-               :conditions => ["encounter_type = ? AND concept_id = ? AND person_id = ? AND value_coded = ? AND DATE(obs_datetime) = ?",
-               encounter_type.id,refer_concept,self.id,yes_concept,date.to_date],:order => 'encounter_datetime DESC')
+      :joins => 'INNER JOIN obs USING (encounter_id)', 
+      :conditions => ["encounter_type = ? AND concept_id = ? AND person_id = ? AND value_coded = ? AND DATE(obs_datetime) = ?",
+        encounter_type.id,refer_concept,self.id,yes_concept,date.to_date],:order => 'encounter_datetime DESC')
     return false if refer_patient.blank?
     return true
   end
@@ -388,16 +388,16 @@ EOF
     concept_id = ConceptName.find_by_name('AMOUNT OF DRUG BROUGHT TO CLINIC').concept_id
     encounter_type = EncounterType.find_by_name('ART ADHERENCE')
     adherence = Observation.find(:all,
-                :joins => 'INNER JOIN encounter USING(encounter_id)',
-                :conditions =>["encounter_type = ? AND patient_id = ? AND concept_id = ? AND DATE(encounter_datetime)=?",
-                encounter_type.id,self.id,concept_id,date.to_date],:order => 'encounter_datetime DESC')
+      :joins => 'INNER JOIN encounter USING(encounter_id)',
+      :conditions =>["encounter_type = ? AND patient_id = ? AND concept_id = ? AND DATE(encounter_datetime)=?",
+        encounter_type.id,self.id,concept_id,date.to_date],:order => 'encounter_datetime DESC')
     return 0 if adherence.blank?
     concept_id = ConceptName.find_by_name('AMOUNT DISPENSED').concept_id
     encounter_type = EncounterType.find_by_name('DISPENSING')
     drug_dispensed = Observation.find(:all,
-                     :joins => 'INNER JOIN encounter USING(encounter_id)',
-                     :conditions =>["encounter_type = ? AND patient_id = ? AND concept_id = ? AND DATE(encounter_datetime)=?",
-                     encounter_type.id,self.id,concept_id,date.to_date],:order => 'encounter_datetime DESC')
+      :joins => 'INNER JOIN encounter USING(encounter_id)',
+      :conditions =>["encounter_type = ? AND patient_id = ? AND concept_id = ? AND DATE(encounter_datetime)=?",
+        encounter_type.id,self.id,concept_id,date.to_date],:order => 'encounter_datetime DESC')
 
     #check if what was dispensed is what was counted as remaing pills
     return 0 unless (drug_dispensed.map{| d | d.value_drug } - adherence.map{|a|a.order.drug_order.drug_inventory_id}) == []
@@ -451,18 +451,24 @@ EOF
       
     pregnancies = {}; 
     
+    active_years = {}
+    
     patient.encounters.active.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
-      if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]
-        pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}  
+      if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]       
+        pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}        
+        
         e.observations.each{|o| 
           concept = o.concept.name rescue nil
           if concept
-            if o.concept.name.name == "DATE OF LAST MENSTRUAL PERIOD"         
-              pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.name.name] = o.answer_string 
+            if !active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")]                            
+              if o.concept.name.name == "DATE OF LAST MENSTRUAL PERIOD"         
+                pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.name.name] = o.answer_string          
+                active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")] = true 
+              end              
             end
-          end
+          end   
         } 
-      end      
+      end   
     }    
     
     pregnancies.each{|preg|

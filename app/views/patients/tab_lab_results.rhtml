@@ -49,6 +49,23 @@
       </tr>
       <tr>
         <td style="padding-left: 30px;">
+          HIV Test
+        </td>
+        <td style="border-left: 1px solid #000;
+            border-bottom: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @hiv_test_date %>&nbsp;
+        </td>
+        <td style="color: #000;
+            border-left: 1px solid #000;
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @hiv_test %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 30px;">
           Hb1
         </td>
         <td style="border-left: 1px solid #000;
@@ -119,7 +136,7 @@
         </td>
         <td style="border: 1px solid #000;"
             align="center" <%= (@height < 150 ? "class='selected'" : "") %>>
-          &nbsp;<%= (@height < 150 ? "< 150cm" : "150cm +") %>&nbsp;
+          &nbsp;<%= @height %>&nbsp;
         </td>
       </tr>
       <tr>
