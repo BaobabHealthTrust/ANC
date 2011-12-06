@@ -535,6 +535,11 @@ class PatientsController < ApplicationController
     
     @range = @range.sort.reverse
     
+    @gravida = Observation.find(:last,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('GRAVIDA').concept_id]).answer_string.to_i rescue nil
+
     # raise @range.to_yaml
     
     render :layout => 'dashboard'
@@ -556,6 +561,12 @@ class PatientsController < ApplicationController
         EncounterType.find(:all, :conditions => ["name in ('OBSERVATIONS', 'VITALS', 'TREATMENT', 'LAB RESULTS', " +
               "'DIAGNOSIS', 'APPOINTMENT', 'UPDATE OUTCOME')"]).collect{|t| t.id}, 
         (session[:datetime] ? session[:datetime].to_date.strftime("%Y-%m-%d") : Date.today.strftime("%Y-%m-%d"))]).collect{|e|              
+      e.type.name
+    }.join(", ") # rescue ""
+
+    @all_encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_type IN (?)",
+        EncounterType.find(:all, :conditions => ["name in ('OBSERVATIONS', 'VITALS', 'TREATMENT', 'LAB RESULTS', " +
+              "'DIAGNOSIS', 'APPOINTMENT', 'UPDATE OUTCOME')"]).collect{|t| t.id}]).collect{|e|              
       e.type.name
     }.join(", ") # rescue ""
 

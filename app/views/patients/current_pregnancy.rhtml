@@ -6,6 +6,25 @@
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
   var timedEvent;
 
+  var d = new Date("<%= (session[:datetime] ? session[:datetime].to_date.strftime("%Y-%m-%d") : 
+    Date.today.strftime("%Y-%m-%d")) %>");
+
+  d.setDate(d.getDate() - 7);
+
+  var tstEstimatedLMPDate = d.getFullYear() + "-" + padZeros((d.getMonth() + 1),2) + "-" + padZeros(d.getDate(),2);
+   
+  function padZeros(number, positions){
+    var zeros = parseInt(positions) - String(number).length;
+    var padded = "";
+    
+    for(var i = 0; i < zeros; i++){
+      padded += "0";
+    }
+    
+    padded += String(number);
+    
+    return padded;
+  }
 
   function calculateEDOD(){
     var edod = "";
@@ -83,6 +102,10 @@
   .Date #num {
     display: none;
   }
+
+  .exclude #today {
+    display: none;
+  }
 </style>
 
 <% form_tag :controller => "encounters", :action => "create" do |f| %>
@@ -100,7 +123,9 @@
     {:id => "lmp",
     :helptext => "Last Menstrual Period",
     :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100);",
-    :tt_onUnLoad => "clearTimeout(timedEvent);" } %>
+    :tt_onUnLoad => 'clearTimeout(timedEvent); if (__$("touchscreenInput" + tstCurrentPage).value == "Unknown" ) __$("lmp").value = tstEstimatedLMPDate;',
+    :tt_pageStyleClass => "exclude"
+  } %>
 
   <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "week_of_first_visit",

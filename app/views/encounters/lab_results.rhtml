@@ -10,6 +10,8 @@
   var timedEvent;
 
   function checkHIVTestUnknown(){
+    // Asked to disable this
+    return false;
     if($("new_test_result_at_current_facility").value.toLowerCase() == "not done"){
 
       showMessage("Patient needs to be tested now!", true);

@@ -2,6 +2,8 @@ class EncountersController < ApplicationController
 
   def create
 
+    # raise params.to_yaml
+    
     @patient = Patient.find(params[:encounter][:patient_id])
 
     # Go to the dashboard if this is a non-encounter
@@ -105,7 +107,7 @@ class EncountersController < ApplicationController
 
     @current_range = Patient.active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
     
-    # raise @current_range[0]["START"].to_yaml
+    # raise params.to_yaml
     
 =begin
     use_regimen_short_names = GlobalProperty.find_by_property(

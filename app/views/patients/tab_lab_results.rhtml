@@ -136,7 +136,7 @@
         </td>
         <td style="border: 1px solid #000;"
             align="center" <%= (@height < 150 ? "class='selected'" : "") %>>
-          &nbsp;<%= @height %>&nbsp;
+          &nbsp;<%= (@height > 0 ? @height : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -154,7 +154,7 @@
         </td>
         <td style="border: 1px solid #000;"
             align="center" >
-          &nbsp;<%= @who %>&nbsp;
+          &nbsp;<%= (@who == 0 ? "?" : @who) %>&nbsp;
         </td>
       </tr>
     </table>

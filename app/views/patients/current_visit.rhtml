@@ -66,10 +66,10 @@
       </div>
       <div style="display: table-row">
         <div style="display: table-cell">
-          <button class="blue" onclick="<%= (@encounters.include?("LAB RESULTS") ? 
+          <button class="blue" onclick="<%= (@all_encounters.include?("LAB RESULTS") ? 
               "window.location = '/encounters/new/lab_results?patient_id=#{@patient.id}&update=true'" :
                       "window.location = '/encounters/new/lab_results?patient_id=#{@patient.id}'") %> ">
-            <span><%= (@encounters.include?("LAB RESULTS") ? "Update Lab Results" : "Lab Results") %></span>
+            <span><%= (@all_encounters.include?("LAB RESULTS") ? "Update Lab Results" : "Lab Results") %></span>
           </button>
         </div>
         <div style="display: table-cell">

@@ -75,7 +75,10 @@
     <% @types.each do |type| %>
       <tr class="<%= cycle('even', 'odd') %>">
         <td style="text-align:left;"><%= (type == "HIV STATUS" ? "HIV Status" :
-              (type == "PMTCT MANAGEMENT" ? "PMTCT Management" : type.titleize)) %></td>
+              (type == "PMTCT MANAGEMENT" ? "PMTCT Management" : (type == "OBSERVATIONS" ? 
+                  "ANC Management" : (type == "TREATMENT" ? "Drug Administration" : 
+                    (type == "APPOINTMENT" ? "Appointments" : (type == "UPDATE OUTCOME" ? "Outcome Updates" : 
+                        type.titleize)))))) %></td>
         <td><%= @me[type] %></td>
         <td><%= @today[type] %></td>
         <td><%= @year[type] %></td>

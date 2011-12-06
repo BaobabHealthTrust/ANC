@@ -115,10 +115,10 @@
           On ART
         </td>
         <td rowspan="4" class="topic leftTop">
-          Medications / Outcome
+          Signs / Symptoms
         </td>
         <td rowspan="4" class="topic leftTop">
-          Signs / Symptoms
+          Medications / Outcome
         </td>
         <td rowspan="4" class="topic leftTop">
           Next Visit Date
@@ -188,23 +188,29 @@
             <%= encounter[0] %>
           </td>
           <td class="leftTop" align="center">
-            <%= ((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7).to_s + " wks" rescue "&nbsp;" %>
+            <%= (((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7) <= 0 ? "?" : 
+                ((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7).to_s + " wks") rescue "&nbsp;" %>
           </td>
           <td class="leftTop" align="center">
-            <%= @encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i.to_s + " (cm)" rescue "&nbsp;" %>
+            <%= (@encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i <= 0 ? "?" : 
+                @encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i.to_s + " (cm)") rescue "&nbsp;" %>
           </td>
           <td class="leftTop">
             <%= @encounters[encounter[0]]["OBSERVATIONS"]["POSITION"] rescue "&nbsp;" %>&nbsp;
             <%= @encounters[encounter[0]]["OBSERVATIONS"]["PRESENTATION"] rescue "&nbsp;" %>
           </td>
           <td class="leftTop" align="center">
-            <%= @encounters[encounter[0]]["OBSERVATIONS"]["FETAL HEART BEAT"].humanize rescue "&nbsp;" %>
+            <%= (@encounters[encounter[0]]["OBSERVATIONS"]["FETAL HEART BEAT"].humanize == "Unknown" ? "?" :
+                @encounters[encounter[0]]["OBSERVATIONS"]["FETAL HEART BEAT"].humanize) rescue "&nbsp;" %>
           </td>
           <td class="leftTop" align="center">
-            <%= @encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"].to_i rescue "&nbsp;" %>
+            <%= (@encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"].to_i <= 0 ? "?" : 
+                @encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"].to_i) rescue "&nbsp;" %>
           </td>
           <td class="leftTop">
-            <%= @encounters[encounter[0]]["VITALS"]["SYSTOLIC BLOOD PRESSURE"].to_i rescue "?" %>/<%= @encounters[encounter[0]]["VITALS"]["DIASTOLIC BLOOD PRESSURE"].to_i rescue "?" %>
+            <%= (@encounters[encounter[0]]["VITALS"]["SYSTOLIC BLOOD PRESSURE"].to_i <= 0 ? "?" : 
+                @encounters[encounter[0]]["VITALS"]["SYSTOLIC BLOOD PRESSURE"].to_i) rescue "?" %>/<%= (@encounters[encounter[0]]["VITALS"]["DIASTOLIC BLOOD PRESSURE"].to_i <= 0 ? "?" : 
+                @encounters[encounter[0]]["VITALS"]["DIASTOLIC BLOOD PRESSURE"].to_i) rescue "?" %>
           </td>
           <td class="leftTop" align="center">
             <%= @encounters[encounter[0]]["LAB RESULTS"]["URINE PROTEIN"] rescue "&nbsp;" %>&nbsp;
@@ -240,15 +246,15 @@
           <td class="leftTop" align="center" colspan="2">
             <%= (@encounters[encounter[0]]["LAB RESULTS"]["ON ART"].upcase == "YES" ? "Y" : "N") rescue "&nbsp;" %>
           </td>
+          <td class="leftTop" align="center">
+            <%= @encounters[encounter[0]]["OBSERVATIONS"]["DIAGNOSIS"].humanize rescue "&nbsp;" %>
+          </td>
           <td class="leftTop">
             <%= "<b>Outcome:</b> " + @encounters[encounter[0]]["UPDATE OUTCOME"]["OUTCOME"].humanize + ";<br />" rescue "&nbsp;" %>
             <%= ("<b>Other Drugs:</b> " + 
               (@other_drugs[encounter[0]].collect{|d, v| 
                 "#{d}: #{ (v.to_s.match(/\.[1-9]/) ? v : v.to_i) }"
               }.join("; ")) + ";<br />") if @other_drugs[encounter[0]].length > 0 rescue "&nbsp;" %>
-          </td>
-          <td class="leftTop" align="center">
-            <%= @encounters[encounter[0]]["OBSERVATIONS"]["DIAGNOSIS"].humanize rescue "&nbsp;" %>
           </td>
           <td class="leftTop">
             <%= @encounters[encounter[0]]["APPOINTMENT"]["APPOINTMENT DATE"] rescue "&nbsp;" %>

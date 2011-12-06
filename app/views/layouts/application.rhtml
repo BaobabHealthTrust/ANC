@@ -4,16 +4,18 @@
   <head>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <% @title = "#{controller.controller_name.humanize} #{controller.action_name.humanize}" rescue ""  %>
-    <script language="javascript">
+    <script language="javascript" defer="true">
       tstUsername = "<%= User.current_user.username unless User.current_user.nil? %>";
-      tstCurrentDate = "<%= Time.now.strftime("%Y/%m/%d") %>";
+      
+      tstCurrentDate = "<%= (session[:datetime] ? session[:datetime].to_date.strftime("%Y-%m-%d") : 
+    Date.today.strftime("%Y-%m-%d")) %>";
     </script>
-    
-    <script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer></script>
-    <%#= stylesheet_link_tag "mateme" %>
-    <%#= stylesheet_link_tag fancy_or_high_contrast_touch %>
-    <%#= javascript_include_tag "preload" %>
-    <%#= javascript_include_tag "touchscreenToolkit" %>
+
+    <script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer="true"></script>
+<%#= stylesheet_link_tag "mateme" %>
+<%#= stylesheet_link_tag fancy_or_high_contrast_touch %>
+<%#= javascript_include_tag "preload" %>
+<%#= javascript_include_tag "touchscreenToolkit" %>
     <%= javascript_include_tag "dateselector" %>
   </head>
   <body id="mateme">  

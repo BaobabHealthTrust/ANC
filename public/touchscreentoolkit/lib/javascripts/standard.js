@@ -63,8 +63,14 @@ var tstMessageBoxType = {
     YesNoCancel:{}
 }
 
+var touchscreenInterfaceEnabled = 0;
+var contentContainer = null;
+
 var tstTimerHandle = null;
 var tstTimerFunctionCall = "";
+
+var tstInternalCurrentDate = (new Date().getFullYear()) + "-" + padZeros((new Date().getMonth() + 1),2) + "-" + 
+    padZeros((new Date().getDate()), 2);
 
 //--------------------------------------
 // Default method in module to access element id changed to __$ to avoid
@@ -105,10 +111,6 @@ function elementSelectedValue(element){
     }
     return null;
 }
-
-
-var touchscreenInterfaceEnabled = 0;
-var contentContainer = null;
 
 function loadTouchscreenToolkit() {
     if(document.getElementById("loadingProgressMessage")){
@@ -786,7 +788,7 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
         // ' onmousedown="'+ mouseDownAction +'"';
     
         optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
-            ' onclick="' + mouseDownAction + '" ';
+        ' onclick="' + mouseDownAction + '" ';
         
         // njih
         optionsList += ">" + (tstFormElements[tstCurrentPage].getAttribute("multiple") ? 
@@ -1508,9 +1510,9 @@ function confirmValue() {
     confirmationBar.appendChild(username);
 
     confirmationBar.innerHTML += "<div style='display: block; margin-top: 15px;'><input type='submit'" +
-        " value='OK' class='btn' style='float: left;' onclick='validateConfirmUsername()'" + 
-        " onmousedown='validateConfirmUsername()'/><input type='submit' value='Cancel' " + 
-        " class='btn' style='float: right; right: 3px;' onmousedown='cancelConfirmValue()' />";
+    " value='OK' class='btn' style='float: left;' onclick='validateConfirmUsername()'" + 
+    " onmousedown='validateConfirmUsername()'/><input type='submit' value='Cancel' " + 
+    " class='btn' style='float: right; right: 3px;' onmousedown='cancelConfirmValue()' />";
 
     confirmationBar.style.display = "block";
     tstInputTarget = __$("confirmUsername");
@@ -3108,7 +3110,9 @@ DateSelector.prototype = {
 				<button id="dateselector_preDay" onmousedown="ds.decrementDay();"><span>-</span></button> \
 			</div> \
 			</td><td> \
-                        <button id="today" onmousedown="setToday()" style="width: 150px;"><span>Today</span></button> \
+                        <button id="today" ' + (tstCurrentDate ? (tstCurrentDate == tstInternalCurrentDate ? 
+                            'class="blue" ' : 'class="red" ') : 'class="blue" ') + 
+                            ' onmousedown="setToday()" style="width: 150px;"><span>Today</span></button> \
 			<!--button id="num" onmousedown="updateKeyColor(this);press(this.id);" style="width: 150px;"><span>Num</span></button--> \
 			<button id="Unknown" onmousedown="updateKeyColor(this);press(this.id);" style="width: 150px;"><span>Unknown</span></button> \
 			</tr></table> \
@@ -3321,6 +3325,12 @@ var DateUtil = {
 
 function setToday(){
     var d = new Date();
+    if (tstCurrentDate) {
+        if(tstCurrentDate.match(/\d{4}\-\d{2}\-\d{2}/)){
+            d = new Date(tstCurrentDate);
+        }
+    }
+    
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     document.getElementById("touchscreenInput" + tstCurrentPage).value =
@@ -3800,4 +3810,17 @@ function showKeyboard(full_keyboard){
     
     __$("keyboard").appendChild(div);
     
+}
+
+function padZeros(number, positions){
+    var zeros = parseInt(positions) - String(number).length;
+    var padded = "";
+    
+    for(var i = 0; i < zeros; i++){
+        padded += "0";
+    }
+    
+    padded += String(number);
+    
+    return padded;
 }

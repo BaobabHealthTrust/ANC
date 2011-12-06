@@ -471,10 +471,12 @@ EOF
       end   
     }    
     
+    pregnancies = pregnancies.delete_if{|x, v| v == {}}
+    
     pregnancies.each{|preg|
       if preg[1]["DATE OF LAST MENSTRUAL PERIOD"]
         preg[1]["START"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 7.day
-        preg[1]["END"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 7.day + 45.week
+        preg[1]["END"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 7.day + 45.week        
       else
         preg[1]["START"] = preg[0].to_date + 7.day
         preg[1]["END"] = preg[0].to_date + 7.day + 45.week
