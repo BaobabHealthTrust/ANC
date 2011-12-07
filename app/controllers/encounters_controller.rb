@@ -98,10 +98,10 @@ class EncountersController < ApplicationController
       (encounter.type.name.upcase rescue "") == "SURGICAL HISTORY" || 
       (encounter.type.name.upcase rescue "") == "SOCIAL HISTORY")
   
-    redirect_to "/patients/show/#{@patient.id}"
+    # redirect_to "/patients/show/#{@patient.id}"
     
     # Go to the next task in the workflow (or dashboard)
-    # redirect_to next_task(@patient) 
+    redirect_to next_task(@patient) 
   end
 
   def new
