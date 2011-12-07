@@ -3,38 +3,40 @@
   .tt_controls_time_until_next_appointment #keyboard, 
   .tt_controls_next_appointment_date #num,
   .tt_controls_next_appointment_date #Unknown {
-    display:none;
+    /*display:none;*/
   }
   .tt_controls_next_appointment_date #keyboard{
-    top:80px;
+    /*top:80px;*/
   }
 
   #information {
     display: none;
-    border: 5px;
-    border-style: solid;
-    border-width: 1px;
+    border: 1px #000 solid;
     font-size: 2em;
-    left: 575px;
+    left: 585px;
     padding: 10px;
     position: absolute;
     text-align: center;
-    top: 85px;
+    top: 463px;
     width: 350px;
     height: 160px;
-    z-index: 20;
+    z-index: 2000;
     -moz-user-select:none;
     -moz-border-radius: 10px;
     margin-top: 10px;
+    background-color: #EEFFEE;
   }
   
   #expected_date_of_delivery {
     top: 380px;
-    width: 850px;
-    left: -445px;
+    width: 915px;
+    left: -475px;
   }
   
   #today {
+    display: none;
+  }
+  #Unknown {
     display: none;
   }
 </style>
@@ -155,8 +157,10 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     
 
     new_date = dateCreate(year + '-' + month + '-' + day)
-    $('helpText1').innerHTML = 'Next Appointment Date ' + dateFormat(new_date,"dddd, mmmm dS, yyyy");
+    $('appointmentdate').innerHTML = dateFormat(new_date,"dddd, mmm dS, yyyy");
     showRecordedAppointments(dateFormat(new_date,"dddd, mmmm dS, yyyy"));
+    
+    timedEvent = setTimeout('showDate()', 100);
   }
 
   function calculateGivenRange(start_date,end_date) {
@@ -190,8 +194,9 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
       var div = document.createElement("div");
       div.id = "expected_date_of_delivery";
       div.className = "statusLabel";
+      div.style.top = "80px";
 
-      $("keyboard").appendChild(div);
+      $("page" + tstCurrentPage).appendChild(div);
     }
 
     var theDate = new Date($("lmp").value.trim());
@@ -208,13 +213,27 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
 
     edod = (theDate.getDate() + "-" + month[theDate.getMonth()] + "-" + theDate.getFullYear());    
 
-    $("expected_date_of_delivery").innerHTML = "Expected Date Of Delivery: <i style='font-size: 1.2em; float: right;'>" +
-      edod + "</i><br /><br />Gestation Weeks: " + (gestation < 32 &&
+    $("expected_date_of_delivery").innerHTML = "Next Appointment Date: <i id='appointmentdate' " + 
+      "style='font-size: 1.2em; float: right;'>&nbsp;</i><br /><br />Expected Date Of Delivery: " + 
+      "<i style='font-size: 1.2em; float: right;'>" +
+      dateFormat(theDate,"dddd, mmm dS, yyyy") + "</i><br /><br />Gestation Weeks: " + (gestation < 32 &&
       gestation.trim().length > 0 ? "" : 
       (gestation > 42 && gestation.trim().length > 0 ? "<i style='color: red'>(Abnormal)</i>" : "")) +
       "<i style='font-size: 1.2em; float: right; width: 100px;'>" + gestation + "</i>";
 
-    timedEvent = setTimeout('calculateEDOD()', 500);
+      __$("inputFrame" + tstCurrentPage).style.display = "none";
+    
+  }
+
+  function setAppointmentDate(){
+    var days = parseInt(__$("touchscreenInput" + tstCurrentPage).getAttribute("tstValue")) * 7;
+    
+    var appointmentDate = new Date(tstCurrentDate);
+    
+    appointmentDate.setDate(appointmentDate.getDate() + days);
+    
+    __$("next_appointment_date").value = appointmentDate.getFullYear() + "-" + 
+      padZeros((appointmentDate.getMonth() + 1),2) + "-" + padZeros(appointmentDate.getDate(), 2);
   }
 
 </script>
@@ -233,26 +252,34 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
         ["2 months", 8],
         ["3 months", 12]]),
     {:helpText => 'Time Until Next Appointment',
-      :tt_onLoad => "calculateGivenRange('#{params[:start_date]}','#{params[:end_date]}')"}) %>
+      :tt_onLoad => "calculateGivenRange('#{params[:start_date]}','#{params[:end_date]}')",
+      :tt_onUnLoad => "setAppointmentDate();"}) %>
 
   <%
   absolute_min = params[:start_date].to_date.year rescue Date.today.year
   absolute_max = params[:end_date].to_date.year + 1 rescue Date.today.year + 1%>
-  <label for='next_appointment_date'>Next Appointment Date</label>
+  <!--label for='next_appointment_date'>Next Appointment Date</label-->
   <%= hidden_field_tag("observations[][concept_name]", "RETURN VISIT DATE") %>
   <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
   <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
-  <%= text_field_tag("observations[][value_datetime]", (Time.now + 1.month).year,
+  <%# = text_field_tag("observations[][value_datetime]", nil, #(Time.now + 1.month).year,
     {:helpText => 'Next Appointment Date',
       :field_type => 'date',
       :absoluteMin => absolute_min,
       :absoluteMax => absolute_max,
       :maxDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
       :tt_pageStyleClass => "Date DatesOnly",
-      :tt_onLoad => "calculate_dates('#{params[:start_date]}','#{params[:end_date]}'); calculateEDOD();",
+      :tt_onLoad => "/*calculate_dates('#{params[:start_date]}','#{params[:end_date]}');*/ calculateEDOD();",
       :id => 'next_appointment_date',
       :tt_onUnLoad => "hideInfo();"}) %>
-
+  
+  <%= text_field_tag("observations[][value_datetime]", nil, #(Time.now + 1.month).year,
+    { :helpText => "Next Appointment",
+      :field_type => 'date',
+      :tt_onLoad => "calculateEDOD(); showDate();",
+      :id => 'next_appointment_date',
+      :maxDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
+      :tt_onUnLoad => "hideInfo();"}) %>
 
   <%= submit_tag "Finish" %>
 </form>
