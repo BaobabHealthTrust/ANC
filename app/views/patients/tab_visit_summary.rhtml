@@ -33,7 +33,7 @@
 <script type="text/javascript">
 
   function voiding(node) {
-    parent.confirmYesNo("Void this item?", function() {
+    parent.confirmYesNo("Delete this entry?", function() {
       parent.hideConfirmation();
       node = node.parent();
       $.post('/patients/void/?patient_id=<%= @patient.patient_id %>&encounter_id=' + node.attr('encounter_id'), {}, function(data, status) {

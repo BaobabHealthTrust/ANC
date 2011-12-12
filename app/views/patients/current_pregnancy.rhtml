@@ -127,7 +127,7 @@
     :tt_pageStyleClass => "exclude"
   } %>
 
-  <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"], ["Uknown", "Uknown"]]),
     {:id => "week_of_first_visit",
     :helptext => "Is This a Multiple Pregnancy?" } %>
 
@@ -150,6 +150,21 @@
     :helptext => "Date Bet Net Given",
     :condition => "__$('bed_net').value == 'Yes'"
   } %>
+
+  <% options = {
+      :id => "tt_status_value",
+      :helptext => "Previous TT Doses",
+      :field_type => "number",
+      :absoluteMin => "0",
+      :max => "5",
+      # :flag => '{"condition":"^1$|^0$","message":"TT is inadequate"}',
+      :tt_pageStyleClass => "NumbersOnly"
+    } %>
+
+  <%= hidden_field_tag("observations[][concept_name]",  "TT STATUS", {:id => 'tt_status_concept_name'}) %>
+  <%= text_field_tag("observations[][value_numeric]",   nil, options) %>
+  <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
+  <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
 
   <%= submit_tag 'Finish' %>
 <% end %>

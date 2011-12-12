@@ -149,7 +149,7 @@
     " && getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
 
   <%= touch_select_tag "URINE PROTEIN", @patient, 
-    options_for_select([["", ""], ["Retrace", "Retrace"], ["+", "+"], ["++", "++"], 
+    options_for_select([["", ""], ["Negative", "Negative"], ["Retrace", "Retrace"], ["+", "+"], ["++", "++"], 
       ["+++", "+++"], ["++++", "++++"], ["Not Done", "Not Done"]]),
     {:id => "enter_urine_protein",
     :helptext => "Urine Protein",

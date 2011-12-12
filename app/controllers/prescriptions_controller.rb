@@ -20,7 +20,10 @@ class PrescriptionsController < ApplicationController
   end
   
   def create
-    # raise params.to_yaml
+    @patient    = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
+    if !params[:prescriptions]
+      redirect_to ("/patients/current_visit/?patient_id=#{@patient.id}") and return
+    end
 
     encounter = Encounter.new(params[:encounter])
     encounter.encounter_datetime ||= session[:datetime]
@@ -90,7 +93,7 @@ class PrescriptionsController < ApplicationController
 
     }
 
-    redirect_to ("/patients/current_visit/?patient_id=#{@patient.id}")
+    redirect_to ("/patients/current_visit/?patient_id=#{@patient.id}") and return
   end
   
   def auto
@@ -203,6 +206,7 @@ class PrescriptionsController < ApplicationController
     @generics = generic
     @frequencies = drug_frequency
     @diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []
+    
   end
 
   def load_frequencies_and_dosages
@@ -219,7 +223,7 @@ class PrescriptionsController < ApplicationController
     Drug.all.each{|drug|
       #Concept.find(drug.concept_id, :conditions => ["retired = 0 AND concept_id IN (?)", preferred]).concept_names.each{|conceptname|
       Concept.find(drug.concept_id, :conditions => ["retired = 0"]).concept_names.each{|conceptname|
-        generics << [conceptname.name, drug.concept_id] rescue nil
+        generics << [(conceptname.name.titleize == "Tetanus Toxoid Vaccine" ? "TTV" : conceptname.name), drug.concept_id] rescue nil
       }.compact.uniq rescue []
     }
 

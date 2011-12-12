@@ -87,7 +87,7 @@
   :condition => '$("gender").value == "" || skipped[tstCurrentPage] == 1', 
   :tt_onLoad => 'seen(tstCurrentPage);' } %>
 
-  <%= text_field_tag "person[names][family_name2]", params[:family_name2], {
+  <%#= text_field_tag "person[names][family_name2]", params[:family_name2], {
     :id => 'family_name2', 
     :field_type => 'alpha', 
     :helpText => 'Maiden Name', 
@@ -106,11 +106,14 @@
 
   <%= text_field_tag "person[birth_day]",  nil, :field_type => 'number', :helpText => 'Birth Day', :condition => '($("person_birth_year").value != "Unknown") && ($("person_birth_month").value != "Unknown")', :tt_onLoad => "getDayOfMonthPicker($('person_birth_year').value, $('person_birth_month').value)" %>
 
-  <%= text_field_tag "person[addresses][address2]", params[:address2], {:id => 'address2', :field_type => 'alpha', :helpText => 'Home Village', :ajaxURL => '/person_addresses/address2?search_string=', :allowFreeText => true, :condition => '$("address2").value == "" || skipped[tstCurrentPage] == 1', :tt_onLoad => 'seen(tstCurrentPage);' } if ask_home_village %>
+  <%#= text_field_tag "person[addresses][address2]", params[:address2], {
+      :id => 'address2', :field_type => 'alpha', :helpText => 'Home Village', :ajaxURL => '/person_addresses/address2?search_string=', :allowFreeText => true, :condition => '$("address2").value == "" || skipped[tstCurrentPage] == 1', :tt_onLoad => 'seen(tstCurrentPage);' } if ask_home_village %>
 
-  <%= text_field_tag "person[addresses][county_district]",  params[:county_district], {:field_type => 'alpha', :helpText => 'Current Traditional Authority (TA)', :ajaxURL => '/person_addresses/traditional_authority?search_string=', :allowFreeText => true }%>
+  <%= text_field_tag "person[addresses][county_district]",  params[:county_district], {
+    :field_type => 'alpha', :helpText => 'Current Traditional Authority (TA)', :ajaxURL => '/person_addresses/traditional_authority?search_string=', :allowFreeText => true }%>
 
-  <%= text_field_tag "person[addresses][city_village]",  params[:city_village], {:field_type => 'alpha', :helpText => 'Current Village (residence)', :ajaxURL => '/person_addresses/village?search_string=', :allowFreeText => true }%>
+  <%= text_field_tag "person[addresses][city_village]",  params[:city_village], {
+    :field_type => 'alpha', :helpText => 'Current Village (residence)', :ajaxURL => '/person_addresses/village?search_string=', :allowFreeText => true }%>
 
   <%= text_field_tag "person[addresses][address1]",  params[:address1], {:id => 'address1', :helpText => 'Closest Landmark or Plot Number<br /><span style="font-size:0.7em;font-style:italic">(Please do not include these words: Next to, close, in front of, behind)</span>', :allowFreeText => true }%>
 
@@ -126,7 +129,7 @@
     <%= text_field_tag "person[home_phone_number]",  params[:home_phone_number], {:field_type => 'number', :helpText => 'Home Phone Number', :allowFreeText => true }%>
   <%end%>
 
-  <%= select_tag("person[occupation]", options_for_select([" ", "Housewife", "Farmer", "Police", "Soldier", "Business", "Teacher", "Student", "Healthcare Worker"].sort.concat(["Other"]) ,params[:occupation]),:helpText =>"Occupation",:allowFreeText => true, :tt_onLoad => 'seen(tstCurrentPage);')%>
+  <%= select_tag("person[occupation]", options_for_select([" ", "Housewife", "Farmer", "Police", "Soldier", "Business", "Teacher", "Student", "Healthcare Worker"].sort.concat(["Other", "Unknown"]) ,params[:occupation]),:helpText =>"Occupation",:allowFreeText => true, :tt_onLoad => 'seen(tstCurrentPage);')%>
 
   <!-- Make sure patient is created -->
 

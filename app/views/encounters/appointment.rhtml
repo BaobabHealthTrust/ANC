@@ -153,10 +153,10 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     }
 
     if (month.length == 1)
-      month = '0' + month
-    
+      month = '0' + month    
 
     new_date = dateCreate(year + '-' + month + '-' + day)
+    
     $('appointmentdate').innerHTML = dateFormat(new_date,"dddd, mmm dS, yyyy");
     showRecordedAppointments(dateFormat(new_date,"dddd, mmmm dS, yyyy"));
     
@@ -184,7 +184,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   function hideInfo() {
     $('information').style.display = 'none';
   }
-    
+   
   function calculateEDOD(){
     var edod = "";
     var gestation = "";
@@ -197,6 +197,10 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
       div.style.top = "80px";
 
       $("page" + tstCurrentPage).appendChild(div);
+    }
+
+    if($("lmp").value.trim().length == 0){
+      $("lmp").value = "<%= (session[:datetime] ? session[:datetime].to_date : Date.today).strftime("%Y-%m-%d") %>";
     }
 
     var theDate = new Date($("lmp").value.trim());
