@@ -451,7 +451,7 @@ EOF
       
     pregnancies = {}; 
     
-    active_years = {}
+    # active_years = {}
     
     patient.encounters.active.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
       if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]       
@@ -460,18 +460,18 @@ EOF
         e.observations.each{|o| 
           concept = o.concept.name rescue nil
           if concept
-            if !active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")]                            
+            # if !active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")]                            
               if o.concept.name.name == "DATE OF LAST MENSTRUAL PERIOD"         
                 pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.name.name] = o.answer_string          
-                active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")] = true 
+                # active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")] = true 
               end              
-            end
+            # end
           end   
         } 
       end   
     }    
     
-    pregnancies = pregnancies.delete_if{|x, v| v == {}}
+    # pregnancies = pregnancies.delete_if{|x, v| v == {}}
     
     pregnancies.each{|preg|
       if preg[1]["DATE OF LAST MENSTRUAL PERIOD"]

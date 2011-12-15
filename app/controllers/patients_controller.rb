@@ -4,7 +4,7 @@ class PatientsController < ApplicationController
   def show  
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     
-    @current_range = Patient.active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today)) rescue nil
+    @current_range = Patient.active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
 
     @encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]) rescue []
@@ -15,6 +15,8 @@ class PatientsController < ApplicationController
     @names = @encounters.collect{|e|
       e.name
     }
+    
+    # raise @names.to_yaml
     
     render :layout => 'dynamic-dashboard'
   end
@@ -446,19 +448,19 @@ class PatientsController < ApplicationController
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
-      @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name] = {}
+      @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = {}
     }
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
       e.observations.each{|o| 
-        if o.to_a[0] == "DIAGNOSIS" && @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name][o.to_a[0]]
-          @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name][o.to_a[0]] += "; " + o.to_a[1]
+        if o.to_a[0].upcase == "DIAGNOSIS" && @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase]
+          @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] += "; " + o.to_a[1]
         else
-          @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name][o.to_a[0]] = o.to_a[1]
-          if o.to_a[0] == "PLANNED DELIVERY PLACE"
+          @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] = o.to_a[1]
+          if o.to_a[0].upcase == "PLANNED DELIVERY PLACE"
             @current_range[0]["PLANNED DELIVERY PLACE"] = o.to_a[1]
-          elsif o.to_a[0] == "MOSQUITO NET"
+          elsif o.to_a[0].upcase == "MOSQUITO NET"
             @current_range[0]["MOSQUITO NET"] = o.to_a[1]
           end
         end
@@ -619,24 +621,24 @@ class PatientsController < ApplicationController
       "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", "AGE AT DEATH"]
     current_level = 0
     
-    @patient.encounters.active.collect{|e| 
-      e.observations.active.collect{|obs|
+    @patient.encounters.active.all.each{|e| 
+      e.observations.active.each{|obs|
         concept = obs.concept.name.name rescue nil
         if(!concept.nil?)
-          if search_set.include?(concept)
-            if obs.concept.name.name.eql?("YEAR OF BIRTH")
+          if search_set.include?(concept.upcase)
+            if obs.concept.name.name.upcase.eql?("YEAR OF BIRTH")
               current_level += 1
             
               @obstetrics[current_level] = {}
             end
           
-            @obstetrics[current_level][obs.concept.name.name] = obs.answer_string rescue nil
+            @obstetrics[current_level][obs.concept.name.name.upcase] = obs.answer_string rescue nil
             
           end
         end
       }      
     }
-        
+     
     @pregnancies = Patient.active_range(@patient.id)
     
     @range = []

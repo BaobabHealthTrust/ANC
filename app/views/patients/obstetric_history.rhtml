@@ -171,9 +171,11 @@
     <%= touch_select_tag "Procedure Done", @patient, options_for_select(@procedures),
     {:id => "method_of_delivery#{e}",
       :helptext => "Procedure Done #{e}#{indice} Abortion",
-      :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
+      :condition => "__$('enter_number_of_abortions').value >= #{e}",
+      :tt_onUnLoad => "__$('condition_at_birth_abortion#{e}').value = 'Abortion'"
+    } %>
 
-    <%= touch_text_field_tag "Condition at Birth", @patient, "Abortion",
+    <%= touch_hidden_tag "Condition at Birth", @patient, nil,
     {:id => "condition_at_birth_abortion#{e}",
       :helptext => "Condition at Birth #{e}#{indice} Abortion",
       :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
