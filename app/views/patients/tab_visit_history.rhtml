@@ -220,7 +220,7 @@
                 @encounters[encounter[0]]["CURRENT PREGNANCY"]["TT STATUS"].to_i : "&nbsp;") rescue "&nbsp;" %>&nbsp;
           </td>
           <td class="topic leftTop" align="center">
-            <%= @drugs[encounter[0]]["Tetanus"] rescue "&nbsp;"; %>&nbsp;
+            <%= (@drugs[encounter[0]]["TTV"] > 0 ? 1 : "&nbsp;")  rescue "&nbsp;"; %>&nbsp;
           </td>
           <td class="leftTop" align="center">
             <%= (@drugs[encounter[0]]["SP"].to_i > 0 ? @drugs[encounter[0]]["SP"].to_i : "&nbsp;") rescue "&nbsp;";  %> 

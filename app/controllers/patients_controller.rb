@@ -469,7 +469,7 @@ class PatientsController < ApplicationController
 
     @drugs = {}; 
     @other_drugs = {}; 
-    main_drugs = ["Tetanus", "SP", "Fefol", "NVP", "TMP/SMX", "TDF/3TC/EFV"]
+    main_drugs = ["TTV", "SP", "Fefol", "NVP", "TMP/SMX", "TDF/3TC/EFV"]
     
     @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
       :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
