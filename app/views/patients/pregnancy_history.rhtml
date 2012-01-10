@@ -12,17 +12,19 @@
     pos = @range.length
 
     @range.each do |yr|
-    %>
+      if !@gravida.nil?      
+      %>
 
-      <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>&target_date=<%= yr.strftime("%Y-%m-%d") %>'>
+        <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>&target_date=<%= yr.strftime("%Y-%m-%d") %>'>
         <%= pos + (@gravida > 1 ? (@gravida - 1) : 0) %><sup><%= case pos + (@gravida > 1 ? (@gravida - 1) : 0) when 1: "st" when 2: "nd" when 3: "rd" else "th" end %></sup>
-      </option>  
+        </option>  
 
-    <% 
+      <% 
+      end
       pos -= 1
-      end 
-    %>
-  
+    end 
+  %>
+
   </select>
 
   <div id="tabBucket" style="height: 526px;">

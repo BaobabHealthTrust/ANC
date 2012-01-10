@@ -34,7 +34,7 @@ class User < ActiveRecord::Base
 
   def name
     name = self.names.first
-    "#{name.given_name} #{name.family_name}"
+    "#{name.given_name} #{name.family_name}" rescue ""
   end
 
   def try_to_login

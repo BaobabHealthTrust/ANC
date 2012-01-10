@@ -218,9 +218,9 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     edod = (theDate.getDate() + "-" + month[theDate.getMonth()] + "-" + theDate.getFullYear());    
 
     $("expected_date_of_delivery").innerHTML = "Next Appointment Date: <i id='appointmentdate' " + 
-      "style='font-size: 1.2em; float: right;'>&nbsp;</i><br /><br />Expected Date Of Delivery: " + 
+      "style='font-size: 1.2em; float: right;'>&nbsp;</i><br /><br /><!--Expected Date Of Delivery: " + 
       "<i style='font-size: 1.2em; float: right;'>" +
-      dateFormat(theDate,"dddd, mmm dS, yyyy") + "</i><br /><br />Gestation Weeks: " + (gestation < 32 &&
+      dateFormat(theDate,"dddd, mmm dS, yyyy") + "</i><br /><br />-->Gestation Weeks: " + (gestation < 32 &&
       gestation.trim().length > 0 ? "" : 
       (gestation > 42 && gestation.trim().length > 0 ? "<i style='color: red'>(Abnormal)</i>" : "")) +
       "<i style='font-size: 1.2em; float: right; width: 100px;'>" + gestation + "</i>";

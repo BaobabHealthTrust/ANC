@@ -84,7 +84,8 @@ class PatientsController < ApplicationController
     @encounter = Encounter.find(params[:encounter_id])
     @patient = @encounter.patient
     @encounter.void
-    redirect_to "/patients/tab_visit_summary/?patient_id=#{@patient.id}" and return
+    # redirect_to "/patients/tab_visit_summary/?patient_id=#{@patient.id}" and return
+    redirect_to "/patients/show/#{@patient.id}" and return
   end
 
   def print_registration
@@ -442,26 +443,28 @@ class PatientsController < ApplicationController
     @encounters = {}
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
-        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
-      @encounters[e.encounter_datetime.strftime("%d/%b/%Y")] = {"USER" => User.find(e.creator).name}    
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e|       
+      @encounters[e.encounter_datetime.strftime("%d/%b/%Y")] = {"USER" => User.find(e.creator).name }
     }
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
-      @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = {}
+      @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = {} rescue ""
     }
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
       e.observations.each{|o| 
-        if o.to_a[0].upcase == "DIAGNOSIS" && @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase]
-          @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] += "; " + o.to_a[1]
-        else
-          @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] = o.to_a[1]
-          if o.to_a[0].upcase == "PLANNED DELIVERY PLACE"
-            @current_range[0]["PLANNED DELIVERY PLACE"] = o.to_a[1]
-          elsif o.to_a[0].upcase == "MOSQUITO NET"
-            @current_range[0]["MOSQUITO NET"] = o.to_a[1]
+        if o.to_a[0]
+          if o.to_a[0].upcase == "DIAGNOSIS" && @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase]
+            @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] += "; " + o.to_a[1]
+          else
+            @encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] = o.to_a[1]
+            if o.to_a[0].upcase == "PLANNED DELIVERY PLACE"
+              @current_range[0]["PLANNED DELIVERY PLACE"] = o.to_a[1]
+            elsif o.to_a[0].upcase == "MOSQUITO NET"
+              @current_range[0]["MOSQUITO NET"] = o.to_a[1]
+            end
           end
         end
       }
@@ -474,8 +477,8 @@ class PatientsController < ApplicationController
     @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
       :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
         EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e| 
-      @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {}; 
-      @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {}; 
+      @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
+      @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
       e.orders.each{|o| 
         if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])
           @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
@@ -485,7 +488,7 @@ class PatientsController < ApplicationController
       }      
     }
     
-    # raise @other_drugs.inspect
+    # raise @current_range.to_yaml
 
     render :layout => false
   end

@@ -37,7 +37,10 @@
       parent.hideConfirmation();
       node = node.parent();
       $.post('/patients/void/?patient_id=<%= @patient.patient_id %>&encounter_id=' + node.attr('encounter_id'), {}, function(data, status) {
-        if (status == 'success') node.remove();
+        if (status == 'success') {
+          node.remove();
+          parent.window.location = "/patients/show/<%= @patient.patient_id %>";
+        }
       })
     }, function() { parent.hideConfirmation(); });
   }

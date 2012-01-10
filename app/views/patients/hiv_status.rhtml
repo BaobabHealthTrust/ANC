@@ -98,7 +98,7 @@
   <%  session_date = session[:datetime] || Time.now() %>
 
   <%= select_tag("choice", options_for_select(["", "Last Menstrual Period", 
-        "Planned delivery place", "Multiple Pregnancy", "Bed Net Given?"]), 
+        "Planned delivery place", "Multiple Pregnancy", "Bed Net Given?", "Previous TT Doses"]), 
     {:helpText => 'Select Task(s)', :id => "choice", :multiple => true})%>
 
   <%= touch_date_tag "LAST MENSTRUAL PERIOD", @patient, nil,
@@ -162,6 +162,22 @@
     :helptext => "Date Syphilis Test Result Given",
     :condition => "getSelected().match(/Syphilis\sResult/)",
     :max => "#{session[:datetime].to_date rescue Date.today}" } %>
+
+  <% options = {
+    :id => "tt_status_value",
+    :helptext => "Previous TT Doses",
+    :field_type => "number",
+    :absoluteMin => "0",
+    :max => "5",
+    # :flag => '{"condition":"^1$|^0$","message":"TT is inadequate"}',
+    :tt_pageStyleClass => "NumbersOnly",
+    :condition => "getSelected().match(/Previous\sTT\sDoses/)"
+  } %>
+
+  <%= hidden_field_tag("observations[][concept_name]",  "TT STATUS", {:id => 'tt_status_concept_name'}) %>
+  <%= text_field_tag("observations[][value_numeric]",   nil, options) %>
+  <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
+  <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
 
   <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "bed_net",

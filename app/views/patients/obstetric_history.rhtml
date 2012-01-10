@@ -21,16 +21,16 @@
     :absoluteMin => 0,
     :max => 20,
     :tt_pageStyleClass => "NumbersOnly"} %>
-  <%= touch_select_tag "MULTIPLE GESTATION", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  <%= touch_select_tag "MULTIPLE GESTATION", @patient, options_for_select([["No", "No"], ["Yes", "Yes"]]),
     {:id => "multiple_pregnancy",
     :helptext => "Ever Had Multiple Pregnancy?",
-    :condition => "__$('enter_gravida').value > 0"
+    :condition => "__$('enter_gravida').value > 1"
   } %>
-  <%= touch_numeric_tag "PARITY", @patient, nil,
+  <%= touch_numeric_tag "PARITY", @patient, 0,
     {:id => "enter_number_of_deliveries",
     :helptext => "Enter Number Of Deliveries",
     :tt_pageStyleClass => "NumbersWithUnknown",
-    :condition => "((__$('multiple_pregnancy').value == 'No' && (__$('enter_gravida').value - 1) > 0) || (__$('multiple_pregnancy').value == 'Yes' && __$('enter_gravida').value > 0))",
+    :condition => "((__$('multiple_pregnancy').value == 'No' && (__$('enter_gravida').value - 1) > 1) || (__$('multiple_pregnancy').value == 'Yes' && __$('enter_gravida').value > 1))",
     :tt_onLoad => "if(__$('multiple_pregnancy').value == 'No'){__$('touchscreenInput' + " + 
       "tstCurrentPage).setAttribute('absoluteMax', (__$('enter_gravida').value - 1))}"
   } %>
@@ -122,11 +122,11 @@
 
   <% } %>
 
-  <%= touch_numeric_tag "NUMBER OF ABORTIONS", @patient, nil,
+  <%= touch_numeric_tag "NUMBER OF ABORTIONS", @patient, 0,
     {:id => "enter_number_of_abortions",
     :helptext => "Enter Number Of Abortions",
     :tt_pageStyleClass => "NumbersWithUnknown",
-    :condition => "__$('enter_gravida').value > 0" } %>
+    :condition => "__$('enter_gravida').value > 1" } %>
 
 
   <% (1..8).each{|e| %>
@@ -207,9 +207,10 @@
     :condition => "__$('enter_number_of_deliveries').value > 0" 
   } %>
 
-  <%= touch_select_tag "PRE-ECLAMPSIA", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  <%= touch_select_tag "PRE-ECLAMPSIA", @patient, options_for_select([["No", "No"], ["Yes", "Yes"]]),
     {:id => "pre-eclampsia",
-    :helptext => "Pre-Eclampsia" } %>
+    :helptext => "Pre-Eclampsia",
+    :condition => "__$('enter_gravida').value > 1" } %>
   <%#= touch_numeric_tag "Height (cm)", @patient, nil,
   {:id => "Height_cm",
   :helptext => "Height (cm)",
