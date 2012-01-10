@@ -139,30 +139,37 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     return set_date
   }
 
-  function showDate() {
-    year = $('dateselector_year').value
-    month = $('dateselector_month').value 
-    day = $('dateselector_day').value 
+  function showDate() {    
+    days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    year = $('dateselector_year').value;
+    month = $('dateselector_month').value;
+    day = $('dateselector_day').value;
+        
     if (day.toString().length == 1)
       day = '0' + day.toString()
-
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    
     for (i = 0 ; i < months.length ; i++) {
       if (months[i] == month)
-        month = (i + 1).toString()
+        month = (i + 1).toString();
     }
 
     if (month.length == 1)
-      month = '0' + month    
-
-    new_date = dateCreate(year + '-' + month + '-' + day)
+      month = '0' + month;  
+    /*
+    new_date = dateCreate(year + '-' + month + '-' + day);
+     */
+       
+    var appointmentDate = new Date(year + '-' + month + '-' + day);
     
-    $('appointmentdate').innerHTML = dateFormat(new_date,"dddd, mmm dS, yyyy");
-    showRecordedAppointments(dateFormat(new_date,"dddd, mmmm dS, yyyy"));
+    $('appointmentdate').innerHTML = days[appointmentDate.getDay()] + ", " + months[appointmentDate.getMonth()] + 
+      " " + appointmentDate.getDate() + ", " + appointmentDate.getFullYear();
+    
+    showRecordedAppointments(year + '-' + month + '-' + day);
     
     // try{
     var theDate = new Date($("lmp").value.trim());
-    var appointmentDate = new Date(year + '-' + month + '-' + day);
       
     var s = appointmentDate - theDate;
 
@@ -172,7 +179,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     // } catch(e){}
    
     
-    timedEvent = setTimeout('showDate()', 100);
+    timedEvent = setTimeout('showDate()', 300);
   }
 
   function calculateGivenRange(start_date,end_date) {

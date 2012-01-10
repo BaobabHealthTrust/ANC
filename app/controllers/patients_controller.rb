@@ -621,7 +621,8 @@ class PatientsController < ApplicationController
     
     @obstetrics = {}
     search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "PREGNANCY", "LABOUR DURATION", 
-      "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", "AGE AT DEATH"]
+      "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", 
+      "AGE AT DEATH", "UNITS OF AGE OF CHILD"]
     current_level = 0
     
     @patient.encounters.active.all.each{|e| 

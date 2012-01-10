@@ -82,7 +82,9 @@
               <%= pos %>
             </td>
             <td>
-              <%= (@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ? @obstetrics[pos]["YEAR OF BIRTH"].to_i : "&nbsp;") : "&nbsp;") %>
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ? 
+                    (@obstetrics[pos]["YEAR OF BIRTH"].to_i > 0 ? @obstetrics[pos]["YEAR OF BIRTH"].to_i : 
+                      "Unknown") : "&nbsp;") : "&nbsp;") %>
             </td>
             <td>
               <%= (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? @obstetrics[pos]["PLACE OF BIRTH"] : "&nbsp;") : "&nbsp;") %>
@@ -106,7 +108,11 @@
               <%= (@obstetrics[pos] ? (@obstetrics[pos]["ALIVE"] ? @obstetrics[pos]["ALIVE"] : "&nbsp;") : "&nbsp;") %>
             </td>
             <td>
-              <%= (@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? @obstetrics[pos]["AGE AT DEATH"] : "&nbsp;") : "&nbsp;") %>
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
+                    (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
+                      @obstetrics[pos]["AGE AT DEATH"].to_i) : "&nbsp;") : "&nbsp;") %>
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
+                    @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "&nbsp;") : "&nbsp;") %>
             </td>
           </tr>
 

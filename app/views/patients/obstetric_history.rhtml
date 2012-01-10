@@ -30,7 +30,7 @@
     {:id => "enter_number_of_deliveries",
     :helptext => "Enter Number Of Deliveries",
     :tt_pageStyleClass => "NumbersWithUnknown",
-    :condition => "((__$('multiple_pregnancy').value == 'No' && (__$('enter_gravida').value - 1) > 1) || (__$('multiple_pregnancy').value == 'Yes' && __$('enter_gravida').value > 1))",
+    :condition => "((__$('multiple_pregnancy').value == 'No' && (__$('enter_gravida').value) > 1) || (__$('multiple_pregnancy').value == 'Yes' && __$('enter_gravida').value > 1))",
     :tt_onLoad => "if(__$('multiple_pregnancy').value == 'No'){__$('touchscreenInput' + " + 
       "tstCurrentPage).setAttribute('absoluteMax', (__$('enter_gravida').value - 1))}"
   } %>
