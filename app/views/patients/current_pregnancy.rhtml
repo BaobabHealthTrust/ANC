@@ -97,6 +97,18 @@
     return false;
   }
 
+  function checkLMP(){
+    if(__$("lmp").value == "Unknown"){
+      var value = __$("touchscreenInput" + tstCurrentPage).value;
+      var range = {"0-12":6, "13-24":18, "25-28":26, "28+":29};
+      var date = new Date();
+
+      date.setDate(date.getDate() - (7 * range[value]) - 7);
+    
+      __$("lmp").value = (date.getFullYear() + "-" + padZeros((date.getMonth() + 1), 2) + "-" + padZeros(date.getDate(), 2));
+    }
+  }
+
   //-->
 </script>
 
@@ -125,7 +137,7 @@
     {:id => "lmp",
     :helptext => "Last Menstrual Period",
     :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100);",
-    :tt_onUnLoad => 'clearTimeout(timedEvent); if (__$("touchscreenInput" + tstCurrentPage).value == "Unknown" ) __$("lmp").value = tstEstimatedLMPDate;',
+    :tt_onUnLoad => 'clearTimeout(timedEvent); // if (__$("touchscreenInput" + tstCurrentPage).value == "Unknown" ) __$("lmp").value = tstEstimatedLMPDate;',
     :tt_pageStyleClass => "exclude"
   } %>
 
@@ -136,7 +148,8 @@
   <%= touch_select_tag "Week of First Visit", @patient, 
     options_for_select(["", "0-12", "13-24", "25-28", "28+"]),
     {:id => "week_of_first_visit",
-    :helptext => "Week of First Visit" } %>
+    :helptext => "Week of First Visit",
+    :tt_onUnload => "checkLMP()" } %>
 
   <%= touch_text_field_tag "Planned delivery place", @patient, nil,
     {:id => "planned_delivery_place",

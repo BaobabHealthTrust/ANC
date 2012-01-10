@@ -488,7 +488,7 @@ class PatientsController < ApplicationController
       }      
     }
     
-    # raise @current_range.to_yaml
+    # raise @encounters.to_yaml
 
     render :layout => false
   end

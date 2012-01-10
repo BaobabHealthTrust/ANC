@@ -26,13 +26,13 @@
     margin-top: 10px;
     background-color: #EEFFEE;
   }
-  
+
   #expected_date_of_delivery {
     top: 380px;
     width: 915px;
     left: -475px;
   }
-  
+
   #today {
     display: none;
   }
@@ -160,6 +160,18 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     $('appointmentdate').innerHTML = dateFormat(new_date,"dddd, mmm dS, yyyy");
     showRecordedAppointments(dateFormat(new_date,"dddd, mmmm dS, yyyy"));
     
+    // try{
+    var theDate = new Date($("lmp").value.trim());
+    var appointmentDate = new Date(year + '-' + month + '-' + day);
+      
+    var s = appointmentDate - theDate;
+
+    var gestation = String(Math.floor(s / (24 * 60 * 60 * 7 * 1000)));
+
+    __$("app_date").innerHTML = gestation;
+    // } catch(e){}
+   
+    
     timedEvent = setTimeout('showDate()', 100);
   }
 
@@ -222,10 +234,10 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
       "<i style='font-size: 1.2em; float: right;'>" +
       dateFormat(theDate,"dddd, mmm dS, yyyy") + "</i><br /><br />-->Gestation Weeks: " + (gestation < 32 &&
       gestation.trim().length > 0 ? "" : 
-      (gestation > 42 && gestation.trim().length > 0 ? "<i style='color: red'>(Abnormal)</i>" : "")) +
-      "<i style='font-size: 1.2em; float: right; width: 100px;'>" + gestation + "</i>";
+      (gestation > 42 && gestation.trim().length > 0 ? "<i id='app_date' style='color: red'>(Abnormal)</i>" : "")) +
+      "<i id='app_date' style='font-size: 1.2em; float: right; width: 100px;'>" + gestation + "</i>";
 
-      __$("inputFrame" + tstCurrentPage).style.display = "none";
+    __$("inputFrame" + tstCurrentPage).style.display = "none";
     
   }
 
@@ -238,6 +250,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     
     __$("next_appointment_date").value = appointmentDate.getFullYear() + "-" + 
       padZeros((appointmentDate.getMonth() + 1),2) + "-" + padZeros(appointmentDate.getDate(), 2);
+    
   }
 
 </script>
@@ -249,7 +262,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>  
-  
+
   <label for='time_until_next_visit'>Time Until Next Appointment</label>
   <%= select_tag("time_until_next_visit", options_for_select([["2 weeks", 2],
         ["1 month", 4],
@@ -266,17 +279,17 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   <%= hidden_field_tag("observations[][concept_name]", "RETURN VISIT DATE") %>
   <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
   <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
-  <%# = text_field_tag("observations[][value_datetime]", nil, #(Time.now + 1.month).year,
-    {:helpText => 'Next Appointment Date',
-      :field_type => 'date',
-      :absoluteMin => absolute_min,
-      :absoluteMax => absolute_max,
-      :maxDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
-      :tt_pageStyleClass => "Date DatesOnly",
-      :tt_onLoad => "/*calculate_dates('#{params[:start_date]}','#{params[:end_date]}');*/ calculateEDOD();",
-      :id => 'next_appointment_date',
-      :tt_onUnLoad => "hideInfo();"}) %>
-  
+<%# = text_field_tag("observations[][value_datetime]", nil, #(Time.now + 1.month).year,
+{:helpText => 'Next Appointment Date',
+:field_type => 'date',
+:absoluteMin => absolute_min,
+:absoluteMax => absolute_max,
+:maxDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
+:tt_pageStyleClass => "Date DatesOnly",
+:tt_onLoad => "/*calculate_dates('#{params[:start_date]}','#{params[:end_date]}');*/ calculateEDOD();",
+:id => 'next_appointment_date',
+:tt_onUnLoad => "hideInfo();"}) %>
+
   <%= text_field_tag("observations[][value_datetime]", nil, #(Time.now + 1.month).year,
     { :helpText => "Next Appointment",
       :field_type => 'date',

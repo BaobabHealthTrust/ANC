@@ -461,8 +461,8 @@ EOF
           concept = o.concept.name rescue nil
           if concept
             # if !active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")]                            
-              if o.concept.name.name == "DATE OF LAST MENSTRUAL PERIOD"         
-                pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.name.name] = o.answer_string          
+              if o.concept.name.name.upcase == "DATE OF LAST MENSTRUAL PERIOD"         
+                pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.name.name.upcase] = o.answer_string          
                 # active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")] = true 
               end              
             # end
