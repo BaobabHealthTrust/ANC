@@ -33,22 +33,25 @@
                   <td style="width: 25%;">
                     ANC Site Name
                   </td>
-                  <td colspan="3" style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                    &nbsp;
+                  <td colspan="3" style="border-left: 1px solid #999; 
+                      border-bottom: 1px solid #999; font-style: italic;">
+                    <%= @facility %>&nbsp;
                   </td>
                 </tr>
                 <tr>
                   <td style="width: 25%;">
                     Reporting Year
                   </td>
-                  <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                    &nbsp;
+                  <td style="border-left: 1px solid #999; border-bottom: 1px solid #999; 
+                      font-style: italic;">
+                    <%= @end_date.to_date.strftime("%Y") rescue "" %>&nbsp;
                   </td>
                   <td style="width: 25%; border-left: 1px solid #999; border-bottom: 1px solid #999;" align="right">
                     Reporting Month
                   </td>
-                  <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                    &nbsp;
+                  <td style="border-left: 1px solid #999; border-bottom: 1px solid #999; 
+                      font-style: italic;">
+                    <%= @end_date.to_date.strftime("%B") rescue "" %>&nbsp;
                   </td>
                 </tr>
                 <tr>
@@ -58,14 +61,11 @@
                       If no, still submit this report
                     </span>
                   </td>
-                  <td style="width: 25%; border-left: 1px solid #999;">
+                  <td style="width: 25%; border-left: 1px solid #999; ">
                     <table width="100%">
                       <tr>
-                        <td align="center">
-                          Y
-                        </td>
-                        <td align="center">
-                          N
+                        <td align="center" style="font-style: italic;">
+                          <%= (@observations_total.length > 0 ? "Yes" : "No") %>
                         </td>
                       </tr>
                     </table>
@@ -96,8 +96,9 @@
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
                             New women registered
                           </td>
-                          <td style="border-right: 1px solid #999; border-bottom: 1px solid #999;">
-                            &nbsp;
+                          <td style="border-right: 1px solid #999; border-bottom: 1px solid #999; 
+                              font-style: italic;">
+                            <%= @new_women_registered.to_i %>&nbsp;
                           </td>
                         </tr>
                         <tr>
@@ -189,7 +190,7 @@
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            &nbsp;
+                            <%= @observations_total.length %>&nbsp;
                           </td>
                         </tr>
                         <tr>
@@ -513,7 +514,7 @@
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @on_art__3.length %>
+                            <%= @on_art__3.length rescue 0 %>
                           </td>
                         </tr>
                         <tr>
@@ -563,7 +564,7 @@
                             None
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @pmtct_management_1.length %>
+                            <%= @pmtct_management_1.length rescue 0 %>
                           </td>
                         </tr>
                         <tr>
@@ -575,7 +576,7 @@
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @pmtct_management_2.length %>
+                            <%= @pmtct_management_2.length rescue 0 %>
                           </td>
                         </tr>
                         <tr>
@@ -587,7 +588,7 @@
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @pmtct_management_3.length %>
+                            <%= @pmtct_management_3.length rescue 0 %>
                           </td>
                         </tr>
                         <tr>
@@ -599,7 +600,7 @@
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @pmtct_management_4.length %>
+                            <%= @pmtct_management_4.length rescue 0 %>
                           </td>
                         </tr>
                         <tr>

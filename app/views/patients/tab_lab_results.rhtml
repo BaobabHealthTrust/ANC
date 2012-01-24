@@ -144,8 +144,8 @@
           Multiple pregnancy
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@multiple != "NO" ? "class='selected'" : "") %>>
-          &nbsp;<%= (!@multiple.nil? ? (@multiple == "NO" ? "NO" : "YES") : "") %>&nbsp;
+            align="center" <%= (@multiple == "YES" ? "class='selected'" : "") %>>
+          &nbsp;<%= (!@multiple.nil? ? (@multiple == "NO" ? "NO" : (@multiple == "YES" ? "YES" : @multiple)) : "") %>&nbsp;
         </td>
       </tr>
       <tr>

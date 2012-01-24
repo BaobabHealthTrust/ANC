@@ -325,31 +325,31 @@ class PatientsController < ApplicationController
     
     @asthma = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('ASTHMA').concept_id]).answer_string rescue nil
+        ConceptName.find_by_name('ASTHMA').concept_id]).answer_string.upcase rescue nil
 
     @hyper = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('HYPERTENSION').concept_id]).answer_string rescue nil
+        ConceptName.find_by_name('HYPERTENSION').concept_id]).answer_string.upcase rescue nil
 
     @diabetes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('DIABETES').concept_id]).answer_string rescue nil
+        ConceptName.find_by_name('DIABETES').concept_id]).answer_string.upcase rescue nil
 
     @epilepsy = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('EPILEPSY').concept_id]).answer_string rescue nil
+        ConceptName.find_by_name('EPILEPSY').concept_id]).answer_string.upcase rescue nil
 
     @renal = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('RENAL DISEASE').concept_id]).answer_string rescue nil
+        ConceptName.find_by_name('RENAL DISEASE').concept_id]).answer_string.upcase rescue nil
 
     @fistula = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('FISTULA REPAIR').concept_id]).answer_string rescue nil
+        ConceptName.find_by_name('FISTULA REPAIR').concept_id]).answer_string.upcase rescue nil
 
     @deform = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('SPINE OR LEG DEFORM').concept_id]).answer_string rescue nil
+        ConceptName.find_by_name('SPINE OR LEG DEFORM').concept_id]).answer_string.upcase rescue nil
 
     @surgicals = Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
@@ -422,7 +422,8 @@ class PatientsController < ApplicationController
     @height = @patient.current_height.to_i
 
     @multiple = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
+        @patient.id, Encounter.active.find(:all, :conditions => ["encounter_type = ?", 
+            EncounterType.find_by_name("CURRENT PREGNANCY").id]).collect{|e| e.encounter_id},
         ConceptName.find_by_name('Multiple Gestation').concept_id]).answer_string rescue nil
 
     @who = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
@@ -622,7 +623,7 @@ class PatientsController < ApplicationController
     @obstetrics = {}
     search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "PREGNANCY", "LABOUR DURATION", 
       "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", 
-      "AGE AT DEATH", "UNITS OF AGE OF CHILD"]
+      "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
     current_level = 0
     
     @patient.encounters.active.all.each{|e| 
@@ -636,13 +637,21 @@ class PatientsController < ApplicationController
               @obstetrics[current_level] = {}
             end
           
-            @obstetrics[current_level][obs.concept.name.name.upcase] = obs.answer_string rescue nil
-            
+            if @obstetrics[current_level]
+              @obstetrics[current_level][concept.upcase] = obs.answer_string rescue nil
+              
+              if concept.upcase == "YEAR OF BIRTH" && obs.answer_string.to_i == 0
+                @obstetrics[current_level][concept.upcase] = "Unknown"
+              end
+            end
+                        
           end
         end
       }      
     }
-     
+    
+    # raise @obstetrics.to_yaml
+    
     @pregnancies = Patient.active_range(@patient.id)
     
     @range = []

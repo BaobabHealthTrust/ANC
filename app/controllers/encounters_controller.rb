@@ -27,7 +27,7 @@ class EncountersController < ApplicationController
       observation[:value_text] = observation[:value_text].join(", ") if observation[:value_text].present? && observation[:value_text].is_a?(Array)
       observation.delete(:value_text) unless observation[:value_coded_or_text].blank?
       observation[:encounter_id] = encounter.id
-      observation[:obs_datetime] = encounter.encounter_datetime || Time.now()
+      # observation[:obs_datetime] = encounter.encounter_datetime || Time.now()
       observation[:person_id] ||= encounter.patient_id
       observation[:concept_name] ||= "DIAGNOSIS" if encounter.type.name == "DIAGNOSIS"
       # Handle multiple select
@@ -217,13 +217,18 @@ class EncountersController < ApplicationController
   
   def static_locations
     search_string = (params[:search_string] || "").upcase
-
+    extras = ["Health Facility", "Home", "TBA", "Other"]
+    
     locations = []
 
     File.open(RAILS_ROOT + "/public/data/locations.txt", "r").each{ |loc|
       locations << loc if loc.upcase.strip.match(search_string)
     }
 
+    if params[:extras]
+      extras.each{|loc| locations << loc if loc.upcase.strip.match(search_string)}
+    end
+    
     render :text => "<li></li><li " + locations.map{|location| "value=\"#{location}\">#{location}" }.join("</li><li ") + "</li>"
 
   end

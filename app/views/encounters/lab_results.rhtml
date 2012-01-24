@@ -93,7 +93,7 @@
   <%= touch_date_tag "HB Test Result Date", @patient, nil,
     {:id => "enter_date_hb1_result_given",
     :helptext => "Date HB Test Result Given",
-    :condition => "__$('hb_result').value != 'Not Done'#{ (params[:update] ? 
+    :condition => "!__$('hb_result').value.match(/Not\\sDone/)#{ (params[:update] ? 
     " && getSelected().match(/HB\sTest\sResult/)" : "") }",
     :max => "#{session[:datetime].to_date rescue Date.today}" } %>
 
@@ -128,9 +128,18 @@
     " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "on_art?",
+    {:id => "on_art",
     :helptext => "On Art?",
     :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+    " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
+
+  <%= touch_select_tag "ART start date", @patient, options_for_select([
+      ["", ""], ["Before this Pregnancy", "Before this Pregnancy"], 
+      ["At 0-27 weeks of Pregnancy", "At 0-27 weeks of Pregnancy"],
+      ["At 28+ of Pregnancy", "At 28+ of Pregnancy"]]),
+    {:id => "art_start",
+    :helptext => "When did Client start ART?",
+    :condition => "__$('new_test_result_at_current_facility').value == 'Positive' && __$('on_art').value == 'Yes'#{ (params[:update] ? 
     " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%= touch_select_tag "Syphilis Test Result", @patient,

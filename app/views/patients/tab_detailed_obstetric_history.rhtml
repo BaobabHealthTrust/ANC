@@ -19,8 +19,8 @@
     font-size: 0.9em;
     border: 1px solid #000;
     padding: 2px;
-    background-color: #333;
-    color: #fff;
+    background-color: #ff;
+    color: #000;
   }
 
   #tbl2 td {
@@ -96,7 +96,8 @@
               <%= (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? @obstetrics[pos]["LABOUR DURATION"] : "&nbsp;") : "&nbsp;") %>
             </td>
             <td>
-              <%= (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? @obstetrics[pos]["METHOD OF DELIVERY"].titleize : "&nbsp;") : "&nbsp;") %>
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? @obstetrics[pos]["METHOD OF DELIVERY"].titleize : 
+                    (@obstetrics[pos]["PROCEDURE DONE"] ? @obstetrics[pos]["PROCEDURE DONE"] : "&nbsp;")) : "&nbsp;") %>
             </td>
             <td>
               <%= (@obstetrics[pos] ? (@obstetrics[pos]["CONDITION AT BIRTH"] ? @obstetrics[pos]["CONDITION AT BIRTH"] : "&nbsp;") : "&nbsp;") %>

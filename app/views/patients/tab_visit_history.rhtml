@@ -189,7 +189,7 @@
           </td>
           <td class="leftTop" align="center">
             <%= (((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7) <= 0 ? "?" : 
-                ((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7).to_s + " wks") rescue "&nbsp;" %>
+                (((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7) - 1).to_s + " wks") rescue "&nbsp;" %>
           </td>
           <td class="leftTop" align="center">
             <%= (@encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i <= 0 ? "?" : 

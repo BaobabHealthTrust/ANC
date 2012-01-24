@@ -108,6 +108,8 @@ class ReportsController < ApplicationController
   end
   
 	def report
+    @facility = Location.current_health_center.name rescue ''
+    
 		@start_date = nil
 		@end_date = nil
 		@start_age = params[:startAge]
@@ -138,9 +140,13 @@ class ReportsController < ApplicationController
 			@start_date = params[:start_date]
 			@end_date = params[:end_date]
 		end
-
+    
 		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type)
 
+    @new_women_registered = report.new_women_registered
+    
+    @observations_total = report.observations_total
+    
 		@observations_1 = report.observations_1
 
 		@observations_2 = report.observations_2
@@ -187,7 +193,7 @@ class ReportsController < ApplicationController
 
 		@hiv_test_result_5 = report.hiv_test_result_5
 
-		@on_art__1 = report.on_art__1
+		@on_art__1 = report.on_art__1 
 
 		@on_art__2 = report.on_art__2
 

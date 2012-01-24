@@ -80,7 +80,8 @@
     :condition => "__$('presentation').value != 'Ball'"} %>
 
   <%= touch_select_tag "FETAL HEART BEAT", @patient, 
-    options_for_select([["", ""], ["Negative", "Negative"], ["Positive", "Positive"], ["Unknown", "Unknown"]]),
+    options_for_select([["", ""], ["Heard", "Heard"], ["Not heard", "Not heard"], 
+      ["Fetal Movement Felt (FMF)", "Fetal Movement Felt (FMF)"]]),
     {:id => "enter_fetal_heart",
     :helptext => "Fetal Heart Rate" } %>
 

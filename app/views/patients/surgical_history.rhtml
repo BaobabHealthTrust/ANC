@@ -27,8 +27,9 @@
     :helptext => "Surgical procedure done before" } %>
 
   <%= touch_date_tag "Date", @patient, nil,
-    {:id => "date_done",
-    :helptext => "Date Procedure Done" } %>
+    {:id => "date_done1",
+    :helptext => "Date Procedure Done",
+    :tt_onUnLoad => "__$('observations__obs_datetime_surgical1').value = __$('date_done1').value" } %>
 
   <% (2..8).each do |e| %>
 
@@ -57,10 +58,10 @@
     } %>
 
     <%= touch_date_tag "Date", @patient, nil,
-      {:id => "date_done",
+      {:id => "date_done#{e}",
       :helptext => "Date #{e}#{indice} Procedure Done",
       :condition => "__$('surgical#{e}').value != ''",
-      :tt_onBeforeUnload => "__$('observations__value_datetime_surgical#{e}').value = __$('touchscreenInput' + tstCurrentPage).value"
+      :tt_onUnLoad => "__$('observations__obs_datetime_surgical#{e}').value = __$('date_done#{e}').value"
     } %>
 
   <% end %>

@@ -12,7 +12,7 @@
     </head>
     <body><div id='content'>
             <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
-                <form  action='show.html'>
+                <form  action='' method="post">
                     <table cellpadding=10>
                         <tr>
                             <th colspan=2>Registration</th>
@@ -20,13 +20,15 @@
                         <tr>
                             <td>First Name</td>
                             <td>
-                                <input type='text' value='Text' field_type='text' name='first_name' id='first_name' helptext='First Name' />
+                                <input type='text' value='Text' field_type='text' name='first_name' id='first_name' 
+                                       helptext='First Name' />
                             </td>
                         </tr>
                         <tr>
                             <td>Last Name</td>
                             <td>
-                                <input type='text' value='Text' field_type='text' name='last_name' id='last_name' helptext='Last Name' />
+                                <input type='text' value='Text' field_type='text' name='last_name' id='last_name' 
+                                       helptext='Last Name' />
                             </td>
                         </tr>
                         <tr>
@@ -50,7 +52,8 @@
                         <tr>
                             <td>Allergies (Multiple Selection Example)</td>
                             <td>
-                                <select style='width: 100%' name='gender' id='gender' helptext='Allergies (Multiple Selection Example)' multiple="multiple">
+                                <select style='width: 100%' name='gender' id='gender' helptext='Allergies (Multiple Selection Example)' 
+                                        multiple="multiple">
                                     <option></option>
                                     <option>Groundnuts</option>
                                     <option>Flowers</option>
@@ -68,20 +71,24 @@
                         <tr>
                             <td>Mother's Surname</td>
                             <td>
-                                <input type='text' value='Text' field_type='text' name='mothers_surname' id='mothers_surname' helptext="Mother's Surname" />
+                                <input type='text' value='Text' field_type='text' name='mothers_surname' id='mothers_surname' 
+                                       helptext="Mother's Surname" />
                             </td>
                         </tr>
                         <tr>
                             <td>Year Of Birth</td>
                             <td>
-                                <input type='text' value='' field_type='number' name='birth_year' id='birth_year' helptext='Year Of Birth' 
-                                       tt_pageStyleClass="NumbersWithUnknown" validationCode="this.value.match(/^19\d{2}$/)" validationMessage="This is a question for adults only" />
+                                <input type='text' value='' field_type='number' name='birth_year' id='birth_year' 
+                                       helptext='Year Of Birth' 
+                                       tt_pageStyleClass="NumbersWithUnknown" validationCode="this.value.match(/^19\d{2}|Unknown$/)" 
+                                       validationMessage="This is a question for adults only" />
                             </td>
                         </tr>
                         <tr>
                             <td>Month Of Birth</td>
                             <td>
-                                <select style='width: 100%' name='birth_month' id='birth_month' helptext='Month Of Birth'>
+                                <select style='width: 100%' name='birth_month' id='birth_month' 
+                                        helptext='Month Of Birth' condition="__$('birth_year').value != 'Unknown'">
                                     <option></option>
                                     <option value="1">Jan</option>
                                     <option value="2">Feb</option>
@@ -104,32 +111,45 @@
                             <td>
                                 <input type='text' value='' field_type='number' name='bday' 
                                        id='bday' helptext='Birth Day' 
-                                       tt_pageStyleClass="NumbersWithUnknown" />
+                                       tt_pageStyleClass="NumbersWithUnknown" condition="__$('birth_year').value != 'Unknown'" />
+                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Age</td>
+                            <td>
+                                <input type='text' value='' field_type='number' name='age' 
+                                       id='age' helptext='Age' 
+                                       tt_pageStyleClass="NumbersOnly" condition="__$('birth_year').value == 'Unknown'" />
                                 
                             </td>
                         </tr>
                         <tr>
                             <td>Home Village</td>
                             <td>
-                                <input type='text' value='Text' field_type='text' name='home_village' id='home_village' helptext='Home Village' />
+                                <input type='text' value='Text' field_type='text' name='home_village' id='home_village' 
+                                       helptext='Home Village' />
                             </td>
                         </tr>
                         <tr>
                             <td>Current Traditional Authority (ta)</td>
                             <td>
-                                <input type='text' value='Text' field_type='text' name='current_traditional_authority_(ta)' id='current_traditional_authority_(ta)' helptext='Current Traditional Authority (ta)' />
+                                <input type='text' value='Text' field_type='text' name='current_traditional_authority_(ta)' 
+                                       id='current_traditional_authority_(ta)' helptext='Current Traditional Authority (ta)' />
                             </td>
                         </tr>
                         <tr>
                             <td>Current Village (residence)</td>
                             <td>
-                                <input type='text' value='Text' field_type='text' name='current_village_(residence)' id='current_village_(residence)' helptext='Current Village (residence)' />
+                                <input type='text' value='Text' field_type='text' name='current_village_(residence)' 
+                                       id='current_village_(residence)' helptext='Current Village (residence)' />
                             </td>
                         </tr>
                         <tr>
                             <td>Cell Phone Number</td>
                             <td>
-                                <input type='text' value='' optional="true" field_type='number' name='cell_phone_number' id='cell_phone_number' helptext='Cell Phone Number' />
+                                <input type='text' value='' optional="true" field_type='number' name='cell_phone_number' 
+                                       id='cell_phone_number' helptext='Cell Phone Number' />
                             </td>
                         </tr>
                         <tr>

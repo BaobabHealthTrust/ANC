@@ -18,7 +18,6 @@ var current_generic = null;
 var selectedGenerics = {};
 var current_diagnosis = null;
 
-//var search_path = (typeof(search_path) != "undefined" ? search_path : "/search/load_frequencies_and_dosages");
 var search_path = (typeof(search_path) != "undefined" ? search_path : "/prescriptions/load_frequencies_and_dosages");
 
 // This function exists in the TouchScreenToolkit but repeated here in case it's
@@ -180,7 +179,7 @@ function generateGenerics(){
     drugsDiv.appendChild(drugsListDiv);
 
     var doseDiv = document.createElement("div");
-    doseDiv.style.width = "33%";
+    doseDiv.style.width = "42%";
     doseDiv.style.height = "49%";
     doseDiv.style.backgroundColor = "#fff";
     doseDiv.style.borderRight = "1px solid #ccc";
@@ -210,7 +209,7 @@ function generateGenerics(){
     doseDiv.appendChild(doseListDiv);
 
     var freqDiv = document.createElement("div");
-    freqDiv.style.width = "33%";
+    freqDiv.style.width = "24%";
     freqDiv.style.height = "49%";
     freqDiv.style.backgroundColor = "#ff0";
     freqDiv.style.borderRight = "1px solid #ccc";

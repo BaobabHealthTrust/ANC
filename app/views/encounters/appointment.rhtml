@@ -251,7 +251,14 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   function setAppointmentDate(){
     var days = parseInt(__$("touchscreenInput" + tstCurrentPage).getAttribute("tstValue")) * 7;
     
-    var appointmentDate = new Date(tstCurrentDate);
+    if($("lmp").value.trim().length == 0){
+      $("lmp").value = "<%= (session[:datetime] ? session[:datetime].to_date : Date.today).strftime("%Y-%m-%d") %>";
+    }
+
+    var appointmentDate = new Date($("lmp").value);
+    
+    if(days == 0)
+      appointmentDate = new Date(tstCurrentDate);
     
     appointmentDate.setDate(appointmentDate.getDate() + days);
     
@@ -271,11 +278,25 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>  
 
   <label for='time_until_next_visit'>Time Until Next Appointment</label>
-  <%= select_tag("time_until_next_visit", options_for_select([["2 weeks", 2],
-        ["1 month", 4],
-        ["2 months", 8],
-        ["3 months", 12]]),
-    {:helpText => 'Time Until Next Appointment',
+<%#= select_tag("time_until_next_visit", options_for_select([["2 weeks", 2],
+["1 month", 4],
+["2 months", 8],
+["3 months", 12]]),
+{:helpText => 'Time Until Next Appointment',
+:tt_onLoad => "calculateGivenRange('#{params[:start_date]}','#{params[:end_date]}')",
+:tt_onUnLoad => "setAppointmentDate();"}) %>
+
+  <% 
+  current = (session[:datetime] ? session[:datetime].to_date : Date.today).strftime("%Y-%m-%d")
+  trimester = current.to_date - @current_range[0]["START"].to_date rescue 0
+  
+  periods = {22 => "20-24 weeks", 30 => "28-32 weeks", 36 => "36 weeks", 0 => "Other"} 
+  
+  actual = periods.collect{|p, v| [v, p] if p < trimester}
+%>
+  
+  <%= select_tag("time_until_next_visit", options_for_select(actual),
+    {:helpText => 'Gestation Weeks at Next Visit',
       :tt_onLoad => "calculateGivenRange('#{params[:start_date]}','#{params[:end_date]}')",
       :tt_onUnLoad => "setAppointmentDate();"}) %>
 

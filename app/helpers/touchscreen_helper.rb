@@ -3,15 +3,8 @@ module TouchscreenHelper
 
   def touch_meta_tag(concept, patient, time=DateTime.now(), kind=nil, options={})
     content = ""
-    content << hidden_field_tag("observations[][value_numeric]", nil) unless kind == 'value_numeric'
-    
-    if options[:id]
-      content << hidden_field_tag("observations[][value_datetime]", nil, 
-        {:id => "observations__value_datetime_" + options[:id]}) unless kind == 'value_datetime'
-    else
-      content << hidden_field_tag("observations[][value_datetime]", nil) unless kind == 'value_datetime'
-    end
-    
+    content << hidden_field_tag("observations[][value_numeric]", nil) unless kind == 'value_numeric'    
+    content << hidden_field_tag("observations[][value_datetime]", nil) unless kind == 'value_datetime'
     content << hidden_field_tag("observations[][value_coded_or_text]", nil) unless kind == 'value_coded_or_text'
     content << hidden_field_tag("observations[][value_coded_or_text_multiple][]", nil) unless kind == 'value_coded_or_text_multiple'
     content << hidden_field_tag("observations[][value_coded]", nil)  unless kind == 'value_coded'
@@ -22,7 +15,14 @@ module TouchscreenHelper
     content << hidden_field_tag("observations[][order_id]", options[:order_id])
     content << hidden_field_tag("observations[][concept_name]", concept) 
     content << hidden_field_tag("observations[][patient_id]", patient.id) 
-    content << hidden_field_tag("observations[][obs_datetime]", time)
+    
+    if options[:id]
+      content << hidden_field_tag("observations[][obs_datetime]", time, 
+        {:id => "observations__obs_datetime_" + options[:id]})
+    else
+      content << hidden_field_tag("observations[][obs_datetime]", time)
+    end
+    
     content
   end  
 

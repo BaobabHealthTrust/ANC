@@ -36,7 +36,7 @@
 
   <%= touch_select_tag "Spine or Leg Deform", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "do_you_have_a_spine_or_leg_deform?",
-    :helptext => "Do You Have A Spine Or Leg Deform?" } %>
+    :helptext => "Does Client have Leg or Spine Deformity?" } %>
 
   <%= submit_tag 'Finish' %>
 <% end %>

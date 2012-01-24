@@ -1456,10 +1456,14 @@ function navigateToPage(destPage, validate, navback){
     }
     else{
 
+    /*
         var popupBox = __$("popupBox");
         if (popupBox) {
             popupBox.style.visibility = "visible";
         }
+    */
+   
+        showStatus();
 
         document.forms[0].submit();
     }
@@ -3800,4 +3804,18 @@ function showKeyboard(full_keyboard){
     
     __$("keyboard").appendChild(div);
     
+}
+
+function showStatus(){
+    if(!__$("popupBox")){
+       var  popupBox = document.createElement("div");
+       popupBox.id = "popupBox";
+       popupBox.style.display = "none";
+       
+       popupBox.innerHTML = "<p>Processing. Please Wait ...</p>"
+       
+       __$("content").appendChild(popupBox);
+    }
+    
+    __$("popupBox").style.display = "block";
 }
