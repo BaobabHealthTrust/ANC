@@ -533,7 +533,21 @@ button:hover.dark span {
 .NumbersOnlyWithDecimal #slash,
 .NumbersOnlyWithDecimal #comma,
 .NumbersOnlyWithDecimal #Unknown,
+.NumbersOnlyWithDecimal #qwerty,
 .NumbersOnlyWithDecimal #percent{
+    display: none
+}
+
+.NumbersOnlyWithUnknown #star,
+.NumbersOnlyWithUnknown #abc,
+.NumbersOnlyWithUnknown #char,
+.NumbersOnlyWithUnknown #date,
+.NumbersOnlyWithUnknown #minus,
+.NumbersOnlyWithUnknown #plus,
+.NumbersOnlyWithUnknown #slash,
+.NumbersOnlyWithUnknown #comma,
+.NumbersOnlyWithUnknown #qwerty,
+.NumbersOnlyWithUnknown #percent{
     display: none
 }
 
@@ -547,6 +561,7 @@ button:hover.dark span {
 .NumbersOnly #slash,
 .NumbersOnly #comma,
 .NumbersOnly #Unknown,
+.NumbersOnly #qwerty,
 .NumbersOnly #percent{
     display: none
 }
@@ -755,6 +770,7 @@ button {
 .NumbersWithUnknown #decimal,
 .NumbersWithUnknown #slash,
 .NumbersWithUnknown #comma,
+.NumbersWithUnknown #qwerty,
 .NumbersWithUnknown #percent{
     display: none
 }
