@@ -267,66 +267,74 @@ class PatientsController < ApplicationController
       @range << preg[0].to_date
     }
     
-    @deliveries = Observation.find(:last,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-        Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('PARITY').concept_id]).answer_string.to_i rescue nil
-
-    @deliveries = @deliveries + (@range.length > 0 ? @range.length - 1 : @range.length) if !@deliveries.nil?
     
-    @gravida = Observation.find(:last,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-        Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('GRAVIDA').concept_id]).answer_string.to_i rescue nil
-
-    @multipreg = Observation.find(:last,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-        Encounter.active.find(:all, :conditions => ["encounter_type = ?", 
-            EncounterType.find_by_name("OBSTETRIC HISTORY").id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string rescue nil
-
-    @abortions = Observation.find(:last,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-        Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('NUMBER OF ABORTIONS').concept_id]).answer_string.to_i rescue nil
-
-    @stillbirths = Observation.find(:last,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-        Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string rescue nil
-
-    #Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", 40, Encounter.active.find(:all, :conditions => ["patient_id = ?", 40]).collect{|e| e.encounter_id}, ConceptName.find_by_name('Caesarean section').concept_id])
+    @encs = Encounter.active.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
+        @patient.id, EncounterType.find_by_name("OBSTETRIC HISTORY").id]).length
     
-    @csections = Observation.find(:all,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
-        Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Caesarean section').concept_id]).length rescue nil
+    if @encs > 0
+      @deliveries = Observation.find(:last,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('PARITY').concept_id]).answer_string.to_i rescue nil
 
-    @vacuum = Observation.find(:all,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
-        Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Vacuum extraction delivery').concept_id]).length rescue nil
+      @deliveries = @deliveries + (@range.length > 0 ? @range.length - 1 : @range.length) if !@deliveries.nil?
+    
+      @gravida = Observation.find(:last,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('GRAVIDA').concept_id]).answer_string.to_i rescue nil
 
-    @symphosio = Observation.find(:last, 
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-        Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('SYMPHYSIOTOMY').concept_id]).answer_string rescue nil
+      @multipreg = Observation.find(:last,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+          Encounter.active.find(:all, :conditions => ["encounter_type = ?", 
+              EncounterType.find_by_name("OBSTETRIC HISTORY").id]).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string.upcase rescue nil
 
-    @haemorrhage = Observation.find(:last,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-        Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('HEMORRHAGE').concept_id]).answer_string rescue nil
+      @abortions = Observation.find(:last,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('NUMBER OF ABORTIONS').concept_id]).answer_string.to_i rescue nil
 
-    @preeclampsia = Observation.find(:last,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-        Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('PRE-ECLAMPSIA').concept_id]).answer_string rescue nil
+      @stillbirths = Observation.find(:last,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string.upcase rescue nil
 
-    @eclampsia = Observation.find(:last,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-        Encounter.active.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('ECLAMPSIA').concept_id]).answer_string rescue nil
+      #Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", 40, Encounter.active.find(:all, :conditions => ["patient_id = ?", 40]).collect{|e| e.encounter_id}, ConceptName.find_by_name('Caesarean section').concept_id])
+    
+      @csections = Observation.find(:all,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
+          Encounter.active.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", @patient.id, 
+              EncounterType.find_by_name("OBSTETRIC HISTORY").id]).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('Caesarean section').concept_id]).length rescue nil
 
+      @vacuum = Observation.find(:all,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
+          Encounter.active.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
+              @patient.id, EncounterType.find_by_name("OBSTETRIC HISTORY").id]).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('Vacuum extraction delivery').concept_id]).length rescue nil
+
+      @symphosio = Observation.find(:last, 
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('SYMPHYSIOTOMY').concept_id]).answer_string.upcase rescue nil
+
+      @haemorrhage = Observation.find(:last,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('HEMORRHAGE').concept_id]).answer_string.upcase rescue nil
+
+      @preeclampsia = Observation.find(:last,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('PRE-ECLAMPSIA').concept_id]).answer_string.upcase rescue nil
+
+      @eclampsia = Observation.find(:last,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('ECLAMPSIA').concept_id]).answer_string.upcase rescue nil
+    end
+    
     render :layout => false
   end
 
@@ -594,7 +602,7 @@ class PatientsController < ApplicationController
     @range = @range.sort.reverse
     
     @gravida = Observation.find(:last,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
         Encounter.active.find(:all).collect{|e| e.encounter_id},
         ConceptName.find_by_name('GRAVIDA').concept_id]).answer_string.to_i rescue nil
 
@@ -674,8 +682,8 @@ class PatientsController < ApplicationController
     
     @obstetrics = {}
     search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "PREGNANCY", "LABOUR DURATION", 
-        "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", 
-        "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
+      "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", 
+      "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
     current_level = 0
     
     @patient.encounters.active.all.each{|e| 
@@ -772,8 +780,8 @@ class PatientsController < ApplicationController
     encounter_type = EncounterType.find_by_name('APPOINTMENT')
     concept_id = ConceptName.find_by_name('APPOINTMENT DATE').concept_id
     count = Observation.count(:all,
-        :joins => "INNER JOIN encounter e USING(encounter_id)",:group => "value_datetime",
-        :conditions =>["concept_id = ? AND encounter_type = ? AND value_datetime >= ? AND value_datetime <= ?",
+      :joins => "INNER JOIN encounter e USING(encounter_id)",:group => "value_datetime",
+      :conditions =>["concept_id = ? AND encounter_type = ? AND value_datetime >= ? AND value_datetime <= ?",
         concept_id,encounter_type.id,date.strftime('%Y-%m-%d 00:00:00'),date.strftime('%Y-%m-%d 23:59:59')])
     count = count.values unless count.blank?
     count = '0' if count.blank?
@@ -804,7 +812,7 @@ class PatientsController < ApplicationController
   
   def print_history
     print_and_redirect("/patients/obstertic_medical_examination_label/?patient_id=#{@patient.id}", 
-        "/patients/patient_history/?patient_id=#{@patient.id}")  
+      "/patients/patient_history/?patient_id=#{@patient.id}")  
   end
 
   def obstertic_medical_examination_label
@@ -814,7 +822,7 @@ class PatientsController < ApplicationController
 
   def print_visit_label
     print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
-        "/patients/current_visit/?patient_id=#{@patient.id}")  
+      "/patients/current_visit/?patient_id=#{@patient.id}")  
   end
 
   def current_visit_label
@@ -825,7 +833,7 @@ class PatientsController < ApplicationController
 
   def print_exam_label
     print_and_redirect("/patients/exam_label/?patient_id=#{@patient.id}", 
-        "/patients/current_visit/?patient_id=#{@patient.id}")  
+      "/patients/current_visit/?patient_id=#{@patient.id}")  
   end
 
   def exam_label

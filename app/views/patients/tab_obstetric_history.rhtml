@@ -76,8 +76,8 @@
           Stillbirths
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@stillbirths != "NO" ? "class='selected'" : "") %>>
-          &nbsp;<%= (!@stillbirths.nil? ? (@stillbirths == "NO" ? "NO" : "YES") : "") %>&nbsp;
+            align="center" <%= (!@stillbirths.nil? ? (@stillbirths.upcase == "YES" ? "class='selected'" : "") : "") %>>
+          &nbsp;<%= (!@stillbirths.nil? ? (@stillbirths.upcase == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -85,8 +85,8 @@
           C-sections
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@csections > 0 ? "class='selected'" : "") %>>
-          &nbsp;<%= (!@stillbirths.nil? ? (@csections > 0 ? "YES" : "NO") : "") %>&nbsp;
+            align="center" <%= (!@csections.nil? ? (@csections > 0 ? "class='selected'" : "") : "") %>>
+          &nbsp;<%= (!@csections.nil? ? (@csections > 0 ? "YES" : "NO") : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -94,7 +94,7 @@
           Vacuum extraction
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@vacuum > 0 ? "class='selected'" : "") %>>
+            align="center" <%= (!@vacuum.nil? ? (@vacuum > 0 ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@vacuum.nil? ? (@vacuum > 0 ? "YES" : "NO") : "") %>&nbsp;
         </td>
       </tr>
@@ -103,8 +103,8 @@
           Symphysiotomy
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@symphosio != "NO" ? "class='selected'" : "") %>>
-          &nbsp;<%= (!@symphosio.nil? ? (@symphosio == "NO" ? "NO" : "YES") : "") %>&nbsp;
+            align="center" <%= (!@symphosio.nil? ? (@symphosio.upcase != "NO" ? "class='selected'" : "") : "") %>>
+          &nbsp;<%= (!@symphosio.nil? ? (@symphosio.upcase == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -121,7 +121,7 @@
           Pre-Eclampsia
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@preeclampsia != "NO" ? "class='selected'" : "") %>>
+            align="center" <%= (!@preeclampsia.nil? ? (@preeclampsia.upcase != "NO" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@preeclampsia.nil? ? (@preeclampsia.upcase == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>

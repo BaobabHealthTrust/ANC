@@ -245,7 +245,8 @@
 
   <%= touch_select_tag "HEMORRHAGE", @patient, options_for_select([["", ""], ["No", "No"], ["APH", "APH"], ["PPH", "PPH"]]),
     {:id => "hemorrhage",
-    :helptext => "Hemorrhage" 
+    :helptext => "Hemorrhage", 
+    :condition => "__$('enter_gravida').value > 1"
   } %>
 
   <%= touch_select_tag "PRE-ECLAMPSIA", @patient, options_for_select([["", ""], ["No", "No"], ["Yes", "Yes"]]),
