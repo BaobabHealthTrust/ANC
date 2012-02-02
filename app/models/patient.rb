@@ -1255,7 +1255,9 @@ EOF
       @i = @i + 1
       
       if encounter[0] == target_date.to_date.strftime("%d/%b/%Y")
-        label.draw_text("Visit No: #{@i}",250,33,0,1,1,2,false)
+        visit = encounters[encounter[0]]["ANC VISIT TYPE"]["REASON FOR VISIT"].to_i
+        
+        label.draw_text("Visit No: #{visit}",250,33,0,1,1,2,false)
         label.draw_text("Visit Date: #{encounter[0]}",450,33,0,1,1,2,false)
         
         gest = (((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7) <= 0 ? "?" : 
