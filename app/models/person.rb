@@ -219,6 +219,9 @@ class Person < ActiveRecord::Base
   end
 
   def self.create_from_form(params)
+    if params.has_key?('person')
+      params = params['person']
+    end
     address_params = params["addresses"]
     names_params = params["names"]
     patient_params = params["patient"]
@@ -226,8 +229,12 @@ class Person < ActiveRecord::Base
     birthday_params = params_to_process.reject{|key,value| key.match(/gender/) }
     person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate|occupation/) }
 
-    person = Person.create(person_params)
-
+    if params.has_key?('person')
+      person = Person.create(person_params[:person])
+    else
+      person = Person.create(person_params)
+    end
+    
     if birthday_params["birth_year"] == "Unknown"
       person.set_birthdate_by_age(birthday_params["age_estimate"],self.session_datetime || Date.today)
     else
