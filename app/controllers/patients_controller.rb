@@ -403,7 +403,7 @@ class PatientsController < ApplicationController
     @patient.encounters.find(:all, :conditions => ["encounter_type IN (?)", 
         EncounterType.find_by_name("LAB RESULTS").id]).each{|e| 
       e.observations.active.each{|o| 
-        syphil[o.concept.name.name] = o.answer_string
+        syphil[o.concept.name.name.upcase] = o.answer_string.upcase
       }      
     }
     
@@ -420,8 +420,8 @@ class PatientsController < ApplicationController
     @patient.encounters.active.find(:all, 
       :order => "encounter_datetime DESC", :conditions => ["encounter_type = ?", 
         EncounterType.find_by_name("LAB RESULTS").id]).each{|e| 
-      e.observations.active.each{|o| hb[o.concept.name.name + " " + 
-            pos.to_s] = o.answer_string; pos += 1 if o.concept.name.name == "HB TEST RESULT DATE";
+      e.observations.active.each{|o| hb[o.concept.name.name.upcase + " " + 
+            pos.to_s] = o.answer_string.upcase; pos += 1 if o.concept.name.name.upcase == "HB TEST RESULT DATE";
       }      
     }
     
