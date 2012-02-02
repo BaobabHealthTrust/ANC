@@ -514,6 +514,48 @@ class PatientsController < ApplicationController
 
   def hiv_status
     @patient = Patient.find(params[:patient_id]) rescue nil
+    
+    @current_range = Patient.active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
+
+    @encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]) rescue []
+    
+    @encounter_names = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).map{|encounter| encounter.name}.uniq rescue []
+
+    @names = @encounters.collect{|e|
+      e.name.upcase
+    }
+    
+    # raise @encounters.to_yaml        
+    
+    @lmp = nil
+    @planned_place = nil
+    @multi_preg = nil
+    @bed_net = nil
+    @bed_net_date = nil
+    @tt = nil
+    @f_visit = nil
+    @enc_id = nil
+    
+    @encounters.each{|e|
+      if e.name.upcase == "CURRENT PREGNANCY"
+        @enc_id = e.id
+        
+        e.observations.each{|o| 
+          if !o.concept.nil?
+            @lmp = (o.answer_string.to_date.strftime("%Y-%m-%d") rescue nil) if o.concept.name.name.upcase == "DATE OF LAST MENSTRUAL PERIOD"
+            @planned_place = (o.answer_string rescue nil) if o.concept.name.name.titleize == "Planned Delivery Place"
+            @multi_preg = (o.answer_string rescue nil) if o.concept.name.name.titleize == "Multiple Gestation"
+            @bed_net = (o.answer_string rescue nil) if o.concept.name.name.titleize == "Mosquito Net"
+            @bed_net_date = (o.answer_string rescue nil) if o.concept.name.name.titleize == "Date"
+            @tt = (o.answer_string.to_i rescue nil) if o.concept.name.name.titleize == "Tt Status"
+            @f_visit = (o.answer_string rescue nil) if o.concept.name.name.titleize == "Week Of First Visit"
+          end
+        }
+      end
+    }
+    
   end
 
   def pmtct_management
@@ -552,7 +594,7 @@ class PatientsController < ApplicationController
     @range = @range.sort.reverse
     
     @gravida = Observation.find(:last,
-      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
         Encounter.active.find(:all).collect{|e| e.encounter_id},
         ConceptName.find_by_name('GRAVIDA').concept_id]).answer_string.to_i rescue nil
 
@@ -632,8 +674,8 @@ class PatientsController < ApplicationController
     
     @obstetrics = {}
     search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "PREGNANCY", "LABOUR DURATION", 
-      "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", 
-      "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
+        "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", 
+        "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
     current_level = 0
     
     @patient.encounters.active.all.each{|e| 
@@ -730,8 +772,8 @@ class PatientsController < ApplicationController
     encounter_type = EncounterType.find_by_name('APPOINTMENT')
     concept_id = ConceptName.find_by_name('APPOINTMENT DATE').concept_id
     count = Observation.count(:all,
-      :joins => "INNER JOIN encounter e USING(encounter_id)",:group => "value_datetime",
-      :conditions =>["concept_id = ? AND encounter_type = ? AND value_datetime >= ? AND value_datetime <= ?",
+        :joins => "INNER JOIN encounter e USING(encounter_id)",:group => "value_datetime",
+        :conditions =>["concept_id = ? AND encounter_type = ? AND value_datetime >= ? AND value_datetime <= ?",
         concept_id,encounter_type.id,date.strftime('%Y-%m-%d 00:00:00'),date.strftime('%Y-%m-%d 23:59:59')])
     count = count.values unless count.blank?
     count = '0' if count.blank?
@@ -762,7 +804,7 @@ class PatientsController < ApplicationController
   
   def print_history
     print_and_redirect("/patients/obstertic_medical_examination_label/?patient_id=#{@patient.id}", 
-      "/patients/patient_history/?patient_id=#{@patient.id}")  
+        "/patients/patient_history/?patient_id=#{@patient.id}")  
   end
 
   def obstertic_medical_examination_label
@@ -772,7 +814,7 @@ class PatientsController < ApplicationController
 
   def print_visit_label
     print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
-      "/patients/current_visit/?patient_id=#{@patient.id}")  
+        "/patients/current_visit/?patient_id=#{@patient.id}")  
   end
 
   def current_visit_label
@@ -783,7 +825,7 @@ class PatientsController < ApplicationController
 
   def print_exam_label
     print_and_redirect("/patients/exam_label/?patient_id=#{@patient.id}", 
-      "/patients/current_visit/?patient_id=#{@patient.id}")  
+        "/patients/current_visit/?patient_id=#{@patient.id}")  
   end
 
   def exam_label

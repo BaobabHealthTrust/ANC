@@ -91,6 +91,9 @@
 </script>
 
 <% form_tag :controller => "encounters", :action => "create" do |f| %>
+
+  <%= hidden_field_tag "void_encounter_id", @enc_id %>
+
   <%= hidden_field_tag "encounter[encounter_type_name]", "CURRENT PREGNANCY" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
@@ -101,67 +104,23 @@
         "Planned delivery place", "Multiple Pregnancy", "Bed Net Given?", "Previous TT Doses"]), 
     {:helpText => 'Select Task(s)', :id => "choice", :multiple => true})%>
 
-  <%= touch_date_tag "LAST MENSTRUAL PERIOD", @patient, nil,
+  <%= touch_date_tag "LAST MENSTRUAL PERIOD", @patient, @lmp,
     {:id => "lmp",
     :helptext => "Last Menstrual Period",
     :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100);",
     :tt_onUnLoad => "clearTimeout(timedEvent);",
     :condition => "getSelected().match(/Last\sMenstrual\sPeriod/)" } %>
 
-  <%#= touch_select_tag "Previous HIV Test Status From Before Current Facility Visit", @patient,
-  options_for_select([["Negative in the last 3 months", "Negative in the last 3 months"],
-  ["Positive Ever", "Positive Ever"], ["Unknown", "Unknown"]]),
-  {:id => "previous_test_status_from_before_currrent_facility_visit",
-  :helptext => "Previous HIV Test Status From Before Currrent Facility Visit" } %>
-
-  <%#= touch_select_tag "HIV Status", @patient,
-    options_for_select([["", ""], ["Negative", "Negative"], ["Positive", "Positive"], ["Not Done", "Not Done"]]),
-    {:id => "new_test_result_at_current_facility",
-    :helptext => "New Test Result At Current Facility",
-    :condition => "getSelected().match(/HIV\sStatus/)",
-    :tt_BeforeUnload => "checkHIVTestUnkown()" } %>
-
-  <%#= touch_date_tag "HIV test date", @patient, nil,
-    {:id => "enter_date_result_given",
-    :helptext => "Date Result Given",
-    :condition => "getSelected().match(/HIV\sStatus/)",
-    # :tt_BeforeUnload => "checkHIVTestDate()",
-    :maxDate => "#{(Date.today + 2.month + 5.day).strftime("%Y-%m-%d")}"
-  } %>
-
-  <%#= touch_select_tag "Is on CPT", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "on_cpt?",
-    :helptext => "On CPT?",
-    :condition => "getSelected().match(/HIV\sStatus/)" } %>
-
-  <%#= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "on_art?",
-    :helptext => "On Art?",
-    :condition => "getSelected().match(/HIV\sStatus/)" } %>
-
-  <%= touch_text_field_tag "Planned delivery place", @patient, nil,
+  <%= touch_text_field_tag "Planned delivery place", @patient, @planned_place,
     {:id => "planned_delivery_place",
     :helptext => "Planned delivery place",
     :condition => "getSelected().match(/Planned\sdelivery\splace/)",
     :ajaxURL => "/encounters/static_locations?search_string=" } %>
 
-  <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]], @multi_preg),
     {:id => "week_of_first_visit",
     :condition => "getSelected().match(/Multiple\sPregnancy/)",
     :helptext => "Multiple Pregnancy?" } %>
-
-  <%#= touch_select_tag "Syphilis Test Result", @patient,
-    options_for_select([["", ""], ["Positive", "Positive"], 
-      ["Negative", "Negative"], ["Inconclusive", "Inconclusive"]]),
-    {:id => "syphilis_result",
-    :condition => "getSelected().match(/Syphilis\sResult/)",
-    :helptext => "Syphilis Result" } %>
-
-  <%#= touch_date_tag "Syphilis Test Result Date", @patient, "#{session[:datetime].to_date rescue Date.today}",
-    {:id => "enter_date_syphilis_result_given",
-    :helptext => "Date Syphilis Test Result Given",
-    :condition => "getSelected().match(/Syphilis\sResult/)",
-    :max => "#{session[:datetime].to_date rescue Date.today}" } %>
 
   <% options = {
     :id => "tt_status_value",
@@ -175,16 +134,16 @@
   } %>
 
   <%= hidden_field_tag("observations[][concept_name]",  "TT STATUS", {:id => 'tt_status_concept_name'}) %>
-  <%= text_field_tag("observations[][value_numeric]",   nil, options) %>
+  <%= text_field_tag("observations[][value_numeric]",   @tt, options) %>
   <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
   <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
 
-  <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]], @bed_net),
     {:id => "bed_net",
     :helptext => "Bed Net Given?",
     :condition => "getSelected().match(/Bed\sNet\sGiven\?/)" } %>
 
-  <%= touch_date_tag "Date", @patient, nil,
+  <%= touch_date_tag "Date", @patient, @bed_net_date,
     {:id => "bed_date",
     :helptext => "Date Bet Net Given",
     :condition => "__$('bed_net').value == 'Yes' && getSelected().match(/Bed\sNet\sGiven\?/)"

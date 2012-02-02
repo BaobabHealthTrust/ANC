@@ -112,7 +112,7 @@
           Haemorrhage
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@haemorrhage.upcase == "PPH" ? "class='selected'" : "") %>>
+            align="center" <%= (!@haemorrhage.nil? ? (@haemorrhage.upcase == "PPH" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= @haemorrhage %>&nbsp;
         </td>
       </tr>

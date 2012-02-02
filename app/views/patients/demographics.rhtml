@@ -31,8 +31,8 @@
 
   #printButton {
     position: absolute;
-    top: 630px;
-    left: 630px;
+    top: 678px;
+    left: 600px;
     z-index: 1;
   }
 </style>
@@ -98,7 +98,7 @@
         </tr>
       </table>
 
-      <button id="printButton" class="button blue" style="margin-top: 50px; float: right; margin-right: 290px;"
+      <button id="printButton" class="button blue"
               onclick="window.location = '/patients/print_registration?patient_id=<%= @patient.id %>'">
         <span>Print Registration</span>
       </button>

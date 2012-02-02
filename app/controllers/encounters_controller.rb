@@ -4,6 +4,11 @@ class EncountersController < ApplicationController
 
     # raise params.to_yaml
     
+    if params[:void_encounter_id]
+      @encounter = Encounter.find(params[:void_encounter_id])
+      @encounter.void
+    end
+    
     @patient = Patient.find(params[:encounter][:patient_id])
 
     # Go to the dashboard if this is a non-encounter
@@ -98,6 +103,9 @@ class EncountersController < ApplicationController
         (encounter.type.name.upcase rescue "") == "SURGICAL HISTORY" || 
         (encounter.type.name.upcase rescue "") == "SOCIAL HISTORY")
   
+    redirect_to "/patients/print_registration?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") == 
+        "REGISTRATION")
+      
     redirect_to "/patients/current_visit/?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") == 
         "ANC VISIT TYPE")
     

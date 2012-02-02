@@ -453,7 +453,7 @@ EOF
     
     # active_years = {}
     
-    patient.encounters.active.find(:all, :order => ["encounter_datetime ASC"]).each{|e| 
+    patient.encounters.active.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
       if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]       
         pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}        
         
