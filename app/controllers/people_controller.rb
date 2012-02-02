@@ -46,7 +46,7 @@ class PeopleController < ApplicationController
  
   def create
     Person.session_datetime = session[:datetime].to_date rescue Date.today
-    person = Person.create_from_form(params[:person])
+    person = Person.create_from_form(params)
     
     encounter = Encounter.new(params[:encounter])
     encounter.patient_id = person.id

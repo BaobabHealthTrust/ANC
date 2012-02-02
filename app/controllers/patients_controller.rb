@@ -750,6 +750,41 @@ class PatientsController < ApplicationController
     render :layout => false
   end
   
+  def print_history
+    print_and_redirect("/patients/obstertic_medical_examination_label/?patient_id=#{@patient.id}", 
+      "/patients/patient_history/?patient_id=#{@patient.id}")  
+  end
+
+  def obstertic_medical_examination_label
+    print_string = @patient.obstetric_medical_history_label + @patient.detailed_obstetric_history_label # rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
+    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
+  end
+
+  def print_visit_label
+    print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
+      "/patients/current_visit/?patient_id=#{@patient.id}")  
+  end
+
+  def current_visit_label
+    print_string = @patient.visit_summary_label((session[:datetime] ? session[:datetime].to_date : Date.today)) + 
+      @patient.visit_summary2_label((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
+    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
+  end
+
+  def print_exam_label
+    print_and_redirect("/patients/exam_label/?patient_id=#{@patient.id}", 
+      "/patients/current_visit/?patient_id=#{@patient.id}")  
+  end
+
+  def exam_label
+    print_string = @patient.examination_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
+    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
+  end
+
+  def print_labels
+    @patient = Patient.find(params[:patient_id] || session[:patient_id])
+  end
+  
   private
 
 end

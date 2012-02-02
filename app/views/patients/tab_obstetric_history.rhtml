@@ -95,7 +95,7 @@
         </td>
         <td style="border: 1px solid #000;"
             align="center" <%= (@vacuum > 0 ? "class='selected'" : "") %>>
-          &nbsp;<%= (!@stillbirths.nil? ? (@vacuum > 0 ? "YES" : "NO") : "") %>&nbsp;
+          &nbsp;<%= (!@vacuum.nil? ? (@vacuum > 0 ? "YES" : "NO") : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -118,7 +118,7 @@
       </tr>
       <tr>
         <td style="padding-left: 10px;">
-          (Pre)Eclampsia
+          Pre-Eclampsia
         </td>
         <td style="border: 1px solid #000;"
             align="center" <%= (@preeclampsia != "NO" ? "class='selected'" : "") %>>

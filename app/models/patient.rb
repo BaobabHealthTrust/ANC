@@ -461,10 +461,10 @@ EOF
           concept = o.concept.name rescue nil
           if concept
             # if !active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")]                            
-              if o.concept.name.name.upcase == "DATE OF LAST MENSTRUAL PERIOD"         
-                pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.name.name.upcase] = o.answer_string          
-                # active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")] = true 
-              end              
+            if o.concept.name.name.upcase == "DATE OF LAST MENSTRUAL PERIOD"         
+              pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.name.name.upcase] = o.answer_string          
+              # active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")] = true 
+            end              
             # end
           end   
         } 
@@ -489,6 +489,942 @@ EOF
     }
     
     return [current_range, pregnancies]
+  end
+  
+  def detailed_obstetric_history_label(date = Date.today)
+    @patient = self rescue nil
+    
+    @obstetrics = {}
+    search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "PREGNANCY", "LABOUR DURATION", 
+      "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", 
+      "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
+    current_level = 0
+    
+    @patient.encounters.active.all.each{|e| 
+      e.observations.active.each{|obs|
+        concept = obs.concept.name.name rescue nil
+        if(!concept.nil?)
+          if search_set.include?(concept.upcase)
+            if obs.concept.name.name.upcase.eql?("YEAR OF BIRTH")
+              current_level += 1
+            
+              @obstetrics[current_level] = {}
+            end
+          
+            if @obstetrics[current_level]
+              @obstetrics[current_level][concept.upcase] = obs.answer_string rescue nil
+              
+              if concept.upcase == "YEAR OF BIRTH" && obs.answer_string.to_i == 0
+                @obstetrics[current_level][concept.upcase] = "Unknown"
+              end
+            end
+                        
+          end
+        end
+      }      
+    }
+    
+    # raise @obstetrics.to_yaml
+    
+    @pregnancies = Patient.active_range(@patient.id)
+    
+    @range = []
+    
+    @pregnancies = @pregnancies[1]
+    
+    @pregnancies.each{|preg|
+      @range << preg[0].to_date
+    }
+    
+    @range = @range.sort    
+    
+    @range.each{|y|
+      current_level += 1
+      @obstetrics[current_level] = {}
+      @obstetrics[current_level]["YEAR OF BIRTH"] = y.year
+      @obstetrics[current_level]["PLACE OF BIRTH"] = "(Here)"
+    }
+    
+    label = ZebraPrinter::StandardLabel.new
+    label2 = ZebraPrinter::StandardLabel.new
+    label2set = false
+    label3 = ZebraPrinter::StandardLabel.new
+    label3set = false
+
+    label.draw_text("Detailed Obstetric History",28,29,0,1,1,2,false)
+    label.draw_text("Pre",24,70,0,1,1,1,false)
+    label.draw_text("No.",25,85,0,1,1,1,false)
+    label.draw_text("Year",60,70,0,1,1,1,false)
+    label.draw_text("Place",110,70,0,1,1,1,false)
+    label.draw_text("Gest.",225,70,0,1,1,1,false)
+    label.draw_text("(wks)",225,85,0,1,1,1,false)
+    label.draw_text("Labour",305,70,0,1,1,1,false)
+    label.draw_text("duration",300,85,0,1,1,1,false)
+    label.draw_text("(hrs)",310,100,0,1,1,1,false)
+    label.draw_text("Delivery",405,70,0,1,1,1,false)
+    label.draw_text("Method",410,85,0,1,1,1,false)
+    label.draw_text("Condition",518,70,0,1,1,1,false)
+    label.draw_text("at birth",518,85,0,1,1,1,false)
+    label.draw_text("Birth",625,70,0,1,1,1,false)
+    label.draw_text("weight",620,85,0,1,1,1,false)
+    label.draw_text("(kg)",625,100,0,1,1,1,false)
+    label.draw_text("Alive",690,70,0,1,1,1,false)
+    label.draw_text("now?",695,85,0,1,1,1,false)
+    label.draw_text("Age at",745,70,0,1,1,1,false)
+    label.draw_text("death*",745,85,0,1,1,1,false)
+    
+    label.draw_line(20,60,800,2,0)
+    label.draw_line(20,60,2,245,0)
+    label.draw_line(20,305,800,2,0)
+    label.draw_line(805,60,2,245,0)
+    label.draw_line(20,120,800,2,0)
+    
+    label.draw_line(55,60,2,245,0)
+    label.draw_line(102,60,2,245,0)
+    label.draw_line(220,60,2,245,0)
+    label.draw_line(295,60,2,245,0)
+    label.draw_line(380,60,2,245,0)
+    label.draw_line(510,60,2,245,0)
+    label.draw_line(615,60,2,245,0)
+    label.draw_line(683,60,2,245,0)
+    label.draw_line(740,60,2,245,0)
+    
+    (1..(@obstetrics.length + 1)).each do |pos|
+      if pos <= 4
+        
+        label.draw_text(pos,28,(90 + (45 * pos)),0,1,1,1,false)
+        
+        label.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ? 
+                (@obstetrics[pos]["YEAR OF BIRTH"].to_i > 0 ? @obstetrics[pos]["YEAR OF BIRTH"].to_i : 
+                  "????") : "") : ""),60,(90 + (45 * pos)),0,1,1,1,false)
+        
+        
+        @place = (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? 
+              @obstetrics[pos]["PLACE OF BIRTH"] : "") : "")
+          
+        if @place.length < 11
+          label.draw_text(@place,107,(90 + (45 * pos)),0,1,1,1,false)
+        else
+          @place = paragraphate(@place)
+        
+          (0..(@place.length)).each{|p|
+            label.draw_text(@place[p],107,(85 + (45 * pos) + (13 * p)),0,1,1,1,false)
+          }
+        end
+        
+        @gest = (@obstetrics[pos] ? (@obstetrics[pos]["PREGNANCY"] ? 
+              @obstetrics[pos]["PREGNANCY"] : "") : "")
+          
+        @gest = (@gest.length > 6 ? truncate(@gest, 6) : @gest)
+               
+        label.draw_text(@gest,225,(90 + (45 * pos)),0,1,1,1,false)
+        
+        
+        @labor = (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? 
+              @obstetrics[pos]["LABOUR DURATION"] : "") : "")
+          
+        @labor = (@labor.length > 6 ? truncate(@labor,6) : @labor)
+        
+        label.draw_text(@labor,300,(90 + (45 * pos)),0,1,1,1,false)
+        
+        
+        @delmode = (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? 
+              @obstetrics[pos]["METHOD OF DELIVERY"].titleize : (@obstetrics[pos]["PROCEDURE DONE"] ? 
+                @obstetrics[pos]["PROCEDURE DONE"] : "")) : "")
+          
+        if @delmode.length < 11
+          label.draw_text(@delmode,385,(90 + (45 * pos)),0,1,1,1,false)
+        else
+          @delmode = paragraphate(@delmode)
+        
+          (0..(@delmode.length)).each{|p|
+            label.draw_text(@delmode[p],385,(85 + (45 * pos) + (13 * p)),0,1,1,1,false)
+          }
+        end
+        
+        @cond = (@obstetrics[pos] ? (@obstetrics[pos]["CONDITION AT BIRTH"] ? 
+              @obstetrics[pos]["CONDITION AT BIRTH"] : "") : "").titleize
+        
+        if @cond.length < 8
+          label.draw_text(@cond,515,(90 + (45 * pos)),0,1,1,1,false)
+        else
+          @cond = paragraphate(@cond, 8)
+        
+          (0..(@cond.length)).each{|p|
+            label.draw_text(@cond[p],515,(85 + (45 * pos) + (13 * p)),0,1,1,1,false)
+          }
+        end
+        
+        label.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["BIRTH WEIGHT"] ? 
+                @obstetrics[pos]["BIRTH WEIGHT"] : "") : ""),620,(90 + (45 * pos)),0,1,1,1,false)
+        
+        label.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["ALIVE"] ? 
+                @obstetrics[pos]["ALIVE"] : "") : ""),687,(90 + (45 * pos)),0,1,1,1,false)
+        
+        label.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
+                (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
+                  @obstetrics[pos]["AGE AT DEATH"].to_i) : "") : "").to_s + 
+            (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
+                @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "") : ""),745,(90 + (45 * pos)),0,1,1,1,false)
+        
+        label.draw_line(20,((125 + (45 * pos)) <= 305 ? (125 + (45 * pos)) : 305),800,2,0)
+        
+      elsif pos >= 5 && pos <= 10
+        if pos == 5
+          label2.draw_line(20,30,800,2,0)
+          label2.draw_line(20,30,2,275,0)
+          label2.draw_line(20,305,800,2,0)
+          label2.draw_line(805,30,2,275,0)
+          
+          label2.draw_line(55,30,2,275,0)
+          label2.draw_line(102,30,2,275,0)
+          label2.draw_line(220,30,2,275,0)
+          label2.draw_line(295,30,2,275,0)
+          label2.draw_line(380,30,2,275,0)
+          label2.draw_line(510,30,2,275,0)
+          label2.draw_line(615,30,2,275,0)
+          label2.draw_line(683,30,2,275,0)
+          label2.draw_line(740,30,2,275,0)
+        end
+        label2.draw_text(pos,28,((45 * (pos - 4))),0,1,1,1,false)
+        
+        label2.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ? 
+                (@obstetrics[pos]["YEAR OF BIRTH"].to_i > 0 ? @obstetrics[pos]["YEAR OF BIRTH"].to_i : 
+                  "????") : "") : ""),60,((45 * (pos - 4))),0,1,1,1,false)
+        
+        
+        @place = (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? 
+              @obstetrics[pos]["PLACE OF BIRTH"] : "") : "")
+          
+        if @place.length < 11
+          label2.draw_text(@place,107,((45 * (pos - 4))),0,1,1,1,false)
+        else
+          @place = paragraphate(@place)
+        
+          (0..(@place.length)).each{|p|
+            label2.draw_text(@place[p],107,((45 * (pos - 4)) + (13 * p)),0,1,1,1,false)
+          }
+        end
+        
+        
+        @gest = (@obstetrics[pos] ? (@obstetrics[pos]["PREGNANCY"] ? 
+              @obstetrics[pos]["PREGNANCY"] : "") : "")
+          
+        @gest = (@gest.length > 6 ? truncate(@gest, 6) : @gest)
+               
+        label2.draw_text(@gest,225,((45 * (pos - 4))),0,1,1,1,false)
+        
+        
+        @labor = (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? 
+              @obstetrics[pos]["LABOUR DURATION"] : "") : "")
+          
+        @labor = (@labor.length > 6 ? truncate(@labor,6) : @labor)
+        
+        label2.draw_text(@labor,300,((45 * (pos - 4))),0,1,1,1,false)
+        
+        
+        @delmode = (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? 
+              @obstetrics[pos]["METHOD OF DELIVERY"].titleize : (@obstetrics[pos]["PROCEDURE DONE"] ? 
+                @obstetrics[pos]["PROCEDURE DONE"] : "")) : "")
+          
+        if @delmode.length < 11
+          label2.draw_text(@delmode,385,(45 * (pos - 4)),0,1,1,1,false)
+        else
+          @delmode = paragraphate(@delmode)
+        
+          (0..(@delmode.length)).each{|p|
+            label2.draw_text(@delmode[p],385,(45 * (pos - 4) + (13 * p))-4,0,1,1,1,false)
+          }
+        end
+        
+        @cond = (@obstetrics[pos] ? (@obstetrics[pos]["CONDITION AT BIRTH"] ? 
+              @obstetrics[pos]["CONDITION AT BIRTH"] : "") : "").titleize
+        
+        if @cond.length < 8
+          label2.draw_text(@cond,515,((45 * (pos - 4))),0,1,1,1,false)
+        else
+          @cond = paragraphate(@cond, 8)
+        
+          (0..(@cond.length)).each{|p|
+            label2.draw_text(@cond[p],515,(45 * (pos - 4) + (13 * p))-4,0,1,1,1,false)
+          }
+        end
+        
+        label2.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["BIRTH WEIGHT"] ? 
+                @obstetrics[pos]["BIRTH WEIGHT"] : "") : ""),620,((45 * (pos - 4))),0,1,1,1,false)
+        
+        label2.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["ALIVE"] ? 
+                @obstetrics[pos]["ALIVE"] : "") : ""),687,((45 * (pos - 4))),0,1,1,1,false)
+        
+        label2.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
+                (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
+                  @obstetrics[pos]["AGE AT DEATH"].to_i) : "") : "").to_s + 
+            (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
+                @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "") : ""),745,((45 * (pos - 4))),0,1,1,1,false)
+        
+        label2.draw_line(20,(((45 * (pos - 4)) + 35) <= 305 ? ((45 * (pos - 4)) + 35) : 305),800,2,0)
+        label2set = true
+      else
+        if pos == 11
+          label3.draw_line(20,30,800,2,0)
+          label3.draw_line(20,30,2,275,0)
+          label3.draw_line(20,305,800,2,0)
+          label3.draw_line(805,30,2,275,0)
+          
+          label3.draw_line(55,30,2,275,0)
+          label3.draw_line(102,30,2,275,0)
+          label3.draw_line(220,30,2,275,0)
+          label3.draw_line(295,30,2,275,0)
+          label3.draw_line(380,30,2,275,0)
+          label3.draw_line(510,30,2,275,0)
+          label3.draw_line(615,30,2,275,0)
+          label3.draw_line(683,30,2,275,0)
+          label3.draw_line(740,30,2,275,0)
+        end
+        label3.draw_text(pos,28,((45 * (pos - 10))),0,1,1,1,false)
+        
+        label3.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ? 
+                (@obstetrics[pos]["YEAR OF BIRTH"].to_i > 0 ? @obstetrics[pos]["YEAR OF BIRTH"].to_i : 
+                  "????") : "") : ""),60,((45 * (pos - 10))),0,1,1,1,false)
+        
+        
+        @place = (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? 
+              @obstetrics[pos]["PLACE OF BIRTH"] : "") : "")
+          
+        if @place.length < 11
+          label3.draw_text(@place,107,((45 * (pos - 10))),0,1,1,1,false)
+        else
+          @place = paragraphate(@place)
+        
+          (0..(@place.length)).each{|p|
+            label3.draw_text(@place[p],107,((45 * (pos - 10)) + (13 * p)),0,1,1,1,false)
+          }
+        end
+        
+        
+        @gest = (@obstetrics[pos] ? (@obstetrics[pos]["PREGNANCY"] ? 
+              @obstetrics[pos]["PREGNANCY"] : "") : "")
+          
+        @gest = (@gest.length > 6 ? truncate(@gest, 6) : @gest)
+               
+        label3.draw_text(@gest,225,((45 * (pos - 10))),0,1,1,1,false)
+        
+        
+        @labor = (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? 
+              @obstetrics[pos]["LABOUR DURATION"] : "") : "")
+          
+        @labor = (@labor.length > 6 ? truncate(@labor,6) : @labor)
+        
+        label3.draw_text(@labor,300,((45 * (pos - 10))),0,1,1,1,false)
+        
+        
+        @delmode = (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? 
+              @obstetrics[pos]["METHOD OF DELIVERY"].titleize : (@obstetrics[pos]["PROCEDURE DONE"] ? 
+                @obstetrics[pos]["PROCEDURE DONE"] : "")) : "")
+          
+        if @delmode.length < 11
+          label3.draw_text(@delmode,385,(45 * (pos - 10)),0,1,1,1,false)
+        else
+          @delmode = paragraphate(@delmode)
+        
+          (0..(@delmode.length)).each{|p|
+            label3.draw_text(@delmode[p],385,(45 * (pos - 10) + (13 * p))-4,0,1,1,1,false)
+          }
+        end
+        
+        @cond = (@obstetrics[pos] ? (@obstetrics[pos]["CONDITION AT BIRTH"] ? 
+              @obstetrics[pos]["CONDITION AT BIRTH"] : "") : "").titleize
+        
+        if @cond.length < 8
+          label3.draw_text(@cond,515,((45 * (pos - 10))),0,1,1,1,false)
+        else
+          @cond = paragraphate(@cond, 8)
+        
+          (0..(@cond.length)).each{|p|
+            label3.draw_text(@cond[p],515,(45 * (pos - 10) + (13 * p))-4,0,1,1,1,false)
+          }
+        end
+        
+        label3.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["BIRTH WEIGHT"] ? 
+                @obstetrics[pos]["BIRTH WEIGHT"] : "") : ""),620,((45 * (pos - 10))),0,1,1,1,false)
+        
+        label3.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["ALIVE"] ? 
+                @obstetrics[pos]["ALIVE"] : "") : ""),687,((45 * (pos - 10))),0,1,1,1,false)
+        
+        label3.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
+                (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
+                  @obstetrics[pos]["AGE AT DEATH"].to_i) : "") : "").to_s + 
+            (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
+                @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "") : ""),745,((45 * (pos - 10))),0,1,1,1,false)
+        
+        label3.draw_line(20,(((45 * (pos - 10)) + 35) <= 305 ? ((45 * (pos - 10)) + 35) : 305),800,2,0)
+        label3set = true
+      end
+      
+    end
+    
+    if label3set
+      label.print(1) + label2.print(1) + label3.print(1)
+    elsif label2set
+      label.print(1) + label2.print(1)
+    else
+      label.print(1)
+    end    
+  end
+  
+  def obstetric_medical_history_label(date = Date.today)
+    @patient = self rescue nil
+     
+    @pregnancies = Patient.active_range(@patient.id)
+    
+    @range = []
+    
+    @pregnancies = @pregnancies[1]
+    
+    @pregnancies.each{|preg|
+      @range << preg[0].to_date
+    }
+    
+    @deliveries = Observation.find(:last,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('PARITY').concept_id]).answer_string.to_i rescue nil
+
+    @deliveries = @deliveries + (@range.length > 0 ? @range.length - 1 : @range.length) if !@deliveries.nil?
+    
+    @gravida = Observation.find(:last,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('GRAVIDA').concept_id]).answer_string.to_i rescue nil
+
+    @multipreg = Observation.find(:last,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all, :conditions => ["encounter_type = ?", 
+            EncounterType.find_by_name("OBSTETRIC HISTORY").id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string rescue nil
+
+    @abortions = Observation.find(:last,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('NUMBER OF ABORTIONS').concept_id]).answer_string.to_i rescue nil
+
+    @stillbirths = Observation.find(:last,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string rescue nil
+
+    #Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", 40, Encounter.active.find(:all, :conditions => ["patient_id = ?", 40]).collect{|e| e.encounter_id}, ConceptName.find_by_name('Caesarean section').concept_id])
+    
+    @csections = Observation.find(:all,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
+        Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Caesarean section').concept_id]).length rescue nil
+
+    @vacuum = Observation.find(:all,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
+        Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Vacuum extraction delivery').concept_id]).length rescue nil
+
+    @symphosio = Observation.find(:last, 
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('SYMPHYSIOTOMY').concept_id]).answer_string rescue nil
+
+    @haemorrhage = Observation.find(:last,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('HEMORRHAGE').concept_id]).answer_string rescue nil
+
+    @preeclampsia = Observation.find(:last,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('PRE-ECLAMPSIA').concept_id]).answer_string rescue nil
+
+    @asthma = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('ASTHMA').concept_id]).answer_string.upcase rescue nil
+
+    @hyper = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('HYPERTENSION').concept_id]).answer_string.upcase rescue nil
+
+    @diabetes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('DIABETES').concept_id]).answer_string.upcase rescue nil
+
+    @epilepsy = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('EPILEPSY').concept_id]).answer_string.upcase rescue nil
+
+    @renal = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('RENAL DISEASE').concept_id]).answer_string.upcase rescue nil
+
+    @fistula = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('FISTULA REPAIR').concept_id]).answer_string.upcase rescue nil
+
+    @deform = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('SPINE OR LEG DEFORM').concept_id]).answer_string.upcase rescue nil
+
+    @surgicals = Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
+            @patient.id, EncounterType.find_by_name("SURGICAL HISTORY").id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('PROCEDURE DONE').concept_id]).collect{|o| 
+      "#{o.answer_string} (#{o.obs_datetime.strftime('%d-%b-%Y')})"} rescue []
+
+    @age = @patient.age rescue 0
+
+    label = ZebraPrinter::StandardLabel.new
+
+    label.draw_text("Obstetric History",28,29,0,1,1,2,false)
+    label.draw_text("Medical History",400,29,0,1,1,2,false)
+    label.draw_text("Refer",750,29,0,1,1,2,true)
+    label.draw_line(25,60,172,1,0)
+    label.draw_line(400,60,152,1,0)
+    label.draw_text("Gravida",28,80,0,1,1,1,false)
+    label.draw_text("Asthma",400,80,0,1,1,1,false)
+    label.draw_text("Deliveries",28,110,0,1,1,1,false)
+    label.draw_text("Hypertension",400,110,0,1,1,1,false)
+    label.draw_text("Abortions",28,140,0,1,1,1,false)
+    label.draw_text("Diabetes",400,140,0,1,1,1,false)
+    label.draw_text("Still Births",28,170,0,1,1,1,false)
+    label.draw_text("Epilepsy",400,170,0,1,1,1,false)
+    label.draw_text("Vacuum Extraction",28,200,0,1,1,1,false)
+    label.draw_text("Renal Disease",400,200,0,1,1,1,false)
+    label.draw_text("Symphisiotomy",28,230,0,1,1,1,false)
+    label.draw_text("Fistula Repair",400,230,0,1,1,1,false)
+    label.draw_text("Haemorrhage",28,260,0,1,1,1,false)
+    label.draw_text("Leg/Spine Deformation",400,260,0,1,1,1,false)
+    label.draw_text("Pre-Eclampsia",28,290,0,1,1,1,false)
+    label.draw_text("Age",400,290,0,1,1,1,false)
+    label.draw_line(230,70,130,1,0)
+    label.draw_line(230,70,1,236,0)
+    label.draw_line(230,306,130,1,0)
+    label.draw_line(360,70,1,236,0)
+    label.draw_line(230,100,130,1,0)
+    label.draw_line(230,130,130,1,0)
+    label.draw_line(230,160,130,1,0)
+    label.draw_line(230,190,130,1,0)
+    label.draw_line(230,220,130,1,0)
+    label.draw_line(230,250,130,1,0)
+    label.draw_line(230,280,130,1,0)
+    label.draw_line(629,70,130,1,0)
+    label.draw_line(629,70,1,236,0)
+    label.draw_line(629,306,130,1,0)
+    label.draw_line(760,70,1,236,0)
+    label.draw_line(629,100,130,1,0)
+    label.draw_line(629,130,130,1,0)
+    label.draw_line(629,160,130,1,0)
+    label.draw_line(629,190,130,1,0)
+    label.draw_line(629,220,130,1,0)
+    label.draw_line(629,250,130,1,0)
+    label.draw_line(629,280,130,1,0)
+    label.draw_text("#{@gravida}",260,80,0,1,1,1,false)
+    label.draw_text("#{@deliveries}",260,110,0,1,1,1,(@deliveries > 4 ? true : false))
+    label.draw_text("#{@abortions}",260,140,0,1,1,1,(@abortions > 1 ? true : false))
+    label.draw_text("#{(!@stillbirths.nil? ? (@stillbirths == "NO" ? "NO" : "YES") : "")}",260,170,0,1,1,1,
+      (!@stillbirths.nil? ? (@stillbirths == "NO" ? false : true) : false))
+    label.draw_text("#{(!@vacuum.nil? ? (@vacuum > 0 ? "YES" : "NO") : "")}",260,200,0,1,1,1,
+      (!@vacuum.nil? ? (@vacuum > 0 ? true : false) : false))
+    label.draw_text("#{(!@symphosio.nil? ? (@symphosio == "NO" ? "NO" : "YES") : "")}",260,230,0,1,1,1,
+      (!@symphosio.nil? ? (@symphosio == "NO" ? false : true) : false))
+    label.draw_text("#{@haemorrhage}",260,260,0,1,1,1,(@haemorrhage == "PPH" ? true : false))
+    label.draw_text("#{(!@preeclampsia.nil? ? (@preeclampsia == "NO" ? "NO" : "YES") : "")}",260,290,0,1,1,1,
+      (!@preeclampsia.nil? ? (@preeclampsia == "NO" ? false : true) : false))
+    
+    label.draw_text("#{(!@asthma.nil? ? (@asthma == "NO" ? "NO" : "YES") : "")}",660,80,0,1,1,1,
+      (!@asthma.nil? ? (@asthma == "NO" ? false : true) : false))
+    label.draw_text("#{(!@hyper.nil? ? (@hyper == "NO" ? "NO" : "YES") : "")}",660,110,0,1,1,1,
+      (!@hyper.nil? ? (@hyper == "NO" ? false : true) : false))
+    label.draw_text("#{(!@diabetes.nil? ? (@diabetes == "NO" ? "NO" : "YES") : "")}",660,140,0,1,1,1,
+      (!@diabetes.nil? ? (@diabetes == "NO" ? false : true) : false))
+    label.draw_text("#{(!@epilepsy.nil? ? (@epilepsy == "NO" ? "NO" : "YES") : "")}",660,170,0,1,1,1,
+      (!@epilepsy.nil? ? (@epilepsy == "NO" ? false : true) : false))
+    label.draw_text("#{(!@renal.nil? ? (@renal == "NO" ? "NO" : "YES") : "")}",660,200,0,1,1,1,
+      (!@renal.nil? ? (@renal == "NO" ? false : true) : false))
+    label.draw_text("#{(!@fistula.nil? ? (@fistula == "NO" ? "NO" : "YES") : "")}",660,230,0,1,1,1,
+      (!@fistula.nil? ? (@fistula == "NO" ? false : true) : false))
+    label.draw_text("#{(!@deform.nil? ? (@deform == "NO" ? "NO" : "YES") : "")}",660,260,0,1,1,1,
+      (!@deform.nil? ? (@deform == "NO" ? false : true) : false))
+    label.draw_text("#{@age}",660,290,0,1,1,1,
+      (((@age > 0 && @age < 16) || (@age > 40)) ? true : false))
+
+    label.print(1)
+  end
+  
+  def examination_label(date = Date.today)
+    label = ZebraPrinter::StandardLabel.new
+
+    label.draw_text("Examination",28,29,0,1,1,2,false)
+    label.draw_line(25,55,115,1,0)
+    label.draw_line(25,190,115,1,0)
+    label.draw_text("Height",28,80,0,1,1,1,false)
+    label.draw_text("Multiple Pregnancy",28,110,0,1,1,1,false)
+    label.draw_text("WHO Clinical Stage",28,140,0,1,1,1,false)
+    label.draw_text("Lab Results",28,165,0,1,1,2,false)
+    label.draw_text("Date",185,174,0,1,1,1,false)
+    label.draw_text("Result",265,174,0,1,1,1,false)
+    label.draw_text("HIV",28,200,0,1,1,1,false)
+    label.draw_text("Syphilis",28,230,0,1,1,1,false)
+    label.draw_text("Hb1",28,260,0,1,1,1,false)
+    label.draw_text("Hb2",28,290,0,1,1,1,false)
+    label.draw_line(230,70,130,1,0)
+    label.draw_line(230,70,1,90,0)
+    label.draw_line(180,306,180,1,0)
+    label.draw_line(360,70,1,90,0)
+    label.draw_line(180,190,1,115,0)
+    label.draw_line(260,190,1,115,0)
+    label.draw_line(360,190,1,115,0)
+    label.draw_line(230,100,130,1,0)
+    label.draw_line(230,130,130,1,0)
+    label.draw_line(230,160,130,1,0)
+    label.draw_line(180,190,180,1,0)
+    label.draw_line(180,220,180,1,0)
+    label.draw_line(180,250,180,1,0)
+    label.draw_line(180,280,180,1,0)
+
+    label.print(1)
+  end
+  
+  def visit_summary_label(target_date = Date.today)
+    @patient = self rescue nil
+    
+    @current_range = Patient.active_range(@patient.id, target_date.to_date)
+
+    # raise @current_range.to_yaml
+    
+    encounters = {}
+
+    @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e|    
+      encounters[e.encounter_datetime.strftime("%d/%b/%Y")] = {"USER" => User.find(e.creator).name}      
+    }
+
+    @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
+      encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = {} # rescue ""
+    }
+
+    @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
+      e.observations.each{|o| 
+        if o.to_a[0]
+          if o.to_a[0].upcase == "DIAGNOSIS" && encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase]
+            encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] += "; " + o.to_a[1]
+          else
+            encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] = o.to_a[1]
+            if o.to_a[0].upcase == "PLANNED DELIVERY PLACE"
+              @current_range[0]["PLANNED DELIVERY PLACE"] = o.to_a[1]
+            elsif o.to_a[0].upcase == "MOSQUITO NET"
+              @current_range[0]["MOSQUITO NET"] = o.to_a[1]
+            end
+          end
+        end
+      }
+    }
+
+    @drugs = {}; 
+    @other_drugs = {}; 
+    main_drugs = ["TTV", "SP", "Fefol", "NVP", "TMP/SMX", "TDF/3TC/EFV"]
+    
+    @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
+      :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
+        EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e| 
+      @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
+      @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
+      e.orders.each{|o| 
+        if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])
+          @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        else
+          @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        end
+      }      
+    }
+    
+    label = ZebraPrinter::StandardLabel.new
+
+    label.draw_line(20,25,800,2,0)
+    label.draw_line(20,25,2,280,0)
+    label.draw_line(20,305,800,2,0)
+    label.draw_line(805,25,2,280,0)
+    label.draw_text("Visit Summary",28,33,0,1,1,2,false)
+    label.draw_text("Last Menstrual Period: #{@current_range[0]["START"].to_date.strftime("%d/%b/%Y") rescue ""}",28,76,0,1,1,1,false)
+    label.draw_text("Expected Date of Delivery: #{@current_range[0]["END"].to_date.strftime("%d/%b/%Y") rescue ""}",28,99,0,1,1,1,false)
+    label.draw_line(28,60,132,1,0)
+    label.draw_line(20,130,800,2,0)
+    label.draw_line(20,190,800,2,0)
+    label.draw_text("Gest.",29,140,0,1,1,1,false)
+    label.draw_text("Fundal",99,140,0,1,1,1,false)
+    label.draw_text("Pos./",178,140,0,1,1,1,false)
+    label.draw_text("Fetal",259,140,0,1,1,1,false)
+    label.draw_text("Weight",339,140,0,1,1,1,false)
+    label.draw_text("(kg)",339,158,0,1,1,1,false)
+    label.draw_text("BP",435,140,0,1,1,1,false)
+    label.draw_text("Urine",499,140,0,1,1,1,false)
+    label.draw_text("Protein",499,158,0,1,1,1,false)
+    label.draw_text("SP",595,140,0,1,1,1,false)
+    label.draw_text("FeFo",664,140,0,1,1,1,false)
+    label.draw_text("Albe.",740,140,0,1,1,1,false)
+    label.draw_text("Age",35,158,0,1,1,1,false)
+    label.draw_text("Height",99,158,0,1,1,1,false)
+    label.draw_text("Pres.",178,158,0,1,1,1,false)
+    label.draw_text("Heart",259,158,0,1,1,1,false)
+    label.draw_line(90,130,2,175,0)
+    label.draw_line(170,130,2,175,0)
+    label.draw_line(250,130,2,175,0)
+    label.draw_line(330,130,2,175,0)
+    label.draw_line(410,130,2,175,0)
+    label.draw_line(490,130,2,175,0)
+    label.draw_line(570,130,2,175,0)
+    label.draw_line(650,130,2,175,0)
+    label.draw_line(730,130,2,175,0)
+    
+    @i = 0
+
+    encounters.sort.each do |encounter|
+      @i = @i + 1
+      
+      if encounter[0] == target_date.to_date.strftime("%d/%b/%Y")
+        label.draw_text("Visit No: #{@i}",250,33,0,1,1,2,false)
+        label.draw_text("Visit Date: #{encounter[0]}",450,33,0,1,1,2,false)
+        
+        gest = (((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7) <= 0 ? "?" : 
+            (((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7) - 1).to_s + " wks") rescue ""
+            
+        label.draw_text(gest,29,200,0,1,1,1,false)
+        
+        fund = (encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i <= 0 ? "?" : 
+            encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i.to_s + " (wks)") rescue ""
+            
+        label.draw_text(fund,99,200,0,1,1,1,false)
+        
+        posi = encounters[encounter[0]]["OBSERVATIONS"]["POSITION"] rescue ""
+        pres = encounters[encounter[0]]["OBSERVATIONS"]["PRESENTATION"] rescue ""
+        
+        posipres = paragraphate(posi.to_s + pres.to_s, 6, 5)
+        
+        (0..(posipres.length)).each{|u|
+          label.draw_text(posipres[u],178,(200 + (13 * u)),0,1,1,1,false)
+        }
+        
+        fet = (encounters[encounter[0]]["OBSERVATIONS"]["FETAL HEART BEAT"].humanize == "Unknown" ? "?" :
+            encounters[encounter[0]]["OBSERVATIONS"]["FETAL HEART BEAT"].humanize) rescue ""
+        
+        fet = paragraphate(fet, 6, 5)
+        
+        (0..(fet.length)).each{|f|
+          label.draw_text(fet[f],259,(200 + (13 * f)),0,1,1,1,false)
+        }
+        
+        wei = (encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"].to_i <= 0 ? "?" : 
+            ((encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"].to_s.match(/\.[1-9]/) ? 
+                encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"] : 
+                encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"].to_i))) rescue ""
+        
+        label.draw_text(wei,339,200,0,1,1,1,false)
+        
+        sbp = (encounters[encounter[0]]["VITALS"]["SYSTOLIC BLOOD PRESSURE"].to_i <= 0 ? "?" : 
+            encounters[encounter[0]]["VITALS"]["SYSTOLIC BLOOD PRESSURE"].to_i) rescue "?"
+            
+        dbp = (encounters[encounter[0]]["VITALS"]["DIASTOLIC BLOOD PRESSURE"].to_i <= 0 ? "?" : 
+            encounters[encounter[0]]["VITALS"]["DIASTOLIC BLOOD PRESSURE"].to_i) rescue "?"
+        
+        label.draw_text(sbp.to_s + "/" + dbp.to_s,420,200,0,1,1,1,false)
+        
+        uri = encounters[encounter[0]]["LAB RESULTS"]["URINE PROTEIN"] rescue ""
+        
+        uri = paragraphate(uri, 6, 5)
+        
+        (0..(uri.length)).each{|u|
+          label.draw_text(uri[u],499,(200 + (13 * u)),0,1,1,1,false)
+        }
+        
+        sp = (@drugs[encounter[0]]["SP"].to_i > 0 ? @drugs[encounter[0]]["SP"].to_i : "") rescue ""
+        
+        label.draw_text(sp,595,200,0,1,1,1,false)
+        
+        fefo = (@drugs[encounter[0]]["Fefol"].to_i > 0 ? @drugs[encounter[0]]["Fefol"].to_i : "") rescue ""
+        
+        label.draw_text(fefo,664,200,0,1,1,1,false)
+        
+        albe = (@drugs[encounter[0]]["Albendazole"].to_i > 0 ? @drugs[encounter[0]]["Fefol"].to_i : "") rescue ""
+        
+        label.draw_text(albe,740,200,0,1,1,1,false)
+      end 
+      
+    end
+    
+    @encounters = encounters
+    
+    label.print(1)
+  end
+  
+  def visit_summary2_label(target_date = Date.today)
+    @patient = self rescue nil
+    
+    @current_range = Patient.active_range(@patient.id, target_date.to_date)
+
+    # raise @current_range.to_yaml
+    
+    encounters = {}
+
+    @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e|    
+      encounters[e.encounter_datetime.strftime("%d/%b/%Y")] = {"USER" => User.find(e.creator).name}      
+    }
+
+    @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
+      encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = {} # rescue ""
+    }
+
+    @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
+      e.observations.each{|o| 
+        if o.to_a[0]
+          if o.to_a[0].upcase == "DIAGNOSIS" && encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase]
+            encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] += "; " + o.to_a[1]
+          else
+            encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] = o.to_a[1]
+            if o.to_a[0].upcase == "PLANNED DELIVERY PLACE"
+              @current_range[0]["PLANNED DELIVERY PLACE"] = o.to_a[1]
+            elsif o.to_a[0].upcase == "MOSQUITO NET"
+              @current_range[0]["MOSQUITO NET"] = o.to_a[1]
+            end
+          end
+        end
+      }
+    }
+
+    @drugs = {}; 
+    @other_drugs = {}; 
+    main_drugs = ["TTV", "SP", "Fefol", "NVP", "TMP/SMX", "TDF/3TC/EFV"]
+    
+    @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
+      :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
+        EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e| 
+      @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
+      @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
+      e.orders.each{|o| 
+        if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])
+          @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        else
+          @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        end
+      }      
+    }
+    
+    label = ZebraPrinter::StandardLabel.new
+
+    label.draw_line(20,25,800,2,0)
+    label.draw_line(20,25,2,280,0)
+    label.draw_line(20,305,800,2,0)
+    label.draw_line(805,25,2,280,0)
+    label.draw_line(20,130,800,2,0)
+    label.draw_line(20,190,800,2,0)
+    label.draw_line(100,130,2,175,0)
+    label.draw_line(200,130,2,175,0)
+    label.draw_line(300,130,2,175,0)
+    label.draw_line(400,130,2,175,0)
+    label.draw_line(500,130,2,175,0)
+    label.draw_line(600,130,2,175,0)
+    label.draw_line(700,130,2,175,0)
+    label.draw_text("Planned Delivery Place: #{@current_range[0]["PLANNED DELIVERY PLACE"] rescue ""}",28,66,0,1,1,1,false)
+    label.draw_text("Bed Net Given: #{@current_range[0]["MOSQUITO NET"] rescue ""}",28,99,0,1,1,1,false)
+    label.draw_text("TDF/",40,140,0,1,1,1,false)
+    label.draw_text("3TC/",40,158,0,1,1,1,false)
+    label.draw_text("EFV",40,176,0,1,1,1,false)
+    label.draw_text("NVP",129,140,0,1,1,1,false)
+    label.draw_text("Baby(ml)",110,158,0,1,1,1,false)
+    label.draw_text("On CPT",219,140,0,1,1,1,false)
+    label.draw_text("On ART",319,140,0,1,1,1,false)
+    label.draw_text("Signs/",429,140,0,1,1,1,false)
+    label.draw_text("Symptoms",410,158,0,1,1,1,false)
+    label.draw_text("Medics./",510,140,0,1,1,1,false)
+    label.draw_text("Next Vis.",610,140,0,1,1,1,false)
+    label.draw_text("Outcome",510,158,0,1,1,1,false)
+    label.draw_text("Date",629,158,0,1,1,1,false)
+    label.draw_text("Provider",710,140,0,1,1,1,false)
+
+    @i = 0
+
+    encounters.sort.each do |encounter|
+      @i = @i + 1
+      
+      if encounter[0] == target_date.to_date.strftime("%d/%b/%Y")
+        
+        tdf = (@drugs[encounter[0]]["TDF/3TC/EFV"].to_i > 0 ? @drugs[encounter[0]]["TDF/3TC/EFV"].to_i : "") rescue ""
+          
+        label.draw_text(tdf,40,200,0,1,1,1,false)
+        
+        nvp = (@drugs[encounter[0]]["NVP"].to_i > 0 ? @drugs[encounter[0]]["NVP"].to_i : "") rescue ""
+          
+        label.draw_text(nvp,129,200,0,1,1,1,false)
+      
+        cpt = (encounters[encounter[0]]["LAB RESULTS"]["TAKING CO-TRIMOXAZOLE PREVENTIVE THERAPY"].upcase == "YES" ? "Y" : "N") rescue ""
+        
+        label.draw_text(cpt,219,200,0,1,1,1,false)
+        
+        art = (encounters[encounter[0]]["LAB RESULTS"]["ON ART"].upcase == "YES" ? "Y" : "N") rescue ""
+        
+        label.draw_text(art,319,200,0,1,1,1,false)
+        
+        sign = encounters[encounter[0]]["OBSERVATIONS"]["DIAGNOSIS"].humanize rescue ""
+        
+        label.draw_text(sign,429,200,0,1,1,1,false)
+        
+        med = encounters[encounter[0]]["UPDATE OUTCOME"]["OUTCOME"].humanize rescue ""
+        oth = (@other_drugs[encounter[0]].collect{|d, v| 
+            "#{d}: #{ (v.to_s.match(/\.[1-9]/) ? v : v.to_i) }"
+          }.join("; ")) if @other_drugs[encounter[0]].length > 0 rescue ""
+          
+        med = paragraphate(med.to_s + oth.to_s, 6, 5)
+        
+        (0..(med.length)).each{|m|
+          label.draw_text(med[m],510,(200 + (13 * m)),0,1,1,1,false)
+        }
+        
+        nex = encounters[encounter[0]]["APPOINTMENT"]["APPOINTMENT DATE"] rescue ""
+        
+        label.draw_text(nex,610,200,0,1,1,1,false)
+        
+        use = encounters[encounter[0]]["USER"] rescue ""
+          
+        label.draw_text(use,710,200,0,1,1,1,false)
+        
+      end
+    end
+    
+    label.print(1)
+  end
+  
+  def abbreviate(string)
+    string.strip.split(" ").collect{|e| e[0,1].upcase + "." if e[0,1] != ("(")}.join("")
+  end
+  
+  def truncate(string, length = 6)
+    string[0,length] + "."
+  end
+  
+  def paragraphate(string, collen = 10, rows = 2)
+    arr = []
+    
+    string = string.strip
+    
+    (0..rows).each{|p| 
+      if !(string[p*collen,collen]).nil?
+        if p == rows
+          arr << (string[p*collen,collen] + ".") if !(string[p*collen,collen]).nil?
+        elsif string[((p*collen) + collen),1] != " " && !string.strip[((p+1)*collen),collen].nil?
+          arr << (string[p*collen,collen] + "-") if !(string[p*collen,collen]).nil?
+        else 
+          arr << string[p*collen,collen] if !(string[p*collen,collen]).nil?
+        end
+      end
+    }
+    arr
   end
   
 end

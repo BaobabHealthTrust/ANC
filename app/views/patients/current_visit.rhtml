@@ -96,6 +96,19 @@
           &nbsp;
         </div>
       </div>
+      <div style="display: table-row">
+        <div style="display: table-cell">
+         <button class="blue" onclick="window.location = '/patients/print_exam_label/?patient_id=<%= @patient.id %>'">
+            <span>Print Examinations Label</span>
+          </button>
+        </div>
+        <div style="display: table-cell">          
+          <button class="blue" onclick="window.location = '/patients/print_visit_label/?patient_id=<%= @patient.id %>'">
+            <span>Print Visit Summary</span>
+          </button>
+          &nbsp;
+        </div>
+      </div>
     </div>
   </center>
   <div id="nav">
