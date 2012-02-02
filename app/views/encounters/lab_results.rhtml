@@ -105,7 +105,7 @@
     :tt_onLoad => "unknownToNotDone()",
     :condition => "#{ (params[:update] ? "getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
-  <%= touch_date_tag "HIV test date", @patient, "#{session[:datetime].to_date rescue Date.today}",
+  <%= touch_date_tag "HIV test date", @patient, nil,
     {:id => "enter_date_result_given",
     :helptext => "Date Result Given",
     :condition => "__$('new_test_result_at_current_facility').value != 'Not Done'#{ (params[:update] ? 
@@ -150,7 +150,7 @@
     :tt_onLoad => "unknownToNotDone()",
     :condition => "#{ (params[:update] ? "getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
 
-  <%= touch_date_tag "Syphilis Test Result Date", @patient, "#{session[:datetime].to_date rescue Date.today}",
+  <%= touch_date_tag "Syphilis Test Result Date", @patient, nil,
     {:id => "enter_date_syphilis_result_given",
     :helptext => "Date Syphilis Test Result Given",
     :max => "#{session[:datetime].to_date rescue Date.today}",
