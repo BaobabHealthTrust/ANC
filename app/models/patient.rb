@@ -1054,7 +1054,58 @@ EOF
     label.print(1)
   end
   
-  def examination_label(date = Date.today)
+  def examination_label(target_date = Date.today)
+    @patient = self rescue nil
+
+    syphil = {}
+    @patient.encounters.find(:all, :conditions => ["encounter_type IN (?)", 
+        EncounterType.find_by_name("LAB RESULTS").id]).each{|e| 
+      e.observations.active.each{|o| 
+        syphil[o.concept.name.name.upcase] = o.answer_string.upcase
+      }      
+    }
+    
+    @syphilis = syphil["SYPHILIS TEST RESULT"].titleize rescue nil
+
+    @syphilis_date = syphil["SYPHILIS TEST RESULT DATE"].to_date.strftime("%Y/%m/%d") rescue nil
+
+    @hiv_test = syphil["HIV STATUS"].titleize rescue nil
+
+    @hiv_test_date = syphil["HIV TEST DATE"].to_date.strftime("%Y/%m/%d") rescue nil
+
+    hb = {}; pos = 1; 
+    
+    @patient.encounters.active.find(:all, 
+      :order => "encounter_datetime DESC", :conditions => ["encounter_type = ?", 
+        EncounterType.find_by_name("LAB RESULTS").id]).each{|e| 
+      e.observations.active.each{|o| hb[o.concept.name.name.upcase + " " + 
+            pos.to_s] = o.answer_string.upcase; pos += 1 if o.concept.name.name.upcase == "HB TEST RESULT DATE";
+      }      
+    }
+    
+    @hb1 = hb["HB TEST RESULT 1"] rescue nil
+
+    @hb1_date = hb["HB TEST RESULT DATE 1"].to_date.strftime("%Y/%m/%d") rescue nil
+
+    @hb2 = hb["HB TEST RESULT 2"] rescue nil
+
+    @hb2_date = hb["HB TEST RESULT DATE 2"].to_date.strftime("%Y/%m/%d") rescue nil
+
+    @cd4 = syphil['CD4 COUNT'] rescue nil
+
+    @cd4_date = syphil['CD4 COUNT DATETIME'].to_date.strftime("%Y/%m/%d") rescue nil
+
+    @height = @patient.current_height.to_i
+
+    @multiple = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["encounter_type = ?", 
+            EncounterType.find_by_name("CURRENT PREGNANCY").id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Multiple Gestation').concept_id]).answer_string rescue nil
+
+    @who = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('WHO STAGE').concept_id]).answer_string.to_i rescue nil
+
     label = ZebraPrinter::StandardLabel.new
 
     label.draw_text("Examination",28,29,0,1,1,2,false)
@@ -1064,27 +1115,44 @@ EOF
     label.draw_text("Multiple Pregnancy",28,110,0,1,1,1,false)
     label.draw_text("WHO Clinical Stage",28,140,0,1,1,1,false)
     label.draw_text("Lab Results",28,165,0,1,1,2,false)
-    label.draw_text("Date",185,174,0,1,1,1,false)
-    label.draw_text("Result",265,174,0,1,1,1,false)
+    label.draw_text("Date",190,174,0,1,1,1,false)
+    label.draw_text("Result",305,174,0,1,1,1,false)
     label.draw_text("HIV",28,200,0,1,1,1,false)
     label.draw_text("Syphilis",28,230,0,1,1,1,false)
     label.draw_text("Hb1",28,260,0,1,1,1,false)
     label.draw_text("Hb2",28,290,0,1,1,1,false)
-    label.draw_line(230,70,130,1,0)
+    label.draw_line(230,70,160,1,0)
     label.draw_line(230,70,1,90,0)
-    label.draw_line(180,306,180,1,0)
-    label.draw_line(360,70,1,90,0)
+    label.draw_line(180,306,210,1,0)
+    label.draw_line(390,70,1,90,0)
+    
     label.draw_line(180,190,1,115,0)
-    label.draw_line(260,190,1,115,0)
-    label.draw_line(360,190,1,115,0)
-    label.draw_line(230,100,130,1,0)
-    label.draw_line(230,130,130,1,0)
-    label.draw_line(230,160,130,1,0)
-    label.draw_line(180,190,180,1,0)
-    label.draw_line(180,220,180,1,0)
-    label.draw_line(180,250,180,1,0)
-    label.draw_line(180,280,180,1,0)
-
+    label.draw_line(300,190,1,115,0)
+    label.draw_line(390,190,1,115,0)
+    
+    label.draw_line(230,100,160,1,0)    
+    label.draw_line(230,130,160,1,0)
+    label.draw_line(230,160,160,1,0)
+    
+    label.draw_line(180,190,210,1,0)
+    label.draw_line(180,220,210,1,0)
+    label.draw_line(180,250,210,1,0)
+    label.draw_line(180,280,210,1,0)
+    
+    label.draw_text(@height,240,80,0,1,1,1,false)
+    label.draw_text(@multiple,240,110,0,1,1,1,false)
+    label.draw_text(@who,240,140,0,1,1,1,false)
+        
+    label.draw_text(@hiv_test_date,190,200,0,1,1,1,false)
+    label.draw_text(@syphilis_date,190,230,0,1,1,1,false)
+    label.draw_text(@hb1_date,190,260,0,1,1,1,false)
+    label.draw_text(@hb2_date,190,290,0,1,1,1,false)
+        
+    label.draw_text(@hiv_test,305,200,0,1,1,1,false)
+    label.draw_text(@syphilis,305,230,0,1,1,1,false)
+    label.draw_text(@hb1,305,260,0,1,1,1,false)
+    label.draw_text(@hb2,305,290,0,1,1,1,false)
+    
     label.print(1)
   end
   
