@@ -686,7 +686,8 @@ class PatientsController < ApplicationController
       "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
     current_level = 0
     
-    @patient.encounters.active.all.each{|e| 
+    Encounter.find(:all, :conditions => ["encounter_type = ? AND patient_id = ?", 
+        EncounterType.find_by_name("OBSTETRIC HISTORY").id, @patient.id]).each{|e| 
       e.observations.active.each{|obs|
         concept = obs.concept.name.name rescue nil
         if(!concept.nil?)
