@@ -151,7 +151,7 @@
         tstCurrentPage).value.trim() : "?");
       
       if(parseInt(__$("touchscreenInput" + tstCurrentPage).value) > 90 && alreadyNoted == false){ 
-        showMessage('Client is at risk of pre-eclampsia. Please refer her for Urine Protein test.'); 
+        showMessage('Client is at risk of pre-eclampsia. Please refer her for Urine Protein test.',false,false); 
         alreadyNoted = true;
       } else if(parseInt(__$("touchscreenInput" + tstCurrentPage).value) <= 90){
         alreadyNoted = false;

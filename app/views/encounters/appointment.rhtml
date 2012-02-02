@@ -288,11 +288,11 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
 
   <% 
   current = (session[:datetime] ? session[:datetime].to_date : Date.today).strftime("%Y-%m-%d")
-  trimester = current.to_date - @current_range[0]["START"].to_date rescue 0
+  trimester = (current.to_date - @current_range[0]["START"].to_date).to_i / 7 rescue 0
   
   periods = {22 => "20-24 weeks", 30 => "28-32 weeks", 36 => "36 weeks", 0 => "Other"} 
   
-  actual = periods.collect{|p, v| [v, p] if p < trimester}
+  actual = periods.collect{|p, v| [v, p] if p > trimester || p == 0}
 %>
   
   <%= select_tag("time_until_next_visit", options_for_select(actual),

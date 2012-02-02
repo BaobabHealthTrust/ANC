@@ -86,19 +86,20 @@ class EncountersController < ApplicationController
     end
 
     redirect_to "/patients/current_visit?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") ==
-      "VITALS" || (encounter.type.name.upcase rescue "") == "LAB RESULTS" ||
-      (encounter.type.name.upcase rescue "") == "OBSERVATIONS" ||
-      (encounter.type.name.upcase rescue "") == "DIAGNOSIS" ||
-      (encounter.type.name.upcase rescue "") == "TREATMENT" ||
-      (encounter.type.name.upcase rescue "") == "UPDATE OUTCOME" ||
-      (encounter.type.name.upcase rescue "") == "APPOINTMENT")
+        "VITALS" || (encounter.type.name.upcase rescue "") == "LAB RESULTS" ||
+        (encounter.type.name.upcase rescue "") == "OBSERVATIONS" ||
+        (encounter.type.name.upcase rescue "") == "DIAGNOSIS" ||
+        (encounter.type.name.upcase rescue "") == "TREATMENT" ||
+        (encounter.type.name.upcase rescue "") == "UPDATE OUTCOME" ||
+        (encounter.type.name.upcase rescue "") == "APPOINTMENT")
       
     redirect_to "/patients/patient_history?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") ==
-      "OBSTETRIC HISTORY" || (encounter.type.name.upcase rescue "") == "MEDICAL HISTORY" || 
-      (encounter.type.name.upcase rescue "") == "SURGICAL HISTORY" || 
-      (encounter.type.name.upcase rescue "") == "SOCIAL HISTORY")
+        "OBSTETRIC HISTORY" || (encounter.type.name.upcase rescue "") == "MEDICAL HISTORY" || 
+        (encounter.type.name.upcase rescue "") == "SURGICAL HISTORY" || 
+        (encounter.type.name.upcase rescue "") == "SOCIAL HISTORY")
   
-    # redirect_to "/patients/show/#{@patient.id}"
+    redirect_to "/patients/current_visit/?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") == 
+        "ANC VISIT TYPE")
     
     # Go to the next task in the workflow (or dashboard)
     redirect_to next_task(@patient) 
@@ -187,9 +188,9 @@ class EncountersController < ApplicationController
   def arv_regimen_answers(options = {})
     answer_array = Array.new
     regimen_types = ['FIRST LINE ANTIRETROVIRAL REGIMEN', 
-                     'ALTERNATIVE FIRST LINE ANTIRETROVIRAL REGIMEN',
-                     'SECOND LINE ANTIRETROVIRAL REGIMEN'
-                    ]
+      'ALTERNATIVE FIRST LINE ANTIRETROVIRAL REGIMEN',
+      'SECOND LINE ANTIRETROVIRAL REGIMEN'
+    ]
 
     regimen_types.collect{|regimen_type|
       Concept.find_by_name(regimen_type).concept_members.flatten.collect{|member|
@@ -231,6 +232,35 @@ class EncountersController < ApplicationController
     
     render :text => "<li></li><li " + locations.map{|location| "value=\"#{location}\">#{location}" }.join("</li><li ") + "</li>"
 
+  end
+  
+  def anc_diagnoses
+
+    search_string         = (params[:search_string] || '').upcase
+
+    diagnosis_concepts = ["Malaria", 
+      "Anaemia", 
+      "Severe Anaemia", 
+      "Pre-eclampsia", 
+      "Eclampsia", 
+      "Vaginal Bleeding", 
+      "Severe Headache", 
+      "Blurred vision", 
+      "Oedema", 
+      "Dizziness", 
+      "Fever", 
+      "Early rupture of membranes", 
+      "Premature Labour", 
+      "Labour Pains", 
+      "Abdominal Pain", 
+      "Pneumonia", 
+      "Threatened Abortion", 
+      "Extensive Warts"]
+  
+    @results = diagnosis_concepts.collect{|e| e}.delete_if{|x| !x.match(/^#{search_string}/)}
+
+    render :text => "<li>" + @results.join("</li><li>") + "</li>"
+    
   end
 
 end

@@ -149,14 +149,16 @@
         <td class="topic leftTop" rowspan="2">
           FeFo
         </td>
-        <td class="topic leftTop" rowspan="2">
+        <!--td class="topic leftTop" rowspan="2">
           NVP
         </td>
         <td class="topic leftTop" rowspan="2">
           AZT
-        </td>
-        <td class="topic leftTop" rowspan="2">
-          AZT 3TC
+        </td-->
+        <td class="topic leftTop" rowspan="2" colspan="3">
+          TDF/
+          3TC/
+          EFV
         </td>
         <td class="topic leftTop" rowspan="2">
           NVP
@@ -196,8 +198,8 @@
                 @encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i.to_s + " (wks)") rescue "&nbsp;" %>
           </td>
           <td class="leftTop">
-            <%= @encounters[encounter[0]]["OBSERVATIONS"]["POSITION"] rescue "&nbsp;" %>&nbsp;
-            <%= @encounters[encounter[0]]["OBSERVATIONS"]["PRESENTATION"] rescue "&nbsp;" %>
+            <%= (@encounters[encounter[0]]["OBSERVATIONS"]["POSITION"]).to_s.titleize.gsub("Breech Delivery", "Breech") rescue "&nbsp;" %>&nbsp;
+            <%= (@encounters[encounter[0]]["OBSERVATIONS"]["PRESENTATION"]).to_s.titleize.gsub("Breech Delivery", "Breech") rescue "&nbsp;" %>
           </td>
           <td class="leftTop" align="center">
             <%= (@encounters[encounter[0]]["OBSERVATIONS"]["FETAL HEART BEAT"].humanize == "Unknown" ? "?" :
@@ -230,17 +232,17 @@
           <td class="leftTop" align="center">
             <%= (@drugs[encounter[0]]["Fefol"].to_i > 0 ? @drugs[encounter[0]]["Fefol"].to_i : "&nbsp;") rescue "&nbsp;";  %> 
           </td>
-          <td class="leftTop" align="center">
-            <%= (@drugs[encounter[0]]["NVP"].to_i > 0 ? @drugs[encounter[0]]["NVP"].to_i : "&nbsp;") rescue "&nbsp;";  %> 
-          </td>
-          <td class="leftTop" align="center">
-            <%= (@drugs[encounter[0]]["TMP/SMX"].to_i > 0 ? @drugs[encounter[0]]["TMP/SMX"].to_i : "&nbsp;") rescue "&nbsp;";  %>                            
-          </td>
-          <td class="leftTop" align="center">
+          <!--td class="leftTop" align="center">
+            <%#= (@drugs[encounter[0]]["NVP"].to_i > 0 ? @drugs[encounter[0]]["NVP"].to_i : "&nbsp;") rescue "&nbsp;";  %> 
+          </td-->
+          <!--td class="leftTop" align="center">
+            <%#= (@drugs[encounter[0]]["TMP/SMX"].to_i > 0 ? @drugs[encounter[0]]["TMP/SMX"].to_i : "&nbsp;") rescue "&nbsp;";  %>                            
+          </td-->
+          <td class="leftTop" align="center" colspan="3">
             <%= (@drugs[encounter[0]]["TDF/3TC/EFV"].to_i > 0 ? @drugs[encounter[0]]["TDF/3TC/EFV"].to_i : "&nbsp;") rescue "&nbsp;";  %>                            
           </td>
           <td class="leftTop" align="center">
-            <%= @encounters[encounter[0]]["PMTCT MANAGEMENT"]["NVP BABY?"].to_i rescue "&nbsp;" %>
+            <%= (@drugs[encounter[0]]["NVP"].to_i > 0 ? @drugs[encounter[0]]["NVP"].to_i : "&nbsp;") rescue "&nbsp;"; %>
           </td>
           <td class="leftTop" align="center" colspan="2">
             <%= (@encounters[encounter[0]]["LAB RESULTS"]["TAKING CO-TRIMOXAZOLE PREVENTIVE THERAPY"].upcase == "YES" ? "Y" : "N") rescue "&nbsp;" %>
@@ -395,15 +397,15 @@
             style="border-bottom: 1px solid #000;">
           &nbsp;
         </td>
-        <td class="leftTop"
+        <!--td class="leftTop"
             style="border-bottom: 1px solid #000;">
           &nbsp;
         </td>
         <td class="leftTop"
             style="border-bottom: 1px solid #000;">
           &nbsp;
-        </td>
-        <td class="leftTop"
+        </td-->
+        <td class="leftTop" colspan="3"
             style="border-bottom: 1px solid #000;">
           &nbsp;
         </td>

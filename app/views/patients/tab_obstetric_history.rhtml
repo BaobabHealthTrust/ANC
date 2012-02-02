@@ -112,7 +112,7 @@
           Haemorrhage
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@haemorrhage == "PPH" ? "class='selected'" : "") %>>
+            align="center" <%= (@haemorrhage.upcase == "PPH" ? "class='selected'" : "") %>>
           &nbsp;<%= @haemorrhage %>&nbsp;
         </td>
       </tr>
@@ -122,9 +122,20 @@
         </td>
         <td style="border: 1px solid #000;"
             align="center" <%= (@preeclampsia != "NO" ? "class='selected'" : "") %>>
-          &nbsp;<%= (!@preeclampsia.nil? ? (@preeclampsia == "NO" ? "NO" : "YES") : "") %>&nbsp;
+          &nbsp;<%= (!@preeclampsia.nil? ? (@preeclampsia.upcase == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
       </tr>
+      <% if (!@preeclampsia.nil? ? (@preeclampsia.upcase == "NO" ? "NO" : "YES") : "NO") == "YES" %>
+        <tr>
+          <td style="padding-left: 10px;">
+            Eclampsia
+          </td>
+          <td style="border: 1px solid #000;"
+              align="center" <%= (@eclampsia.upcase != "NO" ? "class='selected'" : "") %>>
+            &nbsp;<%= (!@eclampsia.nil? ? (@eclampsia.upcase == "NO" ? "NO" : "YES") : "") %>&nbsp;
+          </td>
+        </tr>
+      <% end %>
     </table>
   </td>
 </tr>

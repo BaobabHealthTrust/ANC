@@ -1,7 +1,7 @@
 <style type="text/css">
 
   table {
-    width: 70%;
+    width: 100%;
     border-collapse: collapse;
   }
 
@@ -29,6 +29,12 @@
     border-width: 0px 1px 1px;
   }
 
+  #printButton {
+    position: absolute;
+    top: 630px;
+    left: 630px;
+    z-index: 1;
+  }
 </style>
 
 <script type="text/javascript">
@@ -74,7 +80,7 @@
           <td class='title'><a href="edit_demographics?patient_id=<%=@patient.id%>&field=current_district"> Current District</a> </td>
           <td class='data'> <%=@current_district%></td>
           </tr>
-	 <tr>
+         <tr>
             <td class='title'><a href="edit_demographics?patient_id=<%=@patient.id%>&field=home_district"> Home District</a></td>
             <td class='data'><%=@home_district%></td>
           </tr>
@@ -91,12 +97,21 @@
           <td class='data'><%=@occupation%><br/> </td>
         </tr>
       </table>
+
+      <button id="printButton" class="button blue" style="margin-top: 50px; float: right; margin-right: 290px;"
+              onclick="window.location = '/patients/print_registration?patient_id=<%= @patient.id %>'">
+        <span>Print Registration</span>
+      </button>
     </div>
   </div>
 </div>
 <div id="footer" style="position: absolute; bottom: 80px; width: 1000px;">
   <div id="buttons" class="buttonsDiv" style="top:0px">
-    <button id="finishButton" class="button navButton green" onclick="if (tt_cancel_destination) window.location = tt_cancel_destination;"><span>Finish</span></button></div>
+    <button id="finishButton" class="button navButton green" 
+            onclick="if (tt_cancel_destination) window.location = tt_cancel_destination;">
+      <span>Finish</span>
+    </button>
+  </div>
   <div id="tt_extraButtons"/>
 </div>
 

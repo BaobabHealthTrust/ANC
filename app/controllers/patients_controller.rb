@@ -13,10 +13,15 @@ class PatientsController < ApplicationController
         @current_range[0]["START"], @current_range[0]["END"]]).map{|encounter| encounter.name}.uniq rescue []
 
     @names = @encounters.collect{|e|
-      e.name
+      e.name.upcase
     }
     
-    # raise @names.to_yaml
+    @current_encounter_names = @patient.encounters.active.find(:all, 
+      :conditions => ["DATE_FORMAT(encounter_datetime, '%Y-%m-%d') = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]).collect{|e|
+      e.name.upcase
+    }
+    
+    # raise @current_encounter_names.to_yaml
     
     render :layout => 'dynamic-dashboard'
   end
@@ -89,7 +94,7 @@ class PatientsController < ApplicationController
   end
 
   def print_registration
-    print_and_redirect("/patients/national_id_label/?patient_id=#{@patient.id}", next_task(@patient))  
+    print_and_redirect("/patients/national_id_label/?patient_id=#{@patient.id}", "/patients/demographics?patient_id=#{@patient.id}")  
   end
 
   def print_visit
@@ -317,6 +322,11 @@ class PatientsController < ApplicationController
         Encounter.active.find(:all).collect{|e| e.encounter_id},
         ConceptName.find_by_name('PRE-ECLAMPSIA').concept_id]).answer_string rescue nil
 
+    @eclampsia = Observation.find(:last,
+      :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
+        Encounter.active.find(:all).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('ECLAMPSIA').concept_id]).answer_string rescue nil
+
     render :layout => false
   end
 
@@ -473,7 +483,7 @@ class PatientsController < ApplicationController
 
     @drugs = {}; 
     @other_drugs = {}; 
-    main_drugs = ["TTV", "SP", "Fefol", "NVP", "TMP/SMX", "TDF/3TC/EFV"]
+    main_drugs = ["TTV", "SP", "Fefol", "NVP", "TDF/3TC/EFV"]
     
     @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
       :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
@@ -783,6 +793,10 @@ class PatientsController < ApplicationController
 
   def print_labels
     @patient = Patient.find(params[:patient_id] || session[:patient_id])
+  end
+  
+  def visit_type
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil    
   end
   
   private

@@ -26,6 +26,11 @@
                       __$('multiple_pregnancy').value = 'No';
                       __$('enter_number_of_abortions').value = 0;
                       __$('pre_eclampsia').value = 'No';
+                      __$('ever_had_symphysiotomy').value = 'No';
+                      __$('hemorrhage').value = 'No';
+                      __$('ever_had_c_sections').value = 'No';
+                      __$('ever_had_a_vacuum_extraction').value = 'No';
+                      __$('ever_had_still_births').value = 'No';
                     }",
     :tt_pageStyleClass => "NumbersOnly"} %>
 
@@ -40,7 +45,13 @@
     :tt_pageStyleClass => "NumbersWithUnknown",
     :condition => "((__$('multiple_pregnancy').value == 'No' && (__$('enter_gravida').value) > 1) || (__$('multiple_pregnancy').value == 'Yes' && __$('enter_gravida').value > 1))",
     :tt_onLoad => "if(__$('multiple_pregnancy').value == 'No'){__$('touchscreenInput' + " + 
-      "tstCurrentPage).setAttribute('absoluteMax', (__$('enter_gravida').value - 1))}"
+      "tstCurrentPage).setAttribute('absoluteMax', (__$('enter_gravida').value - 1))}",
+    :tt_onUnLoad => "if(__$('enter_number_of_deliveries').value == 0){
+                      __$('ever_had_still_births').value = 'No';
+                      __$('ever_had_symphysiotomy').value = 'No';
+                      __$('ever_had_c_sections').value = 'No';
+                      __$('ever_had_a_vacuum_extraction').value = 'No';
+                    }"
   } %>
 
   <% (1..8).each{|e| %>
@@ -94,7 +105,9 @@
     <%= touch_select_tag "Method of Delivery", @patient, options_for_select(@delivery_modes),
     {:id => "method_of_delivery#{e}",
       :helptext => "Method of Delivery #{e}#{indice} Child",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>
+      :condition => "__$('enter_number_of_deliveries').value >= #{e}",
+      :tt_onUnLoad => "if(__$('method_of_delivery#{e}').value == 'Caesarean Section'){__$('ever_had_c_sections').value = 'Yes';} " + 
+          " else if(__$('method_of_delivery#{e}').value == 'Vacuum Extraction Delivery'){__$('ever_had_a_vacuum_extraction').value = 'Yes';}" } %>
 
     <%= touch_select_tag "Condition at Birth", @patient, 
       options_for_select([["", ""], ["Alive", "Alive"], ["Still Birth","Still Birth"]]),
@@ -137,7 +150,10 @@
     {:id => "enter_number_of_abortions",
     :helptext => "Enter Number Of Abortions",
     :tt_pageStyleClass => "NumbersWithUnknown",
-    :condition => "__$('enter_gravida').value > 1" } %>
+    :condition => "__$('enter_gravida').value > 1",
+    :min => 0,
+    :max => 5
+  } %>
 
 
   <% (1..8).each{|e| %>
@@ -156,6 +172,7 @@
     end
 
     @procedures = ["", "Manual Vacuum Aspiration (MVA)", "Evacuation"]
+    @place = ["", "Health Facility", "Home", "TBA", "Other"]
   %>
 
     <%= touch_numeric_tag "YEAR OF BIRTH", @patient, nil,
@@ -166,23 +183,23 @@
       :validationMessage => "Please enter a proper year in the form 'YYYY'",
       :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
 
-    <%= touch_text_field_tag "Place of Birth", @patient, nil,
+    <%= touch_select_tag "Place of Birth", @patient, options_for_select(@place),
     {:id => "delivery#{e}",
       :helptext => "Place of #{e}#{indice} Abortion",
-      :ajaxURL => "/encounters/static_locations?extras=true&search_string=",
+      # :ajaxURL => "/encounters/static_locations?extras=true&search_string=",
       :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
 
     <%= touch_select_tag "Type of Abortion", @patient, options_for_select(["", "Incomplete abortion", "Complete abortion"]),
     {:id => "type_of_abortion#{e}",
       :helptext => "Type of #{e}#{indice} Abortion",
-      :condition => "__$('enter_number_of_abortions').value >= #{e}"
+      :condition => "__$('enter_number_of_abortions').value >= #{e}",
+      :tt_onUnLoad => "__$('condition_at_birth_abortion#{e}').value = 'Abortion'"
     } %>
 
     <%= touch_select_tag "Procedure Done", @patient, options_for_select(@procedures),
     {:id => "method_of_delivery#{e}",
       :helptext => "Procedure Done #{e}#{indice} Abortion",
-      :condition => "__$('enter_number_of_abortions').value >= #{e} && __$('type_of_abortion#{e}').value == 'Incomplete abortion'",
-      :tt_onUnLoad => "__$('condition_at_birth_abortion#{e}').value = 'Abortion'"
+      :condition => "__$('enter_number_of_abortions').value >= #{e} && __$('type_of_abortion#{e}').value == 'Incomplete abortion'"
     } %>
 
     <%= touch_text_field_tag "Gestation", @patient, nil,
@@ -206,30 +223,29 @@
       controls = controls + (controls.length > 0 ? "&& " : "") + "__$('condition_at_birth#{e}').value != 'Still Birth' "
     }
   %>
-  <%= touch_select_tag "STILL BIRTH", @patient, options_for_select([["", ""], ["No", "No"], ["Yes", "Yes"]]),
+  <%= touch_hidden_tag "STILL BIRTH", @patient, "No",
     {:id => "ever_had_still_births",
     :helptext => "Ever Had Still Births?",
     :condition => "__$('enter_gravida').value > 0 && __$('enter_number_of_deliveries').value > 0 " + 
     "&& (#{controls})"} %>
-  <%#= touch_select_tag "Caesarean section", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "ever_had_c-sections?",
+  <%= touch_hidden_tag "Caesarean section", @patient, "No",
+    {:id => "ever_had_c_sections",
     :helptext => "Ever Had C-sections?",
     :condition => "__$('enter_gravida').value > 0" } %>
-  <%#= touch_select_tag "Vacuum extraction delivery", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  <%= touch_hidden_tag "Vacuum extraction delivery", @patient, "No",
     {:id => "ever_had_a_vacuum_extraction",
     :helptext => "Ever Had A Vacuum Extraction",
     :condition => "__$('enter_gravida').value > 0" } %>
 
   <%= touch_select_tag "SYMPHYSIOTOMY", @patient, options_for_select([["", ""], ["No", "No"], ["Yes", "Yes"]]),
-    {:id => "ever_had_symphysiotomy?",
+    {:id => "ever_had_symphysiotomy",
     :helptext => "Ever Had Symphysiotomy?",
     :condition => "__$('enter_number_of_deliveries').value > 0"
   } %>
 
   <%= touch_select_tag "HEMORRHAGE", @patient, options_for_select([["", ""], ["No", "No"], ["APH", "APH"], ["PPH", "PPH"]]),
     {:id => "hemorrhage",
-    :helptext => "Hemorrhage",
-    :condition => "__$('enter_number_of_deliveries').value > 0" 
+    :helptext => "Hemorrhage" 
   } %>
 
   <%= touch_select_tag "PRE-ECLAMPSIA", @patient, options_for_select([["", ""], ["No", "No"], ["Yes", "Yes"]]),

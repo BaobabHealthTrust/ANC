@@ -1,0 +1,25 @@
+
+<script type="text/javascript" language="javascript">
+  <!--
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+  //-->
+</script>
+
+<% form_tag :controller => "encounters", :action => "create" do %>
+  <%= hidden_field_tag "encounter[encounter_type_name]", "ANC VISIT TYPE" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%session_date = session[:datetime] || Time.now() %>
+
+  <%= touch_numeric_tag "Type of visit", @patient, nil,
+    {
+    :id => "visit",    
+    :helptext => "Type of ANC Visit",
+    :field_type => 'number',
+    :tt_pageStyleClass => "NumbersOnly",
+    :max => 7,
+    :min => 1
+  } %>
+<% end %>

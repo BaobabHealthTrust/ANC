@@ -1460,7 +1460,7 @@ function navigateToPage(destPage, validate, navback){
     }
     else{
 
-    /*
+        /*
         var popupBox = __$("popupBox");
         if (popupBox) {
             popupBox.style.visibility = "visible";
@@ -1587,7 +1587,7 @@ function clearInput(){
     }
 }
 
-function showMessage(aMessage, withCancel) {
+function showMessage(aMessage, withCancel, timed) {
     var messageBar = tstMessageBar;
     messageBar.innerHTML = aMessage +
     "<br />" + (typeof(withCancel) != "undefined" ? (withCancel == true ?
@@ -1597,7 +1597,9 @@ function showMessage(aMessage, withCancel) {
     "clearTimeout(tstTimerHandle); eval(tstTimerFunctionCall);'><span>Ok</span></button>";
     if (aMessage.length > 0) {
         messageBar.style.display = 'block'
-        window.setTimeout("hideMessage()",3000)
+        if((typeof(timed) == "undefined" ? true : timed) == true){
+            window.setTimeout("hideMessage()",3000)
+        }
     }
 }
 
@@ -3904,13 +3906,13 @@ function hideProgress(){
 
 function showStatus(){
     if(!__$("popupBox")){
-       var  popupBox = document.createElement("div");
-       popupBox.id = "popupBox";
-       popupBox.style.display = "none";
+        var  popupBox = document.createElement("div");
+        popupBox.id = "popupBox";
+        popupBox.style.display = "none";
        
-       popupBox.innerHTML = "<p>Processing. Please Wait ...</p>"
+        popupBox.innerHTML = "<p>Processing. Please Wait ...</p>"
        
-       __$("content").appendChild(popupBox);
+        __$("content").appendChild(popupBox);
     }
     
     __$("popupBox").style.display = "block";

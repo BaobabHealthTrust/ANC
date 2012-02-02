@@ -72,7 +72,9 @@
       </div>
       <div style="display: table-row">
         <div style="display: table-cell">  
-          &nbsp;
+          <button class="blue" onclick="window.location = '/patients/pregnancy_history/?patient_id=<%= @patient.id %>'">
+            <span>Pregnancy History</span>
+          </button>
         </div>
         <div style="display: table-cell">
           <button class="blue" onclick="window.location = '/patients/print_history/?patient_id=<%= @patient.id %>'">
