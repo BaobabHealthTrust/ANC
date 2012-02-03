@@ -1266,7 +1266,7 @@ EOF
         label.draw_text(gest,29,200,0,1,1,1,false)
         
         fund = (encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i <= 0 ? "?" : 
-            encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i.to_s + " (wks)") rescue ""
+            encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i.to_s + "(wks)") rescue ""
             
         label.draw_text(fund,99,200,0,1,1,1,false)
         
@@ -1392,30 +1392,33 @@ EOF
     label.draw_line(20,25,2,280,0)
     label.draw_line(20,305,800,2,0)
     label.draw_line(805,25,2,280,0)
+    
     label.draw_line(20,130,800,2,0)
     label.draw_line(20,190,800,2,0)
-    label.draw_line(100,130,2,175,0)
-    label.draw_line(200,130,2,175,0)
-    label.draw_line(300,130,2,175,0)
-    label.draw_line(400,130,2,175,0)
-    label.draw_line(500,130,2,175,0)
-    label.draw_line(600,130,2,175,0)
-    label.draw_line(700,130,2,175,0)
+    
+    label.draw_line(72,130,2,175,0)
+    label.draw_line(116,130,2,175,0)
+    label.draw_line(156,130,2,175,0)
+    label.draw_line(192,130,2,175,0)
+    label.draw_line(364,130,2,175,0)
+    label.draw_line(594,130,2,175,0)
+    label.draw_line(706,130,2,175,0)
     label.draw_text("Planned Delivery Place: #{@current_range[0]["PLANNED DELIVERY PLACE"] rescue ""}",28,66,0,1,1,1,false)
     label.draw_text("Bed Net Given: #{@current_range[0]["MOSQUITO NET"] rescue ""}",28,99,0,1,1,1,false)
-    label.draw_text("TDF/",40,140,0,1,1,1,false)
-    label.draw_text("3TC/",40,158,0,1,1,1,false)
-    label.draw_text("EFV",40,176,0,1,1,1,false)
-    label.draw_text("NVP",129,140,0,1,1,1,false)
-    label.draw_text("Baby(ml)",110,158,0,1,1,1,false)
-    label.draw_text("On CPT",219,140,0,1,1,1,false)
-    label.draw_text("On ART",319,140,0,1,1,1,false)
-    label.draw_text("Signs/",429,140,0,1,1,1,false)
-    label.draw_text("Symptoms",410,158,0,1,1,1,false)
-    label.draw_text("Medics./",510,140,0,1,1,1,false)
-    label.draw_text("Next Vis.",610,140,0,1,1,1,false)
-    label.draw_text("Outcome",510,158,0,1,1,1,false)
-    label.draw_text("Date",629,158,0,1,1,1,false)
+    label.draw_text("TDF/",28,140,0,1,1,1,false)
+    label.draw_text("3TC/",28,158,0,1,1,1,false)
+    label.draw_text("EFV",28,176,0,1,1,1,false)
+    label.draw_text("NVP",80,140,0,1,1,1,false)
+    label.draw_text("Baby",75,158,0,1,1,1,false)
+    label.draw_text("(ml)",75,176,0,1,1,1,false)
+    label.draw_text("On",122,140,0,1,1,1,false)
+    label.draw_text("CPT",120,158,0,1,1,1,false)
+    label.draw_text("On",162,140,0,1,1,1,false)
+    label.draw_text("ART",160,158,0,1,1,1,false)
+    label.draw_text("Signs/Symptoms",198,140,0,1,1,1,false)
+    label.draw_text("Medications/Outcome",370,140,0,1,1,1,false)
+    label.draw_text("Next Visit",600,140,0,1,1,1,false)
+    label.draw_text("Date",622,158,0,1,1,1,false)
     label.draw_text("Provider",710,140,0,1,1,1,false)
 
     @i = 0
@@ -1427,38 +1430,42 @@ EOF
         
         tdf = (@drugs[encounter[0]]["TDF/3TC/EFV"].to_i > 0 ? @drugs[encounter[0]]["TDF/3TC/EFV"].to_i : "") rescue ""
           
-        label.draw_text(tdf,40,200,0,1,1,1,false)
+        label.draw_text(tdf,28,200,0,1,1,1,false)
         
         nvp = (@drugs[encounter[0]]["NVP"].to_i > 0 ? @drugs[encounter[0]]["NVP"].to_i : "") rescue ""
           
-        label.draw_text(nvp,129,200,0,1,1,1,false)
+        label.draw_text(nvp,77,200,0,1,1,1,false)
       
         cpt = (encounters[encounter[0]]["LAB RESULTS"]["TAKING CO-TRIMOXAZOLE PREVENTIVE THERAPY"].upcase == "YES" ? "Y" : "N") rescue ""
         
-        label.draw_text(cpt,219,200,0,1,1,1,false)
+        label.draw_text(cpt,124,200,0,1,1,1,false)
         
         art = (encounters[encounter[0]]["LAB RESULTS"]["ON ART"].upcase == "YES" ? "Y" : "N") rescue ""
         
-        label.draw_text(art,319,200,0,1,1,1,false)
+        label.draw_text(art,164,200,0,1,1,1,false)
         
         sign = encounters[encounter[0]]["OBSERVATIONS"]["DIAGNOSIS"].humanize rescue ""
         
-        label.draw_text(sign,429,200,0,1,1,1,false)
+        sign = paragraphate(sign.to_s, 15, 5)
+        
+        (0..(sign.length)).each{|m|
+          label.draw_text(sign[m],198,(200 + (13 * m)),0,1,1,1,false)
+        }
         
         med = encounters[encounter[0]]["UPDATE OUTCOME"]["OUTCOME"].humanize rescue ""
         oth = (@other_drugs[encounter[0]].collect{|d, v| 
             "#{d}: #{ (v.to_s.match(/\.[1-9]/) ? v : v.to_i) }"
           }.join("; ")) if @other_drugs[encounter[0]].length > 0 rescue ""
           
-        med = paragraphate(med.to_s + oth.to_s, 6, 5)
+        med = paragraphate(med.to_s + oth.to_s, 20, 5)
         
         (0..(med.length)).each{|m|
-          label.draw_text(med[m],510,(200 + (13 * m)),0,1,1,1,false)
+          label.draw_text(med[m],370,(200 + (13 * m)),0,1,1,1,false)
         }
         
         nex = encounters[encounter[0]]["APPOINTMENT"]["APPOINTMENT DATE"] rescue ""
         
-        label.draw_text(nex,610,200,0,1,1,1,false)
+        label.draw_text(nex,598,200,0,1,1,1,false)
         
         use = encounters[encounter[0]]["USER"] rescue ""
           
@@ -1480,6 +1487,10 @@ EOF
   
   def paragraphate(string, collen = 10, rows = 2)
     arr = []
+    
+    if string.nil? 
+      return arr
+    end
     
     string = string.strip
     
