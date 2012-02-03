@@ -1195,7 +1195,7 @@ EOF
 
     @drugs = {}; 
     @other_drugs = {}; 
-    main_drugs = ["TTV", "SP", "Fefol", "NVP", "TMP/SMX", "TDF/3TC/EFV"]
+    main_drugs = ["TTV", "SP", "Fefol", "NVP", "Albendazole", "TDF/3TC/EFV"]
     
     @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
       :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
@@ -1319,7 +1319,7 @@ EOF
         
         label.draw_text(fefo,664,200,0,1,1,1,false)
         
-        albe = (@drugs[encounter[0]]["Albendazole"].to_i > 0 ? @drugs[encounter[0]]["Fefol"].to_i : "") rescue ""
+        albe = (@drugs[encounter[0]]["Albendazole"].to_i > 0 ? @drugs[encounter[0]]["Albendazole"].to_i : "") rescue ""
         
         label.draw_text(albe,740,200,0,1,1,1,false)
       end 
@@ -1370,7 +1370,7 @@ EOF
 
     @drugs = {}; 
     @other_drugs = {}; 
-    main_drugs = ["TTV", "SP", "Fefol", "NVP", "TMP/SMX", "TDF/3TC/EFV"]
+    main_drugs = ["TTV", "SP", "Fefol", "NVP", "Albendazole", "TDF/3TC/EFV"]
     
     @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
       :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
