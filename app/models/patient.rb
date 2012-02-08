@@ -1106,29 +1106,29 @@ EOF
         @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
         ConceptName.find_by_name('WHO STAGE').concept_id]).answer_string.to_i rescue nil
 
-    label = ZebraPrinter::StandardLabel.new
-
+    label = ZebraPrinter::StandardLabel.new   
+    
     label.draw_text("Examination",28,29,0,1,1,2,false)
     label.draw_line(25,55,115,1,0)
     label.draw_line(25,190,115,1,0)
-    label.draw_text("Height",28,80,0,1,1,1,false)
-    label.draw_text("Multiple Pregnancy",28,110,0,1,1,1,false)
-    label.draw_text("WHO Clinical Stage",28,140,0,1,1,1,false)
-    label.draw_text("Lab Results",28,165,0,1,1,2,false)
-    label.draw_text("Date",190,174,0,1,1,1,false)
-    label.draw_text("Result",305,174,0,1,1,1,false)
-    label.draw_text("HIV",28,200,0,1,1,1,false)
-    label.draw_text("Syphilis",28,230,0,1,1,1,false)
-    label.draw_text("Hb1",28,260,0,1,1,1,false)
-    label.draw_text("Hb2",28,290,0,1,1,1,false)
+    label.draw_text("Height",28,76,0,2,1,1,false)
+    label.draw_text("Multiple Pregnancy",28,106,0,2,1,1,false)
+    label.draw_text("WHO Clinical Stage",28,136,0,2,1,1,false)
+    label.draw_text("Lab Results",28,161,0,1,1,2,false)
+    label.draw_text("Date",190,170,0,2,1,1,false)
+    label.draw_text("Result",305,170,0,2,1,1,false)
+    label.draw_text("HIV",28,196,0,2,1,1,false)
+    label.draw_text("Syphilis",28,226,0,2,1,1,false)
+    label.draw_text("Hb1",28,256,0,2,1,1,false)
+    label.draw_text("Hb2",28,286,0,2,1,1,false)
     label.draw_line(230,70,160,1,0)
     label.draw_line(230,70,1,90,0)
     label.draw_line(180,306,210,1,0)
     label.draw_line(390,70,1,90,0)
     
-    label.draw_line(180,190,1,115,0)
-    label.draw_line(300,190,1,115,0)
-    label.draw_line(390,190,1,115,0)
+    label.draw_line(200,190,1,115,0)
+    label.draw_line(320,190,1,115,0)
+    label.draw_line(410,190,1,115,0)
     
     label.draw_line(230,100,160,1,0)    
     label.draw_line(230,130,160,1,0)
@@ -1139,19 +1139,19 @@ EOF
     label.draw_line(180,250,210,1,0)
     label.draw_line(180,280,210,1,0)
     
-    label.draw_text(@height,240,80,0,1,1,1,false)
-    label.draw_text(@multiple,240,110,0,1,1,1,false)
-    label.draw_text(@who,240,140,0,1,1,1,false)
+    label.draw_text(@height,240,76,0,2,1,1,false)
+    label.draw_text(@multiple,240,106,0,2,1,1,false)
+    label.draw_text(@who,240,136,0,2,1,1,false)
         
-    label.draw_text(@hiv_test_date,190,200,0,1,1,1,false)
-    label.draw_text(@syphilis_date,190,230,0,1,1,1,false)
-    label.draw_text(@hb1_date,190,260,0,1,1,1,false)
-    label.draw_text(@hb2_date,190,290,0,1,1,1,false)
+    label.draw_text(@hiv_test_date,190,196,0,2,1,1,false)
+    label.draw_text(@syphilis_date,190,226,0,2,1,1,false)
+    label.draw_text(@hb1_date,190,256,0,2,1,1,false)
+    label.draw_text(@hb2_date,190,286,0,2,1,1,false)
         
-    label.draw_text(@hiv_test,305,200,0,1,1,1,false)
-    label.draw_text(@syphilis,305,230,0,1,1,1,false)
-    label.draw_text(@hb1,305,260,0,1,1,1,false)
-    label.draw_text(@hb2,305,290,0,1,1,1,false)
+    label.draw_text(@hiv_test,305,196,0,2,1,1,false)
+    label.draw_text(@syphilis,305,226,0,2,1,1,false)
+    label.draw_text(@hb1,305,256,0,2,1,1,false)
+    label.draw_text(@hb2,305,286,0,2,1,1,false)
     
     label.print(1)
   end
@@ -1203,8 +1203,16 @@ EOF
       @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
       @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
       e.orders.each{|o| 
-        if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])
-          @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])          
+          if o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")] == "NVP"
+            if o.drug_order.drug.name.upcase.include?("ML")
+              @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+            else
+              @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+            end
+          else            
+            @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+          end          
         else
           @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
         end
@@ -1378,8 +1386,16 @@ EOF
       @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
       @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
       e.orders.each{|o| 
-        if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])
-          @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])          
+          if o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")] == "NVP"
+            if o.drug_order.drug.name.upcase.include?("ML")
+              @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+            else
+              @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+            end
+          else            
+            @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+          end          
         else
           @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
         end

@@ -88,16 +88,16 @@
 
     <%= touch_text_field_tag "Gestation", @patient, nil,
     {:id => "gestation#{e}",
-      :helptext => "Gestation #{e}#{indice} Child (Weeks)",
+      :helptext => "Gestation #{e}#{indice} Child (Months)",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}",
       :field_type => "number",
       :tt_pageStyleClass => "NumbersWithUnknown",
-      :max => 42
+      :max => 9
     } %>
 
     <%= touch_text_field_tag "Labour Duration", @patient, nil,
     {:id => "labour_duration#{e}",
-      :helptext => "Labour Duration #{e}#{indice} Child (Hours)",
+      :helptext => "Estimated Labour Duration #{e}#{indice} Child (Hours)",
       :condition => "__$('enter_number_of_deliveries').value >= #{e}",
       :field_type => "number",
       :tt_pageStyleClass => "NumbersWithUnknown" } %>
@@ -117,12 +117,11 @@
       :tt_onUnLoad => "if(__$('condition_at_birth#{e}').value == 'Still Birth'){__$('ever_had_still_births').value = 'Yes';}"
     } %>
 
-    <%= touch_numeric_tag "Birth Weight", @patient, nil,
+    <%= touch_select_tag "Birth Weight", @patient, 
+      options_for_select([["", ""], ["Big Baby (Above 4kg)", "Big Baby (Above 4kg)"], 
+        ["Average","Average"], ["Small Baby (Less than 2.5kg)", "Small Baby (Less than 2.5kg)"]]),
     {:id => "birth_weight#{e}",
-      :helptext => "Birth Weight #{e}#{indice} Child (kg)",
-      :tt_pageStyleClass => "NumbersWithUnknownAndDecimal",
-      :absoluteMin => 0,
-      :max => 5,
+      :helptext => "Estimated Birth Weight #{e}#{indice} Child (kg)",
       :condition => "__$('enter_number_of_deliveries').value >= #{e} && __$('condition_at_birth#{e}').value != 'Still Birth'" } %>
 
     <%= touch_select_tag "Alive", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No","No"]]),
@@ -131,7 +130,8 @@
       :condition => "__$('enter_number_of_deliveries').value >= #{e} && __$('condition_at_birth#{e}').value != 'Still Birth'" } %>
 
     <%= touch_select_tag "Units of age of child", @patient,  
-    options_for_select([["", ""], ["Years", "Years"], ["Months","Months"], ["Weeks", "Weeks"], ["Days", "Days"]]),
+    options_for_select([["", ""], ["Years", "Years"], ["Months","Months"], ["Weeks", "Weeks"], ["Days", "Days"], 
+      ["Hours", "Hours"], ["Minutes", "Minutes"]]),
     {:id => "age_units#{e}",
       :helptext => "#{e}#{indice} Child's Units of age at death",
       :condition => "__$('enter_number_of_deliveries').value >= #{e} && __$('alive#{e}').value == 'No'" } %>
@@ -204,10 +204,10 @@
 
     <%= touch_text_field_tag "Gestation", @patient, nil,
     {:id => "gestation#{e}",
-      :helptext => "Gestation #{e}#{indice} Abortion (Weeks)",
+      :helptext => "Gestation #{e}#{indice} Abortion (Months)",
       :condition => "__$('enter_number_of_abortions').value >= #{e}",
       :field_type => "number",
-      :absoluteMax => "27",
+      :absoluteMax => "6",
       :tt_pageStyleClass => "NumbersOnly" } %>
 
     <%= touch_hidden_tag "Condition at Birth", @patient, nil,

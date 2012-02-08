@@ -499,16 +499,22 @@ class PatientsController < ApplicationController
       @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
       @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
       e.orders.each{|o| 
-        if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])
-          @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+        if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])          
+          if o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")] == "NVP"
+            if o.drug_order.drug.name.upcase.include?("ML")
+              @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+            else
+              @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+            end
+          else            
+            @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+          end          
         else
           @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
         end
       }      
     }
     
-    # raise @encounters.to_yaml
-
     render :layout => false
   end
 
@@ -807,6 +813,23 @@ class PatientsController < ApplicationController
     @nutrition = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
         ConceptName.find_by_name('Nutrition status').concept_id]).answer_string rescue nil
+  
+    @civil = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Civil status').concept_id]).answer_string.titleize rescue nil
+  
+    @civil_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Other Civil Status Comment').concept_id]).answer_string rescue nil) if @civil == "Other"
+  
+    @religion = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Religion').concept_id]).answer_string.titleize rescue nil
+  
+    @religion_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
+            @patient.id, EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Other').concept_id]).answer_string rescue nil) if @religion == "Other"
   
     render :layout => false
   end

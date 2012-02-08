@@ -61,9 +61,24 @@
         <td style="padding-left: 10px;">
           Nutrition Status
         </td>
-        <td style="border: 1px solid #000;" align="center"
-            <%#= (!@nutrition.nil? ? (@nutrition == "Malnourished" ? "class='selected'" : "NO") : "") %>>
+        <td style="border: 1px solid #000;" align="center">
           &nbsp;<%= (!@nutrition.nil? ? @nutrition.titleize : "") %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          Marital Status
+        </td>
+        <td style="border: 1px solid #000;" align="center">
+          &nbsp;<%= (!@civil.nil? ? (@civil.titleize == "Other" ? @civil_other : @civil) : "") %>&nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-left: 10px;">
+          Religion
+        </td>
+        <td style="border: 1px solid #000;" align="center">
+          &nbsp;<%= (!@religion.nil? ? (@religion.titleize == "Other" ? @religion_other : @religion) : "") %>&nbsp;
         </td>
       </tr>
     </table>
