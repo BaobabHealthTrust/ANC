@@ -794,9 +794,10 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
             } catch(e){}
         }
         
-        // optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
-        // ' onmousedown="'+ mouseDownAction +'"';
-    
+        optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
+        ' onmousedown="'+ (tstFormElements[tstCurrentPage].getAttribute("tt_requirenextclick") != null ? 
+            (tstFormElements[tstCurrentPage].getAttribute("tt_requirenextclick") == "false" ? "checkRequireNextClick();" : "") : "") +'"';
+
         optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
         ' onclick="' + mouseDownAction + '" ';
         

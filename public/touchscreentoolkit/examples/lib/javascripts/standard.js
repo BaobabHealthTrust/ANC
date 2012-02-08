@@ -345,7 +345,7 @@ function enableTouchscreenInterface(){
     document.getElementById('launchButton').innerHTML = "Disable Touchscreen UI";
 }
 
-function populateInputPage(pageNum) {
+function populateInputPage(pageNum, navback) {   
     var i = tstPages[pageNum];
 
     inputPage  = createInputPage(pageNum);
@@ -433,7 +433,7 @@ function populateInputPage(pageNum) {
     tstInputTarget = touchscreenInputNode;
 
     // options
-    inputDiv.appendChild(getOptions());
+    inputDiv.appendChild(getOptions(navback));
 
     contentContainer.appendChild(wrapperPage);
 
@@ -595,7 +595,7 @@ function getHelpText(inputElement, aPageNum) {
     return helpText;
 }
 
-function getOptions() {
+function getOptions(navback) {   
     var pageNum = tstCurrentPage;
     var i = tstPages[pageNum]
     var optionsClass = "";
@@ -648,7 +648,7 @@ function getOptions() {
                     tstFormElements[i].getAttribute("dualViewOptions") != undefined){
                     loadSelectOptions(selectOptions, options, tstFormElements[i].getAttribute("dualViewOptions"));
                 } else {
-                    loadSelectOptions(selectOptions, options);
+                    loadSelectOptions(selectOptions, options, null, navback);
                 }
                       
                 var val = elementSelectedValue(tstFormElements[i]);
@@ -756,9 +756,8 @@ function toggleShowProgress() {
     }
 }
 
-function loadSelectOptions(selectOptions, options, dualViewOptions) {        
-    
-    if(dualViewOptions != undefined) {
+function loadSelectOptions(selectOptions, options, dualViewOptions) {
+    if(dualViewOptions != undefined || dualViewOptions != null) {
         tstDualViewOptions = eval(dualViewOptions);
         setTimeout("addSummary(" + selected + ")", 0);
     }
@@ -778,7 +777,8 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
         // inherit mouse down options
         mouseDownAction = selectOptions[j].getAttribute("onmousedown")
         mouseDownAction += '; updateTouchscreenInputForSelect(' +
-        (tstFormElements[tstCurrentPage].getAttribute("multiple") ? '__$(\'optionValue\' + this.id), this' : 'this') + '); ' + 
+        (tstFormElements[tstCurrentPage].getAttribute("multiple") ? '__$(\'optionValue\' + this.id), this' : 'this') + 
+        '); ' + 
         (dualViewOptions ? 'changeSummary(this.id);' : '');
         
         optionsList += '<li id=\'' + (j-1) + '\' ';
@@ -793,9 +793,10 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
             } catch(e){}
         }
         
-        // optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
-        // ' onmousedown="'+ mouseDownAction +'"';
-    
+        optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
+        ' onmousedown="'+ (tstFormElements[tstCurrentPage].getAttribute("tt_requirenextclick") != null ? 
+            (tstFormElements[tstCurrentPage].getAttribute("tt_requirenextclick") == "false" ? "checkRequireNextClick();" : "") : "") +'"';
+
         optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
         ' onclick="' + mouseDownAction + '" ';
         
@@ -926,7 +927,7 @@ function unhighlight(element){
 }
 
 //TODO make these into 1 function
-function updateTouchscreenInputForSelect(element){
+function updateTouchscreenInputForSelect(element){ 
     var inputTarget = tstInputTarget;
     var multiple = inputTarget.getAttribute("multiple") == "multiple";
 
@@ -965,7 +966,10 @@ function updateTouchscreenInputForSelect(element){
     highlightSelection(element.parentNode.childNodes, inputTarget)
             
     tt_update(inputTarget);
-    checkRequireNextClick();
+    
+/*if(tstDirectionForward == true){
+        checkRequireNextClick();
+    }*/
 }
 
 function updateTouchscreenInput(element){
@@ -1130,7 +1134,8 @@ function tt_update(sourceElement, navback){
         } else {
             sourceValue = sourceElement.getAttribute("tstValue");
         }                
-    } else {
+    }
+    else {
         if (condition && navback == true) {
             sourceValue = "";            
         } else {
@@ -1175,36 +1180,37 @@ function tt_update(sourceElement, navback){
                         for(i=0;i<targetElement.options.length;i++){
                             if(optionIncludedInValue(targetElement.options[i].text, val_arr)) {
                                 targetElement.options[i].selected = true;
-                            } else
-                                targetElement.options[i].selected = false;
+                            }
+                            else
+                            targetElement.options[i].selected = false;
 
-                        }
-                    }
-                }
+                            }
+                            }
+                            }
 
-            }
-            break;
-        case "SELECT":
+                            }
+                            break;
+                            case "SELECT":
             
-            var val_arr = new Array();
-            if (targetElement.multiple) {
-                val_arr = sourceElement.value.split(tstMultipleSplitChar);
-            }
-            else {
-                val_arr.push(sourceElement.value);
-            }
+                            var val_arr = new Array();
+                            if (targetElement.multiple) {
+                            val_arr = sourceElement.value.split(tstMultipleSplitChar);
+                            }
+                            else {
+            val_arr.push(sourceElement.value);
+        }
 
-            for(i=0;i<targetElement.options.length;i++){
-                if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
-                    targetElement.options[i].selected = true;
-                    if (!targetElement.multiple)
-                        break;
-                } else {
-                    targetElement.options[i].selected = false;
-                }
+        for(i=0;i<targetElement.options.length;i++){
+            if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
+                targetElement.options[i].selected = true;
+                if (!targetElement.multiple)
+                    break;
+            } else {
+                targetElement.options[i].selected = false;
             }
+        }
 			 
-            break;
+        break;
         case "TEXTAREA":
             targetElement.value = sourceValue;
             break;
@@ -1287,26 +1293,28 @@ function joinDateValues(aDateElement) {
     if (strDate.length != 10 && aDateElement.value) return aDateElement.value;
     if (strDate.length != 10) return "";
     else return strDate;
-}
+    }
 
-// This detour has been added to capture alert messages that need to be displayed
-// before the next page is viewed
-function gotoPage(destPage, validate, navback){
+    // This detour has been added to capture alert messages that need to be displayed
+    // before the next page is viewed
+    function gotoPage(destPage, validate, navback){
     var currentPage = tstCurrentPage;
     var currentInput = __$("touchscreenInput"+currentPage);
 
-    var navback = (navback ? navback : false);    
+    var navback = (navback == true ? true : false);    
 
     //	tt_BeforeUnload
     var unloadElementId = 'touchscreenInput';
     if (currentPage < destPage) {
-        unloadElementId = 'touchscreenInput'+(destPage-1);
+    unloadElementId = 'touchscreenInput'+(destPage-1);
+    tstDirectionForward = true;
     }
     else if (currentPage > destPage) {
-        unloadElementId = 'touchscreenInput'+(destPage+1);
-    }
+    unloadElementId = 'touchscreenInput'+(destPage+1);
+    tstDirectionForward = false;
+}
 
-    var unloadElement = __$(unloadElementId);
+var unloadElement = __$(unloadElementId);
     if (unloadElement) {
         var onUnloadCode = unloadElement.getAttribute('tt_BeforeUnload');
         if (onUnloadCode) {
@@ -1317,10 +1325,12 @@ function gotoPage(destPage, validate, navback){
                 // corresponding function for earlier cancelling when required
                 tstTimerHandle = setTimeout("navigateToPage(" + destPage + ", " + validate + ", " + navback + ");", 3000);
                 tstTimerFunctionCall = "navigateToPage(" + destPage + ", " + validate + ", " + navback + ");";
-            } else {
+            }
+            else {
                 navigateToPage(destPage, validate, navback);
             }
-        } else {
+        }
+        else {
             navigateToPage(destPage, validate, navback);
         }
     } else {
@@ -1329,7 +1339,7 @@ function gotoPage(destPage, validate, navback){
 }
 
 //args: page number to load, validate: true/false
-function navigateToPage(destPage, validate, navback){    
+function navigateToPage(destPage, validate, navback){
     clearTimeout(tstTimerHandle);
     
     var currentPage = tstCurrentPage;
@@ -1421,7 +1431,7 @@ function navigateToPage(destPage, validate, navback){
 
         inputTargetPageNumber = destPage;
         tstCurrentPage = destPage;
-        populateInputPage(destPage);
+        populateInputPage(destPage, navback);
         __$("progressAreaPage"+destPage).setAttribute("class", "currentIndex");
 
         var nextButton = tstNextButton;
