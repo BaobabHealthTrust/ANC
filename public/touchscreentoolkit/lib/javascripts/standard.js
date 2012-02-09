@@ -759,9 +759,8 @@ function toggleShowProgress() {
     }
 }
 
-function loadSelectOptions(selectOptions, options, dualViewOptions) {
-    
-    if(dualViewOptions != undefined) {
+function loadSelectOptions(selectOptions, options, dualViewOptions) {    
+    if(dualViewOptions != undefined || dualViewOptions != null) {
         tstDualViewOptions = eval(dualViewOptions);
         setTimeout("addSummary(" + selected + ")", 0);
     }
@@ -769,6 +768,8 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
     var optionsList = "<ul id='tt_currentUnorderedListOptions'>";  // <li id='default'> </li>";
     var selectOptionCount = selectOptions.length;
     var selected = -1;
+
+    options.innerHTML = "";
 
     for(var j=0;j<selectOptionCount;j++){
         // njih
@@ -779,7 +780,8 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
         // inherit mouse down options
         mouseDownAction = selectOptions[j].getAttribute("onmousedown")
         mouseDownAction += '; updateTouchscreenInputForSelect(' +
-        (tstFormElements[tstCurrentPage].getAttribute("multiple") ? '__$(\'optionValue\' + this.id), this' : 'this') + '); ' + 
+        (tstFormElements[tstCurrentPage].getAttribute("multiple") ? '__$(\'optionValue\' + this.id), this' : 'this') + 
+        '); ' + 
         (dualViewOptions ? 'changeSummary(this.id);' : '');
         
         optionsList += '<li id=\'' + (j-1) + '\' ';
@@ -804,7 +806,7 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
         // njih
         optionsList += ">" + (tstFormElements[tstCurrentPage].getAttribute("multiple") ? 
             "<div style='display: table; border-spacing: 0px;'><div style='display: table-row'>" + 
-            "<div style='display: table-cell;'><img id='img" + (j-1) + "' src='/touchscreentoolkit/lib/images/unticked.jpg' alt='[ ]' />" + 
+            "<div style='display: table-cell;'><img id='img" + (j-1) + "' src='lib/images/unticked.jpg' alt='[ ]' />" + 
             "</div><div style='display: table-cell; vertical-align: middle; " + 
             "text-align: left; padding-left: 15px;' id='optionValue"  + (j-1) + "'>" : "") + 
         selectOptions[j].text + "</div></div></div></li>\n";
@@ -928,8 +930,7 @@ function unhighlight(element){
 }
 
 //TODO make these into 1 function
-function updateTouchscreenInputForSelect(element, parentElement){
-    
+function updateTouchscreenInputForSelect(element){ 
     var inputTarget = tstInputTarget;
     var multiple = inputTarget.getAttribute("multiple") == "multiple";
 
@@ -965,11 +966,9 @@ function updateTouchscreenInputForSelect(element, parentElement){
         }
     }
 
-    highlightSelection(element.parentNode.childNodes, inputTarget, 
-        (parentElement ? parentElement.childNodes : null))
+    highlightSelection(element.parentNode.childNodes, inputTarget)
             
     tt_update(inputTarget);
-    checkRequireNextClick();
 }
 
 function updateTouchscreenInput(element){
@@ -1134,7 +1133,8 @@ function tt_update(sourceElement, navback){
         } else {
             sourceValue = sourceElement.getAttribute("tstValue");
         }                
-    } else {
+    }
+    else {
         if (condition && navback == true) {
             sourceValue = "";            
         } else {
@@ -1179,36 +1179,37 @@ function tt_update(sourceElement, navback){
                         for(i=0;i<targetElement.options.length;i++){
                             if(optionIncludedInValue(targetElement.options[i].text, val_arr)) {
                                 targetElement.options[i].selected = true;
-                            } else
-                                targetElement.options[i].selected = false;
+                            }
+                            else
+                            targetElement.options[i].selected = false;
 
-                        }
-                    }
-                }
+                            }
+                            }
+                            }
 
-            }
-            break;
-        case "SELECT":
+                            }
+                            break;
+                            case "SELECT":
             
-            var val_arr = new Array();
-            if (targetElement.multiple) {
-                val_arr = sourceElement.value.split(tstMultipleSplitChar);
-            }
-            else {
-                val_arr.push(sourceElement.value);
-            }
+                            var val_arr = new Array();
+                            if (targetElement.multiple) {
+                            val_arr = sourceElement.value.split(tstMultipleSplitChar);
+                            }
+                            else {
+            val_arr.push(sourceElement.value);
+        }
 
-            for(i=0;i<targetElement.options.length;i++){
-                if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
-                    targetElement.options[i].selected = true;
-                    if (!targetElement.multiple)
-                        break;
-                } else {
-                    targetElement.options[i].selected = false;
-                }
+        for(i=0;i<targetElement.options.length;i++){
+            if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
+                targetElement.options[i].selected = true;
+                if (!targetElement.multiple)
+                    break;
+            } else {
+                targetElement.options[i].selected = false;
             }
+        }
 			 
-            break;
+        break;
         case "TEXTAREA":
             targetElement.value = sourceValue;
             break;
@@ -1299,7 +1300,7 @@ function gotoPage(destPage, validate, navback){
     var currentPage = tstCurrentPage;
     var currentInput = __$("touchscreenInput"+currentPage);
 
-    var navback = (navback ? navback : false);    
+    var navback = (navback == true ? true : false);        
 
     //	tt_BeforeUnload
     var unloadElementId = 'touchscreenInput';
@@ -2798,7 +2799,8 @@ RailsDate.prototype = {
                     (this.element.name == str[1]+'['+str[2]+'(1i)]')) {
                     monthElement = document.getElementsByName(str[1]+'['+str[2]+'(2i)]')[0];
 
-                } else if (this.isDayOfMonthElement() &&
+                }
+                else if (this.isDayOfMonthElement() &&
                     (this.element.name == str[1]+'['+str[2]+'(3i)]')) {
                     monthElement = document.getElementsByName(str[1]+'['+str[2]+'(2i)]')[0];
                 }
@@ -2858,7 +2860,8 @@ RailsDate.prototype = {
             if (!yearElement) {
                 if (str[1].search(/month$/) != -1 ) {
                     elementName = str[1].replace(/month$/, "year")+'['+str[2]+'(1i)]';
-                } else if (str[1].search(/date$/) != -1 ) {
+                }
+                else if (str[1].search(/date$/) != -1 ) {
                     elementName = str[1].replace(/date$/, "year")+'['+str[2]+'(1i)]';
                 }
                 yearElement = document.getElementsByName(elementName)[0];

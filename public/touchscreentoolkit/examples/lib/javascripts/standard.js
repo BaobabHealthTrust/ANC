@@ -63,10 +63,18 @@ var tstMessageBoxType = {
     YesNoCancel:{}
 }
 
+var touchscreenInterfaceEnabled = 0;
+var contentContainer = null;
+
 var tstTimerHandle = null;
 var tstTimerFunctionCall = "";
 
 var tstMultipleSelected = {};
+
+var ajaxGeneralRequestResult;
+
+var tstInternalCurrentDate = (new Date().getFullYear()) + "-" + padZeros((new Date().getMonth() + 1),2) + "-" + 
+padZeros((new Date().getDate()), 2);
 
 //--------------------------------------
 // Default method in module to access element id changed to __$ to avoid
@@ -107,10 +115,6 @@ function elementSelectedValue(element){
     }
     return null;
 }
-
-
-var touchscreenInterfaceEnabled = 0;
-var contentContainer = null;
 
 function loadTouchscreenToolkit() {
     if(document.getElementById("loadingProgressMessage")){
@@ -345,7 +349,7 @@ function enableTouchscreenInterface(){
     document.getElementById('launchButton').innerHTML = "Disable Touchscreen UI";
 }
 
-function populateInputPage(pageNum, navback) {   
+function populateInputPage(pageNum) {   
     var i = tstPages[pageNum];
 
     inputPage  = createInputPage(pageNum);
@@ -433,7 +437,7 @@ function populateInputPage(pageNum, navback) {
     tstInputTarget = touchscreenInputNode;
 
     // options
-    inputDiv.appendChild(getOptions(navback));
+    inputDiv.appendChild(getOptions());
 
     contentContainer.appendChild(wrapperPage);
 
@@ -595,7 +599,7 @@ function getHelpText(inputElement, aPageNum) {
     return helpText;
 }
 
-function getOptions(navback) {   
+function getOptions() {   
     var pageNum = tstCurrentPage;
     var i = tstPages[pageNum]
     var optionsClass = "";
@@ -648,7 +652,7 @@ function getOptions(navback) {
                     tstFormElements[i].getAttribute("dualViewOptions") != undefined){
                     loadSelectOptions(selectOptions, options, tstFormElements[i].getAttribute("dualViewOptions"));
                 } else {
-                    loadSelectOptions(selectOptions, options, null, navback);
+                    loadSelectOptions(selectOptions, options);
                 }
                       
                 var val = elementSelectedValue(tstFormElements[i]);
@@ -966,10 +970,6 @@ function updateTouchscreenInputForSelect(element){
     highlightSelection(element.parentNode.childNodes, inputTarget)
             
     tt_update(inputTarget);
-    
-/*if(tstDirectionForward == true){
-        checkRequireNextClick();
-    }*/
 }
 
 function updateTouchscreenInput(element){
@@ -1182,35 +1182,35 @@ function tt_update(sourceElement, navback){
                                 targetElement.options[i].selected = true;
                             }
                             else
-                            targetElement.options[i].selected = false;
+                                targetElement.options[i].selected = false;
 
-                            }
-                            }
-                            }
+                        }
+                    }
+                }
 
-                            }
-                            break;
-                            case "SELECT":
-            
-                            var val_arr = new Array();
-                            if (targetElement.multiple) {
-                            val_arr = sourceElement.value.split(tstMultipleSplitChar);
-                            }
-                            else {
-            val_arr.push(sourceElement.value);
-        }
-
-        for(i=0;i<targetElement.options.length;i++){
-            if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
-                targetElement.options[i].selected = true;
-                if (!targetElement.multiple)
-                    break;
-            } else {
-                targetElement.options[i].selected = false;
             }
-        }
+            break;
+        case "SELECT":
+            
+            var val_arr = new Array();
+            if (targetElement.multiple) {
+                val_arr = sourceElement.value.split(tstMultipleSplitChar);
+            }
+            else {
+                val_arr.push(sourceElement.value);
+            }
+
+            for(i=0;i<targetElement.options.length;i++){
+                if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
+                    targetElement.options[i].selected = true;
+                    if (!targetElement.multiple)
+                        break;
+                } else {
+                    targetElement.options[i].selected = false;
+                }
+            }
 			 
-        break;
+            break;
         case "TEXTAREA":
             targetElement.value = sourceValue;
             break;
@@ -1293,11 +1293,11 @@ function joinDateValues(aDateElement) {
     if (strDate.length != 10 && aDateElement.value) return aDateElement.value;
     if (strDate.length != 10) return "";
     else return strDate;
-    }
+}
 
-    // This detour has been added to capture alert messages that need to be displayed
-    // before the next page is viewed
-    function gotoPage(destPage, validate, navback){
+// This detour has been added to capture alert messages that need to be displayed
+// before the next page is viewed
+function gotoPage(destPage, validate, navback){
     var currentPage = tstCurrentPage;
     var currentInput = __$("touchscreenInput"+currentPage);
 
@@ -1306,15 +1306,13 @@ function joinDateValues(aDateElement) {
     //	tt_BeforeUnload
     var unloadElementId = 'touchscreenInput';
     if (currentPage < destPage) {
-    unloadElementId = 'touchscreenInput'+(destPage-1);
-    tstDirectionForward = true;
+        unloadElementId = 'touchscreenInput'+(destPage-1);
     }
     else if (currentPage > destPage) {
-    unloadElementId = 'touchscreenInput'+(destPage+1);
-    tstDirectionForward = false;
-}
+        unloadElementId = 'touchscreenInput'+(destPage+1);
+    }
 
-var unloadElement = __$(unloadElementId);
+    var unloadElement = __$(unloadElementId);
     if (unloadElement) {
         var onUnloadCode = unloadElement.getAttribute('tt_BeforeUnload');
         if (onUnloadCode) {
@@ -1431,7 +1429,7 @@ function navigateToPage(destPage, validate, navback){
 
         inputTargetPageNumber = destPage;
         tstCurrentPage = destPage;
-        populateInputPage(destPage, navback);
+        populateInputPage(destPage);
         __$("progressAreaPage"+destPage).setAttribute("class", "currentIndex");
 
         var nextButton = tstNextButton;
@@ -1604,7 +1602,7 @@ function clearInput(){
     }
 }
 
-function showMessage(aMessage, withCancel) {
+function showMessage(aMessage, withCancel, timed) {
     var messageBar = tstMessageBar;
     messageBar.innerHTML = aMessage +
     "<br />" + (typeof(withCancel) != "undefined" ? (withCancel == true ?
@@ -1614,7 +1612,9 @@ function showMessage(aMessage, withCancel) {
     "clearTimeout(tstTimerHandle); eval(tstTimerFunctionCall);'><span>Ok</span></button>";
     if (aMessage.length > 0) {
         messageBar.style.display = 'block'
-        window.setTimeout("hideMessage()",3000)
+        if((typeof(timed) == "undefined" ? true : timed) == true){
+            window.setTimeout("hideMessage()",3000)
+        }
     }
 }
 
@@ -1955,13 +1955,15 @@ function getTimePicker() {
             hour: arrDate[0],
             minute: arrDate[1],
             second: arrDate[2],
-            format: "H:M:S"
+            format: "H:M:S",
+            maxNow: (tstInputTarget.getAttribute("maxNow") ? true : false)
         });
     } else {
         ds = new TimeSelector({
             element: keyboardDiv,
             target: tstInputTarget,
-            format: "H:M:S"
+            format: "H:M:S",
+            maxNow: (tstInputTarget.getAttribute("maxNow") ? true : false)
         });
     }
 
@@ -3134,7 +3136,9 @@ DateSelector.prototype = {
 				<button id="dateselector_preDay" onmousedown="ds.decrementDay();"><span>-</span></button> \
 			</div> \
 			</td><td> \
-                        <button id="today" onmousedown="setToday()" style="width: 150px;"><span>Today</span></button> \
+                        <button id="today" ' + (tstCurrentDate ? (tstCurrentDate == tstInternalCurrentDate ? 
+            'class="blue" ' : 'class="red" ') : 'class="blue" ') + 
+        ' onmousedown="setToday()" style="width: 150px;"><span>Today</span></button> \
 			<!--button id="num" onmousedown="updateKeyColor(this);press(this.id);" style="width: 150px;"><span>Num</span></button--> \
 			<button id="Unknown" onmousedown="updateKeyColor(this);press(this.id);" style="width: 150px;"><span>Unknown</span></button> \
 			</tr></table> \
@@ -3347,6 +3351,12 @@ var DateUtil = {
 
 function setToday(){
     var d = new Date();
+    if (tstCurrentDate) {
+        if(tstCurrentDate.match(/\d{4}\-\d{2}\-\d{2}/)){
+            d = new Date(tstCurrentDate);
+        }
+    }
+    
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     document.getElementById("touchscreenInput" + tstCurrentPage).value =
@@ -3374,7 +3384,8 @@ var TimeSelector = function() {
         second: arguments[0].second || this.time[2],
         format: "H:M:S",
         element: arguments[0].element || document.body,
-        target: arguments[0].target
+        target: arguments[0].target,
+        maxNow: arguments[0].maxNow
     };
 
     if (typeof(tstCurrentTime) != "undefined" && tstCurrentTime) {
@@ -3410,14 +3421,18 @@ TimeSelector.prototype = {
 			<td valign="top"> \
 			<div style="display: inline;" > \
                                 <div style="text-align:center; width:100%; font-size:1.8em;">Hr</div>\
-				<button id="timeselector_nextHour" onmousedown="ds.incrementHour();"><span>+</span></button> \
+				<button id="timeselector_nextHour" onmousedown="ds.incrementHour();" ' + 
+        (this.options["maxNow"] == true ? 'class="blue" ' : 'class="red" ') + 
+        ' ><span>+</span></button> \
 				<input id="timeselector_hour" type="text" > \
 				<button id="timeselector_preHour" onmousedown="ds.decrementHour();"><span>-</span></button> \
 			</div> \
 			</td><td> \
 			<div style="display: inline;"> \
                                 <div style="text-align:center; width:100%; font-size:1.8em;">Min</div>\
-				<button id="timeselector_nextMinute" onmousedown="ds.incrementMinute();"><span>+</span></button> \
+				<button id="timeselector_nextMinute" onmousedown="ds.incrementMinute();"' + 
+        (this.options["maxNow"] == true ? 'class="blue" ' : 'class="red" ') + 
+        ' ><span>+</span></button> \
 				<input id="timeselector_minute" type="text"> \
 				<button id="timeselector_preMinute" onmousedown="ds.decrementMinute();"><span>-</span></button> \
 			</div> \
@@ -3443,14 +3458,20 @@ TimeSelector.prototype = {
 
 
     incrementHour: function() {
-        if(this.currentHour.value >= (new Date().getHours())){
+        if(this.options["maxNow"] == true){       
+            if(this.currentHour.value >= (new Date().getHours())){
 
+            } else if(this.currentHour.value == 23){
+                this.currentHour.value = 0;
+            } else {
+                this.currentHour.value++;
+            }
         } else if(this.currentHour.value == 23){
             this.currentHour.value = 0;
         } else {
             this.currentHour.value++;
         }
-
+        
         this.time[0] = this.currentHour.value;
         this.update(this.target);
     },
@@ -3467,10 +3488,14 @@ TimeSelector.prototype = {
     },
 
     incrementMinute: function() {
-        if(this.currentMinute.value == 59){
-            this.currentMinute.value = 0;
-        //} else if(this.currentMinute.value >= (new Date().getMinutes())){
-        //  this.currentMinute.value++;
+        if(this.options["maxNow"] == true){        
+            if(this.currentMinute.value == 59){
+                this.currentMinute.value = 0;
+            } else if(this.currentMinute.value >= (new Date().getMinutes())){
+                this.currentMinute.value = 0;
+            } else  {
+                this.currentMinute.value++;
+            }
         } else  {
             this.currentMinute.value++;
         }
@@ -3491,8 +3516,12 @@ TimeSelector.prototype = {
     },
 
     incrementSecond: function() {
-        if(this.currentSecond.value == 59){
-            this.currentSecond.value = 0;
+        if(this.options["maxNow"] == true){        
+            if(this.currentSecond.value == 59){
+                this.currentSecond.value = 0;
+            } else {
+                this.currentSecond.value++;
+            }
         } else {
             this.currentSecond.value++;
         }
@@ -3826,6 +3855,69 @@ function showKeyboard(full_keyboard, qwerty){
     
     __$("keyboard").appendChild(div);
     
+}
+
+function padZeros(number, positions){
+    var zeros = parseInt(positions) - String(number).length;
+    var padded = "";
+    
+    for(var i = 0; i < zeros; i++){
+        padded += "0";
+    }
+    
+    padded += String(number);
+    
+    return padded;
+}
+
+function ajaxGeneralRequest(aUrl, method) {
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function() {
+        handleGeneralResult(httpRequest, method);
+    };
+    try {        
+        showProgress();
+        
+        httpRequest.open('GET', aUrl, true);
+        httpRequest.send(null);
+    } catch(e){
+    }
+}
+
+function handleGeneralResult(aXMLHttpRequest, method) {    
+    if (!aXMLHttpRequest) return "error";
+
+    if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 || aXMLHttpRequest.status == 304)) {
+        var result = aXMLHttpRequest.responseText;
+        
+        ajaxGeneralRequestResult = result;
+        
+        __$("progress_bar").style.display = "none";        
+        
+        eval(method);
+        
+        return ajaxGeneralRequestResult;
+    }  
+    return "";
+}
+
+function showProgress(){
+    if(!__$("progress_bar")){
+        var div = document.createElement("div");
+        div.id = "progress_bar";
+        div.className = "messageBar";
+        div.innerHTML = "Fetching data. Please wait...";
+        //div.style.top = "200px";
+        //div.style.left = "280px";
+        
+        __$("page" + tstCurrentPage).appendChild(div);
+    }
+    
+    __$("progress_bar").style.display = "block";
+}
+
+function hideProgress(){
+    __$("progress_bar").style.display = "none";
 }
 
 function showStatus(){
