@@ -28,7 +28,7 @@
 
 <table width="100%" border="0" style="height: 100%" cellpadding="0">
   <tr>
-    <th style="height: 30px; font-size: 1.4em;" align="left" colspan="2">
+    <th style="height: 30px; font-size: 1.4em;" align="left" colspan="3">
       Obstetric History
   <div style="float: right; color: #f00;
        font-weight: normal; padding-right: 10px;">
@@ -46,9 +46,7 @@
         <td style="border: 1px solid #000;" align="center">
           &nbsp;<%= @gravida %>&nbsp;
         </td>
-      </tr>
-      <tr>
-        <td style="padding-left: 10px;">
+        <td style="padding-left: 50px;">
           Multiple Pregnancy
         </td>
         <td style="border: 1px solid #000;" align="center">
@@ -62,9 +60,7 @@
         <td style="border: 1px solid #000;" align="center" <%= (@deliveries.nil? ? "" : (@deliveries > 4 ? "class='selected'" : "")) %>>
           &nbsp;<%= @deliveries %>&nbsp;
         </td>
-      </tr>
-      <tr>
-        <td style="padding-left: 10px;">
+        <td style="padding-left: 50px;">
           Abortions
         </td>
         <td style="border: 1px solid #000;" align="center" <%= (@abortions.nil? ? "" : (@abortions > 1 ? "class='selected'" : "")) %>>
@@ -79,9 +75,7 @@
             align="center" <%= (!@stillbirths.nil? ? (@stillbirths.upcase == "YES" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@stillbirths.nil? ? (@stillbirths.upcase == "NO" ? "NO" : "YES") : "") %>&nbsp;
         </td>
-      </tr>
-      <tr>
-        <td style="padding-left: 10px;">
+        <td style="padding-left: 50px;">
           C-sections
         </td>
         <td style="border: 1px solid #000;"
@@ -97,9 +91,7 @@
             align="center" <%= (!@vacuum.nil? ? (@vacuum > 0 ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@vacuum.nil? ? (@vacuum > 0 ? "YES" : "NO") : "") %>&nbsp;
         </td>
-      </tr>
-      <tr>
-        <td style="padding-left: 10px;">
+        <td style="padding-left: 50px;">
           Symphysiotomy
         </td>
         <td style="border: 1px solid #000;"
@@ -115,9 +107,7 @@
             align="center" <%= (!@haemorrhage.nil? ? (@haemorrhage.upcase == "PPH" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= @haemorrhage %>&nbsp;
         </td>
-      </tr>
-      <tr>
-        <td style="padding-left: 10px;">
+        <td style="padding-left: 50px;">
           Pre-Eclampsia
         </td>
         <td style="border: 1px solid #000;"
@@ -127,7 +117,13 @@
       </tr>
       <% if (!@preeclampsia.nil? ? (@preeclampsia.upcase == "NO" ? "NO" : "YES") : "NO") == "YES" %>
         <tr>
-          <td style="padding-left: 10px;">
+          <td>
+            &nbsp;
+          </td>
+          <td>
+            &nbsp;
+          </td>
+          <td style="padding-left: 50px;">
             Eclampsia
           </td>
           <td style="border: 1px solid #000;"

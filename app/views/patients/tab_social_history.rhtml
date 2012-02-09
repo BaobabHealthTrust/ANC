@@ -44,7 +44,7 @@
           Patient Currently Smokes
         </td>
         <td style="border: 1px solid #000;" align="center" 
-            <%#= (!@smokes.nil? ? (@smokes == "YES" ? "class='selected'" : "") : "") %>>
+            <%= (!@smokes.nil? ? (@smokes == "YES" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@smokes.nil? ? (@smokes == "YES" ? "Yes" : "No") : "") %>&nbsp;
         </td>
       </tr>
@@ -53,7 +53,7 @@
           Currently Consumes Alcohol
         </td>
         <td style="border: 1px solid #000;" align="center"
-            <%#= (!@alcohol.nil? ? (@alcohol == "YES" ? "class='selected'" : "") : "") %>>
+            <%= (!@alcohol.nil? ? (@alcohol == "YES" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@alcohol.nil? ? (@alcohol == "YES" ? "Yes" : "No") : "") %>&nbsp;
         </td>
       </tr>
@@ -61,7 +61,8 @@
         <td style="padding-left: 10px;">
           Nutrition Status
         </td>
-        <td style="border: 1px solid #000;" align="center">
+        <td style="border: 1px solid #000;" align="center"
+            <%= (!@nutrition.nil? ? (@nutrition.titleize == "Malnourished" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= (!@nutrition.nil? ? @nutrition.titleize : "") %>&nbsp;
         </td>
       </tr>
@@ -78,7 +79,7 @@
           Religion
         </td>
         <td style="border: 1px solid #000;" align="center">
-          &nbsp;<%= (!@religion.nil? ? (@religion.titleize == "Other" ? @religion_other : @religion) : "") %>&nbsp;
+          &nbsp;<%= (!@religion.nil? ? (@religion.titleize == "Other" ? @religion_other : @religion.titleize) : "") %>&nbsp;
         </td>
       </tr>
     </table>
