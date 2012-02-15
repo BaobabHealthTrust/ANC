@@ -205,11 +205,13 @@ class ReportsController < ApplicationController
 
     @total_hiv_positive = @hiv_test_result_prev_pos + @hiv_test_result_pos
     
-		@on_art__1 = report.on_art__1 
+		@not_on_art = report.not_on_art
 
-		@on_art__2 = report.on_art__2
+		@on_art_before = report.on_art_before
 
-		@on_art__3 = report.on_art__3
+		@on_art_zero_to_27 = report.on_art_zero_to_27
+    
+    @on_art_28_plus = report.on_art_28_plus
 
 		@on_cpt__1 = report.on_cpt__1
 

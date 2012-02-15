@@ -637,10 +637,15 @@
                           </td>
                           <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
                               border-left: 1px solid #999; width: 60%;">
-                            Women on CPT
+                            <form id="on_cpt__1" method="post" action="decompose">
+                              <input type="hidden" value="<%= @on_cpt__1.join(",") %>" name="patients" />
+                              Women on CPT
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @on_art__1.length %>
+                            <a href="javascript:document.getElementById('on_cpt__1').submit()">
+                              <%= @on_cpt__1.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -657,10 +662,15 @@
                           </td>
                           <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
                               border-left: 1px solid #999; width: 60%;">
-                            Tot. received NVP
+                            <form id="nvp_baby__1" method="post" action="decompose">
+                              <input type="hidden" value="<%= @nvp_baby__1.join(",") %>" name="patients" />
+                              Tot. received NVP
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @on_cpt__1.length %>
+                            <a href="javascript:document.getElementById('nvp_baby__1').submit()">
+                              <%= @nvp_baby__1.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -676,10 +686,15 @@
                             25
                           </td>
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
+                            <form id="not_on_art" method="post" action="decompose">
+                              <input type="hidden" value="<%= @not_on_art.join(",") %>" name="patients" />
                             Tot. not on ART
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @pmtct_management_1.length rescue 0 %>
+                            <a href="javascript:document.getElementById('not_on_art').submit()">
+                            <%= @not_on_art.length rescue 0 %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -687,11 +702,16 @@
                             26
                           </td>
                           <td style="border-left: 1px solid #999;">
+                            <form id="on_art_before" method="post" action="decompose">
+                              <input type="hidden" value="<%= @on_art_before.join(",") %>" name="patients" />
                             Tot. already on ART
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                              <%= @pmtct_management_2.length rescue 0 %>
+                            <a href="javascript:document.getElementById('on_art_before').submit()">
+                              <%= @on_art_before.length rescue 0 %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -699,11 +719,16 @@
                             27
                           </td>
                           <td style="border-left: 1px solid #999;">
+                            <form id="on_art_zero_to_27" method="post" action="decompose">
+                              <input type="hidden" value="<%= @on_art_zero_to_27.join(",") %>" name="patients" />
                             Tot. started ART at 0-27 weeks of preg.
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                              <%= @pmtct_management_3.length rescue 0 %>
+                            <a href="javascript:document.getElementById('on_art_zero_to_27').submit()">
+                              <%= @on_art_zero_to_27.length rescue 0 %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -711,11 +736,16 @@
                             28
                           </td>
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
+                            <form id="on_art_28_plus" method="post" action="decompose">
+                              <input type="hidden" value="<%= @on_art_28_plus.join(",") %>" name="patients" />
                             Tot. started ART at 28+ weeks of preg.
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                              <%= @pmtct_management_4.length rescue 0 %>
+                            <a href="javascript:document.getElementById('on_art_28_plus').submit()">
+                              <%= @on_art_28_plus.length rescue 0 %>
+                            </a>
                           </td>
                         </tr>
                       </table>
