@@ -10,15 +10,41 @@
       tt_show = '/clinic';
       //-->
     </script>
+    <style media="print">
+      button {
+        display: none;
+      }
+      #main {
+        height: 100%;
+      }
+    </style>
     <style>
       #Unknown {display: none;}
       #num {display: none;}
+      #main {
+        height: 440px;
+      }
+
+      a:link {
+        color: #000;
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: orange !important;
+        text-decoration: underline;
+      }
+
+      a:visited {
+        color: #000;
+        text-decoration: none;
+      }
     </style>
   </head>
   <body>
     <div id="content">
       <div style="background-color: #fff; height: 660px; width: 99%; padding: 5px;">
-        <table style="width: 100%; border: 1px solid #999;">
+        <table style="width: 100%; border: 1px solid #999; -moz-user-select: none;">
           <tr>
             <th style="font-size: 1.8em; color: #eee; background-color: #999; padding: 10px;">
               ANC C<span style="font-size: 0.8em">LINIC</span> - 
@@ -75,7 +101,7 @@
           </tr>
           <tr>
             <td style="overflow: auto; border-bottom: 1px solid #999; vertical-align: top;">
-              <div style="width: 98%; height: 440px; overflow: auto; padding: 10px;">
+              <div id="main" style="width: 98%; overflow: auto; padding: 10px;">
                 <table style="width: 100%;" border="0">
                   <tr>
                     <td style="width: 33%;" valign="top">
@@ -90,15 +116,19 @@
                         </tr>
                         <tr>
                           <td>
-                            &nbsp;
+                            <form id="new_reg" method="post" action="decompose">
+                              <input type="hidden" value="<%= @new_women_registered.join(",") %>" name="patients" />
+                            </form>
                           </td>
                           <td style="width: 60%; border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
                             New women registered
                           </td>
                           <td style="border-right: 1px solid #999; border-bottom: 1px solid #999; 
-                              font-style: italic;">
-                            <%= @new_women_registered.to_i %>&nbsp;
+                              font-style: italic; padding-bottom: 0px;">
+                            <a href="javascript:document.getElementById('new_reg').submit()">
+                              <%= @new_women_registered.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -127,10 +157,15 @@
                             1
                           </td>
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999;">
-                            One Visit
+                            <form id="visits_1" method="post" action="decompose">
+                              <input type="hidden" value="<%= @observations_1.join(",") %>" name="patients" />
+                              Tot. with 1 Visit
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @observations_1.length %>
+                            <a href="javascript:document.getElementById('visits_1').submit()">
+                              <%= @observations_1.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -138,11 +173,16 @@
                             2
                           </td>
                           <td style="border-left: 1px solid #999;">
-                            Two Visits
+                            <form id="visits_2" method="post" action="decompose">
+                              <input type="hidden" value="<%= @observations_2.join(",") %>" name="patients" />
+                              Tot. with 2 Visits
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @observations_2.length %>
+                            <a href="javascript:document.getElementById('visits_2').submit()">
+                              <%= @observations_2.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -150,11 +190,16 @@
                             3
                           </td>
                           <td style="border-left: 1px solid #999;">
-                            Three Visits
+                            <form id="visits_3" method="post" action="decompose">
+                              <input type="hidden" value="<%= @observations_3.join(",") %>" name="patients" />
+                              Tot. with 3 Visits
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @observations_3.length %>
+                            <a href="javascript:document.getElementById('visits_3').submit()">
+                              <%= @observations_3.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -162,11 +207,16 @@
                             4
                           </td>
                           <td style="border-left: 1px solid #999;">
-                            Four Visits
+                            <form id="visits_4" method="post" action="decompose">
+                              <input type="hidden" value="<%= @observations_4.join(",") %>" name="patients" />
+                              Tot. with 4 Visits
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @observations_4.length %>
+                            <a href="javascript:document.getElementById('visits_4').submit()">
+                              <%= @observations_4.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -174,11 +224,16 @@
                             5
                           </td>
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            Five or more Visits
+                            <form id="visits_5" method="post" action="decompose">
+                              <input type="hidden" value="<%= @observations_5.join(",") %>" name="patients" />
+                              Tot. with 5+ Visits
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @observations_5.length %>
+                            <a href="javascript:document.getElementById('visits_5').submit()">
+                              <%= @observations_5.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -198,30 +253,49 @@
                             &nbsp;
                           </td>
                           <td colspan="2" style="font-weight: bold;">
-                            First visit at <sup style="font-weight: normal;">1</sup>
+                            Week of first ANC visit
                           </td>
                         </tr>
                         <tr>
                           <td>
                             6
                           </td>
-                          <td style="border-top: 1px solid #999; border-left: 1px solid #999;">
-                            0-12 weeks
+                          <td style="border-top: 1px solid #999; border-left: 1px solid #999; 
+                              border-bottom: 1px solid #999;">
+                            <form id="week_of_first_visit_1" method="post" action="decompose">
+                              <input type="hidden" value="<%= @week_of_first_visit_1.join(",") %>" name="patients" />
+                              Tot. started in wk. 0-12
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @week_of_first_visit_1.length %>
+                            <a href="javascript:document.getElementById('week_of_first_visit_1').submit()">
+                              <%= @week_of_first_visit_1.length %>
+                            </a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            &nbsp;
+                          </td>
+                          <td colspan="2" style="font-weight: bold;">
+                            (Pre-) Eclampsia
                           </td>
                         </tr>
                         <tr>
                           <td>
                             7
                           </td>
-                          <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            13+ weeks
+                          <td style="border-left: 1px solid #999; border-bottom: 1px solid #999; border-top: 1px solid #999; ">
+                            <form id="pre_eclampsia_1" method="post" action="decompose">
+                              <input type="hidden" value="<%= @pre_eclampsia_1.join(",") %>" name="patients" />
+                              Tot. with pre-eclampsia
+                            </form>
                           </td>
-                          <td style="border-left: 1px solid #999;
+                          <td style="border-left: 1px solid #999; border-top: 1px solid #999; 
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @week_of_first_visit_2.length %>
+                            <a href="javascript:document.getElementById('pre_eclampsia_1').submit()">
+                              <%= @pre_eclampsia_1.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -229,30 +303,23 @@
                             &nbsp;
                           </td>
                           <td colspan="2" style="font-weight: bold;">
-                            (Pre-)Eclampsia <sup style="font-weight: normal;">1</sup>
+                            TTV doses
                           </td>
                         </tr>
                         <tr>
                           <td>
                             8
                           </td>
-                          <td style="border-top: 1px solid #999; border-left: 1px solid #999;">
-                            No
+                          <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; border-left: 1px solid #999;">
+                            <form id="ttv__total_previous_doses_2" method="post" action="decompose">
+                              <input type="hidden" value="<%= @ttv__total_previous_doses_2.join(",") %>" name="patients" />
+                              Tot. received 2+ doses
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @pre_eclampsia_1.length %>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            9
-                          </td>
-                          <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            Yes
-                          </td>
-                          <td style="border-left: 1px solid #999;
-                              border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @pre_eclampsia_2.length %>
+                            <a href="javascript:document.getElementById('ttv__total_previous_doses_2').submit()">
+                              <%= @ttv__total_previous_doses_2.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -260,18 +327,40 @@
                             &nbsp;
                           </td>
                           <td colspan="2" style="font-weight: bold;">
-                            TTV doses <sup style="font-weight: normal;">1</sup>
+                            SP doses <sup style="font-weight: normal;">1</sup>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            9
+                          </td>
+                          <td style="border-top: 1px solid #999; border-left: 1px solid #999;">
+                            <form id="fansida__sp___number_of_tablets_given_0" method="post" action="decompose">
+                              <input type="hidden" value="<%= @fansida__sp___number_of_tablets_given_0.join(",") %>" name="patients" />
+                              Tot. received 0 doses
+                            </form>
+                          </td>
+                          <td style="border-top: 1px solid #999; border-left: 1px solid #999;
+                              border-right: 1px solid #999;">
+                            <a href="javascript:document.getElementById('fansida__sp___number_of_tablets_given_0').submit()">
+                              <%= @fansida__sp___number_of_tablets_given_0.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
                           <td>
                             10
                           </td>
-                          <td style="border-top: 1px solid #999; border-left: 1px solid #999;">
-                            0-1
+                          <td style="border-left: 1px solid #999;">
+                            <form id="fansida__sp___number_of_tablets_given_1" method="post" action="decompose">
+                              <input type="hidden" value="<%= @fansida__sp___number_of_tablets_given_1.join(",") %>" name="patients" />
+                              Tot. received 1 x 3 tabs
+                            </form>
                           </td>
-                          <td style="border: 1px solid #999;">
-                            <%= @ttv__total_previous_doses_1.length %>
+                          <td style="border-right: 1px solid #999; border-left: 1px solid #999; border-top: 1px solid #999;">
+                            <a href="javascript:document.getElementById('fansida__sp___number_of_tablets_given_1').submit()">
+                              <%= @fansida__sp___number_of_tablets_given_1.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -279,11 +368,16 @@
                             11
                           </td>
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            2+
+                            <form id="fansida__sp___number_of_tablets_given_2" method="post" action="decompose">
+                              <input type="hidden" value="<%= @fansida__sp___number_of_tablets_given_2.join(",") %>" name="patients" />
+                              Tot. received 2 x 3 tabs
+                            </form>                           
                           </td>
-                          <td style="border-left: 1px solid #999;
+                          <td style="border-left: 1px solid #999; border-top: 1px solid #999; 
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @ttv__total_previous_doses_2.length %>
+                            <a href="javascript:document.getElementById('fansida__sp___number_of_tablets_given_2').submit()">
+                              <%= @fansida__sp___number_of_tablets_given_2.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -291,61 +385,19 @@
                             &nbsp;
                           </td>
                           <td colspan="2" style="font-weight: bold;">
-                            SP tablets <sup style="font-weight: normal;">1</sup>
+                            FeFo tablets <sup style="font-weight: normal;">1</sup>
                           </td>
                         </tr>
                         <tr>
                           <td>
                             12
                           </td>
-                          <td style="border-top: 1px solid #999; border-left: 1px solid #999;">
+                          <td style="border-top: 1px solid #999; border-left: 1px solid #999; 
+                              border-bottom: 1px solid #999;">
                             No
                           </td>
                           <td style="border: 1px solid #999;">
                             <%= @fansida__sp___number_of_tablets_given_1.length %>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            13
-                          </td>
-                          <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            Yes
-                          </td>
-                          <td style="border-left: 1px solid #999;
-                              border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @fansida__sp___number_of_tablets_given_2.length %>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            &nbsp;
-                          </td>
-                          <td colspan="2" style="font-weight: bold;">
-                            Total FeFo tablets <sup style="font-weight: normal;">1</sup>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            14
-                          </td>
-                          <td style="border-top: 1px solid #999; border-left: 1px solid #999;">
-                            0-119
-                          </td>
-                          <td style="border: 1px solid #999;">
-                            <%= @fefo__number_of_tablets_given_1.length %>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            15
-                          </td>
-                          <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            120+
-                          </td>
-                          <td style="border-left: 1px solid #999;
-                              border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @fefo__number_of_tablets_given_2.length %>
                           </td>
                         </tr>
                       </table>
@@ -357,12 +409,52 @@
                             &nbsp;
                           </td>
                           <td colspan="2" style="font-weight: bold;">
+                            Albendazole
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            13
+                          </td>
+                          <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
+                              border-left: 1px solid #999; width: 60%;">
+                            Tot. received 1 dose
+                          </td>
+                          <td style="border: 1px solid #999;">
+                            <%= @syphilis_result_1.length %>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="width: 10px;">
+                            &nbsp;
+                          </td>
+                          <td colspan="2" style="font-weight: bold;">
+                            ITN (bed nets)
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            14
+                          </td>
+                          <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
+                              border-left: 1px solid #999; width: 60%;">
+                            Tot. received ITN
+                          </td>
+                          <td style="border: 1px solid #999;">
+                            <%= @syphilis_result_1.length %>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="width: 10px;">
+                            &nbsp;
+                          </td>
+                          <td colspan="2" style="font-weight: bold;">
                             Syphilis status <sup style="font-weight: normal;">1</sup>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            16
+                            15
                           </td>
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
                             Negative
@@ -373,26 +465,26 @@
                         </tr>
                         <tr>
                           <td>
-                            17
+                            16
                           </td>
                           <td style="border-left: 1px solid #999;">
                             Positive
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @syphilis_result_2.length %>
+                              <%= @syphilis_result_2.length %>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            18
+                            17
                           </td>
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
                             Unknown
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @syphilis_result_3.length %>
+                              <%= @syphilis_result_3.length %>
                           </td>
                         </tr>
                         <tr>
@@ -405,7 +497,7 @@
                         </tr>
                         <tr>
                           <td>
-                            19
+                            18
                           </td>
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
                             Previous Negative
@@ -416,58 +508,55 @@
                         </tr>
                         <tr>
                           <td>
-                            20
+                            19
                           </td>
                           <td style="border-left: 1px solid #999;">
                             Previous Positive
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @hiv_test_result_2.length %>
+                              <%= @hiv_test_result_2.length %>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            21
+                            20
                           </td>
                           <td style="border-left: 1px solid #999; width: 60%;">
                             New Negative
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @hiv_test_result_3.length %>
+                              <%= @hiv_test_result_3.length %>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            22
+                            21
                           </td>
                           <td style="border-left: 1px solid #999;">
                             New Positive
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @hiv_test_result_4.length %>
+                              <%= @hiv_test_result_4.length %>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            23
+                            22
                           </td>
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
                             Not Done
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @hiv_test_result_5.length %>
+                              <%= @hiv_test_result_5.length %>
                           </td>
                         </tr>
                         <tr>
-                          <td>
-                            &nbsp;
-                          </td>
-                          <td style="font-style:italic;">
-                            Total women HIV+
+                          <td style="font-style:italic;" colspan="2">
+                            Tot. women HIV+ (19+21)
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
@@ -479,15 +568,16 @@
                             &nbsp;
                           </td>
                           <td colspan="2" style="font-weight: bold;">
-                            ART Eligibility <sup style="font-weight: normal;">2</sup>
+                            CPT
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            24
+                            23
                           </td>
-                          <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
-                            No
+                          <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
+                              border-left: 1px solid #999; width: 60%;">
+                            Women on CPT
                           </td>
                           <td style="border: 1px solid #999;">
                             <%= @on_art__1.length %>
@@ -495,42 +585,19 @@
                         </tr>
                         <tr>
                           <td>
-                            25
-                          </td>
-                          <td style="border-left: 1px solid #999;">
-                            Yes
-                          </td>
-                          <td style="border-left: 1px solid #999;
-                              border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @on_art__2.length %>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            26
-                          </td>
-                          <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            Unknown
-                          </td>
-                          <td style="border-left: 1px solid #999;
-                              border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @on_art__3.length rescue 0 %>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
                             &nbsp;
                           </td>
                           <td colspan="2" style="font-weight: bold;">
-                            On CPT <sup style="font-weight: normal;">2</sup>
+                            NVP syrup dispensed for baby
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            27
+                            24
                           </td>
-                          <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
-                            No
+                          <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
+                              border-left: 1px solid #999; width: 60%;">
+                            Tot. received NVP
                           </td>
                           <td style="border: 1px solid #999;">
                             <%= @on_cpt__1.length %>
@@ -538,30 +605,18 @@
                         </tr>
                         <tr>
                           <td>
-                            28
-                          </td>
-                          <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            Yes
-                          </td>
-                          <td style="border-left: 1px solid #999;
-                              border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @on_cpt__2.length %>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
                             &nbsp;
                           </td>
                           <td colspan="2" style="font-weight: bold; padding-top: 12px;">
-                            Final PMTCT regimen mother <sup style="font-weight: normal;">2</sup>
+                            Final ART status mother <sup style="font-weight: normal;">2</sup>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            29
+                            25
                           </td>
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
-                            None
+                            Tot. not on ART
                           </td>
                           <td style="border: 1px solid #999;">
                             <%= @pmtct_management_1.length rescue 0 %>
@@ -569,69 +624,38 @@
                         </tr>
                         <tr>
                           <td>
-                            30
+                            26
                           </td>
                           <td style="border-left: 1px solid #999;">
-                            ART
+                            Tot. already on ART
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @pmtct_management_2.length rescue 0 %>
+                              <%= @pmtct_management_2.length rescue 0 %>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            31
+                            27
                           </td>
                           <td style="border-left: 1px solid #999;">
-                            sdNVP
+                            Tot. started ART at 0-27 weeks of preg.
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @pmtct_management_3.length rescue 0 %>
+                              <%= @pmtct_management_3.length rescue 0 %>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                            32
+                            28
                           </td>
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            AZT
+                            Tot. started ART at 28+ weeks of preg.
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @pmtct_management_4.length rescue 0 %>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            &nbsp;
-                          </td>
-                          <td colspan="2" style="font-weight: bold;">
-                            NVP syrup dispensed for baby <sup style="font-weight: normal;">2</sup>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            33
-                          </td>
-                          <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
-                            No
-                          </td>
-                          <td style="border: 1px solid #999;">
-                            <%= @nvp_baby__1.length %>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            34
-                          </td>
-                          <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            Yes
-                          </td>
-                          <td style="border-left: 1px solid #999;
-                              border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            <%= @nvp_baby__2.length %>
+                              <%= @pmtct_management_4.length rescue 0 %>
                           </td>
                         </tr>
                       </table>

@@ -552,35 +552,35 @@ EOF
     label3set = false
 
     label.draw_text("Detailed Obstetric History",28,29,0,1,1,2,false)
-    label.draw_text("Pre",24,70,0,1,1,1,false)
-    label.draw_text("No.",25,85,0,1,1,1,false)
-    label.draw_text("Year",60,70,0,1,1,1,false)
-    label.draw_text("Place",110,70,0,1,1,1,false)
-    label.draw_text("Gest.",225,70,0,1,1,1,false)
-    label.draw_text("(wks)",225,85,0,1,1,1,false)
-    label.draw_text("Labour",305,70,0,1,1,1,false)
-    label.draw_text("duration",300,85,0,1,1,1,false)
-    label.draw_text("(hrs)",310,100,0,1,1,1,false)
-    label.draw_text("Delivery",405,70,0,1,1,1,false)
-    label.draw_text("Method",410,85,0,1,1,1,false)
-    label.draw_text("Condition",518,70,0,1,1,1,false)
-    label.draw_text("at birth",518,85,0,1,1,1,false)
-    label.draw_text("Birth",625,70,0,1,1,1,false)
-    label.draw_text("weight",620,85,0,1,1,1,false)
-    label.draw_text("(kg)",625,100,0,1,1,1,false)
-    label.draw_text("Alive",690,70,0,1,1,1,false)
-    label.draw_text("now?",695,85,0,1,1,1,false)
-    label.draw_text("Age at",745,70,0,1,1,1,false)
-    label.draw_text("death*",745,85,0,1,1,1,false)
+    label.draw_text("Pr.",25,65,0,2,1,1,false)
+    label.draw_text("No.",25,85,0,2,1,1,false)
+    label.draw_text("Year",59,65,0,2,1,1,false)
+    label.draw_text("Place",110,65,0,2,1,1,false)
+    label.draw_text("Gest.",225,65,0,2,1,1,false)
+    label.draw_text("(wks)",225,85,0,2,1,1,false)
+    label.draw_text("Labour",305,65,0,2,1,1,false)
+    label.draw_text("durat.",305,85,0,2,1,1,false)
+    label.draw_text("(hrs)",310,105,0,2,1,1,false)
+    label.draw_text("Delivery",405,65,0,2,1,1,false)
+    label.draw_text("Method",410,85,0,2,1,1,false)
+    label.draw_text("Conditi.",518,65,0,2,1,1,false)
+    label.draw_text("at birth",518,85,0,2,1,1,false)
+    label.draw_text("Birt.",625,65,0,2,1,1,false)
+    label.draw_text("weigh.",620,85,0,2,1,1,false)
+    label.draw_text("(kg)",625,105,0,2,1,1,false)
+    label.draw_text("Aliv.",690,65,0,2,1,1,false)
+    label.draw_text("now?",690,85,0,2,1,1,false)
+    label.draw_text("Age at",745,65,0,2,1,1,false)
+    label.draw_text("death*",745,85,0,2,1,1,false)
     
     label.draw_line(20,60,800,2,0)
     label.draw_line(20,60,2,245,0)
     label.draw_line(20,305,800,2,0)
     label.draw_line(805,60,2,245,0)
-    label.draw_line(20,120,800,2,0)
+    label.draw_line(20,125,800,2,0)
     
-    label.draw_line(55,60,2,245,0)
-    label.draw_line(102,60,2,245,0)
+    label.draw_line(56,60,2,245,0)
+    label.draw_line(105,60,2,245,0)
     label.draw_line(220,60,2,245,0)
     label.draw_line(295,60,2,245,0)
     label.draw_line(380,60,2,245,0)
@@ -590,94 +590,96 @@ EOF
     label.draw_line(740,60,2,245,0)
     
     (1..(@obstetrics.length + 1)).each do |pos|
-      if pos <= 4
+      
+      @place = (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? 
+            @obstetrics[pos]["PLACE OF BIRTH"] : "") : "").gsub(/Centre/i, 
+        "C.").gsub(/Health/i, "H.").gsub(/Center/i, "C.")
+          
+      @gest = (@obstetrics[pos] ? (@obstetrics[pos]["PREGNANCY"] ? 
+            @obstetrics[pos]["PREGNANCY"] : "") : "")
+          
+      @gest = (@gest.length > 5 ? truncate(@gest, 5) : @gest)
+              
+      @delmode = (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? 
+            @obstetrics[pos]["METHOD OF DELIVERY"].titleize : (@obstetrics[pos]["PROCEDURE DONE"] ? 
+              @obstetrics[pos]["PROCEDURE DONE"] : "")) : "").gsub(/Spontaneous\sVaginal\sDelivery/i, 
+        "S.V.D.").gsub(/Caesarean\sSection/i, "C-Section").gsub(/Vacuum\sExtraction\sDelivery/i, 
+        "Vac. Extr.").gsub("(MVA)", "").gsub(/Manual\sVacuum\sAspiration/i, 
+        "M.V.A.").gsub(/Evacuation/i, "Evac")
+             
+      @labor = (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? 
+            @obstetrics[pos]["LABOUR DURATION"] : "") : "")
+             
+      @labor = (@labor.length > 5 ? truncate(@labor,5) : @labor)
         
-        label.draw_text(pos,28,(90 + (45 * pos)),0,1,1,1,false)
+      @cond = (@obstetrics[pos] ? (@obstetrics[pos]["CONDITION AT BIRTH"] ? 
+            @obstetrics[pos]["CONDITION AT BIRTH"] : "") : "").titleize
+        
+      if pos <= 3
+        
+        label.draw_text(pos,28,(85 + (60 * pos)),0,2,1,1,false)
         
         label.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ? 
                 (@obstetrics[pos]["YEAR OF BIRTH"].to_i > 0 ? @obstetrics[pos]["YEAR OF BIRTH"].to_i : 
-                  "????") : "") : ""),60,(90 + (45 * pos)),0,1,1,1,false)
-        
-        
-        @place = (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? 
-              @obstetrics[pos]["PLACE OF BIRTH"] : "") : "")
-          
-        if @place.length < 11
-          label.draw_text(@place,107,(90 + (45 * pos)),0,1,1,1,false)
+                  "????") : "") : ""),58,(70 + (60 * pos)),0,2,1,1,false)
+                
+        if @place.length < 9
+          label.draw_text(@place,111,(70 + (60 * pos)),0,2,1,1,false)
         else
           @place = paragraphate(@place)
         
           (0..(@place.length)).each{|p|
-            label.draw_text(@place[p],107,(85 + (45 * pos) + (13 * p)),0,1,1,1,false)
+            label.draw_text(@place[p],111,(70 + (60 * pos) + (18 * p)),0,2,1,1,false)
           }
         end
-        
-        @gest = (@obstetrics[pos] ? (@obstetrics[pos]["PREGNANCY"] ? 
-              @obstetrics[pos]["PREGNANCY"] : "") : "")
           
-        @gest = (@gest.length > 6 ? truncate(@gest, 6) : @gest)
-               
-        label.draw_text(@gest,225,(90 + (45 * pos)),0,1,1,1,false)
-        
-        
-        @labor = (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? 
-              @obstetrics[pos]["LABOUR DURATION"] : "") : "")
-          
-        @labor = (@labor.length > 6 ? truncate(@labor,6) : @labor)
-        
-        label.draw_text(@labor,300,(90 + (45 * pos)),0,1,1,1,false)
-        
-        
-        @delmode = (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? 
-              @obstetrics[pos]["METHOD OF DELIVERY"].titleize : (@obstetrics[pos]["PROCEDURE DONE"] ? 
-                @obstetrics[pos]["PROCEDURE DONE"] : "")) : "")
-          
+        label.draw_text(@gest,225,(70 + (60 * pos)),0,2,1,1,false)
+            
+        label.draw_text(@labor,300,(70 + (60 * pos)),0,2,1,1,false)
+             
         if @delmode.length < 11
-          label.draw_text(@delmode,385,(90 + (45 * pos)),0,1,1,1,false)
+          label.draw_text(@delmode,385,(70 + (60 * pos)),0,2,1,1,false)
         else
           @delmode = paragraphate(@delmode)
         
           (0..(@delmode.length)).each{|p|
-            label.draw_text(@delmode[p],385,(85 + (45 * pos) + (13 * p)),0,1,1,1,false)
+            label.draw_text(@delmode[p],385,(70 + (60 * pos) + (13 * p)),0,2,1,1,false)
           }
         end
         
-        @cond = (@obstetrics[pos] ? (@obstetrics[pos]["CONDITION AT BIRTH"] ? 
-              @obstetrics[pos]["CONDITION AT BIRTH"] : "") : "").titleize
-        
-        if @cond.length < 8
-          label.draw_text(@cond,515,(90 + (45 * pos)),0,1,1,1,false)
+        if @cond.length < 6
+          label.draw_text(@cond,515,(70 + (60 * pos)),0,2,1,1,false)
         else
-          @cond = paragraphate(@cond, 8)
+          @cond = paragraphate(@cond, 6)
         
           (0..(@cond.length)).each{|p|
-            label.draw_text(@cond[p],515,(85 + (45 * pos) + (13 * p)),0,1,1,1,false)
+            label.draw_text(@cond[p],515,(70 + (60 * pos) + (18 * p)),0,2,1,1,false)
           }
         end
         
         label.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["BIRTH WEIGHT"] ? 
-                @obstetrics[pos]["BIRTH WEIGHT"] : "") : ""),620,(90 + (45 * pos)),0,1,1,1,false)
+                @obstetrics[pos]["BIRTH WEIGHT"] : "") : ""),620,(70 + (60 * pos)),0,2,1,1,false)
         
         label.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["ALIVE"] ? 
-                @obstetrics[pos]["ALIVE"] : "") : ""),687,(90 + (45 * pos)),0,1,1,1,false)
+                @obstetrics[pos]["ALIVE"] : "") : ""),687,(70 + (60 * pos)),0,2,1,1,false)
         
-        label.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
-                (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
-                  @obstetrics[pos]["AGE AT DEATH"].to_i) : "") : "").to_s + 
-            (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
-                @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "") : ""),745,(90 + (45 * pos)),0,1,1,1,false)
+        label.draw_text(truncate((@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
+                  (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
+                    @obstetrics[pos]["AGE AT DEATH"].to_i) : "") : "").to_s + 
+              (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
+                  @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "") : ""), 5),745,(70 + (60 * pos)),0,2,1,1,false)
         
-        label.draw_line(20,((125 + (45 * pos)) <= 305 ? (125 + (45 * pos)) : 305),800,2,0)
+        label.draw_line(20,((135 + (45 * pos)) <= 305 ? (125 + (60 * pos)) : 305),800,2,0)
         
-      elsif pos >= 5 && pos <= 10
-        if pos == 5
+      elsif pos >= 4 && pos <= 8
+        if pos == 4
           label2.draw_line(20,30,800,2,0)
           label2.draw_line(20,30,2,275,0)
           label2.draw_line(20,305,800,2,0)
           label2.draw_line(805,30,2,275,0)
           
           label2.draw_line(55,30,2,275,0)
-          label2.draw_line(102,30,2,275,0)
+          label2.draw_line(105,30,2,275,0)
           label2.draw_line(220,30,2,275,0)
           label2.draw_line(295,30,2,275,0)
           label2.draw_line(380,30,2,275,0)
@@ -686,93 +688,69 @@ EOF
           label2.draw_line(683,30,2,275,0)
           label2.draw_line(740,30,2,275,0)
         end
-        label2.draw_text(pos,28,((45 * (pos - 4))),0,1,1,1,false)
+        label2.draw_text(pos,28,((55 * (pos - 3))),0,2,1,1,false)
         
         label2.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ? 
                 (@obstetrics[pos]["YEAR OF BIRTH"].to_i > 0 ? @obstetrics[pos]["YEAR OF BIRTH"].to_i : 
-                  "????") : "") : ""),60,((45 * (pos - 4))),0,1,1,1,false)
+                  "????") : "") : ""),58,((55 * (pos - 3)) - 13),0,2,1,1,false)
         
-        
-        @place = (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? 
-              @obstetrics[pos]["PLACE OF BIRTH"] : "") : "")
-          
-        if @place.length < 11
-          label2.draw_text(@place,107,((45 * (pos - 4))),0,1,1,1,false)
+        if @place.length < 8
+          label2.draw_text(@place,111,((55 * (pos - 3)) - 13),0,2,1,1,false)
         else
           @place = paragraphate(@place)
         
           (0..(@place.length)).each{|p|
-            label2.draw_text(@place[p],107,((45 * (pos - 4)) + (13 * p)),0,1,1,1,false)
+            label2.draw_text(@place[p],111,(55 * (pos - 3) + (18 * p))-17,0,2,1,1,false)
           }
         end
         
+        label2.draw_text(@gest,225,((55 * (pos - 3)) - 13),0,2,1,1,false)
         
-        @gest = (@obstetrics[pos] ? (@obstetrics[pos]["PREGNANCY"] ? 
-              @obstetrics[pos]["PREGNANCY"] : "") : "")
-          
-        @gest = (@gest.length > 6 ? truncate(@gest, 6) : @gest)
-               
-        label2.draw_text(@gest,225,((45 * (pos - 4))),0,1,1,1,false)
+        label2.draw_text(@labor,300,((55 * (pos - 3)) - 13),0,2,1,1,false)
         
-        
-        @labor = (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? 
-              @obstetrics[pos]["LABOUR DURATION"] : "") : "")
-          
-        @labor = (@labor.length > 6 ? truncate(@labor,6) : @labor)
-        
-        label2.draw_text(@labor,300,((45 * (pos - 4))),0,1,1,1,false)
-        
-        
-        @delmode = (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? 
-              @obstetrics[pos]["METHOD OF DELIVERY"].titleize : (@obstetrics[pos]["PROCEDURE DONE"] ? 
-                @obstetrics[pos]["PROCEDURE DONE"] : "")) : "")
-          
         if @delmode.length < 11
-          label2.draw_text(@delmode,385,(45 * (pos - 4)),0,1,1,1,false)
+          label2.draw_text(@delmode,385,(55 * (pos - 3)),0,2,1,1,false)
         else
           @delmode = paragraphate(@delmode)
         
           (0..(@delmode.length)).each{|p|
-            label2.draw_text(@delmode[p],385,(45 * (pos - 4) + (13 * p))-4,0,1,1,1,false)
+            label2.draw_text(@delmode[p],385,(55 * (pos - 3) + (18 * p))-17,0,2,1,1,false)
           }
         end
         
-        @cond = (@obstetrics[pos] ? (@obstetrics[pos]["CONDITION AT BIRTH"] ? 
-              @obstetrics[pos]["CONDITION AT BIRTH"] : "") : "").titleize
-        
-        if @cond.length < 8
-          label2.draw_text(@cond,515,((45 * (pos - 4))),0,1,1,1,false)
+        if @cond.length < 6
+          label2.draw_text(@cond,515,((55 * (pos - 3)) - 13),0,2,1,1,false)
         else
-          @cond = paragraphate(@cond, 8)
+          @cond = paragraphate(@cond, 6)
         
           (0..(@cond.length)).each{|p|
-            label2.draw_text(@cond[p],515,(45 * (pos - 4) + (13 * p))-4,0,1,1,1,false)
+            label2.draw_text(@cond[p],515,(55 * (pos - 3) + (18 * p))-17,0,2,1,1,false)
           }
         end
         
         label2.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["BIRTH WEIGHT"] ? 
-                @obstetrics[pos]["BIRTH WEIGHT"] : "") : ""),620,((45 * (pos - 4))),0,1,1,1,false)
+                @obstetrics[pos]["BIRTH WEIGHT"] : "") : ""),620,((55 * (pos - 3)) - 13),0,2,1,1,false)
         
         label2.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["ALIVE"] ? 
-                @obstetrics[pos]["ALIVE"] : "") : ""),687,((45 * (pos - 4))),0,1,1,1,false)
+                @obstetrics[pos]["ALIVE"] : "") : ""),687,((55 * (pos - 3)) - 13),0,2,1,1,false)
         
-        label2.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
-                (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
-                  @obstetrics[pos]["AGE AT DEATH"].to_i) : "") : "").to_s + 
-            (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
-                @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "") : ""),745,((45 * (pos - 4))),0,1,1,1,false)
+        label2.draw_text(truncate((@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
+                  (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
+                    @obstetrics[pos]["AGE AT DEATH"].to_i) : "") : "").to_s + 
+              (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
+                  @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "") : ""),5),745,((55 * (pos - 3)) - 13),0,2,1,1,false)
         
-        label2.draw_line(20,(((45 * (pos - 4)) + 35) <= 305 ? ((45 * (pos - 4)) + 35) : 305),800,2,0)
+        label2.draw_line(20,(((55 * (pos - 3)) + 35) <= 305 ? ((55 * (pos - 3)) + 35) : 305),800,2,0)
         label2set = true
       else
-        if pos == 11
+        if pos == 9
           label3.draw_line(20,30,800,2,0)
           label3.draw_line(20,30,2,275,0)
           label3.draw_line(20,305,800,2,0)
           label3.draw_line(805,30,2,275,0)
           
           label3.draw_line(55,30,2,275,0)
-          label3.draw_line(102,30,2,275,0)
+          label3.draw_line(105,30,2,275,0)
           label3.draw_line(220,30,2,275,0)
           label3.draw_line(295,30,2,275,0)
           label3.draw_line(380,30,2,275,0)
@@ -781,83 +759,59 @@ EOF
           label3.draw_line(683,30,2,275,0)
           label3.draw_line(740,30,2,275,0)
         end
-        label3.draw_text(pos,28,((45 * (pos - 10))),0,1,1,1,false)
+        label3.draw_text(pos,28,((55 * (pos - 8))),0,2,1,1,false)
         
         label3.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ? 
                 (@obstetrics[pos]["YEAR OF BIRTH"].to_i > 0 ? @obstetrics[pos]["YEAR OF BIRTH"].to_i : 
-                  "????") : "") : ""),60,((45 * (pos - 10))),0,1,1,1,false)
+                  "????") : "") : ""),58,((55 * (pos - 8)) - 13),0,2,1,1,false)
         
-        
-        @place = (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? 
-              @obstetrics[pos]["PLACE OF BIRTH"] : "") : "")
-          
-        if @place.length < 11
-          label3.draw_text(@place,107,((45 * (pos - 10))),0,1,1,1,false)
+        if @place.length < 8
+          label3.draw_text(@place,111,((55 * (pos - 8)) - 13),0,2,1,1,false)
         else
           @place = paragraphate(@place)
         
           (0..(@place.length)).each{|p|
-            label3.draw_text(@place[p],107,((45 * (pos - 10)) + (13 * p)),0,1,1,1,false)
+            label3.draw_text(@place[p],111,(55 * (pos - 8) + (18 * p))-17,0,2,1,1,false)
           }
         end
         
+        label3.draw_text(@gest,225,((55 * (pos - 8)) - 13),0,2,1,1,false)
         
-        @gest = (@obstetrics[pos] ? (@obstetrics[pos]["PREGNANCY"] ? 
-              @obstetrics[pos]["PREGNANCY"] : "") : "")
-          
-        @gest = (@gest.length > 6 ? truncate(@gest, 6) : @gest)
-               
-        label3.draw_text(@gest,225,((45 * (pos - 10))),0,1,1,1,false)
+        label3.draw_text(@labor,300,((55 * (pos - 8)) - 13),0,2,1,1,false)
         
-        
-        @labor = (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? 
-              @obstetrics[pos]["LABOUR DURATION"] : "") : "")
-          
-        @labor = (@labor.length > 6 ? truncate(@labor,6) : @labor)
-        
-        label3.draw_text(@labor,300,((45 * (pos - 10))),0,1,1,1,false)
-        
-        
-        @delmode = (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? 
-              @obstetrics[pos]["METHOD OF DELIVERY"].titleize : (@obstetrics[pos]["PROCEDURE DONE"] ? 
-                @obstetrics[pos]["PROCEDURE DONE"] : "")) : "")
-          
         if @delmode.length < 11
-          label3.draw_text(@delmode,385,(45 * (pos - 10)),0,1,1,1,false)
+          label3.draw_text(@delmode,385,(55 * (pos - 8)),0,2,1,1,false)
         else
           @delmode = paragraphate(@delmode)
         
           (0..(@delmode.length)).each{|p|
-            label3.draw_text(@delmode[p],385,(45 * (pos - 10) + (13 * p))-4,0,1,1,1,false)
+            label3.draw_text(@delmode[p],385,(55 * (pos - 8) + (18 * p))-17,0,2,1,1,false)
           }
         end
         
-        @cond = (@obstetrics[pos] ? (@obstetrics[pos]["CONDITION AT BIRTH"] ? 
-              @obstetrics[pos]["CONDITION AT BIRTH"] : "") : "").titleize
-        
-        if @cond.length < 8
-          label3.draw_text(@cond,515,((45 * (pos - 10))),0,1,1,1,false)
+        if @cond.length < 6
+          label3.draw_text(@cond,515,((55 * (pos - 8)) - 13),0,2,1,1,false)
         else
-          @cond = paragraphate(@cond, 8)
+          @cond = paragraphate(@cond, 6)
         
           (0..(@cond.length)).each{|p|
-            label3.draw_text(@cond[p],515,(45 * (pos - 10) + (13 * p))-4,0,1,1,1,false)
+            label3.draw_text(@cond[p],515,(55 * (pos - 8) + (18 * p))-17,0,2,1,1,false)
           }
         end
         
         label3.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["BIRTH WEIGHT"] ? 
-                @obstetrics[pos]["BIRTH WEIGHT"] : "") : ""),620,((45 * (pos - 10))),0,1,1,1,false)
+                @obstetrics[pos]["BIRTH WEIGHT"] : "") : ""),620,((55 * (pos - 8)) - 13),0,2,1,1,false)
         
         label3.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["ALIVE"] ? 
-                @obstetrics[pos]["ALIVE"] : "") : ""),687,((45 * (pos - 10))),0,1,1,1,false)
+                @obstetrics[pos]["ALIVE"] : "") : ""),687,((55 * (pos - 8)) - 13),0,2,1,1,false)
         
-        label3.draw_text((@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
-                (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
-                  @obstetrics[pos]["AGE AT DEATH"].to_i) : "") : "").to_s + 
-            (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
-                @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "") : ""),745,((45 * (pos - 10))),0,1,1,1,false)
+        label3.draw_text(truncate((@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
+                  (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
+                    @obstetrics[pos]["AGE AT DEATH"].to_i) : "") : "").to_s + 
+              (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
+                  @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "") : ""),5),745,((55 * (pos - 8)) - 13),0,2,1,1,false)
         
-        label3.draw_line(20,(((45 * (pos - 10)) + 35) <= 305 ? ((45 * (pos - 10)) + 35) : 305),800,2,0)
+        label3.draw_line(20,(((55 * (pos - 8)) + 35) <= 305 ? ((55 * (pos - 8)) + 35) : 305),800,2,0)
         label3set = true
       end
       
@@ -983,72 +937,72 @@ EOF
     label.draw_text("Refer",750,29,0,1,1,2,true)
     label.draw_line(25,60,172,1,0)
     label.draw_line(400,60,152,1,0)
-    label.draw_text("Gravida",28,80,0,1,1,1,false)
-    label.draw_text("Asthma",400,80,0,1,1,1,false)
-    label.draw_text("Deliveries",28,110,0,1,1,1,false)
-    label.draw_text("Hypertension",400,110,0,1,1,1,false)
-    label.draw_text("Abortions",28,140,0,1,1,1,false)
-    label.draw_text("Diabetes",400,140,0,1,1,1,false)
-    label.draw_text("Still Births",28,170,0,1,1,1,false)
-    label.draw_text("Epilepsy",400,170,0,1,1,1,false)
-    label.draw_text("Vacuum Extraction",28,200,0,1,1,1,false)
-    label.draw_text("Renal Disease",400,200,0,1,1,1,false)
-    label.draw_text("Symphisiotomy",28,230,0,1,1,1,false)
-    label.draw_text("Fistula Repair",400,230,0,1,1,1,false)
-    label.draw_text("Haemorrhage",28,260,0,1,1,1,false)
-    label.draw_text("Leg/Spine Deformation",400,260,0,1,1,1,false)
-    label.draw_text("Pre-Eclampsia",28,290,0,1,1,1,false)
-    label.draw_text("Age",400,290,0,1,1,1,false)
-    label.draw_line(230,70,130,1,0)
-    label.draw_line(230,70,1,236,0)
-    label.draw_line(230,306,130,1,0)
-    label.draw_line(360,70,1,236,0)
-    label.draw_line(230,100,130,1,0)
-    label.draw_line(230,130,130,1,0)
-    label.draw_line(230,160,130,1,0)
-    label.draw_line(230,190,130,1,0)
-    label.draw_line(230,220,130,1,0)
-    label.draw_line(230,250,130,1,0)
-    label.draw_line(230,280,130,1,0)
-    label.draw_line(629,70,130,1,0)
-    label.draw_line(629,70,1,236,0)
-    label.draw_line(629,306,130,1,0)
-    label.draw_line(760,70,1,236,0)
-    label.draw_line(629,100,130,1,0)
-    label.draw_line(629,130,130,1,0)
-    label.draw_line(629,160,130,1,0)
-    label.draw_line(629,190,130,1,0)
-    label.draw_line(629,220,130,1,0)
-    label.draw_line(629,250,130,1,0)
-    label.draw_line(629,280,130,1,0)
-    label.draw_text("#{@gravida}",260,80,0,1,1,1,false)
-    label.draw_text("#{@deliveries}",260,110,0,1,1,1,(@deliveries > 4 ? true : false))
-    label.draw_text("#{@abortions}",260,140,0,1,1,1,(@abortions > 1 ? true : false))
-    label.draw_text("#{(!@stillbirths.nil? ? (@stillbirths == "NO" ? "NO" : "YES") : "")}",260,170,0,1,1,1,
+    label.draw_text("Gravida",28,80,0,2,1,1,false)
+    label.draw_text("Asthma",400,80,0,2,1,1,false)
+    label.draw_text("Deliveries",28,110,0,2,1,1,false)
+    label.draw_text("Hypertension",400,110,0,2,1,1,false)
+    label.draw_text("Abortions",28,140,0,2,1,1,false)
+    label.draw_text("Diabetes",400,140,0,2,1,1,false)
+    label.draw_text("Still Births",28,170,0,2,1,1,false)
+    label.draw_text("Epilepsy",400,170,0,2,1,1,false)
+    label.draw_text("Vacuum Extraction",28,200,0,2,1,1,false)
+    label.draw_text("Renal Disease",400,200,0,2,1,1,false)
+    label.draw_text("Symphisiotomy",28,230,0,2,1,1,false)
+    label.draw_text("Fistula Repair",400,230,0,2,1,1,false)
+    label.draw_text("Haemorrhage",28,260,0,2,1,1,false)
+    label.draw_text("Leg/Spine Deformation",400,260,0,2,1,1,false)
+    label.draw_text("Pre-Eclampsia",28,290,0,2,1,1,false)
+    label.draw_text("Age",400,290,0,2,1,1,false)
+    label.draw_line(250,70,130,1,0)
+    label.draw_line(250,70,1,236,0)
+    label.draw_line(250,306,130,1,0)
+    label.draw_line(380,70,1,236,0)
+    label.draw_line(250,100,130,1,0)
+    label.draw_line(250,130,130,1,0)
+    label.draw_line(250,160,130,1,0)
+    label.draw_line(250,190,130,1,0)
+    label.draw_line(250,220,130,1,0)
+    label.draw_line(250,250,130,1,0)
+    label.draw_line(250,280,130,1,0)
+    label.draw_line(659,70,130,1,0)
+    label.draw_line(659,70,1,236,0)
+    label.draw_line(659,306,130,1,0)
+    label.draw_line(790,70,1,236,0)
+    label.draw_line(659,100,130,1,0)
+    label.draw_line(659,130,130,1,0)
+    label.draw_line(659,160,130,1,0)
+    label.draw_line(659,190,130,1,0)
+    label.draw_line(659,220,130,1,0)
+    label.draw_line(659,250,130,1,0)
+    label.draw_line(659,280,130,1,0)
+    label.draw_text("#{@gravida}",280,80,0,2,1,1,false)
+    label.draw_text("#{@deliveries}",280,110,0,2,1,1,(@deliveries > 4 ? true : false))
+    label.draw_text("#{@abortions}",280,140,0,2,1,1,(@abortions > 1 ? true : false))
+    label.draw_text("#{(!@stillbirths.nil? ? (@stillbirths == "NO" ? "NO" : "YES") : "")}",280,170,0,2,1,1,
       (!@stillbirths.nil? ? (@stillbirths == "NO" ? false : true) : false))
-    label.draw_text("#{(!@vacuum.nil? ? (@vacuum > 0 ? "YES" : "NO") : "")}",260,200,0,1,1,1,
+    label.draw_text("#{(!@vacuum.nil? ? (@vacuum > 0 ? "YES" : "NO") : "")}",280,200,0,2,1,1,
       (!@vacuum.nil? ? (@vacuum > 0 ? true : false) : false))
-    label.draw_text("#{(!@symphosio.nil? ? (@symphosio == "NO" ? "NO" : "YES") : "")}",260,230,0,1,1,1,
+    label.draw_text("#{(!@symphosio.nil? ? (@symphosio == "NO" ? "NO" : "YES") : "")}",280,230,0,2,1,1,
       (!@symphosio.nil? ? (@symphosio == "NO" ? false : true) : false))
-    label.draw_text("#{@haemorrhage}",260,260,0,1,1,1,(@haemorrhage == "PPH" ? true : false))
-    label.draw_text("#{(!@preeclampsia.nil? ? (@preeclampsia == "NO" ? "NO" : "YES") : "")}",260,290,0,1,1,1,
+    label.draw_text("#{@haemorrhage}",280,260,0,2,1,1,(@haemorrhage == "PPH" ? true : false))
+    label.draw_text("#{(!@preeclampsia.nil? ? (@preeclampsia == "NO" ? "NO" : "YES") : "")}",280,285,0,2,1,1,
       (!@preeclampsia.nil? ? (@preeclampsia == "NO" ? false : true) : false))
     
-    label.draw_text("#{(!@asthma.nil? ? (@asthma == "NO" ? "NO" : "YES") : "")}",660,80,0,1,1,1,
+    label.draw_text("#{(!@asthma.nil? ? (@asthma == "NO" ? "NO" : "YES") : "")}",690,80,0,2,1,1,
       (!@asthma.nil? ? (@asthma == "NO" ? false : true) : false))
-    label.draw_text("#{(!@hyper.nil? ? (@hyper == "NO" ? "NO" : "YES") : "")}",660,110,0,1,1,1,
+    label.draw_text("#{(!@hyper.nil? ? (@hyper == "NO" ? "NO" : "YES") : "")}",690,110,0,2,1,1,
       (!@hyper.nil? ? (@hyper == "NO" ? false : true) : false))
-    label.draw_text("#{(!@diabetes.nil? ? (@diabetes == "NO" ? "NO" : "YES") : "")}",660,140,0,1,1,1,
+    label.draw_text("#{(!@diabetes.nil? ? (@diabetes == "NO" ? "NO" : "YES") : "")}",690,140,0,2,1,1,
       (!@diabetes.nil? ? (@diabetes == "NO" ? false : true) : false))
-    label.draw_text("#{(!@epilepsy.nil? ? (@epilepsy == "NO" ? "NO" : "YES") : "")}",660,170,0,1,1,1,
+    label.draw_text("#{(!@epilepsy.nil? ? (@epilepsy == "NO" ? "NO" : "YES") : "")}",690,170,0,2,1,1,
       (!@epilepsy.nil? ? (@epilepsy == "NO" ? false : true) : false))
-    label.draw_text("#{(!@renal.nil? ? (@renal == "NO" ? "NO" : "YES") : "")}",660,200,0,1,1,1,
+    label.draw_text("#{(!@renal.nil? ? (@renal == "NO" ? "NO" : "YES") : "")}",690,200,0,2,1,1,
       (!@renal.nil? ? (@renal == "NO" ? false : true) : false))
-    label.draw_text("#{(!@fistula.nil? ? (@fistula == "NO" ? "NO" : "YES") : "")}",660,230,0,1,1,1,
+    label.draw_text("#{(!@fistula.nil? ? (@fistula == "NO" ? "NO" : "YES") : "")}",690,230,0,2,1,1,
       (!@fistula.nil? ? (@fistula == "NO" ? false : true) : false))
-    label.draw_text("#{(!@deform.nil? ? (@deform == "NO" ? "NO" : "YES") : "")}",660,260,0,1,1,1,
+    label.draw_text("#{(!@deform.nil? ? (@deform == "NO" ? "NO" : "YES") : "")}",690,260,0,2,1,1,
       (!@deform.nil? ? (@deform == "NO" ? false : true) : false))
-    label.draw_text("#{@age}",660,290,0,1,1,1,
+    label.draw_text("#{@age}",690,285,0,2,1,1,
       (((@age > 0 && @age < 16) || (@age > 40)) ? true : false))
 
     label.print(1)
@@ -1116,42 +1070,42 @@ EOF
     label.draw_text("WHO Clinical Stage",28,136,0,2,1,1,false)
     label.draw_text("Lab Results",28,161,0,1,1,2,false)
     label.draw_text("Date",190,170,0,2,1,1,false)
-    label.draw_text("Result",305,170,0,2,1,1,false)
+    label.draw_text("Result",325,170,0,2,1,1,false)
     label.draw_text("HIV",28,196,0,2,1,1,false)
     label.draw_text("Syphilis",28,226,0,2,1,1,false)
     label.draw_text("Hb1",28,256,0,2,1,1,false)
     label.draw_text("Hb2",28,286,0,2,1,1,false)
-    label.draw_line(230,70,160,1,0)
-    label.draw_line(230,70,1,90,0)
-    label.draw_line(180,306,210,1,0)
-    label.draw_line(390,70,1,90,0)
+    label.draw_line(260,70,170,1,0)
+    label.draw_line(260,70,1,90,0)
+    label.draw_line(180,306,250,1,0)
+    label.draw_line(430,70,1,90,0)
     
-    label.draw_line(200,190,1,115,0)
+    label.draw_line(180,190,1,115,0)
     label.draw_line(320,190,1,115,0)
-    label.draw_line(410,190,1,115,0)
+    label.draw_line(430,190,1,115,0)
     
-    label.draw_line(230,100,160,1,0)    
-    label.draw_line(230,130,160,1,0)
-    label.draw_line(230,160,160,1,0)
+    label.draw_line(260,100,170,1,0)    
+    label.draw_line(260,130,170,1,0)
+    label.draw_line(260,160,170,1,0)
     
-    label.draw_line(180,190,210,1,0)
-    label.draw_line(180,220,210,1,0)
-    label.draw_line(180,250,210,1,0)
-    label.draw_line(180,280,210,1,0)
+    label.draw_line(180,190,250,1,0)
+    label.draw_line(180,220,250,1,0)
+    label.draw_line(180,250,250,1,0)
+    label.draw_line(180,280,250,1,0)
     
-    label.draw_text(@height,240,76,0,2,1,1,false)
-    label.draw_text(@multiple,240,106,0,2,1,1,false)
-    label.draw_text(@who,240,136,0,2,1,1,false)
+    label.draw_text(@height,270,76,0,2,1,1,false)
+    label.draw_text(@multiple,270,106,0,2,1,1,false)
+    label.draw_text(@who,270,136,0,2,1,1,false)
         
     label.draw_text(@hiv_test_date,190,196,0,2,1,1,false)
     label.draw_text(@syphilis_date,190,226,0,2,1,1,false)
     label.draw_text(@hb1_date,190,256,0,2,1,1,false)
     label.draw_text(@hb2_date,190,286,0,2,1,1,false)
         
-    label.draw_text(@hiv_test,305,196,0,2,1,1,false)
-    label.draw_text(@syphilis,305,226,0,2,1,1,false)
-    label.draw_text(@hb1,305,256,0,2,1,1,false)
-    label.draw_text(@hb2,305,286,0,2,1,1,false)
+    label.draw_text(@hiv_test,325,196,0,2,1,1,false)
+    label.draw_text(@syphilis,325,226,0,2,1,1,false)
+    label.draw_text(@hb1,325,256,0,2,1,1,false)
+    label.draw_text(@hb2,325,286,0,2,1,1,false)
     
     label.print(1)
   end
@@ -1172,7 +1126,7 @@ EOF
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
-      encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = {} # rescue ""
+      encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = ({} rescue "") if !e.type.nil?
     }
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
@@ -1182,7 +1136,7 @@ EOF
           if o.to_a[0].upcase == "DIAGNOSIS" && encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase]
             encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] += "; " + o.to_a[1]
           else
-            encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] = o.to_a[1]
+            encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] = (o.to_a[1] rescue "") if !e.type.nil?
             if o.to_a[0].upcase == "PLANNED DELIVERY PLACE"
               @current_range[0]["PLANNED DELIVERY PLACE"] = o.to_a[1]
             elsif o.to_a[0].upcase == "MOSQUITO NET"
@@ -1226,27 +1180,28 @@ EOF
     label.draw_line(20,305,800,2,0)
     label.draw_line(805,25,2,280,0)
     label.draw_text("Visit Summary",28,33,0,1,1,2,false)
-    label.draw_text("Last Menstrual Period: #{@current_range[0]["START"].to_date.strftime("%d/%b/%Y") rescue ""}",28,76,0,1,1,1,false)
-    label.draw_text("Expected Date of Delivery: #{@current_range[0]["END"].to_date.strftime("%d/%b/%Y") rescue ""}",28,99,0,1,1,1,false)
+    label.draw_text("Last Menstrual Period: #{@current_range[0]["START"].to_date.strftime("%d/%b/%Y") rescue ""}",28,76,0,2,1,1,false)
+    label.draw_text("Expected Date of Delivery: #{@current_range[0]["END"].to_date.strftime("%d/%b/%Y") rescue ""}",28,99,0,2,1,1,false)
     label.draw_line(28,60,132,1,0)
     label.draw_line(20,130,800,2,0)
     label.draw_line(20,190,800,2,0)
-    label.draw_text("Gest.",29,140,0,1,1,1,false)
-    label.draw_text("Fundal",99,140,0,1,1,1,false)
-    label.draw_text("Pos./",178,140,0,1,1,1,false)
-    label.draw_text("Fetal",259,140,0,1,1,1,false)
-    label.draw_text("Weight",339,140,0,1,1,1,false)
-    label.draw_text("(kg)",339,158,0,1,1,1,false)
-    label.draw_text("BP",435,140,0,1,1,1,false)
-    label.draw_text("Urine",499,140,0,1,1,1,false)
-    label.draw_text("Protein",499,158,0,1,1,1,false)
-    label.draw_text("SP",595,140,0,1,1,1,false)
-    label.draw_text("FeFo",664,140,0,1,1,1,false)
-    label.draw_text("Albe.",740,140,0,1,1,1,false)
-    label.draw_text("Age",35,158,0,1,1,1,false)
-    label.draw_text("Height",99,158,0,1,1,1,false)
-    label.draw_text("Pres.",178,158,0,1,1,1,false)
-    label.draw_text("Heart",259,158,0,1,1,1,false)
+    label.draw_text("Gest.",29,140,0,2,1,1,false)
+    label.draw_text("Fundal",99,140,0,2,1,1,false)
+    label.draw_text("Pos./",178,140,0,2,1,1,false)
+    label.draw_text("Fetal",259,140,0,2,1,1,false)
+    label.draw_text("Weight",339,140,0,2,1,1,false)
+    label.draw_text("(kg)",339,158,0,2,1,1,false)
+    label.draw_text("BP",435,140,0,2,1,1,false)
+    label.draw_text("Urine",499,138,0,2,1,1,false)
+    label.draw_text("Prote-",499,156,0,2,1,1,false)
+    label.draw_text("in",505,174,0,2,1,1,false)
+    label.draw_text("SP",595,140,0,2,1,1,false)
+    label.draw_text("FeFo",664,140,0,2,1,1,false)
+    label.draw_text("Albe.",740,140,0,2,1,1,false)
+    label.draw_text("Age",35,158,0,2,1,1,false)
+    label.draw_text("Height",99,158,0,2,1,1,false)
+    label.draw_text("Pres.",178,158,0,2,1,1,false)
+    label.draw_text("Heart",259,158,0,2,1,1,false)
     label.draw_line(90,130,2,175,0)
     label.draw_line(170,130,2,175,0)
     label.draw_line(250,130,2,175,0)
@@ -1269,31 +1224,31 @@ EOF
         label.draw_text("Visit Date: #{encounter[0]}",450,33,0,1,1,2,false)
         
         gest = (((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7) <= 0 ? "?" : 
-            (((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7) - 1).to_s + " wks") rescue ""
+            (((encounter[0].to_date - @current_range[0]["START"].to_date).to_i / 7) - 1).to_s + "wks") rescue ""
             
-        label.draw_text(gest,29,200,0,1,1,1,false)
+        label.draw_text(gest,29,200,0,2,1,1,false)
         
         fund = (encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i <= 0 ? "?" : 
             encounters[encounter[0]]["OBSERVATIONS"]["FUNDUS"].to_i.to_s + "(wks)") rescue ""
             
-        label.draw_text(fund,99,200,0,1,1,1,false)
+        label.draw_text(fund,99,200,0,2,1,1,false)
         
         posi = encounters[encounter[0]]["OBSERVATIONS"]["POSITION"] rescue ""
         pres = encounters[encounter[0]]["OBSERVATIONS"]["PRESENTATION"] rescue ""
         
-        posipres = paragraphate(posi.to_s + pres.to_s, 6, 5)
+        posipres = paragraphate(posi.to_s + pres.to_s,5, 5)
         
         (0..(posipres.length)).each{|u|
-          label.draw_text(posipres[u],178,(200 + (13 * u)),0,1,1,1,false)
+          label.draw_text(posipres[u],178,(200 + (13 * u)),0,2,1,1,false)
         }
         
         fet = (encounters[encounter[0]]["OBSERVATIONS"]["FETAL HEART BEAT"].humanize == "Unknown" ? "?" :
             encounters[encounter[0]]["OBSERVATIONS"]["FETAL HEART BEAT"].humanize) rescue ""
         
-        fet = paragraphate(fet, 6, 5)
+        fet = paragraphate(fet, 5, 5)
         
         (0..(fet.length)).each{|f|
-          label.draw_text(fet[f],259,(200 + (13 * f)),0,1,1,1,false)
+          label.draw_text(fet[f],259,(200 + (13 * f)),0,2,1,1,false)
         }
         
         wei = (encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"].to_i <= 0 ? "?" : 
@@ -1301,7 +1256,7 @@ EOF
                 encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"] : 
                 encounters[encounter[0]]["VITALS"]["WEIGHT (KG)"].to_i))) rescue ""
         
-        label.draw_text(wei,339,200,0,1,1,1,false)
+        label.draw_text(wei,339,200,0,2,1,1,false)
         
         sbp = (encounters[encounter[0]]["VITALS"]["SYSTOLIC BLOOD PRESSURE"].to_i <= 0 ? "?" : 
             encounters[encounter[0]]["VITALS"]["SYSTOLIC BLOOD PRESSURE"].to_i) rescue "?"
@@ -1309,27 +1264,31 @@ EOF
         dbp = (encounters[encounter[0]]["VITALS"]["DIASTOLIC BLOOD PRESSURE"].to_i <= 0 ? "?" : 
             encounters[encounter[0]]["VITALS"]["DIASTOLIC BLOOD PRESSURE"].to_i) rescue "?"
         
-        label.draw_text(sbp.to_s + "/" + dbp.to_s,420,200,0,1,1,1,false)
+        bp = paragraphate(sbp.to_s + "/" + dbp.to_s, 4, 3)
+        
+        (0..(bp.length)).each{|u|
+          label.draw_text(bp[u],420,(200 + (18 * u)),0,2,1,1,false)
+        }
         
         uri = encounters[encounter[0]]["LAB RESULTS"]["URINE PROTEIN"] rescue ""
         
-        uri = paragraphate(uri, 6, 5)
+        uri = paragraphate(uri, 5, 5)
         
         (0..(uri.length)).each{|u|
-          label.draw_text(uri[u],499,(200 + (13 * u)),0,1,1,1,false)
+          label.draw_text(uri[u],498,(200 + (18 * u)),0,2,1,1,false)
         }
         
         sp = (@drugs[encounter[0]]["SP"].to_i > 0 ? @drugs[encounter[0]]["SP"].to_i : "") rescue ""
         
-        label.draw_text(sp,595,200,0,1,1,1,false)
+        label.draw_text(sp,595,200,0,2,1,1,false)
         
         fefo = (@drugs[encounter[0]]["Fefol"].to_i > 0 ? @drugs[encounter[0]]["Fefol"].to_i : "") rescue ""
         
-        label.draw_text(fefo,664,200,0,1,1,1,false)
+        label.draw_text(fefo,664,200,0,2,1,1,false)
         
         albe = (@drugs[encounter[0]]["Albendazole"].to_i > 0 ? @drugs[encounter[0]]["Albendazole"].to_i : "") rescue ""
         
-        label.draw_text(albe,740,200,0,1,1,1,false)
+        label.draw_text(albe,740,200,0,2,1,1,false)
       end 
       
     end
@@ -1355,7 +1314,7 @@ EOF
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
-      encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = {} # rescue ""
+      encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = ({} rescue "") if !e.type.nil?
     }
 
     @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
@@ -1365,7 +1324,7 @@ EOF
           if o.to_a[0].upcase == "DIAGNOSIS" && encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase]
             encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] += "; " + o.to_a[1]
           else
-            encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] = o.to_a[1]
+            encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase][o.to_a[0].upcase] = (o.to_a[1] rescue "") if !e.type.nil?
             if o.to_a[0].upcase == "PLANNED DELIVERY PLACE"
               @current_range[0]["PLANNED DELIVERY PLACE"] = o.to_a[1]
             elsif o.to_a[0].upcase == "MOSQUITO NET"
@@ -1419,23 +1378,23 @@ EOF
     label.draw_line(364,130,2,175,0)
     label.draw_line(594,130,2,175,0)
     label.draw_line(706,130,2,175,0)
-    label.draw_text("Planned Delivery Place: #{@current_range[0]["PLANNED DELIVERY PLACE"] rescue ""}",28,66,0,1,1,1,false)
-    label.draw_text("Bed Net Given: #{@current_range[0]["MOSQUITO NET"] rescue ""}",28,99,0,1,1,1,false)
-    label.draw_text("TDF/",28,140,0,1,1,1,false)
-    label.draw_text("3TC/",28,158,0,1,1,1,false)
-    label.draw_text("EFV",28,176,0,1,1,1,false)
-    label.draw_text("NVP",80,140,0,1,1,1,false)
-    label.draw_text("Baby",75,158,0,1,1,1,false)
-    label.draw_text("(ml)",75,176,0,1,1,1,false)
-    label.draw_text("On",122,140,0,1,1,1,false)
+    label.draw_text("Planned Delivery Place: #{@current_range[0]["PLANNED DELIVERY PLACE"] rescue ""}",28,66,0,2,1,1,false)
+    label.draw_text("Bed Net Given: #{@current_range[0]["MOSQUITO NET"] rescue ""}",28,99,0,2,1,1,false)
+    label.draw_text("TDF",28,138,0,2,1,1,false)
+    label.draw_text("3TC",28,156,0,2,1,1,false)
+    label.draw_text("EFV",28,174,0,2,1,1,false)
+    label.draw_text("NVP",78,140,0,2,1,1,false)
+    label.draw_text("Baby",77,158,0,1,1,1,false)
+    label.draw_text("(ml)",77,176,0,1,1,1,false)
+    label.draw_text("On",122,140,0,2,1,1,false)
     label.draw_text("CPT",120,158,0,1,1,1,false)
-    label.draw_text("On",162,140,0,1,1,1,false)
+    label.draw_text("On",162,140,0,2,1,1,false)
     label.draw_text("ART",160,158,0,1,1,1,false)
-    label.draw_text("Signs/Symptoms",198,140,0,1,1,1,false)
-    label.draw_text("Medications/Outcome",370,140,0,1,1,1,false)
-    label.draw_text("Next Visit",600,140,0,1,1,1,false)
-    label.draw_text("Date",622,158,0,1,1,1,false)
-    label.draw_text("Provider",710,140,0,1,1,1,false)
+    label.draw_text("Signs/Symptoms",198,140,0,2,1,1,false)
+    label.draw_text("Medication/Outcome",370,140,0,2,1,1,false)
+    label.draw_text("Next Vis.",600,140,0,2,1,1,false)
+    label.draw_text("Date",622,158,0,2,1,1,false)
+    label.draw_text("Provider",710,140,0,2,1,1,false)
 
     @i = 0
 
@@ -1446,46 +1405,56 @@ EOF
         
         tdf = (@drugs[encounter[0]]["TDF/3TC/EFV"].to_i > 0 ? @drugs[encounter[0]]["TDF/3TC/EFV"].to_i : "") rescue ""
           
-        label.draw_text(tdf,28,200,0,1,1,1,false)
+        label.draw_text(tdf,28,200,0,2,1,1,false)
         
         nvp = (@drugs[encounter[0]]["NVP"].to_i > 0 ? @drugs[encounter[0]]["NVP"].to_i : "") rescue ""
           
-        label.draw_text(nvp,77,200,0,1,1,1,false)
+        label.draw_text(nvp,77,200,0,2,1,1,false)
       
         cpt = (encounters[encounter[0]]["LAB RESULTS"]["TAKING CO-TRIMOXAZOLE PREVENTIVE THERAPY"].upcase == "YES" ? "Y" : "N") rescue ""
         
-        label.draw_text(cpt,124,200,0,1,1,1,false)
+        label.draw_text(cpt,124,200,0,2,1,1,false)
         
         art = (encounters[encounter[0]]["LAB RESULTS"]["ON ART"].upcase == "YES" ? "Y" : "N") rescue ""
         
-        label.draw_text(art,164,200,0,1,1,1,false)
+        label.draw_text(art,164,200,0,2,1,1,false)
         
         sign = encounters[encounter[0]]["OBSERVATIONS"]["DIAGNOSIS"].humanize rescue ""
         
-        sign = paragraphate(sign.to_s, 15, 5)
+        sign = paragraphate(sign.to_s, 13, 5)
         
         (0..(sign.length)).each{|m|
-          label.draw_text(sign[m],198,(200 + (13 * m)),0,1,1,1,false)
+          label.draw_text(sign[m],198,(200 + (18 * m)),0,2,1,1,false)
         }
         
-        med = encounters[encounter[0]]["UPDATE OUTCOME"]["OUTCOME"].humanize rescue ""
+        med = encounters[encounter[0]]["UPDATE OUTCOME"]["OUTCOME"].humanize + "; " rescue ""
         oth = (@other_drugs[encounter[0]].collect{|d, v| 
             "#{d}: #{ (v.to_s.match(/\.[1-9]/) ? v : v.to_i) }"
           }.join("; ")) if @other_drugs[encounter[0]].length > 0 rescue ""
           
-        med = paragraphate(med.to_s + oth.to_s, 20, 5)
+        med = paragraphate(med.to_s + oth.to_s, 17, 5)
         
         (0..(med.length)).each{|m|
-          label.draw_text(med[m],370,(200 + (13 * m)),0,1,1,1,false)
+          label.draw_text(med[m],370,(200 + (18 * m)),0,2,1,1,false)
         }
         
-        nex = encounters[encounter[0]]["APPOINTMENT"]["APPOINTMENT DATE"] rescue ""
+        nex = encounters[encounter[0]]["APPOINTMENT"]["APPOINTMENT DATE"] rescue []
         
-        label.draw_text(nex,598,200,0,1,1,1,false)
+        if nex != []
+          date = nex.to_date
+          nex = []
+          nex << date.strftime("%d/")
+          nex << date.strftime("%b/")
+          nex << date.strftime("%Y")
+        end
+        
+        (0..(nex.length)).each{|m|
+          label.draw_text(nex[m],610,(200 + (18 * m)),0,2,1,1,false)
+        }
         
         use = encounters[encounter[0]]["USER"] rescue ""
           
-        label.draw_text(use,710,200,0,1,1,1,false)
+        label.draw_text(use,710,200,0,2,1,1,false)
         
       end
     end
@@ -1501,7 +1470,7 @@ EOF
     string[0,length] + "."
   end
   
-  def paragraphate(string, collen = 10, rows = 2)
+  def paragraphate(string, collen = 8, rows = 2)
     arr = []
     
     if string.nil? 
@@ -1514,7 +1483,8 @@ EOF
       if !(string[p*collen,collen]).nil?
         if p == rows
           arr << (string[p*collen,collen] + ".") if !(string[p*collen,collen]).nil?
-        elsif string[((p*collen) + collen),1] != " " && !string.strip[((p+1)*collen),collen].nil?
+        elsif string[((p*collen) + collen),1] != " " && !string.strip[((p+1)*collen),collen].nil? && 
+            string[(((p+1)*collen) + collen),1] != " "
           arr << (string[p*collen,collen] + "-") if !(string[p*collen,collen]).nil?
         else 
           arr << string[p*collen,collen] if !(string[p*collen,collen]).nil?

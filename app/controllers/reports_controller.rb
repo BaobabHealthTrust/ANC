@@ -145,6 +145,8 @@ class ReportsController < ApplicationController
 
     @new_women_registered = report.new_women_registered
     
+    # raise @new_women_registered.to_yaml
+    
     @observations_total = report.observations_total
     
 		@observations_1 = report.observations_1
@@ -158,6 +160,8 @@ class ReportsController < ApplicationController
 		@observations_5 = report.observations_5
 
 		@week_of_first_visit_1 = report.week_of_first_visit_1
+    
+    # raise @week_of_first_visit_1.to_yaml
 
 		@week_of_first_visit_2 = report.week_of_first_visit_2
 
@@ -169,10 +173,14 @@ class ReportsController < ApplicationController
 
 		@ttv__total_previous_doses_2 = report.ttv__total_previous_doses_2
 
+    @fansida__sp___number_of_tablets_given_0 = report.fansida__sp___number_of_tablets_given_0
+    
 		@fansida__sp___number_of_tablets_given_1 = report.fansida__sp___number_of_tablets_given_1
 
 		@fansida__sp___number_of_tablets_given_2 = report.fansida__sp___number_of_tablets_given_2
 
+    # raise @fansida__sp___number_of_tablets_given_2.to_yaml
+    
 		@fefo__number_of_tablets_given_1 = report.fefo__number_of_tablets_given_1
 
 		@fefo__number_of_tablets_given_2 = report.fefo__number_of_tablets_given_2
@@ -222,4 +230,20 @@ class ReportsController < ApplicationController
     render :layout => "application"
 	end
 
+  def decompose  
+    # raise params.to_yaml
+    @facility = Location.current_health_center.name rescue ''
+    
+    @patients = []
+    
+    if params[:patients]
+      new_women = params[:patients].split(",")
+      @patients = Patient.find(:all, :conditions => ["patient_id IN (?)", new_women])
+    end
+    
+    # raise @patients.length.to_yaml
+    
+    render :layout => false
+  end
+  
 end
