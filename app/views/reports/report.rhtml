@@ -385,7 +385,7 @@
                             &nbsp;
                           </td>
                           <td colspan="2" style="font-weight: bold;">
-                            FeFo tablets <sup style="font-weight: normal;">1</sup>
+                            FeFo tablets <!--sup style="font-weight: normal;">1</sup-->
                           </td>
                         </tr>
                         <tr>
@@ -394,10 +394,15 @@
                           </td>
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999; 
                               border-bottom: 1px solid #999;">
-                            No
+                            <form id="fefo__number_of_tablets_given_1" method="post" action="decompose">
+                              <input type="hidden" value="<%= @fefo__number_of_tablets_given_1.join(",") %>" name="patients" />
+                              Tot. received 120+ tabs
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @fansida__sp___number_of_tablets_given_1.length %>
+                            <a href="javascript:document.getElementById('fefo__number_of_tablets_given_1').submit()">
+                              <%= @fefo__number_of_tablets_given_1.length %>
+                            </a>
                           </td>
                         </tr>
                       </table>
@@ -418,10 +423,15 @@
                           </td>
                           <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
                               border-left: 1px solid #999; width: 60%;">
-                            Tot. received 1 dose
+                            <form id="albendazole" method="post" action="decompose">
+                              <input type="hidden" value="<%= @albendazole.join(",") %>" name="patients" />
+                              Tot. received 1 dose
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @syphilis_result_1.length %>
+                            <a href="javascript:document.getElementById('albendazole').submit()">
+                              <%= @albendazole.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -438,10 +448,15 @@
                           </td>
                           <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
                               border-left: 1px solid #999; width: 60%;">
-                            Tot. received ITN
+                            <form id="bed_net" method="post" action="decompose">
+                              <input type="hidden" value="<%= @bed_net.join(",") %>" name="patients" />
+                              Tot. received ITN
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @syphilis_result_1.length %>
+                            <a href="javascript:document.getElementById('bed_net').submit()">
+                              <%= @bed_net.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -457,10 +472,15 @@
                             15
                           </td>
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
-                            Negative
+                            <form id="syphilis_result_neg" method="post" action="decompose">
+                              <input type="hidden" value="<%= @syphilis_result_neg.join(",") %>" name="patients" />
+                              Negative
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @syphilis_result_1.length %>
+                            <a href="javascript:document.getElementById('syphilis_result_neg').submit()">
+                              <%= @syphilis_result_neg.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -468,11 +488,16 @@
                             16
                           </td>
                           <td style="border-left: 1px solid #999;">
-                            Positive
+                            <form id="syphilis_result_pos" method="post" action="decompose">
+                              <input type="hidden" value="<%= @syphilis_result_pos.join(",") %>" name="patients" />
+                              Positive
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                              <%= @syphilis_result_2.length %>
+                            <a href="javascript:document.getElementById('syphilis_result_pos').submit()">
+                              <%= @syphilis_result_pos.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -480,11 +505,16 @@
                             17
                           </td>
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            Unknown
+                            <form id="syphilis_result_unk" method="post" action="decompose">
+                              <input type="hidden" value="<%= @syphilis_result_unk.join(",") %>" name="patients" />
+                              Unknown
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                              <%= @syphilis_result_3.length %>
+                            <a href="javascript:document.getElementById('syphilis_result_unk').submit()">
+                              <%= @syphilis_result_unk.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -500,10 +530,15 @@
                             18
                           </td>
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
-                            Previous Negative
+                            <form id="hiv_test_result_prev_neg" method="post" action="decompose">
+                              <input type="hidden" value="<%= @hiv_test_result_prev_neg.join(",") %>" name="patients" />
+                              Previous Negative
+                            </form>
                           </td>
                           <td style="border: 1px solid #999;">
-                            <%= @hiv_test_result_1.length %>
+                            <a href="javascript:document.getElementById('hiv_test_result_prev_neg').submit()">
+                              <%= @hiv_test_result_prev_neg.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -511,11 +546,16 @@
                             19
                           </td>
                           <td style="border-left: 1px solid #999;">
-                            Previous Positive
+                            <form id="hiv_test_result_prev_pos" method="post" action="decompose">
+                              <input type="hidden" value="<%= @hiv_test_result_prev_pos.join(",") %>" name="patients" />
+                              Previous Positive
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                              <%= @hiv_test_result_2.length %>
+                            <a href="javascript:document.getElementById('hiv_test_result_prev_pos').submit()">
+                              <%= @hiv_test_result_prev_pos.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -523,11 +563,16 @@
                             20
                           </td>
                           <td style="border-left: 1px solid #999; width: 60%;">
-                            New Negative
+                            <form id="hiv_test_result_neg" method="post" action="decompose">
+                              <input type="hidden" value="<%= @hiv_test_result_neg.join(",") %>" name="patients" />
+                              New Negative
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                              <%= @hiv_test_result_3.length %>
+                            <a href="javascript:document.getElementById('hiv_test_result_neg').submit()">
+                              <%= @hiv_test_result_neg.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -535,11 +580,16 @@
                             21
                           </td>
                           <td style="border-left: 1px solid #999;">
-                            New Positive
+                            <form id="hiv_test_result_pos" method="post" action="decompose">
+                              <input type="hidden" value="<%= @hiv_test_result_pos.join(",") %>" name="patients" />
+                              New Positive
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                              <%= @hiv_test_result_4.length %>
+                            <a href="javascript:document.getElementById('hiv_test_result_pos').submit()">
+                              <%= @hiv_test_result_pos.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
@@ -547,20 +597,30 @@
                             22
                           </td>
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
-                            Not Done
+                            <form id="hiv_test_result_unk" method="post" action="decompose">
+                              <input type="hidden" value="<%= @hiv_test_result_unk.join(",") %>" name="patients" />
+                              Not Done
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                              <%= @hiv_test_result_5.length %>
+                            <a href="javascript:document.getElementById('hiv_test_result_unk').submit()">
+                              <%= @hiv_test_result_unk.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>
                           <td style="font-style:italic;" colspan="2">
-                            Tot. women HIV+ (19+21)
+                            <form id="total_hiv_positive" method="post" action="decompose">
+                              <input type="hidden" value="<%= @total_hiv_positive.join(",") %>" name="patients" />
+                              Tot. women HIV+ (19+21)
+                            </form>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            &nbsp;
+                            <a href="javascript:document.getElementById('total_hiv_positive').submit()">
+                              <%= @total_hiv_positive.length %>
+                            </a>
                           </td>
                         </tr>
                         <tr>

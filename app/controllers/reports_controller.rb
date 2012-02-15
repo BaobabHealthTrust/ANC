@@ -179,28 +179,32 @@ class ReportsController < ApplicationController
 
 		@fansida__sp___number_of_tablets_given_2 = report.fansida__sp___number_of_tablets_given_2
 
-    # raise @fansida__sp___number_of_tablets_given_2.to_yaml
-    
 		@fefo__number_of_tablets_given_1 = report.fefo__number_of_tablets_given_1
 
-		@fefo__number_of_tablets_given_2 = report.fefo__number_of_tablets_given_2
+		@albendazole = report.albendazole
 
-		@syphilis_result_1 = report.syphilis_result_1
+		@bed_net = report.bed_net
 
-		@syphilis_result_2 = report.syphilis_result_2
+		@syphilis_result_pos = report.syphilis_result_pos
 
-		@syphilis_result_3 = report.syphilis_result_3
+		@syphilis_result_neg = report.syphilis_result_neg
 
-		@hiv_test_result_1 = report.hiv_test_result_1
+		@syphilis_result_unk = report.syphilis_result_unk
 
-		@hiv_test_result_2 = report.hiv_test_result_2
+		@hiv_test_result_prev_neg = report.hiv_test_result_prev_neg
 
-		@hiv_test_result_3 = report.hiv_test_result_3
+    # raise @hiv_test_result_prev_neg.to_yaml
+    
+		@hiv_test_result_prev_pos = report.hiv_test_result_prev_pos
 
-		@hiv_test_result_4 = report.hiv_test_result_4
+		@hiv_test_result_neg = report.hiv_test_result_neg
 
-		@hiv_test_result_5 = report.hiv_test_result_5
+		@hiv_test_result_pos = report.hiv_test_result_pos
 
+		@hiv_test_result_unk = report.hiv_test_result_unk
+
+    @total_hiv_positive = @hiv_test_result_prev_pos + @hiv_test_result_pos
+    
 		@on_art__1 = report.on_art__1 
 
 		@on_art__2 = report.on_art__2
