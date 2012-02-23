@@ -126,6 +126,9 @@ function loadTouchscreenToolkit() {
     if (document.forms.length>0) {
         tstFormElements = getFormElements();
         tstFormLabels = document.forms[0].getElementsByTagName("label");
+        for(var i = 0; i < tstFormElements.length; i++){
+            tstMultipleSelected[i] = {};
+        }
     }
     if (window.location.href.search(/\/patient\/patient_search_names/) != -1) {
         tstSearchPage = true;
@@ -946,13 +949,13 @@ function updateTouchscreenInputForSelect(element){
         
         // Check if the item is already included
         // var idx = val_arr.toString().indexOf(val);
-        if (!tstMultipleSelected[val]){ //(idx == -1){
+        if (!tstMultipleSelected[tstCurrentPage][val]){ //(idx == -1){
             val_arr.push(val);
-            tstMultipleSelected[val] = true;
+            tstMultipleSelected[tstCurrentPage][val] = true;
         } else {
             // val_arr.splice(idx, 1);
             val_arr = removeFromArray(val_arr, val);
-            delete(tstMultipleSelected[val]);
+            delete(tstMultipleSelected[tstCurrentPage][val]);
         }
         inputTarget.value = val_arr.join(tstMultipleSplitChar);
         if (inputTarget.value.indexOf(tstMultipleSplitChar) == 0)
@@ -1181,35 +1184,35 @@ function tt_update(sourceElement, navback){
                                 targetElement.options[i].selected = true;
                             }
                             else
-                            targetElement.options[i].selected = false;
+                                targetElement.options[i].selected = false;
 
-                            }
-                            }
-                            }
+                        }
+                    }
+                }
 
-                            }
-                            break;
-                            case "SELECT":
-            
-                            var val_arr = new Array();
-                            if (targetElement.multiple) {
-                            val_arr = sourceElement.value.split(tstMultipleSplitChar);
-                            }
-                            else {
-            val_arr.push(sourceElement.value);
-        }
-
-        for(i=0;i<targetElement.options.length;i++){
-            if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
-                targetElement.options[i].selected = true;
-                if (!targetElement.multiple)
-                    break;
-            } else {
-                targetElement.options[i].selected = false;
             }
-        }
+            break;
+        case "SELECT":
+            
+            var val_arr = new Array();
+            if (targetElement.multiple) {
+                val_arr = sourceElement.value.split(tstMultipleSplitChar);
+            }
+            else {
+                val_arr.push(sourceElement.value);
+            }
+
+            for(i=0;i<targetElement.options.length;i++){
+                if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
+                    targetElement.options[i].selected = true;
+                    if (!targetElement.multiple)
+                        break;
+                } else {
+                    targetElement.options[i].selected = false;
+                }
+            }
 			 
-        break;
+            break;
         case "TEXTAREA":
             targetElement.value = sourceValue;
             break;
@@ -1300,8 +1303,10 @@ function gotoPage(destPage, validate, navback){
     var currentPage = tstCurrentPage;
     var currentInput = __$("touchscreenInput"+currentPage);
 
-    var navback = (navback == true ? true : false);        
+    var navback = (navback ? navback : false);       
 
+    tstMultipleSelected[tstCurrentPage] = {}; 
+    
     //	tt_BeforeUnload
     var unloadElementId = 'touchscreenInput';
     if (currentPage < destPage) {
@@ -1765,7 +1770,6 @@ function getDatePart(aElementName) {
 
 
 function gotoNextPage() {
-    tstMultipleSelected = {};
     gotoPage(tstCurrentPage+1, true);
 }
 

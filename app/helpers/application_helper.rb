@@ -112,4 +112,9 @@ module ApplicationHelper
   def development_environment?
     ENV['RAILS_ENV'] == 'development'
   end
+  
+  def create_from_dde_server                                                    
+    CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+  end 
+
 end

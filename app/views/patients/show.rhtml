@@ -15,19 +15,19 @@
           <span style="color: #6281A7;">anc</span>
         </h1>
         <span id='patient_name'>
-          <%= @patient.name %>
+          <%= @anc_patient.name %>
         </span>
         <span id='patient_id'>
-          <%= @patient.national_id %>
+          <%= @anc_patient.national_id %>
         </span>
         <span id='patient_residence'>
-          <%= @patient.residence %>
+          <%= @anc_patient.residence %>
         </span>
         <span id='patient_age'>
-          <%= @patient.age %>
+          <%= @anc_patient.age %>
         </span>
         <span id='patient_gender'>
-          <%= @patient.gender %>
+          <%= @anc_patient.sex %>
         </span>
         <!--div id="patient_card">
           <div value="AZT">Regimen</div>
@@ -61,7 +61,7 @@
                   <%= (@social_alert ? " alertTab='true'" : (@social_selected ? " selectedTab='true'" : "")) %> >
             Social History</option>
           <option value='/patients/tab_lab_results?patient_id=<%= @patient.id  %>'
-                  <%= (@labs_alert ? " alertTab='true'" : "") %> >Lab Results</option>
+                  <%= (@labs_alert == true ? " alertTab='true'" : (@labs_selected == true ? " selectedTab='true'" : "")) %> >Lab Results</option>
           <option value='/patients/tab_detailed_obstetric_history?patient_id=<%= @patient.id  %>'>Detailed Obstetric History</option>
           <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>Current Pregnancy</option>
         </select>

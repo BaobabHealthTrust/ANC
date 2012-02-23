@@ -76,8 +76,10 @@
     {:id => "year_of_birth#{e}",
       :helptext => "Year of Birth #{e}#{indice} Child",
       :tt_pageStyleClass => "NumbersWithUnknown",
-      :validationRule => "\\d{4}|Unknown",
-      :validationMessage => "Please enter a proper year in the form 'YYYY'",
+      :absoluteMin => "1890", 
+      :min => (Date.today.year-50), 
+      :max => (Date.today.year-10), 
+      :absoluteMax => Date.today.year,
       :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>
 
     <%= touch_text_field_tag "Place of Birth", @patient, nil,
@@ -121,7 +123,7 @@
       options_for_select([["", ""], ["Big Baby (Above 4kg)", "Big Baby (Above 4kg)"], 
         ["Average","Average"], ["Small Baby (Less than 2.5kg)", "Small Baby (Less than 2.5kg)"]]),
     {:id => "birth_weight#{e}",
-      :helptext => "Estimated Birth Weight #{e}#{indice} Child (kg)",
+      :helptext => "Estimated Birth Weight #{e}#{indice} Child",
       :condition => "__$('enter_number_of_deliveries').value >= #{e} && __$('condition_at_birth#{e}').value != 'Still Birth'" } %>
 
     <%= touch_select_tag "Alive", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No","No"]]),
@@ -139,7 +141,7 @@
     <%= touch_numeric_tag "Age at Death", @patient, nil,
     {:id => "age_at_death#{e}",
       :helptext => "#{e}#{indice} Child's Age at Death ",
-      :tt_pageStyleClass => "NumbersOnlyWithDecimal",
+      :tt_pageStyleClass => "NumbersOnly",
       :absoluteMin => 0,
       :tt_onLoad => "__$('helpText' + tstCurrentPage).innerHTML += '(' + __$('age_units#{e}').value + ')'",
       :condition => "__$('enter_number_of_deliveries').value >= #{e} && __$('alive#{e}').value == 'No'" } %>
@@ -179,8 +181,10 @@
     {:id => "year_of_birth#{e}",
       :helptext => "Year of #{e}#{indice} Abortion",
       :tt_pageStyleClass => "NumbersWithUnknown",
-      :validationRule => "\\d{4}|Unknown",
-      :validationMessage => "Please enter a proper year in the form 'YYYY'",
+      :absoluteMin => "1890", 
+      :min => (Date.today.year-50), 
+      :max => (Date.today.year-10), 
+      :absoluteMax => Date.today.year,
       :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
 
     <%= touch_select_tag "Place of Birth", @patient, options_for_select(@place),

@@ -109,6 +109,14 @@
     }
   }
 
+  function setDate(period){
+    var d = new Date(); 
+    d.setMonth(d.getMonth() - parseInt(period));
+    
+    __$("lmp").value = d.getFullYear() + "-" + padZeros((d.getMonth() + 1), 2) + "-" + padZeros(d.getDate(),2);
+    
+  }
+
   //-->
 </script>
 
@@ -140,6 +148,16 @@
     :tt_onUnLoad => 'clearTimeout(timedEvent); // if (__$("touchscreenInput" + tstCurrentPage).value == "Unknown" ) __$("lmp").value = tstEstimatedLMPDate;',
     :tt_pageStyleClass => "exclude"
   } %>
+
+  <%= text_field_tag "Estimate LMP", nil,
+    {:id => "",
+    :condition => "__$('lmp').value == 'Unknown'",
+    :helpText => "Gestation (months)",
+    :field_type => "number",
+    :tt_pageStyleClass => "NumbersOnly",
+    :tt_onUnload => "setDate(__$('touchscreenInput' + tstCurrentPage).value);"
+    }
+  %>
 
   <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"], ["Uknown", "Uknown"]]),
     {:id => "week_of_first_visit",

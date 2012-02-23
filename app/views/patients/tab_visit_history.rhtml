@@ -184,7 +184,10 @@
 
         <tr style="font-size: 0.8em; font-weight: normal; font-style: italic;">
           <td class="topic leftTop" style="font-style: normal;">
-            <%= @i %>
+            <%#= @i %>
+            <%= (!@encounters[encounter[0]]["ANC VISIT TYPE"].nil? ? 
+                (@encounters[encounter[0]]["ANC VISIT TYPE"]["REASON FOR VISIT"].to_i > 0 ?
+              @encounters[encounter[0]]["ANC VISIT TYPE"]["REASON FOR VISIT"].to_i : "?") : "?") %>            
           </td>
           <td class="leftTop">
             <%= encounter[0] %>

@@ -1,13 +1,13 @@
 class PatientsController < ApplicationController
   before_filter :find_patient, :except => [:void]
   
-  def show  
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    
-    @current_range = Patient.active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
+  def show 
+    @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
 
     @encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]) rescue []
+    
+    @all_encounters = @patient.encounters.active.find(:all) rescue []
     
     @encounter_names = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]).map{|encounter| encounter.name}.uniq rescue []
@@ -16,24 +16,32 @@ class PatientsController < ApplicationController
       e.name.upcase
     }.uniq
     
+    @all_names = @all_encounters.collect{|e|
+      e.name.upcase
+    }.uniq
+    
     @current_encounter_names = @patient.encounters.active.find(:all, 
       :conditions => ["DATE_FORMAT(encounter_datetime, '%Y-%m-%d') = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]).collect{|e|
       e.name.upcase
     }
     
-    @obstretrics_alert = (@names.include?("OBSTETRIC HISTORY") ? false : true)
+    @obstretrics_alert = (@all_names.include?("OBSTETRIC HISTORY") ? false : true)
     
-    @medics_alert = (@names.include?("MEDICAL HISTORY") ? false : true)
+    @medics_alert = (@all_names.include?("MEDICAL HISTORY") ? false : true)
     
-    @social_alert = (@names.include?("SOCIAL HISTORY") ? false : true)
+    @social_alert = (@all_names.include?("SOCIAL HISTORY") ? false : true)
+    
+    @labs_alert = ((@all_names.include?("LAB RESULTS") || @all_names.include?("VITALS")) ? false : true)
     
     @sections = {
       "OBSTETRIC HISTORY" => {},
       "MEDICAL HISTORY" => {},
-      "SOCIAL HISTORY" => {}
+      "SOCIAL HISTORY" => {},
+      "SURGICAL HISTORY" => {},      
+      "LAB RESULTS" => {}
     }
     
-    @encounters.each{|e|
+    @all_encounters.each{|e|
       if !e.type.nil?
         case e.type.name
         when "OBSTETRIC HISTORY"
@@ -48,13 +56,38 @@ class PatientsController < ApplicationController
           e.observations.each{|o|
             @sections["SOCIAL HISTORY"][o.concept.name.name] = (o.answer_string rescue "") if !o.concept.nil?
           }
+        when "SURGICAL HISTORY"
+          e.observations.each{|o|
+            if !o.concept.nil?
+              if @sections["SURGICAL HISTORY"][o.concept.name.name]
+                @sections["SURGICAL HISTORY"][o.concept.name.name] += "; " + (o.answer_string rescue "") if !o.concept.nil?
+              else
+                @sections["SURGICAL HISTORY"][o.concept.name.name] = (o.answer_string rescue "") if !o.concept.nil?
+              end   
+            end
+          }
+        when "LAB RESULTS" # || "VITALS"
+          e.observations.each{|o|
+            if !o.concept.nil?
+              if @sections["LAB RESULTS"][o.concept.name.name]
+                @sections["LAB RESULTS"][o.concept.name.name] = ((o.answer_string rescue 0).to_i > 
+                    (@sections["LAB RESULTS"][o.concept.name.name].to_i) ? (o.answer_string rescue 0) : 
+                    @sections["LAB RESULTS"][o.concept.name.name] )  if !o.concept.nil? 
+              else
+                @sections["LAB RESULTS"][o.concept.name.name] = (o.answer_string rescue "") if !o.concept.nil?
+              end   
+            end
+          }
         end
       end
     }
     
-    @obstetrics_selected = nil
-    @medics_selected = nil
-    @social_selected = nil
+    @obstetrics_selected = false
+    @medics_selected = false
+    @social_selected = false
+    @labs_selected = false
+    
+    # raise @sections.to_yaml
     
     @sections["OBSTETRIC HISTORY"].each{|o,a|
       case o.titleize
@@ -68,17 +101,17 @@ class PatientsController < ApplicationController
           @obstetrics_selected = true
           break
         end
-      when "Still Birth"
-        if a.titleize == "Yes"
+      when "Condition At Birth"
+        if a.titleize == "Still Birth"
           @obstetrics_selected = true
           break
         end
-      when "Caesarean section"
-        if a.titleize == "Yes"
+      when "Method Of Delivery"
+        if a.titleize == "Caesarean Section"
           @obstetrics_selected = true
           break
         end
-      when "Vacuum extraction delivery"
+      when "Vacuum Extraction Delivery"
         if a.titleize == "Yes"
           @obstetrics_selected = true
           break
@@ -93,13 +126,17 @@ class PatientsController < ApplicationController
           @obstetrics_selected = true
           break
         end
-      when "Pre-Eclampsia"
+      when "Pre Eclampsia"
         if a.titleize == "Yes"
           @obstetrics_selected = true
           break
         end
       end
     }    
+    
+    if @sections["SURGICAL HISTORY"].length > 0
+      @medics_selected = true
+    end
     
     @sections["MEDICAL HISTORY"].each{|o,a|
       case o.titleize
@@ -161,7 +198,26 @@ class PatientsController < ApplicationController
       end
     }
     
-    # raise @sections.to_yaml
+    @sections["LAB RESULTS"].each{|o,a|
+      case o.titleize
+      when "Hb Test Result"
+        if a.to_s.upcase != "NOT DONE" && a.to_i <= 11
+          @labs_selected = true
+          break
+        end
+      when "Syphilis Test Result"
+        if a.to_s.upcase != "NOT DONE" && a.titleize == "Positive"
+          @labs_selected = true
+          break
+        end
+      when "Hiv Status"
+        if a.to_s.upcase != "NOT DONE" && a.titleize == "Positive"
+          @labs_selected = true
+          break
+        end
+      end
+    }
+    # raise @labs_selected.to_yaml
     
     render :layout => 'dynamic-dashboard'
   end
@@ -246,7 +302,7 @@ class PatientsController < ApplicationController
   end
 
   def national_id_label
-    print_string = @patient.national_id_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a national id label for that patient")
+    print_string = @anc_patient.national_id_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a national id label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
@@ -395,9 +451,9 @@ class PatientsController < ApplicationController
   end
 
   def tab_obstetric_history
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
      
-    @pregnancies = Patient.active_range(@patient.id)
+    @pregnancies = @anc_patient.active_range
     
     @range = []
     
@@ -479,7 +535,7 @@ class PatientsController < ApplicationController
   end
 
   def tab_medical_history
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     
     @asthma = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
@@ -515,13 +571,13 @@ class PatientsController < ApplicationController
         ConceptName.find_by_name('PROCEDURE DONE').concept_id]).collect{|o| 
       "#{o.answer_string} (#{o.obs_datetime.strftime('%d-%b-%Y')})"} rescue []
 
-    @age = @patient.age rescue 0
+    @age = @anc_patient.age rescue 0
 
     render :layout => false
   end    
 
   def tab_examinations_management
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 
     @height = @patient.current_height.to_i
 
@@ -537,7 +593,7 @@ class PatientsController < ApplicationController
   end
 
   def tab_lab_results
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 
     syphil = {}
     @patient.encounters.find(:all, :conditions => ["encounter_type IN (?)", 
@@ -577,7 +633,7 @@ class PatientsController < ApplicationController
 
     @cd4_date = syphil['CD4 COUNT DATETIME'] rescue nil
 
-    @height = @patient.current_height.to_i
+    @height = @anc_patient.current_height.to_i
 
     @multiple = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.active.find(:all, :conditions => ["encounter_type = ?", 
@@ -592,9 +648,9 @@ class PatientsController < ApplicationController
   end
 
   def tab_visit_history
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
   
-    @current_range = Patient.active_range(@patient.id, (params[:target_date] ? 
+    @current_range = @anc_patient.active_range((params[:target_date] ? 
           params[:target_date].to_date : (session[:datetime] ? session[:datetime].to_date : Date.today)))
 
     # raise @current_range.to_yaml
@@ -633,7 +689,7 @@ class PatientsController < ApplicationController
 
     @drugs = {}; 
     @other_drugs = {}; 
-    main_drugs = ["TTV", "SP", "Fefol", "NVP", "TDF/3TC/EFV", "Albendazole"]
+    main_drugs = ["TTV", "SP", "Fefol", "NVP", "TDF/3TC/EFV"]
     
     @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
       :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
@@ -671,7 +727,7 @@ class PatientsController < ApplicationController
   def hiv_status
     @patient = Patient.find(params[:patient_id]) rescue nil
     
-    @current_range = Patient.active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
+    @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
 
     @encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]) rescue []
@@ -737,7 +793,7 @@ class PatientsController < ApplicationController
   def pregnancy_history
     @patient = Patient.find(params[:patient_id]) rescue nil
     
-    @pregnancies = Patient.active_range(@patient.id)
+    @pregnancies = Patient.active_range
     
     @range = []
     
@@ -787,23 +843,23 @@ class PatientsController < ApplicationController
   end
 
   def demographics
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    @national_id = @patient.national_id_with_dashes rescue nil
+    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    @national_id = @anc_patient.national_id_with_dashes rescue nil
 
     @first_name = @patient.person.names.first.given_name rescue nil
     @last_name = @patient.person.names.first.family_name rescue nil
-    @birthdate = @patient.person.birthdate_formatted rescue nil
-    @gender = @patient.person.sex rescue ''
+    @birthdate = @anc_patient.birthdate_formatted rescue nil
+    @gender = @anc_patient.sex rescue ''
 
     @current_village = @patient.person.addresses.first.city_village rescue ''
     @current_ta = @patient.person.addresses.first.county_district rescue ''
     @current_district = @patient.person.addresses.first.state_province rescue ''
     @home_district = @patient.person.addresses.first.address2 rescue ''
 
-    @primary_phone = @patient.person.phone_numbers[:cell_phone_number] # rescue ''
-    @secondary_phone = @patient.person.phone_numbers["Home Phone Number"] rescue ''
+    @primary_phone = @anc_patient.phone_numbers[:cell_phone_number] # rescue ''
+    @secondary_phone = @anc_patient.phone_numbers["Home Phone Number"] rescue ''
 
-    @occupation = @patient.person.get_attribute("occupation") rescue ''
+    @occupation = @anc_patient.get_attribute("occupation") rescue ''
     render :template => 'patients/demographics', :layout => 'menu'
 
   end
@@ -826,7 +882,7 @@ class PatientsController < ApplicationController
   end
 
   def tab_detailed_obstetric_history
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     
     @obstetrics = {}
     search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "PREGNANCY", "LABOUR DURATION", 
@@ -861,7 +917,7 @@ class PatientsController < ApplicationController
     
     # raise @obstetrics.to_yaml
     
-    @pregnancies = Patient.active_range(@patient.id)
+    @pregnancies = @anc_patient.active_range
     
     @range = []
     
@@ -982,7 +1038,7 @@ class PatientsController < ApplicationController
   end
 
   def obstertic_medical_examination_label
-    print_string = @patient.obstetric_medical_history_label + @patient.detailed_obstetric_history_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
+    print_string = @anc_patient.obstetric_medical_history_label + @anc_patient.detailed_obstetric_history_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
@@ -992,8 +1048,8 @@ class PatientsController < ApplicationController
   end
 
   def current_visit_label
-    print_string = @patient.visit_summary_label((session[:datetime] ? session[:datetime].to_date : Date.today)) + 
-      @patient.visit_summary2_label((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
+    print_string = @anc_patient.visit_summary_label((session[:datetime] ? session[:datetime].to_date : Date.today)) + 
+      @anc_patient.visit_summary2_label((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
@@ -1003,7 +1059,7 @@ class PatientsController < ApplicationController
   end
 
   def exam_label
-    print_string = @patient.examination_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
+    print_string = @anc_patient.examination_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
@@ -1013,6 +1069,28 @@ class PatientsController < ApplicationController
   
   def visit_type
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil    
+  end
+  
+  def social_history
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil 
+    
+    religions = ["Jehovahs Witness",  
+      "Roman Catholic", 
+      "Presbyterian (C.C.A.P.)",
+      "Seventh Day Adventist", 
+      "Baptist", 
+      "Moslem",
+      "Other"]
+    
+    @religions = Observation.find(:all, :joins => [:concept, :encounter], 
+      :conditions => ["obs.concept_id = ? AND NOT value_text IN (?) AND " + 
+          "encounter_type = ?", 
+        ConceptName.find_by_name("Other").concept_id, religions, 
+        EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|o| o.value_text}
+    
+    @religions = religions + @religions
+    
+    # raise @religions.to_yaml
   end
   
   private

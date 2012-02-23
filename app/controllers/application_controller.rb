@@ -1,5 +1,24 @@
 class ApplicationController < ActionController::Base
   include AuthenticatedSystem
+	  Mastercard
+    PatientIdentifierType
+    PatientIdentifier
+    PersonAttribute
+    PersonAttributeType
+    WeightHeight
+    CohortTool
+    Encounter
+    EncounterType
+    Location
+    DrugOrder
+    User
+    Task
+    GlobalProperty
+    Person
+    Regimen
+    Relationship
+    ConceptName
+    Concept
 
   require "fastercsv"
 
@@ -39,6 +58,7 @@ private
 
   def find_patient
     @patient = Patient.find(params[:patient_id] || session[:patient_id] || params[:id]) rescue nil
+    @anc_patient = ANCService::ANC.new(@patient) rescue nil
   end
   
 end

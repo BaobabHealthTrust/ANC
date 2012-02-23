@@ -45,13 +45,13 @@
     try{
       currentHeight = document.getElementById('height').value;
     }catch(e){
-      currentHeight = <%= @patient.current_height %>
+      currentHeight = <%= @anc_patient.current_height %>
     }
     currentWeight = document.getElementById('weight').value;
-    medianWeightHeight = [<%= WeightHeightForAge.median_weight_height(@patient.person.age, @patient.person.gender).join(',') rescue nil -%>];
+    medianWeightHeight = [<%= WeightHeightForAge.median_weight_height(@anc_patient.age, @anc_patient.gender).join(',') rescue nil -%>];
     currentWeightPercentile = (currentWeight/(medianWeightHeight[0])*100).toFixed(0);
     currentHeightPercentile = (currentHeight/(medianWeightHeight[1])*100).toFixed(0);
-    if (('<%= @patient.person.age %>') > 14) {
+    if (('<%= @anc_patient.age %>') > 14) {
       showBMI();
     } else {
       showWeightHeightForAge();
@@ -210,8 +210,8 @@
   <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
   <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
 
-  <% if @patient.person.age > 18 and not @patient.current_height == 0 %>
-    <%= hidden_field_tag "observations[][value_numeric]",@patient.current_height %>
+  <% if @anc_patient.age > 18 and not @anc_patient.current_height == 0 %>
+    <%= hidden_field_tag "observations[][value_numeric]",@anc_patient.current_height %>
     <%= hidden_field_tag("observations[][concept_name]", "HEIGHT (CM)") %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
     <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
@@ -220,8 +220,8 @@
     <%= text_field_tag "observations[][value_numeric]", nil,
       {:id => "height",
       :field_type => 'number',
-      :min => number_with_precision(@patient.min_height, :precision => 1),
-      :max => number_with_precision(@patient.max_height, :precision => 1),
+      :min => number_with_precision(@anc_patient.min_height, :precision => 1),
+      :max => number_with_precision(@anc_patient.max_height, :precision => 1),
       :absoluteMin => 10,
       :absoluteMax => 228,
       :units => 'cm',
@@ -266,7 +266,7 @@
   <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
   <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
 
-  <% if @patient.person.age > 14 %>
+  <% if @anc_patient.age > 14 %>
 
     <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'bmi'}) %>
     <%= hidden_field_tag("observations[][concept_name]", "BODY MASS INDEX, MEASURED") %>

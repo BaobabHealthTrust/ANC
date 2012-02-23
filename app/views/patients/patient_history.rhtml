@@ -59,7 +59,7 @@
       <div style="display: table-row">
         <div style="display: table-cell">
           <button  class="<%= (@encounters.include?("SOCIAL HISTORY") ? "gray" : "blue") %>"  
-                  onclick="<%= (!@encounters.include?("SOCIAL HISTORY") ? "window.location = '/patients/social_history/?patient_id=#{@patient.id}'" : "") %>">
+                   onclick="<%= (!@encounters.include?("SOCIAL HISTORY") ? "window.location = '/patients/social_history/?patient_id=#{@patient.id}'" : "") %>">
             <span>Social History</span>
           </button>
         </div>
@@ -71,14 +71,11 @@
         </div>
       </div>
       <div style="display: table-row">
+        <div style="display: table-cell">
+        </div>
         <div style="display: table-cell">  
           <button class="blue" onclick="window.location = '/patients/pregnancy_history/?patient_id=<%= @patient.id %>'">
-            <span>Pregnancy History</span>
-          </button>
-        </div>
-        <div style="display: table-cell">
-          <button class="blue" onclick="window.location = '/patients/print_history/?patient_id=<%= @patient.id %>'">
-            <span>Print Patient History</span>
+            <span>View Pregnancy History</span>
           </button>
         </div>
       </div>
@@ -86,16 +83,20 @@
   </center>
   <div id="nav">
     <button class="green" onclick="window.location = '/patients/show/<%= @patient.id %>'"
-            style="float: right; margin: 10px;">
+            style="float: right; margin: 10px; min-width: 150px;">
       <span>
         Finish
       </span>
     </button>
-    <!--button class="green" onclick="window.location = '/encounters/diagnoses_index?patient_id=<%= @patient.id %>'"
+    <button onclick="window.location = '/patients/print_history/?patient_id=<%= @patient.id %>'"
             style="float: right; margin: 10px;">
-      <span>
-        Finish
-      </span>
-    </button-->
+      <span>Print Patient History</span>
+    </button>
+<!--button class="green" onclick="window.location = '/encounters/diagnoses_index?patient_id=<%= @patient.id %>'"
+      style="float: right; margin: 10px;">
+<span>
+  Finish
+</span>
+</button-->
   </div>
 </div>

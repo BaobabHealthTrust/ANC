@@ -39,11 +39,11 @@
             align="center">
           &nbsp;<%= @syphilis_date %>&nbsp;
         </td>
-        <td style="color: #000; border-top: 1px solid #000;
+        <td style="border-top: 1px solid #000;
             border-left: 1px solid #000;
             border-bottom: 1px solid #000;
             border-right: 1px solid #000;"
-            align="center">
+            align="center" <%= (!@syphilis.nil? ? (@syphilis.upcase == "POSITIVE" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= @syphilis %>&nbsp;
         </td>
       </tr>
@@ -56,11 +56,10 @@
             align="center">
           &nbsp;<%= @hiv_test_date %>&nbsp;
         </td>
-        <td style="color: #000;
-            border-left: 1px solid #000;
+        <td style="border-left: 1px solid #000;
             border-bottom: 1px solid #000;
             border-right: 1px solid #000;"
-            align="center">
+            align="center" <%= (!@hiv_test.nil? ? (@hiv_test.upcase == "POSITIVE" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= @hiv_test %>&nbsp;
         </td>
       </tr>
@@ -73,10 +72,10 @@
             align="center">
           &nbsp;<%= @hb1_date %>&nbsp;
         </td>
-        <td style="color: #000; border-left: 1px solid #000;
+        <td style="border-left: 1px solid #000;
             border-bottom: 1px solid #000;
             border-right: 1px solid #000;"
-            align="center">
+            align="center" <%= (!@hb1.nil? ? (@hb1.to_i <= 11 && @hb1.to_s.upcase != "NOT DONE" ? "class='selected'" : "") : "") %> >
           &nbsp;<%= @hb1 %>&nbsp;
         </td>
       </tr>
@@ -89,10 +88,10 @@
             align="center">
           &nbsp;<%= @hb2_date %>&nbsp;
         </td>
-        <td style="color: #000; border-left: 1px solid #000;
+        <td style="border-left: 1px solid #000;
             border-bottom: 1px solid #000;
             border-right: 1px solid #000;"
-            align="center">
+            align="center" <%= (!@hb2.nil? ? (@hb2.to_i <= 11 && @hb2.to_s.upcase != "NOT DONE" ? "class='selected'" : "") : "") %>>
           &nbsp;<%= @hb2 %>&nbsp;
         </td>
       </tr>
@@ -144,8 +143,8 @@
           Multiple pregnancy
         </td>
         <td style="border: 1px solid #000;"
-            align="center" <%= (@multiple == "YES" ? "class='selected'" : "") %>>
-          &nbsp;<%= (!@multiple.nil? ? (@multiple == "NO" ? "NO" : (@multiple == "YES" ? "YES" : @multiple)) : "") %>&nbsp;
+            align="center" <%= (!@multiple.nil? ? (@multiple.upcase == "YES" ? "class='selected'" : "") : "") %>>
+          &nbsp;<%= (!@multiple.nil? ? (@multiple.upcase == "NO" ? "NO" : (@multiple.upcase == "YES" ? "YES" : @multiple)) : "") %>&nbsp;
         </td>
       </tr>
       <tr>

@@ -98,14 +98,8 @@
       </div>
       <div style="display: table-row">
         <div style="display: table-cell">
-         <button class="blue" onclick="window.location = '/patients/print_exam_label/?patient_id=<%= @patient.id %>'">
-            <span>Print Examinations Label</span>
-          </button>
         </div>
-        <div style="display: table-cell">          
-          <button class="blue" onclick="window.location = '/patients/print_visit_label/?patient_id=<%= @patient.id %>'">
-            <span>Print Visit Summary</span>
-          </button>
+        <div style="display: table-cell"> 
           &nbsp;
         </div>
       </div>
@@ -113,16 +107,24 @@
   </center>
   <div id="nav">
     <button class="green" onclick="window.location = '/patients/show/<%= @patient.id %>'"
-            style="float: right; margin: 10px;">
+            style="float: right; margin: 10px; width: 150px;">
       <span>
         Finish
       </span>
     </button>
-    <!--button class="green" onclick="window.location = '/encounters/diagnoses_index?patient_id=<%= @patient.id %>'"
-            style="float: right; margin: 10px;">
-      <span>
-        Finish
-      </span>
-    </button-->
+    <button onclick="window.location = '/patients/print_exam_label/?patient_id=<%= @patient.id %>'"
+            style="float: right; margin: 10px; margin-right: 0px;">
+      <span>Print Lab Results</span>
+    </button>         
+    <button onclick="window.location = '/patients/print_visit_label/?patient_id=<%= @patient.id %>'"
+            style="float: right; margin: 10px; margin-right: 0px;">
+      <span>Print Visit Summary</span>
+    </button>
+<!--button class="green" onclick="window.location = '/encounters/diagnoses_index?patient_id=<%= @patient.id %>'"
+      style="float: right; margin: 10px;">
+<span>
+  Finish
+</span>
+</button-->
   </div>
 </div>

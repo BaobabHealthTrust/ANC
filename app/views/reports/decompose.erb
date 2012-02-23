@@ -132,6 +132,7 @@
                   </div>
 
                   <% @patients.each do |patient| %>
+                    <% patient = ANCService::ANC.new(patient) %>
                     <div class="row">
                       <div class="cell">
                         <%= patient.national_id rescue "&nbsp;" %>
@@ -140,10 +141,10 @@
                         <%= patient.name rescue "" %>
                       </div>
                       <div class="cell">
-                        <%= patient.date_created.strftime("%d/%b/%Y") rescue "" %>
+                        <%= patient.patient.date_created.strftime("%d/%b/%Y") rescue "" %>
                       </div>
                       <div class="cell">
-                        <%= patient.person.birthdate_formatted rescue "" %>
+                        <%= patient.birthdate_formatted rescue "" %>
                       </div>
                       <div class="cell" style="vertical-align: top; padding: 0px;">
                         <div class="table">
@@ -155,12 +156,12 @@
                             </div>
                             <div id="<%= "__" + patient.national_id rescue "" %>" 
                                  style="display: block; display: table-cell; vertical-align: middle; font-size: 1.5em;">
-                              <%= patient.encounters.length %>
+                              <%= patient.patient.encounters.length %>
                             </div>
                             <div id="<%= patient.national_id rescue "" %>" style="display: table-cell; display: none; width: 100%;">
                               <% pos = 0 %>
 
-                              <% patient.encounters.each do |encounter| %>
+                              <% patient.patient.encounters.each do |encounter| %>
                                 <% pos = pos + 1 %>
 
                                 <div style="display: table; width: 100%;">

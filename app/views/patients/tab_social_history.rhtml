@@ -44,8 +44,8 @@
           Patient Currently Smokes
         </td>
         <td style="border: 1px solid #000;" align="center" 
-            <%= (!@smokes.nil? ? (@smokes == "YES" ? "class='selected'" : "") : "") %>>
-          &nbsp;<%= (!@smokes.nil? ? (@smokes == "YES" ? "Yes" : "No") : "") %>&nbsp;
+            <%= (!@smokes.nil? ? (@smokes.upcase == "YES" ? "class='selected'" : "") : "") %>>
+          &nbsp;<%= (!@smokes.nil? ? (@smokes.upcase == "YES" ? "Yes" : "No") : "") %>&nbsp;
         </td>
       </tr>
       <tr>
@@ -53,8 +53,8 @@
           Currently Consumes Alcohol
         </td>
         <td style="border: 1px solid #000;" align="center"
-            <%= (!@alcohol.nil? ? (@alcohol == "YES" ? "class='selected'" : "") : "") %>>
-          &nbsp;<%= (!@alcohol.nil? ? (@alcohol == "YES" ? "Yes" : "No") : "") %>&nbsp;
+            <%= (!@alcohol.nil? ? (@alcohol.upcase == "YES" ? "class='selected'" : "") : "") %>>
+          &nbsp;<%= (!@alcohol.nil? ? (@alcohol.upcase == "YES" ? "Yes" : "No") : "") %>&nbsp;
         </td>
       </tr>
       <tr>

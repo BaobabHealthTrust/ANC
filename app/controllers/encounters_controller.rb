@@ -1,4 +1,5 @@
 class EncountersController < ApplicationController
+  before_filter :find_patient, :except => [:void]
 
   def create
 
@@ -114,26 +115,9 @@ class EncountersController < ApplicationController
   end
 
   def new
-    @patient = Patient.find(params[:patient_id] || session[:patient_id])
-
-    @current_range = Patient.active_range(@patient.id, (session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
+    # raise @anc_patient.to_yaml
+    @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) rescue nil
     
-    # raise params.to_yaml
-    
-=begin
-    use_regimen_short_names = GlobalProperty.find_by_property(
-      "use_regimen_short_names").property_value rescue "false"
-    show_other_regimen = GlobalProperty.find_by_property(
-      "show_other_regimen").property_value rescue 'false'
-
-    @answer_array = arv_regimen_answers(:patient => @patient,
-      :use_short_names    => use_regimen_short_names == "true",
-      :show_other_regimen => show_other_regimen      == "true")
-
-    redirect_to "/" and return unless @patient
-
-=end
-
     redirect_to next_task(@patient) and return unless params[:encounter_type]
     
     redirect_to :action => :create, 'encounter[encounter_type_name]' => params[:encounter_type].upcase, 'encounter[patient_id]' => @patient.id and return if ['registration'].include?(params[:encounter_type])
@@ -245,7 +229,12 @@ class EncountersController < ApplicationController
   def anc_diagnoses
 
     search_string         = (params[:search_string] || '').upcase
-
+    exceptions = []
+    
+    params.each{|key, param|
+      exceptions << param if key.match(/^v\d/)
+    }
+    
     diagnosis_concepts = ["Malaria", 
       "Anaemia", 
       "Severe Anaemia", 
@@ -263,7 +252,7 @@ class EncountersController < ApplicationController
       "Abdominal Pain", 
       "Pneumonia", 
       "Threatened Abortion", 
-      "Extensive Warts"]
+      "Extensive Warts"] - exceptions
   
     @results = diagnosis_concepts.collect{|e| e}.delete_if{|x| !x.match(/^#{search_string}/)}
 

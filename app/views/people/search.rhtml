@@ -3,21 +3,24 @@
 
 <%
 pos = 1
+
 @people.each do |person|
   patient = person.patient rescue []
   next if patient.blank? -%>
 
     people.push({});
 
-    people[<%= pos %>]["name"] = "<%= person.name %>";
+  <% patient = ANCService::ANC.new(person.patient) rescue nil %>
 
-    people[<%= pos %>]["gender"] = "<%= person.sex rescue "" %>";
+    people[<%= pos %>]["name"] = "<%= patient.name %>";
+
+    people[<%= pos %>]["gender"] = "<%= patient.sex rescue "" %>";
 
   <% unless person.birthdate.blank? %>
 
-      people[<%= pos %>]["birthdate"] = "<%= person.birthdate_formatted rescue "" %>";
+      people[<%= pos %>]["birthdate"] = "<%= patient.birthdate_formatted rescue "" %>";
 
-      people[<%= pos %>]["age"] = "<%= person.age rescue "" %>";
+      people[<%= pos %>]["age"] = "<%= patient.age rescue "" %>";
 
   <% end %>
 
@@ -108,9 +111,12 @@ end -%>
       <% @people.each do |person|
         patient = person.patient rescue []
         next if patient.blank? -%>
+
+        <% patient = ANCService::ANC.new(person.patient) rescue nil %>
+
         <option value="<%= person.id %>" onmousedown="changeNextButtonText('Select Patient')">
-          <%=h person.name -%>,
-          <% unless person.birthdate.blank? %> Age: <%=h person.age -%>,<% end %> Gender: <%= person.sex rescue "" %>
+          <%=h patient.name -%>,
+          <% unless person.birthdate.blank? %> Age: <%=h patient.age -%>,<% end %> Gender: <%= patient.sex rescue "" %>
         </option>
       <% end -%>
     </select>

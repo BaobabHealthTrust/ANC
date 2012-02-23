@@ -38,7 +38,7 @@
     :condition => "__$('civil_status').value == 'Other'"
   } %>
 
-  <%= touch_select_tag "Religion", @patient, 
+  <%#= touch_select_tag "Religion", @patient, 
     options_for_select([["", ""], 
       ["Jehovah's Witness", "Jehovahs Witness"], 
       ["Roman Catholic", "Roman Catholic"], 
@@ -48,8 +48,12 @@
       ["Moslem", "Moslem"], 
       ["Other", "Other"]]),
     {:id => "religion",
-    :helptext => "Religion" } %>
+    :helptext => "Religion" } %>    
 
+  <%= touch_select_tag "Religion", @patient, options_for_select(@religions),
+    {:id => "religion",
+    :helptext => "Religion" } %>
+    
   <%= touch_text_field_tag "Other", @patient, nil,
     { 
     :id => "other",
