@@ -137,6 +137,14 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%session_date = session[:datetime] || Time.now() %>
 
+  <% if !@patient.patient_programs.current.local.map(&:program).map(&:name).include?('ANC PROGRAM') %>
+    <%= hidden_field_tag("programs[][patient_program_id]", nil) %>
+    <%= hidden_field_tag("programs[][program_id]", Program.find_by_name('ANC PROGRAM').id)%>
+    <%= hidden_field_tag("programs[][location_id]", Location.current_health_center.id) %>
+    <%= hidden_field_tag("programs[][date_enrolled]", session[:datetime] || Date.today ) %>
+    <%= hidden_field_tag("programs[][states][][state]", "Currently in treatment") %>
+  <%end%>
+
   <% default={
     :allowFreeText => 'true',
   } %>
@@ -156,8 +164,8 @@
     :field_type => "number",
     :tt_pageStyleClass => "NumbersOnly",
     :tt_onUnload => "setDate(__$('touchscreenInput' + tstCurrentPage).value);"
-    }
-  %>
+  }
+%>
 
   <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"], ["Uknown", "Uknown"]]),
     {:id => "week_of_first_visit",

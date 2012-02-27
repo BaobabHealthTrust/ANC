@@ -7,7 +7,7 @@ class Patient < ActiveRecord::Base
   has_many :patient_identifiers, :foreign_key => :patient_id, :dependent => :destroy, :conditions => {:voided => 0}
   has_many :patient_programs, :conditions => {:voided => 0}
   has_many :programs, :through => :patient_programs
-  has_many :visits, :dependent => :destroy, :conditions => 'visit.voided = 0'
+  # has_many :visits, :dependent => :destroy, :conditions => 'visit.voided = 0'
   has_many :relationships, :foreign_key => :person_a, :dependent => :destroy, :conditions => {:voided => 0}
   has_many :orders, :conditions => {:voided => 0}
   has_many :encounters, :conditions => {:voided => 0} do 

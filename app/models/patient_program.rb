@@ -47,7 +47,7 @@ class PatientProgram < ActiveRecord::Base
         if (state && state.end_date.blank?)
           state.end_date = params[:start_date]
           state.save!
-        end    
+        end  
         # Create the new state      
         state = self.patient_states.new({
           :state => selected_state.program_workflow_state_id,

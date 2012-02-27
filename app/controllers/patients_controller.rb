@@ -820,7 +820,9 @@ class PatientsController < ApplicationController
   end
 
   def outcome
-    @patient = Patient.find(params[:patient_id]) rescue nil
+    @patient = Patient.find(params[:patient_id]) rescue nil   
+    @program_id = PatientProgram.find_by_patient_id(@patient.id, :conditions => ["program_id = ?", 
+        Program.find_by_name("ANC PROGRAM").id]).patient_program_id rescue nil
   end
 
   def current_visit
@@ -1069,6 +1071,8 @@ class PatientsController < ApplicationController
   
   def visit_type
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil    
+    @program_id = PatientProgram.find_by_patient_id(@patient.id, :conditions => ["program_id = ?", 
+        Program.find_by_name("ANC PROGRAM").id]).patient_program_id rescue nil
   end
   
   def social_history

@@ -10,7 +10,7 @@ class SessionsController < ApplicationController
     user = User.authenticate(params[:login], params[:password])
     if user
       self.current_user = user      
-      redirect_to '/clinic'
+      redirect_to '/location'
     else
       note_failed_signin
       @login = params[:login]
@@ -34,6 +34,7 @@ class SessionsController < ApplicationController
       return    
     end
     self.current_location = location
+    Location.current_location = location
     redirect_to '/clinic'
   end
 

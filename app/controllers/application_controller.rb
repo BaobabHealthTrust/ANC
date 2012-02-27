@@ -42,7 +42,7 @@ class ApplicationController < ActionController::Base
 
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
-    task = Task.next_task(Location.current_location, patient,session_date)
+    task = Task.next_task(Location.current_location, patient,session_date) rescue nil
     return task.url if task.present? && task.url.present?
     return "/patients/show/#{patient.id}" 
   end

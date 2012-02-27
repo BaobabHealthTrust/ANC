@@ -56,12 +56,15 @@ class EncountersController < ApplicationController
     (params[:programs] || []).each do |program|
       # Look up the program if the program id is set      
       @patient_program = PatientProgram.find(program[:patient_program_id]) unless program[:patient_program_id].blank?
+    
       # If it wasn't set, we need to create it
       unless (@patient_program)
         @patient_program = @patient.patient_programs.create(
           :program_id => program[:program_id],
           :date_enrolled => date_enrolled)          
       end
+      
+      # raise program[:states].to_yaml
       # Lots of states bub
       unless program[:states].blank?
         #adding program_state start date

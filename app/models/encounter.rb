@@ -8,7 +8,7 @@ class Encounter < ActiveRecord::Base
   has_many :drug_orders,  :through   => :orders,  :foreign_key => 'order_id'
   has_many :orders, :dependent => :destroy, :conditions => {:voided => 0}
   belongs_to :type, :class_name => "EncounterType", :foreign_key => :encounter_type, :conditions => {:retired => 0}
-  belongs_to :provider, :class_name => "User", :foreign_key => :provider_id, :conditions => {:voided => 0}
+  belongs_to :provider, :class_name => "User", :foreign_key => :provider_id, :conditions => {:retired => 0}
   belongs_to :patient, :conditions => {:voided => 0}
 
   # TODO, this needs to account for current visit, which needs to account for possible retrospective entry
