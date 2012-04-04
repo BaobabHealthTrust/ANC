@@ -2,8 +2,8 @@
 
 <script type="text/javascript" language="javascript">
   <!--
-  tt_cancel_show = "/patients/current_visit/?patient_id=<%= @patient.patient_id %>";
-  tt_cancel_destination = "/patients/current_visit/?patient_id=<%= @patient.patient_id %>";
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
   var timedEvent;
   var selectedSigns = "";
 
@@ -62,7 +62,8 @@
     {:id => "enter_fundal_height",
     :helptext => "Fundus (weeks)",
     :tt_pageStyleClass => "NumbersWithUnknown",
-    :max => 42
+    :max => 42,       
+    :tt_onLoad => "showCategory('ANC Examinations');"
   } %>
 
   <% @presentation = ["", "Cephalic", "Breech", "Ball"] %>
@@ -188,7 +189,7 @@
       "var url = __$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).getAttribute('ajaxURL'); " + 
       "__$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).setAttribute('ajaxURL', " + 
       "url.replace('search_string=', '') + (selectedSigns.length > 0 ? selectedSigns + '&search_string=' : 'search_string='));}" %>
-  
+
     <%= text_field_tag("observations[][value_coded_or_text]", nil, options) %>
     <%= hidden_field_tag("observations[][value_text]", nil) %>
     <%= hidden_field_tag("observations[][concept_name]", "DIAGNOSIS", options) %>

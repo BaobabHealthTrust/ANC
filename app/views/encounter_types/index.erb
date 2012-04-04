@@ -3,7 +3,7 @@
 </script>
 <form action="/encounter_types/show">
   <%= hidden_field_tag "patient_id", params[:patient_id] %>
-  <label for="encounter_type">Select Encounter</label>
+  <label for="encounter_type">Select Activity</label>
   <select name="encounter_type" id="encounter_type">
     <% @available_encounter_types.each do |encounter_type| %>
       <option><%= encounter_type %></option>

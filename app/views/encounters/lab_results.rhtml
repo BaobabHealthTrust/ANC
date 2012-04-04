@@ -5,8 +5,8 @@
 </style>
 <script type="text/javascript" language="javascript">
   <!--
-  tt_cancel_show = "/patients/current_visit/?patient_id=<%= @patient.patient_id %>";
-  tt_cancel_destination = "/patients/current_visit/?patient_id=<%= @patient.patient_id %>";
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
   var timedEvent;
 
   function checkHIVTestUnknown(){
@@ -43,6 +43,7 @@
   function unknownToNotDone(){
     __$("Unknown").innerHTML = "<span>Not Done</span>";
     __$("Unknown").onmousedown = function(){
+      __$("touchscreenInput" + tstCurrentPage).value = "";
       press("Not Done");
     }
   }
@@ -75,7 +76,10 @@
 
     <%= select_tag("choice", options_for_select(["", "HB Test Result", 
           "HIV Test Result", "Syphilis Test Result", "Urine Protein"]), 
-      {:helpText => 'Select Test(s)', :id => "choice", :multiple => true})%>
+      {
+        :helpText => 'Select Test(s)', :id => "choice", :multiple => true,       
+        :tt_onLoad => "showCategory('Lab Results');"
+      })%>
 
   <% end %>
 
@@ -86,7 +90,7 @@
     :tt_pageStyleClass => "NumbersWithUnknownAndDecimal",
     :min => 2,
     :max => 16,
-    :tt_onLoad => "unknownToNotDone()",
+    :tt_onLoad => "showCategory('Lab Results'); unknownToNotDone()",
     :condition => "#{ (params[:update] ? "getSelected().match(/HB\sTest\sResult/)" : "") }"
   } %>
 
@@ -96,51 +100,6 @@
     :condition => "!__$('hb_result').value.match(/Not\\sDone/)#{ (params[:update] ? 
     " && getSelected().match(/HB\sTest\sResult/)" : "") }",
     :max => "#{session[:datetime].to_date rescue Date.today}" } %>
-
-  <%= touch_select_tag "HIV Status", @patient,
-    options_for_select([["", ""], ["Negative", "Negative"], ["Positive", "Positive"], ["Not Done", "Not Done"]]),
-    {:id => "new_test_result_at_current_facility",
-    :helptext => "HIV Test Result",
-    :tt_BeforeUnload => "checkHIVTestUnknown()",
-    :tt_onLoad => "unknownToNotDone()",
-    :condition => "#{ (params[:update] ? "getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
-
-  <%= touch_date_tag "HIV test date", @patient, nil,
-    {:id => "enter_date_result_given",
-    :helptext => "Date Result Given",
-    :condition => "__$('new_test_result_at_current_facility').value != 'Not Done'#{ (params[:update] ? 
-    " && getSelected().match(/HIV\sTest\sResult/)" : "") }",
-    :tt_BeforeUnload => "checkHIVTestDate()",
-    :max => "#{session[:datetime].to_date rescue Date.today}"
-  } %>
-
-  <%= touch_select_tag "WHO Stage", @patient, options_for_select([["", ""], ["1", "1"], 
-      ["2", "2"], ["3", "3"], ["4", "4"], ["Unknown", "Unknown"]]),
-    {:id => "who_stage",
-    :helptext => "WHO STAGE",
-    :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
-    " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
-
-  <%= touch_select_tag "Is on CPT", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "on_cpt?",
-    :helptext => "On CPT?",
-    :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
-    " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
-
-  <%= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "on_art",
-    :helptext => "On Art?",
-    :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
-    " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
-
-  <%= touch_select_tag "ART start date", @patient, options_for_select([
-      ["", ""], ["Before this Pregnancy", "Before this Pregnancy"], 
-      ["At 0-27 weeks of Pregnancy", "At 0-27 weeks of Pregnancy"],
-      ["At 28+ of Pregnancy", "At 28+ of Pregnancy"]]),
-    {:id => "art_start",
-    :helptext => "When did Client start ART?",
-    :condition => "__$('new_test_result_at_current_facility').value == 'Positive' && __$('on_art').value == 'Yes'#{ (params[:update] ? 
-    " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%= touch_select_tag "Syphilis Test Result", @patient,
     options_for_select([["", ""], ["Positive", "Positive"], 
@@ -163,6 +122,51 @@
     {:id => "enter_urine_protein",
     :helptext => "Urine Protein",
     :condition => "#{ (params[:update] ? "getSelected().match(/Urine\sProtein/)" : "") }" } %>
+
+  <%= touch_select_tag "HIV status", @patient,
+    options_for_select([["", ""], ["Negative", "Negative"], ["Positive", "Positive"], ["Not Done", "Not Done"]]),
+    {:id => "new_test_result_at_current_facility",
+    :helptext => "HIV Test Result",
+    :tt_BeforeUnload => "checkHIVTestUnknown()",
+    :tt_onLoad => "unknownToNotDone()",
+    :condition => "#{ (params[:update] ? "getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
+
+  <%= touch_date_tag "HIV test date", @patient, nil,
+    {:id => "enter_date_result_given",
+    :helptext => "Date Result Given",
+    :condition => "__$('new_test_result_at_current_facility').value != 'Not Done'#{ (params[:update] ? 
+    " && getSelected().match(/HIV\sTest\sResult/)" : "") }",
+    :tt_BeforeUnload => "checkHIVTestDate()",
+    :max => "#{session[:datetime].to_date rescue Date.today}"
+  } %>
+
+  <%#= touch_select_tag "WHO Stage", @patient, options_for_select([["", ""], ["1", "1"], 
+  ["2", "2"], ["3", "3"], ["4", "4"], ["Unknown", "Unknown"]]),
+  {:id => "who_stage",
+  :helptext => "WHO STAGE",
+  :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+  " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
+
+  <%#= touch_select_tag "Is on CPT", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  {:id => "on_cpt?",
+  :helptext => "On CPT?",
+  :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+  " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
+
+  <%#= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  {:id => "on_art",
+  :helptext => "On Art?",
+  :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+  " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
+
+  <%#= touch_select_tag "ART start date", @patient, options_for_select([
+  ["", ""], ["Before this Pregnancy", "Before this Pregnancy"], 
+  ["At 0-27 weeks of Pregnancy", "At 0-27 weeks of Pregnancy"],
+  ["At 28+ of Pregnancy", "At 28+ of Pregnancy"]]),
+  {:id => "art_start",
+  :helptext => "When did Client start ART?",
+  :condition => "__$('new_test_result_at_current_facility').value == 'Positive' && __$('on_art').value == 'Yes'#{ (params[:update] ? 
+  " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%= submit_tag 'Finish' %>
 <% end %>

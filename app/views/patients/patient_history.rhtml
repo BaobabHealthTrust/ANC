@@ -50,20 +50,6 @@
           </button>
         </div>
         <div style="display: table-cell">
-          <button class="<%= (@encounters.include?("MEDICAL HISTORY") ? "gray" : "blue") %>"  
-                  onclick="<%= (!@encounters.include?("MEDICAL HISTORY") ? "window.location = '/patients/medical_history/?patient_id=#{@patient.id}'" : "") %>">
-            <span>Medical History</span>
-          </button>
-        </div>
-      </div>
-      <div style="display: table-row">
-        <div style="display: table-cell">
-          <button  class="<%= (@encounters.include?("SOCIAL HISTORY") ? "gray" : "blue") %>"  
-                   onclick="<%= (!@encounters.include?("SOCIAL HISTORY") ? "window.location = '/patients/social_history/?patient_id=#{@patient.id}'" : "") %>">
-            <span>Social History</span>
-          </button>
-        </div>
-        <div style="display: table-cell">
           <button class="<%= (@encounters.include?("SURGICAL HISTORY") ? "gray" : "blue") %>"  
                   onclick="<%= (!@encounters.include?("SURGICAL HISTORY") ? "window.location = '/patients/surgical_history/?patient_id=#{@patient.id}'" : "") %>">
             <span>Surgical History</span>
@@ -72,10 +58,24 @@
       </div>
       <div style="display: table-row">
         <div style="display: table-cell">
+          <button class="<%= (@encounters.include?("MEDICAL HISTORY") ? "gray" : "blue") %>"  
+                  onclick="<%= (!@encounters.include?("MEDICAL HISTORY") ? "window.location = '/patients/medical_history/?patient_id=#{@patient.id}'" : "") %>">
+            <span>Medical History</span>
+          </button>
+        </div>
+        <div style="display: table-cell">
+          <button  class="<%= (@encounters.include?("SOCIAL HISTORY") ? "gray" : "blue") %>"  
+                   onclick="<%= (!@encounters.include?("SOCIAL HISTORY") ? "window.location = '/patients/social_history/?patient_id=#{@patient.id}'" : "") %>">
+            <span>Social History</span>
+          </button>
+        </div>
+      </div>
+      <div style="display: table-row">
+        <div style="display: table-cell">
         </div>
         <div style="display: table-cell">  
           <button class="blue" onclick="window.location = '/patients/pregnancy_history/?patient_id=<%= @patient.id %>'">
-            <span>View Pregnancy History</span>
+            <span>Pregnancy History</span>
           </button>
         </div>
       </div>

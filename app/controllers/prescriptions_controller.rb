@@ -19,10 +19,11 @@ class PrescriptionsController < ApplicationController
     index and return
   end
   
-  def create
+  def created
     @patient    = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
     if !params[:prescriptions]
-      redirect_to ("/patients/current_visit/?patient_id=#{@patient.id}") and return
+      # redirect_to ("/patients/current_visit/?patient_id=#{@patient.id}") and return
+      redirect_to next_task(@patient) and return
     end
 
     encounter = Encounter.new(params[:encounter])
@@ -93,7 +94,74 @@ class PrescriptionsController < ApplicationController
 
     }
 
-    redirect_to ("/patients/current_visit/?patient_id=#{@patient.id}") and return
+    # redirect_to ("/patients/current_visit/?patient_id=#{@patient.id}") and return
+    redirect_to next_task(@patient) 
+  end
+  
+  def create   
+    @suggestions = params[:suggestion] || ['New Prescription']
+    @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
+    
+    encounter = Encounter.new(params[:encounter])
+    encounter.encounter_datetime ||= session[:datetime]
+    encounter.save
+ 
+    if !params[:formulation]
+      redirect_to next_task(@patient) and return
+    end
+    
+    unless params[:location]
+      session_date = session[:datetime] || params[:encounter_datetime] || Time.now()
+    else
+      session_date = params[:encounter_datetime] #Use encounter_datetime passed during import
+    end
+    # set current location via params if given
+    Location.current_location = Location.find(params[:location]) if params[:location]
+    
+    if params[:filter] and !params[:filter][:provider].blank?
+      user_person_id = User.find_by_username(params[:filter][:provider]).person_id
+    elsif params[:location] # migration
+      user_person_id = params[:provider_id]
+    else
+      user_person_id = User.find_by_user_id(session[:user_id]).person_id
+    end
+
+    @encounter = PatientService.current_treatment_encounter( @patient, session_date, user_person_id)
+    @diagnosis = Observation.find(params[:diagnosis]) rescue nil
+    @suggestions.each do |suggestion|
+      unless (suggestion.blank? || suggestion == '0' || suggestion == 'New Prescription')
+        @order = DrugOrder.find(suggestion)
+        DrugOrder.clone_order(@encounter, @patient, @diagnosis, @order)
+      else
+        
+        @formulation = (params[:formulation] || '').upcase
+        @drug = Drug.find_by_name(@formulation) rescue nil
+        unless @drug
+          flash[:notice] = "No matching drugs found for formulation #{params[:formulation]}"
+          render :new
+          return
+        end  
+        start_date = session_date
+        auto_expire_date = session_date.to_date + params[:duration].to_i.days
+        prn = params[:prn].to_i
+        if params[:type_of_prescription] == "variable"
+          DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug, start_date, auto_expire_date, [params[:morning_dose], params[:afternoon_dose], params[:evening_dose], params[:night_dose]], 'VARIABLE', prn)
+        else
+          DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug, start_date, auto_expire_date, params[:dose_strength], params[:frequency], prn)
+        end  
+      end  
+    end
+    
+=begin    
+    unless params[:location]
+      redirect_to (params[:auto] == '1' ? "/prescriptions/auto?patient_id=#{@patient.id}" : "/patients/treatment_dashboard/#{@patient.id}")
+    else
+      render :text => 'import success' and return
+    end
+=end
+    
+    redirect_to next_task(@patient)
+  
   end
   
   def auto
@@ -205,8 +273,7 @@ class PrescriptionsController < ApplicationController
     
     @generics = generic
     @frequencies = drug_frequency
-    @diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []
-    
+    @diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []    
   end
 
   def load_frequencies_and_dosages
@@ -270,6 +337,10 @@ class PrescriptionsController < ApplicationController
       freq.name rescue nil
     }.compact rescue []
   
+  end
+  
+  def ttv
+    @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
   end
   
 end

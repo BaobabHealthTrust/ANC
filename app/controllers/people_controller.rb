@@ -4,8 +4,15 @@ class PeopleController < ApplicationController
   end
  
   def new
+		@occupations = occupations
   end
   
+  def occupations
+    ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
+      'Student','Security guard','Domestic worker', 'Police','Office worker',
+      'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
+  end
+
   def identifiers
   end
 
@@ -19,7 +26,7 @@ class PeopleController < ApplicationController
   def search
     found_person = nil
     if params[:identifier]
-      local_results = Person.search_by_identifier(params[:identifier])
+      local_results = search_by_identifier(params[:identifier])
       if local_results.length > 1
         @people = Person.search(params)
       elsif local_results.length == 1
@@ -304,6 +311,70 @@ class PeopleController < ApplicationController
 
   end 
     
+  # List traditional authority containing the string given in params[:value]
+  def traditional_authority
+    district_id = District.find_by_name("#{params[:filter_value]}").id
+    traditional_authority_conditions = ["name LIKE (?) AND district_id = ?", "#{params[:search_string]}%", district_id]
+
+    traditional_authorities = TraditionalAuthority.find(:all,:conditions => traditional_authority_conditions, :order => 'name')
+    traditional_authorities = traditional_authorities.map do |t_a|
+      "<li value='#{t_a.name}'>#{t_a.name}</li>"
+    end
+    render :text => traditional_authorities.join('') + "<li value='Other'>Other</li>" and return
+  end
+
+  # Regions containing the string given in params[:value]
+  def region
+    region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
+
+    regions = Region.find(:all,:conditions => region_conditions, :order => 'name')
+    regions = regions.map do |r|
+      "<li value='#{r.name}'>#{r.name}</li>"
+    end
+    render :text => regions.join('') and return
+  end
+
+  # Districts containing the string given in params[:value]
+  def district
+    region_id = Region.find_by_name("#{params[:filter_value]}").id
+    region_conditions = ["name LIKE (?) AND region_id = ? ", "#{params[:search_string]}%", region_id]
+
+    districts = District.find(:all,:conditions => region_conditions, :order => 'name')
+    districts = districts.map do |d|
+      "<li value='#{d.name}'>#{d.name}</li>"
+    end
+    render :text => districts.join('') + "<li value='Other'>Other</li>" and return
+  end
+
+  def tb_initialization_district
+    districts = District.find(:all, :order => 'name')
+    districts = districts.map do |d|
+      "<li value='#{d.name}'>#{d.name}</li>"
+    end
+    render :text => districts.join('') + "<li value='Other'>Other</li>" and return
+  end
+
+  # Villages containing the string given in params[:value]
+  def village
+    traditional_authority_id = TraditionalAuthority.find_by_name("#{params[:filter_value]}").id
+    village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "#{params[:search_string]}%", traditional_authority_id]
+
+    villages = Village.find(:all,:conditions => village_conditions, :order => 'name')
+    villages = villages.map do |v|
+      "<li value='#{v.name}'>#{v.name}</li>"
+    end
+    render :text => villages.join('') + "<li value='Other'>Other</li>" and return
+  end
+  
+  # Landmark containing the string given in params[:value]
+  def landmark
+    landmarks = PersonAddress.find(:all, :select => "DISTINCT address1" , :conditions => ["city_village = (?) AND address1 LIKE (?)", "#{params[:filter_value]}", "#{params[:search_string]}%"])
+    landmarks = landmarks.map do |v|
+      "<li value='#{v.address1}'>#{v.address1}</li>"
+    end
+    render :text => landmarks.join('') + "<li value='Other'>Other</li>" and return
+  end
+
   private
   
   def search_complete_url(found_person_id, primary_person_id) 

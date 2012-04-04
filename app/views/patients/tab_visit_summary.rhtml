@@ -57,21 +57,26 @@
     <%@encounter_names.each{|encounter_name|
       header = 'true'
       for encounter in @encounters do %>
+        <% next if encounter.name == "DISPENSING" %>
         <%if encounter.name == encounter_name%>
-          <li class="data <%= cycle('even', 'odd') %>" encounter_id="<%= encounter.id %>">
+          <% color = cycle('even', 'odd') %>
+          <li class="data <%= color %>" encounter_id="<%= encounter.id %>">
             <% if session[:user_id] == encounter.creator %>
               <div class="void" style="float:right;padding:7px;">
                 <img src="/images/cancel_flat_small_red.png"/>
               </div>
             <% end %>
-
+            
             <%if header == 'true' %>
-              <div style="float:left; font-size: 1.1em; font-style: normal; padding-bottom: 5px; ">
-                <%=h (encounter.name.titleize == "Observations" ? "ANC Examinations" : encounter.name.titleize) %>
+              <div style="float:left; font-size: 1.15em; font-style: normal; padding-bottom: 3px;
+                   border: <%= (color == "even" ? "#fff" : "#eee") %> 1px solid; padding: 3px; 
+                   -moz-border-radius: 10px; width: 92%;">
+                <%=h (encounter.name.titleize == "Observations" ? "ANC Examinations" : 
+                    (encounter.name.titleize == "Anc Visit Type" ? "ANC Visit Number" : encounter.name.titleize)) %>
               </div>
             <%end; header = 'false'%>
-            <div style="clear:left; font-size:10pt" class="summary"><span><%= encounter.to_s.lstrip.gsub(/\n/, '<br/>') -%></span>
-              <span style ="font-size:10pt"><%=encounter.encounter_datetime.strftime("%d-%b-%y %H:%M") %></span>
+            <div style="clear:left; font-size:0.85em; padding-left: 20px; padding-right: 60px;" class="summary"><span><%= encounter.to_s.lstrip.gsub(/\n/, '<br/>') -%></span>
+              <span style ="font-size:0.7em; font-style: italic;"><%=encounter.encounter_datetime.strftime("%d-%b-%y %H:%M") %></span>
             </div>
           </li>
         <%end

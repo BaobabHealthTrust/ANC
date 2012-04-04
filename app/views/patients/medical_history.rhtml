@@ -16,7 +16,7 @@
 
   <%= touch_select_tag "ASTHMA", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "ever_had_asthma?",
-    :helptext => "Ever Had Asthma?" } %>
+    :helptext => "Ever Had Asthma?", :tt_onLoad => "showCategory('Medical History');" } %>
   <%= touch_select_tag "HYPERTENSION", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "ever_had_hypertension?",
     :helptext => "Ever Had Hypertension?" } %>

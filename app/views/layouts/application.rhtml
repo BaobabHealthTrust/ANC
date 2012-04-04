@@ -9,6 +9,28 @@
       
       tstCurrentDate = "<%= (session[:datetime] ? session[:datetime].to_date.strftime("%Y-%m-%d") : 
     Date.today.strftime("%Y-%m-%d")) %>";
+            
+  function addHereButton(){
+    var button = document.createElement("button");
+    button.id = "addHere";
+    button.innerHTML = "<span>Here</span>";
+    button.style.cssFloat = "right";
+    
+    button.onclick = function(){
+      __$("touchscreenInput" + tstCurrentPage).value = "<%= Location.current_health_center.name rescue "" %>"
+    }
+    
+    if(__$("buttons")){
+      __$("buttons").appendChild(button);
+    }
+  }
+ 
+  function removeHereButton(){
+    if(__$("addHere")){
+      __$("buttons").removeChild(__$("addHere"));
+    }
+  }
+  
     </script>
 
     <script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer="true"></script>
@@ -17,6 +39,7 @@
 <%#= javascript_include_tag "preload" %>
 <%#= javascript_include_tag "touchscreenToolkit" %>
     <%= javascript_include_tag "dateselector" %>
+
   </head>
   <body id="mateme">  
     <div id="container">

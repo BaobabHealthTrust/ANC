@@ -1,6 +1,16 @@
 <link href="/touchscreentoolkit/lib/stylesheets/drug-style.css" type="text/css" rel="stylesheet" />
-<script type="text/javascript">
-  var tt_cancel_destination = "/patients/current_visit/?patient_id=<%= @patient.patient_id %>";
+<link href="/touchscreentoolkit/lib/stylesheets/dispense.css" type="text/css" rel="stylesheet" />
+<% 
+url = request.referrer.gsub(/http\:\/\//,"") 
+
+url = url[url.index("/"), url.length - url.index("/")]
+%>
+<script type="text/javascript" language="javascript">
+  <!--
+  tt_cancel_show = "<%= (!request.referrer.blank? ? "#{url}" : 
+    "/patients/current_visit/?patient_id=#{@patient.patient_id}") %>";
+  tt_cancel_destination = "<%= (!request.referrer.blank? ? "#{url}" : 
+    "/patients/current_visit/?patient_id=#{@patient.patient_id}") %>";
 
   var generics = <%= @generics.sort.to_json %>;
   var frequencies = <%= @frequencies.to_json %>;
@@ -10,7 +20,8 @@
   var search_path = "/prescriptions/load_frequencies_and_dosages";
 
 </script>
-<script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/treatment.js"></script>
+<script type="text/javascript" src="/touchscreentoolkit/lib/javascripts/generics.js" ></script>
+<script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/dispense.js" defer></script>
 <style type="text/css">
   #space { display:inline; font-size:1.2em; }
   #helpText0 { width:680px}
@@ -46,7 +57,7 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
   <input
-    type='text' name='drugs' tt_onLoad='generateGenerics()'
+    type='text' name='drugs' tt_onLoad='generateGenerics(<%= @patient.id %>)'
     tt_onUnLoad='removeGenerics()' tt_pageStyleClass='NoControls'
     optional />
 
@@ -60,7 +71,7 @@
 
 <div style="z-index:11;bottom:28px; height: 64px; width: 435px; left: 230px;
      right: -66px; position: absolute;">
-  <button id="viewSelectedOnlyButton" class="button navButton blue" style="min-width:350px;"
+  <!--button id="viewSelectedOnlyButton" class="button navButton blue" style="min-width:350px;"
           onclick="if(this.innerHTML=='<span>Show Selected Drugs Only</span>'){
             this.innerHTML = '<span>Show All Drugs</span>';
             showSelectedDrugsOnly();
@@ -72,7 +83,7 @@
     <span>
       Show Selected Drugs Only
     </span>
-  </button>
+  </button-->
 </div>
 <script type="text/javascript" language="javascript">
 <!--

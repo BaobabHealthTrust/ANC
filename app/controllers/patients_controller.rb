@@ -4,17 +4,19 @@ class PatientsController < ApplicationController
   def show 
     @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
 
-    @encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
-        @current_range[0]["START"], @current_range[0]["END"]]) rescue []
+    @encounters = @patient.encounters.active.find(:all) # , :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        # @current_range[0]["START"], @current_range[0]["END"]]) rescue []
     
     @all_encounters = @patient.encounters.active.find(:all) rescue []
     
-    @encounter_names = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
-        @current_range[0]["START"], @current_range[0]["END"]]).map{|encounter| encounter.name}.uniq rescue []
+    @encounter_names = @patient.encounters.active.find(:all)   #, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        # @current_range[0]["START"], @current_range[0]["END"]]).map{|encounter| encounter.name}.uniq rescue []
 
     @names = @encounters.collect{|e|
       e.name.upcase
     }.uniq
+    
+    # raise @names.to_yaml
     
     @all_names = @all_encounters.collect{|e|
       e.name.upcase
@@ -197,7 +199,7 @@ class PatientsController < ApplicationController
         end
       end
     }
-    
+            
     @sections["LAB RESULTS"].each{|o,a|
       case o.titleize
       when "Hb Test Result"
@@ -217,7 +219,7 @@ class PatientsController < ApplicationController
         end
       end
     }
-    # raise @labs_selected.to_yaml
+    # raise @sections.to_yaml
     
     render :layout => 'dynamic-dashboard'
   end
@@ -842,6 +844,15 @@ class PatientsController < ApplicationController
       e.type.name
     }.join(", ") # rescue ""
 
+    @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
+
+    @preg_encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]) rescue []
+    
+    @names = @preg_encounters.collect{|e|
+      e.name.upcase
+    }.uniq
+    
   end
 
   def demographics
@@ -1036,7 +1047,7 @@ class PatientsController < ApplicationController
   
   def print_history
     print_and_redirect("/patients/obstertic_medical_examination_label/?patient_id=#{@patient.id}", 
-      "/patients/patient_history/?patient_id=#{@patient.id}")  
+      next_task(@patient))  
   end
 
   def obstertic_medical_examination_label
@@ -1046,7 +1057,7 @@ class PatientsController < ApplicationController
 
   def print_visit_label
     print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
-      "/patients/current_visit/?patient_id=#{@patient.id}")  
+      next_task(@patient))  
   end
 
   def current_visit_label
@@ -1057,7 +1068,7 @@ class PatientsController < ApplicationController
 
   def print_exam_label
     print_and_redirect("/patients/exam_label/?patient_id=#{@patient.id}", 
-      "/patients/current_visit/?patient_id=#{@patient.id}")  
+      "/patients/print_visit_label/?patient_id=#{@patient.id}")  
   end
 
   def exam_label

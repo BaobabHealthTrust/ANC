@@ -20,7 +20,7 @@ class User < ActiveRecord::Base
    has_one :activities_property,
           :class_name => 'UserProperty',
           :foreign_key => :user_id,
-          :conditions => ['property = ?', 'Activities'] 
+          :conditions => ['property = ?', 'ANC Activities'] 
 
 
   def first_name
@@ -100,7 +100,7 @@ class User < ActiveRecord::Base
   # have a corresponding privilege for?
   def activities=(arr)
     prop = activities_property || UserProperty.new
-    prop.property = 'Activities'
+    prop.property = 'ANC Activities'
     prop.property_value = arr.join(',')
     prop.user_id = self.id
     prop.save

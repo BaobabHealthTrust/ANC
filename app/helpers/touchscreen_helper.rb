@@ -5,7 +5,6 @@ module TouchscreenHelper
     content = ""
     content << hidden_field_tag("observations[][value_numeric]", nil) + "\n" unless kind == 'value_numeric'    
     content << hidden_field_tag("observations[][value_datetime]", nil) + "\n" unless kind == 'value_datetime'
-    content << hidden_field_tag("observations[][value_coded_or_text]", nil) + "\n" unless kind == 'value_coded_or_text'
     content << hidden_field_tag("observations[][value_coded_or_text_multiple][]", nil) + "\n" unless kind == 'value_coded_or_text_multiple'
     content << hidden_field_tag("observations[][value_coded]", nil) + "\n"  unless kind == 'value_coded'
     content << hidden_field_tag("observations[][value_text]", nil) + "\n"  unless kind == 'value_text'
@@ -15,6 +14,7 @@ module TouchscreenHelper
     content << hidden_field_tag("observations[][order_id]", options[:order_id]) + "\n"
     content << hidden_field_tag("observations[][concept_name]", concept)  + "\n"
     content << hidden_field_tag("observations[][patient_id]", patient.id)  + "\n"
+    content << hidden_field_tag("observations[][value_coded_or_text]", nil) + "\n" unless kind == 'value_coded_or_text'
     
     if options[:id]
       content << hidden_field_tag("observations[][obs_datetime]", time, 
@@ -92,7 +92,7 @@ module TouchscreenHelper
       :allowFreeText => false 
     }.merge(options)                 
     options = {:tt_pageStyleClass => "NoKeyboard"}.merge(options) if options[:ajaxURL].blank?
-    kind = options[:multiple] ? "value_coded_or_text_multiple" : "value_coded_or_text"
+    kind = options[:multiple] ? "value_coded_or_text_multiple" : "value_text" # "value_coded_or_text"
     content = ""
     content << touch_meta_tag(concept, patient, time, kind, options) + "\n"
     content << select_tag("observations[][#{kind}]", choices, options)  + "\n"

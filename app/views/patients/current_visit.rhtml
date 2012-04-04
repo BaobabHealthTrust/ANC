@@ -98,6 +98,20 @@
       </div>
       <div style="display: table-row">
         <div style="display: table-cell">
+
+          <% if !@names.include?("CURRENT PREGNANCY") %>
+
+          <button class="blue" onclick="window.location ='/patients/current_pregnancy/?patient_id=<%= @patient.id  %>'">
+              <span>Current Pregnancy</span>
+            </button>
+
+          <% else %>
+
+            <button class="blue" onclick="window.location ='/patients/hiv_status/?patient_id=<%= @patient.id  %>'">
+              <span>Pregnancy Update</span>
+            </button>
+
+          <% end %>
         </div>
         <div style="display: table-cell"> 
           &nbsp;

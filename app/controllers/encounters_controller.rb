@@ -3,7 +3,7 @@ class EncountersController < ApplicationController
 
   def create
 
-    # raise params.to_yaml
+    # raise params.inspect
     
     if params[:void_encounter_id]
       @encounter = Encounter.find(params[:void_encounter_id])
@@ -30,8 +30,10 @@ class EncountersController < ApplicationController
       }.compact
 
       next if values.length == 0
+      
       observation[:value_text] = observation[:value_text].join(", ") if observation[:value_text].present? && observation[:value_text].is_a?(Array)
       observation.delete(:value_text) unless observation[:value_coded_or_text].blank?
+      
       observation[:encounter_id] = encounter.id
       # observation[:obs_datetime] = encounter.encounter_datetime || Time.now()
       observation[:person_id] ||= encounter.patient_id
@@ -44,9 +46,9 @@ class EncountersController < ApplicationController
       if observation[:value_coded_or_text_multiple] && observation[:value_coded_or_text_multiple].is_a?(Array) && !observation[:value_coded_or_text_multiple].blank?
         values = observation.delete(:value_coded_or_text_multiple)
         values.each{|value| observation[:value_coded_or_text] = value; Observation.create(observation) }
-      else      
+      else           
         observation.delete(:value_coded_or_text_multiple)
-        Observation.create(observation)
+        Observation.create(observation)        
       end
     end
 
@@ -94,24 +96,29 @@ class EncountersController < ApplicationController
       end
     end
 
-    redirect_to "/patients/current_visit?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") ==
-        "VITALS" || (encounter.type.name.upcase rescue "") == "LAB RESULTS" ||
-        (encounter.type.name.upcase rescue "") == "OBSERVATIONS" ||
-        (encounter.type.name.upcase rescue "") == "DIAGNOSIS" ||
-        (encounter.type.name.upcase rescue "") == "TREATMENT" ||
-        (encounter.type.name.upcase rescue "") == "UPDATE OUTCOME" ||
-        (encounter.type.name.upcase rescue "") == "APPOINTMENT")
-      
-    redirect_to "/patients/patient_history?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") ==
-        "OBSTETRIC HISTORY" || (encounter.type.name.upcase rescue "") == "MEDICAL HISTORY" || 
-        (encounter.type.name.upcase rescue "") == "SURGICAL HISTORY" || 
-        (encounter.type.name.upcase rescue "") == "SOCIAL HISTORY")
-  
     redirect_to "/patients/print_registration?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") == 
         "REGISTRATION")
       
-    redirect_to "/patients/current_visit/?patient_id=#{@patient.id}" and return if ((encounter.type.name.upcase rescue "") == 
-        "ANC VISIT TYPE")
+    redirect_to "/patients/print_history/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") == 
+      "SOCIAL HISTORY"
+    
+    redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") == 
+      "UPDATE OUTCOME"
+       
+    @anc_patient = (ANCService::ANC.new(@patient) rescue nil) if @anc_patient.nil?
+    
+    @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
+
+    @preg_encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]) rescue []
+    
+    @names = @preg_encounters.collect{|e|
+      e.name.upcase
+    }.uniq
+    
+    if next_task(@patient) == "/patients/current_pregnancy/?patient_id=#{@patient.id}" && @names.include?("CURRENT PREGNANCY")
+      redirect_to "/patients/hiv_status/?patient_id=#{@patient.id}" and return
+    end
     
     # Go to the next task in the workflow (or dashboard)
     redirect_to next_task(@patient) 
@@ -120,6 +127,21 @@ class EncountersController < ApplicationController
   def new
     # raise @anc_patient.to_yaml
     @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) rescue nil
+    
+    @weeks = @anc_patient.fundus rescue 12
+       
+    @pregnancystart = Date.today - (@weeks.week rescue 0)
+    
+    @preg_encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+        @current_range[0]["START"], @current_range[0]["END"]]) rescue []
+    
+    @names = @preg_encounters.collect{|e|
+      e.name.upcase
+    }.uniq
+    
+    if next_task(@patient) == "/patients/current_pregnancy/?patient_id=#{@patient.id}" && @names.include?("CURRENT PREGNANCY")
+      redirect_to "/patients/hiv_status/?patient_id=#{@patient.id}" and return
+    end
     
     redirect_to next_task(@patient) and return unless params[:encounter_type]
     

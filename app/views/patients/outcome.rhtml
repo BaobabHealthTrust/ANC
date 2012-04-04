@@ -1,7 +1,7 @@
 <script type="text/javascript" language="javascript">
   <!--
-  tt_cancel_show = "/patients/current_visit/?patient_id=<%= @patient.id %>";
-  tt_cancel_destination = "/patients/current_visit/?patient_id=<%= @patient.id %>";
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
 
   //-->
 </script>
@@ -19,10 +19,18 @@
   <%= hidden_field_tag("programs[][date_enrolled]", session[:datetime] || Date.today ) %>
   <%= hidden_field_tag("programs[][states][][state]", "Admitted") %>
 
+  <select id="outcome_available" name="outcome_available" helpText="Update Outcome?"
+    tt_onLoad="showCategory('Update Outcome');">
+    <option value="YES">Yes</option>
+    <option value="NO">No</option>
+  </select>
+  
   <%= touch_select_tag "OUTCOME", @patient,
     options_for_select([["", ""], ["Admitted", "Admitted"], ["Referred", "Referred"]]),
     {:id => "outcome",
-    :helptext => "Outcome" } %>
+    :helptext => "Outcome",
+    :condition => "__$('outcome_available').value.toUpperCase() == 'YES'"
+  } %>
 
   <%#= touch_select_tag "Admission Section", @patient,
     options_for_select([["", ""], ["Labour Ward", "Labour Ward"], ["AnteNatal Ward", "AnteNatal Ward"],
@@ -34,7 +42,7 @@
   <%= touch_select_tag "REFERRAL CLINIC IF REFERRED", @patient, nil,
     {:id => "referral",
     :helptext => "Referral Facility",
-    :condition => "__$('outcome').value == 'Referred'",
+    :condition => "__$('outcome').value == 'Referred' && __$('outcome_available').value.toUpperCase() == 'YES'",
     :ajaxURL => "/encounters/static_locations?search_string=" } %>
 
   <%= submit_tag 'Finish' %>

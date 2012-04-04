@@ -46,7 +46,7 @@ class Observation < ActiveRecord::Base
       raise "\"#{concept_name}\" does not exist in the concept_name table"
   end
 
-  def value_coded_or_text=(value_coded_or_text)
+  def value_coded_or_text=(value_coded_or_text)    
     return if value_coded_or_text.blank?
     
     value_coded_name = ConceptName.find_by_name(value_coded_or_text)
@@ -58,7 +58,7 @@ class Observation < ActiveRecord::Base
       self.value_coded_name_id = value_coded_name.concept_name_id
       self.value_coded = value_coded_name.concept_id
       self.value_coded
-    end
+    end 
   end
 
   def self.find_most_common(concept_question, answer_string, limit = 10)

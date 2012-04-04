@@ -100,9 +100,21 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%  session_date = session[:datetime] || Time.now() %>
 
+  <%= select_tag "Updates Available", options_for_select([["Yes", "Yes"], ["No", "NO"]]), 
+    {
+    :id => "updates_available",
+    :helpText => "Update pregnancy information?", 
+    :tt_onLoad => "showCategory('Pregnancy Update');"
+  } %>
+
   <%= select_tag("choice", options_for_select(["", "Last Menstrual Period", 
         "Planned delivery place", "Multiple Pregnancy", "Bed Net Given?", "Previous TT Doses"]), 
-    {:helpText => 'Select Task(s)', :id => "choice", :multiple => true})%>
+    {
+      :helpText => 'Select Task(s)', 
+      :id => "choice", 
+      :multiple => true,
+      :condition => "__$('updates_available').value.toUpperCase()=='YES'"
+    })%>
 
   <%= touch_date_tag "LAST MENSTRUAL PERIOD", @patient, @lmp,
     {:id => "lmp",

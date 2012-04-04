@@ -22,14 +22,24 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%session_date = session[:datetime] || Time.now() %>
 
+  <%= select_tag "Surgicals Available", options_for_select([["Yes", "Yes"], ["No", "NO"]]), 
+    {
+    :id => "surgicals_available",
+    :helpText => "Ever had a surgical procedure?", 
+    :tt_onLoad => "showCategory('Surgical History');"
+  } %>
+
   <%= touch_text_field_tag "Procedure Done", @patient, nil,
     {:id => "surgical1",
-    :helptext => "Surgical procedure done before" } %>
+    :helptext => "Surgical procedure done before",
+    :condition => "__$('surgicals_available').value.toUpperCase() == 'YES'"
+  } %>
 
   <%= touch_date_tag "Date", @patient, nil,
     {:id => "date_done1",
     :helptext => "Date Procedure Done",
-    :tt_onUnLoad => "__$('observations__obs_datetime_surgical1').value = __$('date_done1').value" } %>
+    :tt_onUnLoad => "__$('observations__obs_datetime_surgical1').value = __$('date_done1').value",
+    :condition => "__$('surgicals_available').value.toUpperCase() == 'YES'" } %>
 
   <% (2..8).each do |e| %>
 
@@ -52,7 +62,7 @@
     <%= touch_text_field_tag "Procedure Done", @patient, nil,
       {:id => "surgical#{e}",
       :helptext => "#{e}#{indice} Surgical procedure done before",
-      :condition => "__$('surgical#{e - 1}').value != ''",
+      :condition => "__$('surgical#{e - 1}').value != '' && __$('surgicals_available').value.toUpperCase() == 'YES'",
       :tt_onLoad => "setTimeout(updateNextFinish, 20)",
       :optional => "true"
     } %>
@@ -60,7 +70,7 @@
     <%= touch_date_tag "Date", @patient, nil,
       {:id => "date_done#{e}",
       :helptext => "Date #{e}#{indice} Procedure Done",
-      :condition => "__$('surgical#{e}').value != ''",
+      :condition => "__$('surgical#{e}').value != '' && __$('surgicals_available').value.toUpperCase() == 'YES'",
       :tt_onUnLoad => "__$('observations__obs_datetime_surgical#{e}').value = __$('date_done#{e}').value"
     } %>
 

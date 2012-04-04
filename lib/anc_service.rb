@@ -1349,6 +1349,14 @@ module ANCService
       "#{self.person.addresses.first.city_village}" rescue nil
     end
 
+    def fundus
+      self.patient.encounters.collect{|e| 
+        e.observations.collect{|o| 
+          o.answer_string.to_i if o.concept.name.name == "Fundus"
+        }.compact
+      }.uniq.delete_if{|x| x == []}.flatten.max
+    end
+    
   end
   
 end

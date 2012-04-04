@@ -1,0 +1,52 @@
+<script type="text/javascript">
+  <!--
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+  
+  function checkForm(){
+    if(__$("ttv").value.toUpperCase() == "NO"){
+      __$("generic").removeAttribute("name");
+      __$("formulation").removeAttribute("name");
+      __$("type_of_prescription").removeAttribute("name");
+      __$("dose_strength").removeAttribute("name");
+      __$("frequency").removeAttribute("name");
+      __$("duration").removeAttribute("name");
+      __$("prn").removeAttribute("name");
+    }
+  }
+  
+  //-->
+</script>
+
+<form id='prescription' action="/prescriptions/create" method='post'>
+
+  <%= hidden_field_tag "encounter[encounter_type_name]", "DISPENSING" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", session[:datetime] ||=  DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  
+  <select id="ttv" name="ttv" tt_onUnLoad="checkForm()" helpText="Has TTV been given today?">
+    <option>Yes</option>
+    <option>No</option>
+  </select>
+  
+  <%= hidden_field_tag :generic, "TTV"%>
+
+  <%= hidden_field_tag :formulation, "TTV (0.5ml)"%>
+
+  <%= hidden_field_tag :type_of_prescription, "standard" %> 
+
+  <%= hidden_field_tag :dose_strength, "0.5"%>  
+
+  <%= hidden_field_tag :frequency, 'Once a day (od)' %> 
+
+  <%= hidden_field_tag :duration, 1%>
+
+  <%= hidden_field_tag :prn, "0"%> 
+
+  <input type="hidden" value="<%= @patient.id %>" id="patient_id" name="patient_id" />
+
+
+  <%= submit_tag "Finish" %>
+
+</form>

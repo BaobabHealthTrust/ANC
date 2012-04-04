@@ -1,0 +1,29 @@
+<html>
+    <head>        
+        <title>Calendar</title>
+        <link href="lib/stylesheets/calendar.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/stylesheets/touch-fancy.css" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="lib/javascripts/calendar.js"></script>
+        <script type="text/javascript">
+            <!--
+            
+            var today = new Date();
+            var y = today.getFullYear();
+            var m = padZeros((today.getMonth() + 1), 2);
+            var date0 = y + "-" + m + "-" + padZeros(today.getDate(), 2);
+            var date1 = y+"-"+m+"-10";
+            var date2 = y+"-"+m+"-26";
+            
+            selecteddays[date1] = 600;
+            selecteddays[date2] = 4;
+            
+            setTimeout("createCalendar('center', '" + date0 + "', selecteddays)", 200);
+            
+            //-->
+        </script>
+    </head>
+    <body>
+    <center id="center">
+    </center>
+</body>
+</html>

@@ -42,7 +42,8 @@ class ApplicationController < ActionController::Base
 
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
-    task = Task.next_task(Location.current_location, patient,session_date) rescue nil
+    task = Task.next_task(Location.current_location, patient,session_date) # rescue nil
+    
     return task.url if task.present? && task.url.present?
     return "/patients/show/#{patient.id}" 
   end
@@ -52,6 +53,13 @@ class ApplicationController < ActionController::Base
     @redirect_url = redirect_url
     @message = message
     render :template => 'print/print', :layout => nil
+  end
+  
+	def use_user_selected_activities
+		GlobalProperty.find_by_property('use.user.selected.activities').property_value.to_s == "true" rescue false
+	end
+  
+  def ttv    
   end
   
 private

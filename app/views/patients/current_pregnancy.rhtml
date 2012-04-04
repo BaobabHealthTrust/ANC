@@ -152,8 +152,9 @@
   <%= touch_date_tag "LAST MENSTRUAL PERIOD", @patient, nil,
     {:id => "lmp",
     :helptext => "Last Menstrual Period",
-    :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100);",
-    :tt_onUnLoad => 'clearTimeout(timedEvent); // if (__$("touchscreenInput" + tstCurrentPage).value == "Unknown" ) __$("lmp").value = tstEstimatedLMPDate;',
+    :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100); showCategory('Current Pregnancy');",
+    :tt_onUnLoad => 'clearTimeout(timedEvent);
+    // if (__$("touchscreenInput" + tstCurrentPage).value == "Unknown" ) __$("lmp").value = tstEstimatedLMPDate;',
     :tt_pageStyleClass => "exclude"
   } %>
 
@@ -163,7 +164,9 @@
     :helpText => "Gestation (months)",
     :field_type => "number",
     :tt_pageStyleClass => "NumbersOnly",
-    :tt_onUnload => "setDate(__$('touchscreenInput' + tstCurrentPage).value);"
+    :tt_onUnload => "setDate(__$('touchscreenInput' + tstCurrentPage).value);",
+    :max => 9,
+    :absoluteMax => 12
   }
 %>
 
@@ -180,7 +183,9 @@
   <%= touch_text_field_tag "Planned delivery place", @patient, nil,
     {:id => "planned_delivery_place",
     :helptext => "Planned delivery place",
-    :ajaxURL => "/encounters/static_locations?search_string=" } %>
+    :ajaxURL => "/encounters/static_locations?search_string=",
+    :tt_onLoad => "addHereButton()",
+    :tt_onUnLoad => "removeHereButton()" } %>
 
   <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "bed_net",

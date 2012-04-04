@@ -85,6 +85,8 @@ class Encounter < ActiveRecord::Base
       diagnosis_array.compact.to_s.gsub(/ : $/, "")    
     elsif name == 'OBSERVATIONS' || name == 'CURRENT PREGNANCY'
       observations.collect{|observation| observation.to_s.titleize.gsub("Breech Delivery", "Breech")}.join(", ")
+    elsif name == "ANC VISIT TYPE"
+      observations.collect{|o| "Visit No.: " + o.value_numeric.to_i.to_s}.join(", ")
     else  
       observations.collect{|observation| observation.to_s.titleize}.join(", ")
     end  

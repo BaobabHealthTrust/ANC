@@ -36,15 +36,6 @@
         <select id="links">
           <option value='/patients/patient_history/?patient_id=<%= @patient.id  %>'>Patient History</option>
 
-          <% if !@names.include?("CURRENT PREGNANCY") %>
-          
-            <option value='/patients/current_pregnancy/?patient_id=<%= @patient.id  %>'>Current Pregnancy</option>
-            
-          <% else %>
-            
-            <option value='/patients/hiv_status/?patient_id=<%= @patient.id  %>'>Pregnancy Update</option>
-            
-          <% end %>
           <option value='/patients/<%= (@current_encounter_names.include?("ANC VISIT TYPE") ? 
               "current_visit" : "visit_type") %>/?patient_id=<%= @patient.id  %>'>Current Visit</option>
           <option value='/patients/demographics?patient_id=<%= @patient.id %>'>Full Demographics</option>
@@ -64,6 +55,9 @@
                   <%= (@labs_alert == true ? " alertTab='true'" : (@labs_selected == true ? " selectedTab='true'" : "")) %> >Lab Results</option>
           <option value='/patients/tab_detailed_obstetric_history?patient_id=<%= @patient.id  %>'>Detailed Obstetric History</option>
           <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>Current Pregnancy</option>
+        </select>
+        <select id="navigation_links">
+          <option link="/encounter_types?patient_id=<%= @patient.id  %>" ttSize = "160px">Tasks</option>
         </select>
       </td>
     </tr>

@@ -1,5 +1,7 @@
-<script>
-  var tt_cancel_destination = "/patients/current_visit/?patient_id=<%= @patient.patient_id %>"
+<script type="text/javascript" language="javascript">
+  <!--
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
 </script>
 <style type="text/css">
   #summary {
@@ -89,7 +91,7 @@
  
   function showWeightForHeight() {
     var currentHeightRounded = (currentHeight % Math.floor(currentHeight) < 0.5 ? 0 : 0.5) + Math.floor(currentHeight);
-    var weightForHeights = <%= WeightForHeight.patient_weight_for_height_values.to_json -%>;
+    var weightForHeights = null<%#= WeightForHeight.patient_weight_for_height_values.to_json -%>;
     var medianWeightHeight = weightForHeights[currentHeightRounded.toFixed(1)];
     var weightForHeightPercentile = (currentWeight/(medianWeightHeight)*100).toFixed(0);
 
@@ -125,7 +127,6 @@
  
 </script>
 <script>
-  var tt_cancel_destination = "/patients/current_visit/?patient_id=<%=  @patient.id %>"
   var timedEvent;
   var alreadyNoted = false;
 
@@ -182,7 +183,8 @@
       {:id => "temperature",
       :field_type => 'number',
       :helptext =>"Temperature",
-      :allowFreeText => 'true',
+      :allowFreeText => 'true',       
+      :tt_onLoad => "showCategory('Vitals');",
       :min => 20,
       :max => 45,
       :units => 'Celcius',
@@ -194,101 +196,121 @@
     <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
   <% end %>
 
-  <label for='weight'>Weight (KG)</label>
-  <%= text_field_tag "observations[][value_numeric]", nil,
-    {:id => "weight",
-    :field_type => 'number',
-    :min => 40, # number_with_precision(@patient.min_weight, :precision => 1),
-    :max => 200, # number_with_precision(@patient.max_weight, :precision => 1),
-    :absoluteMin => 40,
-    :absoluteMax => 200,
-    :units => 'kg',
-    :validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
-    :validationMessage => "You must enter a number",
-    :tt_pageStyleClass => "NumbersWithUnknownAndDecimal"} %>
-  <%= hidden_field_tag("observations[][concept_name]", "WEIGHT (KG)") %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+  <% if params[:weight] %>
 
-  <% if @anc_patient.age > 18 and not @anc_patient.current_height == 0 %>
-    <%= hidden_field_tag "observations[][value_numeric]",@anc_patient.current_height %>
-    <%= hidden_field_tag("observations[][concept_name]", "HEIGHT (CM)") %>
-    <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
-  <% else %>
-    <label for='height'>Height (CM)</label>
+    <label for='weight'>Weight (KG)</label>
     <%= text_field_tag "observations[][value_numeric]", nil,
-      {:id => "height",
+      {:id => "weight",
       :field_type => 'number',
-      :min => number_with_precision(@anc_patient.min_height, :precision => 1),
-      :max => number_with_precision(@anc_patient.max_height, :precision => 1),
-      :absoluteMin => 10,
-      :absoluteMax => 228,
-      :units => 'cm',
-      :validationRule => "^([0-9]+)|Unknown$",
-      :validationMessage => "You must enter numbers only (for example 157)",
-      :tt_pageStyleClass => "Numeric NumbersWithUnknown"} %>
-    <%= hidden_field_tag("observations[][concept_name]", "HEIGHT (CM)") %>
+      :min => 40, # number_with_precision(@patient.min_weight, :precision => 1),
+      :max => 200, # number_with_precision(@patient.max_weight, :precision => 1),
+      :absoluteMin => 40,
+      :absoluteMax => 200,      
+      :tt_onLoad => "showCategory('Vitals');",
+      :units => 'kg',
+      :validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+      :validationMessage => "You must enter a number",
+      :tt_pageStyleClass => "NumbersWithUnknownAndDecimal"} %>
+    <%= hidden_field_tag("observations[][concept_name]", "WEIGHT (KG)") %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
     <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+
   <% end %>
 
-  <% options = default.merge({
-      :id => "systolic_blood_pressure",
-      :helptext => "Systolic Blood Pressure",
-      :field_type => "number",
-      :tt_pageStyleClass => "NumbersWithUnknown",
-      :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
-      :tt_onUnLoad => "clearTimeout(timedEvent);",
-      :absoluteMin => 0,
-      :max => 250
-    }) %>
+  <% if params[:height] %>
 
-  <%= text_field_tag("observations[][value_numeric]", nil,options) %>
-  <%= hidden_field_tag("observations[][concept_name]",  "SYSTOLIC BLOOD PRESSURE", {:id => 'systolic_blood_pressure_concept_name'}) %>
-  <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
+    <% if @anc_patient.age > 18 and not @anc_patient.current_height == 0 %>
 
-  <% options = default.merge({
-      :id => "diastolic_blood_pressure",
-      :helptext => "Diastolic Blood Pressure",
-      :field_type => "number",
-      :tt_pageStyleClass => "NumbersWithUnknown",
-      :tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100);",
-      :tt_onUnLoad => "clearTimeout(timedEvent);",
-      :absoluteMin => 0,
-      :max => 180,
-      :condition => "__$('systolic_blood_pressure').value.toLowerCase() != 'unknown'"
-    }) %>
+      <%= hidden_field_tag "observations[][value_numeric]",@anc_patient.current_height %>
+      <%= hidden_field_tag("observations[][concept_name]", "HEIGHT (CM)") %>
+      <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+      <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
 
-  <%= text_field_tag("observations[][value_numeric]", nil,options) %>
-  <%= hidden_field_tag("observations[][concept_name]",  "DIASTOLIC BLOOD PRESSURE", {:id => 'diastolic_blood_pressure_concept_name'}) %>
-  <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
+    <% else %>
 
-  <% if @anc_patient.age > 14 %>
+      <label for='height'>Height (CM)</label>
+      <%= text_field_tag "observations[][value_numeric]", nil,
+        {:id => "height",
+        :field_type => 'number',
+        :min => number_with_precision(@anc_patient.min_height, :precision => 1),
+        :max => number_with_precision(@anc_patient.max_height, :precision => 1),
+        :absoluteMin => 10,
+        :absoluteMax => 228,
+        :units => 'cm',
+        :validationRule => "^([0-9]+)|Unknown$",
+        :validationMessage => "You must enter numbers only (for example 157)",
+        :tt_pageStyleClass => "Numeric NumbersWithUnknown"} %>
+      <%= hidden_field_tag("observations[][concept_name]", "HEIGHT (CM)") %>
+      <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+      <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
 
-    <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'bmi'}) %>
-    <%= hidden_field_tag("observations[][concept_name]", "BODY MASS INDEX, MEASURED") %>
-    <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+    <% end %>
 
-  <% else %>
+  <% end %>
 
-    <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'weight_for_height'}) %>
-    <%= hidden_field_tag("observations[][concept_name]", "WT FOR HT") %>
-    <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+  <% if params[:bp] %>
 
-    <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'weight_for_age'}) %>
-    <%= hidden_field_tag("observations[][concept_name]", "WT FOR AGE") %>
-    <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+    <% options = default.merge({
+        :id => "systolic_blood_pressure",
+        :helptext => "Systolic Blood Pressure",
+        :field_type => "number",
+        :tt_pageStyleClass => "NumbersWithUnknown",
+        :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
+        :tt_onUnLoad => "clearTimeout(timedEvent);",
+        :absoluteMin => 0,
+        :max => 250
+      }) %>
 
-    <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'height_for_age'}) %>
-    <%= hidden_field_tag("observations[][concept_name]", "HT FOR AGE") %>
-    <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+    <%= text_field_tag("observations[][value_numeric]", nil,options) %>
+    <%= hidden_field_tag("observations[][concept_name]",  "SYSTOLIC BLOOD PRESSURE", {:id => 'systolic_blood_pressure_concept_name'}) %>
+    <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
+    <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
+
+    <% options = default.merge({
+        :id => "diastolic_blood_pressure",
+        :helptext => "Diastolic Blood Pressure",
+        :field_type => "number",
+        :tt_pageStyleClass => "NumbersWithUnknown",
+        :tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100);",
+        :tt_onUnLoad => "clearTimeout(timedEvent);",
+        :absoluteMin => 0,
+        :max => 180,
+        :condition => "__$('systolic_blood_pressure').value.toLowerCase() != 'unknown'"
+      }) %>
+
+    <%= text_field_tag("observations[][value_numeric]", nil,options) %>
+    <%= hidden_field_tag("observations[][concept_name]",  "DIASTOLIC BLOOD PRESSURE", {:id => 'diastolic_blood_pressure_concept_name'}) %>
+    <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
+    <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
+
+  <% end %>
+
+  <% if params[:height] && params[:weight] %>
+    <% if @anc_patient.age > 14 %>
+
+      <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'bmi'}) %>
+      <%= hidden_field_tag("observations[][concept_name]", "BODY MASS INDEX, MEASURED") %>
+      <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+      <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+
+    <% else %>
+
+      <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'weight_for_height'}) %>
+      <%= hidden_field_tag("observations[][concept_name]", "WT FOR HT") %>
+      <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+      <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+
+      <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'weight_for_age'}) %>
+      <%= hidden_field_tag("observations[][concept_name]", "WT FOR AGE") %>
+      <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+      <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+
+      <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'height_for_age'}) %>
+      <%= hidden_field_tag("observations[][concept_name]", "HT FOR AGE") %>
+      <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+      <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+
+    <% end %>
 
   <% end %>
 
