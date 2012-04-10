@@ -12,7 +12,7 @@ class Task < ActiveRecord::Base
     active_encounters = patient.encounters
     
     all_tasks.each do |task|
-      next if todays_encounters.map{ | e | e.name }.include?(task.encounter_type)
+      # next if todays_encounters.map{ | e | e.name }.include?(task.encounter_type)
       # Is the task for this location?
       next unless task.location.blank? || task.location == '*' || location.name.match(/#{task.location}/)
 
@@ -30,8 +30,11 @@ class Task < ActiveRecord::Base
       # For example, if this task is the art_clinician task we want to skip it unless REFER TO CLINICIAN = yes
       if task.has_obs_concept_id.present?
         if (task.has_obs_scope.blank? || task.has_obs_scope == 'TODAY')
+
+=begin          
           obs = Observation.first(:conditions => [
-              'encounter_id IN (?) AND concept_id = ? AND (value_coded = ? OR value_drug = ? OR value_datetime = ? OR value_numeric = ? OR value_text = ?)',
+              "encounter_id IN (?) AND concept_id = '?' AND (value_coded = '?' OR value_drug = '?' " + 
+                "OR value_datetime = '?' OR value_numeric = '?' OR value_text = '?')",
               todays_encounters.map(&:encounter_id),
               task.has_obs_concept_id,
               task.has_obs_value_coded,
@@ -39,6 +42,12 @@ class Task < ActiveRecord::Base
               task.has_obs_value_datetime,
               task.has_obs_value_numeric,
               task.has_obs_value_text])
+=end
+          obs = Observation.first(:conditions => [
+              "encounter_id IN (?) AND concept_id = '?'",
+              todays_encounters.map(&:encounter_id),
+              task.has_obs_concept_id])
+          
         end
         
         # Only the most recent obs
@@ -54,6 +63,8 @@ class Task < ActiveRecord::Base
         end
           
         skip = true if obs.present?
+      else
+        next if todays_encounters.map{ | e | e.name }.include?(task.encounter_type)
       end
 
       if task.has_obs_value_drug && task.has_obs_scope == 'TODAY'

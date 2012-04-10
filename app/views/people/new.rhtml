@@ -163,7 +163,9 @@
   
   <%= text_field_tag "person[names][family_name]", params[:family_name], {:id => 'family_name', :field_type => 'alpha', :helpText => 'Last name', :ajaxURL => '/person_names/family_names?search_string=', :allowFreeText => true, :condition => '$("family_name").value == "" || skipped[tstCurrentPage] == 1', :tt_onLoad => 'seen(tstCurrentPage);' } %>
 
-  Gender: <%= f.select :gender, {"" => "", "Male" => "M", "Female" => "F"}, {:selected => params[:gender]}, {:id => 'gender', :helpText => 'Gender', :condition => '$("gender").value == "" || skipped[tstCurrentPage] == 1', :tt_onLoad => 'seen(tstCurrentPage);' } %>
+  Gender: <%= f.select :gender, options_for_select([["", ""], ["Male", "M"], ["Female", "F"]], "F"), 
+  {:selected => params[:gender]}, {:id => 'gender', :helpText => 'Gender', 
+  :condition => 'false/*$("gender").value == "" || skipped[tstCurrentPage] == 1*/', :tt_onLoad => 'seen(tstCurrentPage);' }  %>
 
   <%= text_field_tag "person[names][middle_name]", params[:middle_name],
   	 {:id => 'middle_name',
@@ -174,7 +176,7 @@
   	 	:condition => '$("middle_name").value == "" || skipped[tstCurrentPage] == 1',
   	 	:tt_pageStyleClass => "azButton",
   	 	:tt_onLoad => 'seen(tstCurrentPage);' } if ask_middle_name %>
-
+  
   <%= text_field_tag "person[birth_year]", nil, {:helpText => 'Year of Birth', :field_type => 'number', :absoluteMin => "1890", :min => "1940", :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly", :tt_onLoad => 'seen(tstCurrentPage);',:validationJS => "setDOB();" }  %>
 
   <%= select_tag "person[birth_month]", month_name_options, {:helpText => 'Month of Birth', :condition => '$("person_birth_year").value.toLowerCase() != "unknown"',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date'}%>

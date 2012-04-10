@@ -5,12 +5,12 @@ class PatientsController < ApplicationController
     @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
 
     @encounters = @patient.encounters.active.find(:all) # , :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
-        # @current_range[0]["START"], @current_range[0]["END"]]) rescue []
+    # @current_range[0]["START"], @current_range[0]["END"]]) rescue []
     
     @all_encounters = @patient.encounters.active.find(:all) rescue []
     
     @encounter_names = @patient.encounters.active.find(:all)   #, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
-        # @current_range[0]["START"], @current_range[0]["END"]]).map{|encounter| encounter.name}.uniq rescue []
+    # @current_range[0]["START"], @current_range[0]["END"]]).map{|encounter| encounter.name}.uniq rescue []
 
     @names = @encounters.collect{|e|
       e.name.upcase
@@ -1056,8 +1056,41 @@ class PatientsController < ApplicationController
   end
 
   def print_visit_label
-    print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
-      next_task(@patient))  
+    patient = ANCService::ANC.new(@patient)
+    
+    if params[:cango2art] && patient.hiv_status.upcase == "POSITIVE"
+      art_link = GlobalProperty.find_by_property("art_link").property_value rescue nil
+      anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+      
+      if !art_link.nil? && !anc_link.nil?
+        if !session[:token]
+          response = RestClient.post("http://#{art_link}/single_sign_on/get_token", 
+            {"login"=>session[:username], "password"=>session[:password]}) rescue nil
+          
+          if !response.nil?
+            response = JSON.parse(response)
+            
+            session[:token] = response["auth_token"]
+          else 
+            print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
+              next_task(@patient))
+          end
+        end
+                
+        session.delete :datetime
+        
+        print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
+          "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
+            "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
+            "/encounters/new/art_initial?patient_id=#{@patient.id}&current_location=#{session[:location_id]}")  
+      else
+        print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
+          next_task(@patient))  
+      end
+    else
+      print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
+        next_task(@patient))  
+    end
   end
 
   def current_visit_label
@@ -1067,8 +1100,8 @@ class PatientsController < ApplicationController
   end
 
   def print_exam_label
-    print_and_redirect("/patients/exam_label/?patient_id=#{@patient.id}", 
-      "/patients/print_visit_label/?patient_id=#{@patient.id}")  
+    print_and_redirect("/patients/exam_label/?patient_id=#{@patient.id}" + (params[:cango2art] ? "&cango2art=1" : ""), 
+      "/patients/print_visit_label/?patient_id=#{@patient.id}" + (params[:cango2art] ? "&cango2art=1" : ""))  
   end
 
   def exam_label

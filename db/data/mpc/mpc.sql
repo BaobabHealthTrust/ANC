@@ -18,6 +18,8 @@ INSERT INTO `global_property` (property, property_value, description, uuid) VALU
 "localhost:3000", "Link to ART system from ANC system", (SELECT UUID()));
 INSERT INTO `global_property` (property, property_value, description, uuid) VALUES ("clinic_days", 
 "Monday,Thursday", "Clinic days", (SELECT UUID()));
+INSERT INTO `global_property` (property, property_value, description, uuid) VALUES ("anc_link", 
+"localhost:3005", "Link to ART system from ANC system", (SELECT UUID()));
 
 
 

@@ -51,7 +51,7 @@ class PeopleController < ApplicationController
       :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
   end
  
-  def create
+  def create    
     Person.session_datetime = session[:datetime].to_date rescue Date.today
     person = create_from_form(params)
     

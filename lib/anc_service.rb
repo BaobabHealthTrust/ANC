@@ -1357,6 +1357,18 @@ module ANCService
       }.uniq.delete_if{|x| x == []}.flatten.max
     end
     
+    def hiv_status
+      self.patient.encounters.last(:joins => [:observations], :conditions => 
+          ["encounter_type = ? AND obs.concept_id = ? AND ((obs.value_coded IN (?)" + 
+            " OR obs.value_text = 'POSITIVE') OR (obs.value_coded IN (?) OR obs.value_text = 'NEGATIVE'))", 
+          EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("HIV status").concept_id, 
+          ConceptName.find(:all, :conditions => ["name = 'POSITIVE'"]).collect{|c| c.concept_id}, 
+          ConceptName.find(:all, :conditions => ["name = 'NEGATIVE'"]).collect{|c| 
+            c.concept_id}]).observations.collect{|o| o.answer_string if o.answer_string.titleize == "Positive" || 
+          o.answer_string.titleize == "Negative"}.compact.last rescue "Unknown"
+
+    end
+    
   end
   
 end

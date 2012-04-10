@@ -1786,7 +1786,7 @@ function getDatePart(aElementName) {
 
 function gotoNextPage() {
     if(__$("category")){
-        __$("content").removeChild(__$("category"));
+        document.body.removeChild(__$("category"));
     }
     gotoPage(tstCurrentPage+1, true);
 }
@@ -3976,8 +3976,8 @@ function showCategory(category){
     var cat = document.createElement("div");
     cat.id = "category";
     cat.style.position = "absolute";
-    cat.style.left = (pos[3] + (pos[0] - 672)) + "px";
-    cat.style.top = (pos[2] - 10) + "px";
+    cat.style.left = (pos[3] + (pos[0] - 378)) + "px";
+    cat.style.top = (pos[2] + 5) + "px";
     cat.style.width = "350px";
     cat.style.height = "45px";
     cat.style.fontSize = "36px";
@@ -3989,5 +3989,5 @@ function showCategory(category){
     cat.style.textAlign = "center";
     cat.innerHTML = category;
     
-    __$("content").appendChild(cat);
+    document.body.appendChild(cat);
 }  

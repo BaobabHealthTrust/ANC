@@ -317,4 +317,7 @@ module ApplicationHelper
     end                                                                         
   end
 
+  def ask_gender
+    GlobalProperty.find_by_property("ask_gender").property_value rescue false
+  end
 end

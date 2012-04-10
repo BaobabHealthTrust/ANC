@@ -9,7 +9,11 @@ class SessionsController < ApplicationController
     logout_keeping_session!
     user = User.authenticate(params[:login], params[:password])
     if user
-      self.current_user = user      
+      self.current_user = user 
+      
+      session[:username] = params[:login]
+      session[:password] = params[:password]
+      
       redirect_to '/location'
     else
       note_failed_signin
