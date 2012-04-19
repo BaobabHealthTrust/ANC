@@ -157,7 +157,7 @@ protected
     subject = "Number of unique #{self.current_location} patients for today: = #{number_of_uniq_patients_with_encounters}"
     message = ""
 
-    Encounter.count_by_type_for_date(Date.today).sort{|a,b| a[0] <=> b[0]}.each{|name,total|
+    PatientService.count_by_type_for_date(Date.today).sort{|a,b| a[0] <=> b[0]}.each{|name,total|
       message += "#{name}: #{total}\n"
     }
 

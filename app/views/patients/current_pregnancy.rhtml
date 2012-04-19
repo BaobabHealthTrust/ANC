@@ -134,7 +134,7 @@
   <%= hidden_field_tag "encounter[encounter_type_name]", "CURRENT PREGNANCY" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
   <%session_date = session[:datetime] || Time.now() %>
 
   <% if !@patient.patient_programs.current.local.map(&:program).map(&:name).include?('ANC PROGRAM') %>
@@ -191,7 +191,7 @@
     {:id => "bed_net",
     :helptext => "Bed Net Given?" } %>
 
-  <%= touch_date_tag "Date", @patient, nil,
+  <%= touch_date_tag "Date received", @patient, nil,
     {:id => "bed_date",
     :helptext => "Date Bet Net Given",
     :condition => "__$('bed_net').value == 'Yes'"

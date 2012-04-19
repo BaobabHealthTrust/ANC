@@ -34,27 +34,56 @@
           <div value="No">On CPT?</div>
         </div-->
         <select id="links">
-          <option value='/patients/patient_history/?patient_id=<%= @patient.id  %>'>Patient History</option>
+          <% if current_user.activities.include?("Obstetric History") ||  
+              current_user.activities.include?("Medical History") ||
+              current_user.activities.include?("Surgical History") ||
+              current_user.activities.include?("Social History") %>
+            <option value='/patients/patient_history/?patient_id=<%= @patient.id  %>'>Patient History</option>
+          <% end %>
 
-          <option value='/patients/<%= (@current_encounter_names.include?("ANC VISIT TYPE") ? 
-              "current_visit" : "visit_type") %>/?patient_id=<%= @patient.id  %>'>Current Visit</option>
-          <option value='/patients/demographics?patient_id=<%= @patient.id %>'>Full Demographics</option>
+          <% if current_user.activities.include?("ANC Visit Type") %>
+            <option value='/patients/<%= (!@current_encounter_names.include?("ANC VISIT TYPE") ? 
+                        "visit_type" : "current_visit") %>/?patient_id=<%= @patient.id  %>'>Current Visit</option>
+                  <% end %>
+
+          <% if current_user.activities.include?("Registration") %>
+            <option value='/patients/demographics?patient_id=<%= @patient.id %>'>Full Demographics</option>
+          <% end %>
         </select>
         <select id="tabs">
           <option value='/patients/tab_visit_summary?patient_id=<%= @patient.id  %>'>Visit Summary</option>
-          <option value='/patients/tab_obstetric_history?patient_id=<%= @patient.id  %>'
-                  <%= (@obstretrics_alert ? " alertTab='true'" : (@obstetrics_selected ? " selectedTab='true'" : "")) %> >
-            Obstetric History</option>
-          <option value='/patients/tab_medical_history?patient_id=<%= @patient.id  %>'
-                  <%= (@medics_alert ? " alertTab='true'" : (@medics_selected ? " selectedTab='true'" : "")) %> >
-            Medical History</option>
-          <option value='/patients/tab_social_history?patient_id=<%= @patient.id  %>'
-                  <%= (@social_alert ? " alertTab='true'" : (@social_selected ? " selectedTab='true'" : "")) %> >
-            Social History</option>
-          <option value='/patients/tab_lab_results?patient_id=<%= @patient.id  %>'
-                  <%= (@labs_alert == true ? " alertTab='true'" : (@labs_selected == true ? " selectedTab='true'" : "")) %> >Lab Results</option>
-          <option value='/patients/tab_detailed_obstetric_history?patient_id=<%= @patient.id  %>'>Detailed Obstetric History</option>
-          <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>Current Pregnancy</option>
+
+          <% if current_user.activities.include?("Obstetric History") %>
+            <option value='/patients/tab_obstetric_history?patient_id=<%= @patient.id  %>'
+                    <%= (@obstretrics_alert ? " alertTab='true'" : (@obstetrics_selected ? " selectedTab='true'" : "")) %> >
+              Obstetric History</option>
+          <% end %>
+
+          <% if current_user.activities.include?("Medical History") %>
+            <option value='/patients/tab_medical_history?patient_id=<%= @patient.id  %>'
+                    <%= (@medics_alert ? " alertTab='true'" : (@medics_selected ? " selectedTab='true'" : "")) %> >
+              Medical History</option>
+          <% end %>
+
+          <% if current_user.activities.include?("Social History") %>
+            <option value='/patients/tab_social_history?patient_id=<%= @patient.id  %>'
+                    <%= (@social_alert ? " alertTab='true'" : (@social_selected ? " selectedTab='true'" : "")) %> >
+              Social History</option>
+          <% end %>
+
+          <% if current_user.activities.include?("Lab Results") %>
+            <option value='/patients/tab_lab_results?patient_id=<%= @patient.id  %>'
+                    <%= (@labs_alert == true ? " alertTab='true'" : (@labs_selected == true ? " selectedTab='true'" : "")) %> >Lab Results</option>
+                  <% end %>
+
+          <% if current_user.activities.include?("Obstetric History") %>
+            <option value='/patients/tab_detailed_obstetric_history?patient_id=<%= @patient.id  %>'>Detailed Obstetric History</option>
+          <% end %>
+
+          <% if current_user.activities.include?("Current Pregnancy") %>
+            <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>Current Pregnancy</option>
+          <% end %>
+            
         </select>
         <select id="navigation_links">
           <option link="/encounter_types?patient_id=<%= @patient.id  %>" ttSize = "160px">Tasks</option>

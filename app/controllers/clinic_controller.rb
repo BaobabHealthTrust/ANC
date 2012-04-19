@@ -1,4 +1,4 @@
-class ClinicController < ApplicationController
+class ClinicController < GenericClinicController
   def index    
     @facility = Location.current_health_center.name rescue ''
 
@@ -6,12 +6,10 @@ class ClinicController < ApplicationController
 
     @date = (session[:datetime].to_date rescue Date.today).strftime("%Y-%m-%d")
 
-    @user = User.find(session[:user_id]) rescue nil
+    @user = User.find(current_user.user_id) rescue nil
 
-    @roles = User.find(session[:user_id]).user_roles.collect{|r| r.role} rescue []
+    @roles = User.find(current_user.user_id).user_roles.collect{|r| r.role} rescue []
 
-    # raise session.to_yaml
-    
     render :layout => 'dynamic-dashboard'
   end
 
@@ -55,7 +53,7 @@ class ClinicController < ApplicationController
     @types = GlobalProperty.find_by_property("statistics.show_encounter_types").property_value rescue EncounterType.all.map(&:name).join(",")
     @types = @types.split(/,/)
     @me = Encounter.statistics(@types, :conditions => ["DATE(encounter_datetime) = ? AND encounter.creator = ?", 
-        (session[:datetime] ? session[:datetime].to_date : Date.today), User.current_user.user_id]) 
+        (session[:datetime] ? session[:datetime].to_date : Date.today), current_user.user_id]) 
     @today = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = ?', 
         (session[:datetime] ? session[:datetime].to_date : Date.today)]) 
     @year = Encounter.statistics(@types, :conditions => ['YEAR(encounter_datetime) = ?', 
@@ -65,4 +63,8 @@ class ClinicController < ApplicationController
     render :layout => false
   end
 
+  def user_activities
+    render :layout => false
+  end
+  
 end

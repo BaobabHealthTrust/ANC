@@ -278,7 +278,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   <%= hidden_field_tag "encounter[encounter_type_name]", "APPOINTMENT" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>  
+  <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>  
 
   <label for='time_until_next_visit'>Time Until Next Appointment</label>
   
@@ -308,6 +308,9 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     { :helpText => "Next Appointment",
       :field_type => 'calendar',
       :id => 'next_appointment_date',
+      :startweekdate => "#{@pregnancystart.strftime("%Y-%m-%d")}",
+      :endweekdate => "#{(@pregnancystart + 9.month).strftime("%Y-%m-%d")}",
+      :tt_onLoad => "showCategory('Next Appointment'); __$('category').style.opacity = 0.75;",
       :maxDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
       :tt_onUnLoad => "hideInfo();"}) %>
 

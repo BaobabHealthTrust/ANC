@@ -8,32 +8,35 @@
     <option value="/clinic/overview">
       Overview
     </option>
-    <option value="/clinic/reports">
-      Reports
-    </option>
+    <% if current_user.activities.include?("View Reports") %>
+      <option value="/clinic/reports">
+        Reports
+      </option>
+    <% end %>
 
-    <% if @user.admin? %>
-      <option value="/clinic/administration">
+    <% if current_user.admin? && current_user.activities.include?("Manage Users") %>
+      <option value="/clinic/users_tab">
         Administration
       </option>
     <% end %>
-      
+
+      <option value="/clinic/user_activities/?user_id=<%= current_user.user_id %>" >My Preferences</option>
   </select>
 
   <div id="facility"><%= @facility rescue "" %></div>
   <div id="location"><%= @location rescue "" %></div>
 
   <div id="date"><%= @date rescue "" %></div>
-  <div id="user"><%= @user.name rescue "" %></div>
+  <div id="user"><%= @user.name  rescue "" %></div>
 
   <select id="links">
     <option value='/logout' link='/logout'>Logout</option>
     <option value='/people/search' link='/people/search' ttSize="290px">Find / Register Patient</option>
     <option value='<%= ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d") != 
-                      Date.today.strftime("%Y-%m-%d")) ?
-                          "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="100px">
-                <%= ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d") != 
-                      Date.today.strftime("%Y-%m-%d")) ? "Reset Date" : "Set Date") %></option>
+          Date.today.strftime("%Y-%m-%d")) ?
+                "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="100px">
+              <%= ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d") != 
+            Date.today.strftime("%Y-%m-%d")) ? "Reset Date" : "Set Date") %></option>
   </select>
 
 </div>

@@ -1,11 +1,15 @@
-
 var selecteddays = {};            
             
 var active_cell = null;
 var selected_color = "#9e9";
 var default_color = "#fff";
+var default_weekend_color = "#fff";
+var initial_selected_color = "#ccc";
 var selected_date = null;
 var targetControl = null;
+var initial_date = null;
+var start_week_date = null;
+var end_week_date = null;
             
 var monthNames = ["January", "February", "March", "April", "May", "June", 
 "July", "August", "September", "October", "November", "December"];
@@ -67,7 +71,7 @@ function addMonth(){
     current_month = monthNames[pos];
                 
     createMonth(current_year + "-" + padZeros((pos + 1), 2) + 
-        "-" + padZeros(selected_date.getDate(), 2), selecteddays);
+        "-" + padZeros(selected_date.getDate(), 2), selecteddays, initial_date, start_week_date, end_week_date);
 }
             
 function subtractMonth(){                
@@ -83,32 +87,44 @@ function subtractMonth(){
     current_month = monthNames[pos];
                 
     createMonth(current_year + "-" + padZeros((pos + 1), 2) + 
-        "-" + padZeros(selected_date.getDate(), 2), selecteddays);
+        "-" + padZeros(selected_date.getDate(), 2), selecteddays, initial_date, start_week_date, end_week_date);
 }
             
 function addYear(){
     current_year++;
     createMonth(current_year + "-" + padZeros((selected_date.getMonth() + 1), 2) + 
-        "-" + padZeros(selected_date.getDate(), 2), selecteddays);                
+        "-" + padZeros(selected_date.getDate(), 2), selecteddays, initial_date, start_week_date, end_week_date);                
 }
             
 function subtractYear(){
     current_year--;
     createMonth(current_year + "-" + padZeros((selected_date.getMonth() + 1), 2) + 
-        "-" + padZeros(selected_date.getDate(), 2), selecteddays);
+        "-" + padZeros(selected_date.getDate(), 2), selecteddays, initial_date, start_week_date, end_week_date);
 }
             
-function createMonth(date, selected){
+function createMonth(date, selected, initialdate, startweekdate, endweekdate){
     __$("chart").innerHTML = "";
+                
+    if(typeof(initialdate) != "undefined"){                    
+        initial_date = initialdate;
+    }
+                   
+    if(typeof(startweekdate) != "undefined"){                    
+        start_week_date = startweekdate;
+    }
+                   
+    if(typeof(endweekdate) != "undefined"){                    
+        end_week_date = endweekdate;
+    }
                 
     if(typeof(date) != "undefined" && date != null){
         selected_date = new Date(date);
         current_year = selected_date.getFullYear();
-        current_month = monthNames[selected_date.getMonth()];
+        current_month = monthNames[selected_date.getMonth()];        
     } else {
         current_year = (new Date()).getFullYear();
         current_month = monthNames[(new Date()).getMonth()];
-    }
+    }            
       
     if(typeof(selected) == "undefined"){
         selected = {};
@@ -122,397 +138,174 @@ function createMonth(date, selected){
     var first_day = new Date(current_year, months[current_month][0], 1);
     var today = new Date();
                 
-    var names = ["S", "M", "T", "W", "T", "F", "S"];
-    var days = {
-        0:[0,7,14,21,28,35], 
-        1:[1,8,15,22,29,36], 
-        2:[2,9,16,23,30,37], 
-        3:[3,10,17,24,31,38], 
-        4:[4,11,18,25,32,39], 
-        5:[5,12,19,26,33,40], 
-        6:[6,13,20,27,34,41]
-    };
-                
+    var names = ["Week", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];    
+     
     var carry_over_day = new Date(first_day.getFullYear(), first_day.getMonth(), first_day.getDate());    
                 
     if(carry_over_day.getDay() > 0){
         carry_over_day.setDate(carry_over_day.getDate() - first_day.getDay());
     }
-                
-    for(var day in days){
-        var row = document.createElement("div");
-        row.className = "cRow";
-                    
+      
+    var row = document.createElement("div");
+    row.className = "cRow";
+    
+    for(var day = 0; day < 8; day++){                    
         __$("chart").appendChild(row);
                     
         var dayCell = document.createElement("div");
-        dayCell.className = "cCell" + (day == 0 || day == 6 ? " weekEnd" : " weekDay");
+        dayCell.className = "cCell" + (day == 1 || day == 7 ? " weekEnd" : " weekDay");
         dayCell.innerHTML = names[day];
+        
+        if(day == 0){
+            dayCell.style.textAlign = "center";
+        }
                     
         row.appendChild(dayCell);
-                    
+    }
+         
+    var rowcoll = [];
+    for(var i = 0; i < 7; i++){
+        rowcoll[i] = document.createElement("div");        
+        rowcoll[i].className = "cRow";
+        
+        __$("chart").appendChild(rowcoll[i]);               
+    }
+              
+    for(var week = 0; week < 7; week++){
         var current_day = new Date(carry_over_day.getFullYear(), carry_over_day.getMonth(), carry_over_day.getDate());
+               
+        for(var day = 0; day < 7; day++){
+            
+            if(day == 0){
+                var dayCell = document.createElement("div");
+                dayCell.id = "week" + week;
+                dayCell.className = "cCell day";
+                dayCell.style.backgroundColor = "#ddd";
+                dayCell.style.textAlign = "center";
+                dayCell.style.verticalAlign = "middle";
+                dayCell.style.fontSize = "30px";
+                dayCell.style.padding = "0px";
+            
+                rowcoll[week].appendChild(dayCell);
+                
+                var startdate;
+                var enddate;
+                
+                if(typeof(start_week_date) != "undefined" && start_week_date != null){
+                    if((start_week_date + "").match(/\d{4}\-\d{2}\-\d{2}/)){                    
+                        startdate = new Date(start_week_date);
+                    }                     
+                } else {
+                    startdate = new Date(current_day.getFullYear(), 0, 1);
+                }
+                
+                if(typeof(end_week_date) != "undefined" && end_week_date != null){
+                    if(end_week_date.match(/\d{4}\-\d{2}\-\d{2}/)){                    
+                        enddate = new Date(end_week_date);
+                    }                    
+                } else {
+                    enddate = new Date(current_day.getFullYear(), 11, 31);
+                }
+                
+                var millisecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
+                
+                var period = Math.floor(((current_day.getTime() - startdate.getTime()) / millisecondsPerWeek)) + 1;
+                
+                var durationend = Math.abs(((enddate.getTime() - startdate.getTime()) / millisecondsPerWeek)) + 1;
                     
-        for(var d = 0; d < days[day].length; d++){
+                dayCell.innerHTML = (period < durationend && period > 0 ? period : "&nbsp;");
+            }            
+            
             var dayCell = document.createElement("div");
-            dayCell.id = days[day][d];
-            0
+            dayCell.id = week + "-" + day;
+            
+            rowcoll[week].appendChild(dayCell);
+            
             var found = false;
             if(selected_date != null){
                 if((current_day.getFullYear() == selected_date.getFullYear() && 
                     current_day.getMonth() == selected_date.getMonth() && 
                     current_day.getDate() == selected_date.getDate())) {
                                 
-                    active_cell = days[day][d]; 
+                    active_cell = week + "-" + day; 
                     found = true;
                 }
             }
                         
             var checkDay = current_day.getDay();
-                        
-            switch(checkDay){
-                case 0:
-                    if(days[day][d] == 0 || days[day][d] == 7 || days[day][d] == 14 || 
-                        days[day][d] == 21 || days[day][d] == 28 || days[day][d] == 35){
-                                    
-                        if(current_day.getMonth() == first_day.getMonth()){
-                            dayCell.innerHTML = current_day.getDate();
-                                        
-                            dayCell.setAttribute("value", current_day.getDate());
-                                        
-                            dayCell.className = "cCell day weekEndDay" + 
-                            ((current_day.getFullYear() == today.getFullYear() && 
-                                current_day.getMonth() == today.getMonth() && 
-                                current_day.getDate() == today.getDate()) ? " today" : "");
-                        } else {
-                            dayCell.innerHTML = "&nbsp;";
-                            dayCell.className = "cCell day cellInactive";
-                        }
-                                    
-                        if(checkDay == 0){
-                            current_day.setDate(current_day.getDate() + 7);
-                        }                                    
-                    } else {
-                        dayCell.innerHTML = "&nbsp;";
-                    }                                
-                    break;
-                case 1:
-                    if(days[day][d] == 1 || days[day][d] == 8 || days[day][d] == 15 || 
-                        days[day][d] == 22 || days[day][d] == 29 || days[day][d] == 36){
-                                    
-                        if(current_day.getMonth() == first_day.getMonth()){
-                            dayCell.innerHTML = current_day.getDate();
-                                        
-                            if(selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)]){
+                
+            if(checkDay == day){                
+                dayCell.innerHTML = current_day.getDate();
+                
+                if(current_day.getMonth() == first_day.getMonth()){
+                               
+                    if(selected[current_day.getFullYear() + "-" + 
+                        padZeros((current_day.getMonth() + 1),2) + "-" + 
+                        padZeros(current_day.getDate(),2)]){
                                       
-                                var count = document.createElement("div");
-                                count.className = "dayCount";
-                                count.innerHTML = selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)];
+                        var count = document.createElement("div");
+                        count.className = "dayCount";
+                        count.innerHTML = selected[current_day.getFullYear() + "-" + 
+                        padZeros((current_day.getMonth() + 1),2) + "-" + 
+                        padZeros(current_day.getDate(),2)];
                         
-                                dayCell.appendChild(count);
-                            }
+                        dayCell.appendChild(count);
+                    }
                              
-                            dayCell.setAttribute("value", current_day.getDate());
+                    dayCell.setAttribute("value", current_day.getDate());
+                            
+                    dayCell.setAttribute("daytype", "weekday");
                                         
-                            dayCell.className = "cCell day cellActive" + 
-                            ((current_day.getFullYear() == today.getFullYear() && 
-                                current_day.getMonth() == today.getMonth() && 
-                                current_day.getDate() == today.getDate()) ? " today" : "");
-                                        
-                            dayCell.onclick = function(){
-                                if(active_cell != null){
-                                    __$(active_cell).style.backgroundColor = default_color;
-                                    __$(active_cell).style.color = "#000";
-                                }
-                                            
-                                active_cell = this.id;
-                                __$(active_cell).style.backgroundColor = selected_color;
-                                __$(active_cell).style.color = "#fff";
-                                            
-                                targetControl.value = current_year + "-" + 
-                                    padZeros((months[current_month][0] + 1), 2) + "-" + 
-                                    padZeros(this.getAttribute("value"), 2);
-                                
-                                selected_date = new Date(current_year, months[current_month][0], this.getAttribute("value"));
-                            }
-                        } else {
-                            dayCell.innerHTML = "&nbsp;";
-                            dayCell.className = "cCell day cellInactive";
-                        }
-                                    
-                        if(checkDay == 1){
-                            current_day.setDate(current_day.getDate() + 7);
-                        }                                    
-                    } else {
-                        dayCell.innerHTML = "&nbsp;";
-                    }
-                                
-                    break;
-                case 2:
-                    if(days[day][d] == 2 || days[day][d] == 9 || days[day][d] == 16 || 
-                        days[day][d] == 23 || days[day][d] == 30 || days[day][d] == 37){
-                                    
-                        if(current_day.getMonth() == first_day.getMonth()){
-                            dayCell.innerHTML = current_day.getDate();
-                                        
-                            if(selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)]){
-                                      
-                                var count = document.createElement("div");
-                                count.className = "dayCount";
-                                count.innerHTML = selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)];
-                        
-                                dayCell.appendChild(count);
-                            }
-                             
-                            dayCell.setAttribute("value", current_day.getDate());
-                                        
-                            dayCell.className = "cCell day cellActive" + 
-                            ((current_day.getFullYear() == today.getFullYear() && 
-                                current_day.getMonth() == today.getMonth() && 
-                                current_day.getDate() == today.getDate()) ? " today" : "");
-                                        
-                            dayCell.onclick = function(){
-                                if(active_cell != null){
-                                    __$(active_cell).style.backgroundColor = default_color;
-                                    __$(active_cell).style.color = "#000";
-                                }
-                                            
-                                active_cell = this.id;
-                                __$(active_cell).style.backgroundColor = selected_color;
-                                __$(active_cell).style.color = "#fff";
-                                            
-                                targetControl.value = current_year + "-" + 
-                                    padZeros((months[current_month][0] + 1), 2) + "-" + 
-                                    padZeros(this.getAttribute("value"), 2);                                
-                                            
-                                selected_date = new Date(current_year, months[current_month][0], this.getAttribute("value"));
-                            }
-                        } else {
-                            dayCell.innerHTML = "&nbsp;";
-                            dayCell.className = "cCell day cellInactive";
-                        }
-                                    
-                        if(checkDay == 2){
-                            current_day.setDate(current_day.getDate() + 7);
-                        }                                    
-                    } else {
-                        dayCell.innerHTML = "&nbsp;";
-                    }
-                    break;
-                case 3:
-                    if(days[day][d] == 3 || days[day][d] == 10 || days[day][d] == 17 || 
-                        days[day][d] == 24 || days[day][d] == 31 || days[day][d] == 38){
-                                    
-                        if(current_day.getMonth() == first_day.getMonth()){
-                            dayCell.innerHTML = current_day.getDate();
-                                        
-                            if(selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)]){
-                                      
-                                var count = document.createElement("div");
-                                count.className = "dayCount";
-                                count.innerHTML = selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)];
-                        
-                                dayCell.appendChild(count);
-                            }
-                             
-                            dayCell.setAttribute("value", current_day.getDate());
-                                        
-                            dayCell.className = "cCell day cellActive" + 
-                            ((current_day.getFullYear() == today.getFullYear() && 
-                                current_day.getMonth() == today.getMonth() && 
-                                current_day.getDate() == today.getDate()) ? " today" : "");
-                                        
-                            dayCell.onclick = function(){
-                                if(active_cell != null){
-                                    __$(active_cell).style.backgroundColor = default_color;
-                                    __$(active_cell).style.color = "#000";
-                                }
-                                            
-                                active_cell = this.id;
-                                __$(active_cell).style.backgroundColor = selected_color;
-                                __$(active_cell).style.color = "#fff";
-                                            
-                                targetControl.value = current_year + "-" + 
-                                    padZeros((months[current_month][0] + 1), 2) + "-" + 
-                                    padZeros(this.getAttribute("value"), 2);  
-                                            
-                                selected_date = new Date(current_year, months[current_month][0], this.getAttribute("value"));
-                            }
-                        } else {
-                            dayCell.innerHTML = "&nbsp;";
-                            dayCell.className = "cCell day cellInactive";
-                        }
-                                    
-                        if(checkDay == 3){
-                            current_day.setDate(current_day.getDate() + 7);
-                        }                                    
-                    } else {
-                        dayCell.innerHTML = "&nbsp;";
-                    }
-                    break;
-                case 4:
-                    if(days[day][d] == 4 || days[day][d] == 11 || days[day][d] == 18 || 
-                        days[day][d] == 25 || days[day][d] == 32 || days[day][d] == 39){
-                                    
-                        if(current_day.getMonth() == first_day.getMonth()){
-                            dayCell.innerHTML = current_day.getDate();
-                                        
-                            if(selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)]){
-                                      
-                                var count = document.createElement("div");
-                                count.className = "dayCount";
-                                count.innerHTML = selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)];
-                        
-                                dayCell.appendChild(count);
-                            }
-                             
-                            dayCell.setAttribute("value", current_day.getDate());
-                                        
-                            dayCell.className = "cCell day cellActive" + 
-                            ((current_day.getFullYear() == today.getFullYear() && 
-                                current_day.getMonth() == today.getMonth() && 
-                                current_day.getDate() == today.getDate()) ? " today" : "");
-                                        
-                            dayCell.onclick = function(){
-                                if(active_cell != null){
-                                    __$(active_cell).style.backgroundColor = default_color;
-                                    __$(active_cell).style.color = "#000";
-                                }
-                                            
-                                active_cell = this.id;
-                                __$(active_cell).style.backgroundColor = selected_color;
-                                __$(active_cell).style.color = "#fff";
-                                            
-                                targetControl.value = current_year + "-" + 
-                                    padZeros((months[current_month][0] + 1), 2) + "-" + 
-                                    padZeros(this.getAttribute("value"), 2);  
-                                            
-                                selected_date = new Date(current_year, months[current_month][0], this.getAttribute("value"));
-                            }
-                        } else {
-                            dayCell.innerHTML = "&nbsp;";
-                            dayCell.className = "cCell day cellInactive";
-                        }
-                                                                        
-                        if(checkDay == 4){
-                            current_day.setDate(current_day.getDate() + 7);
-                        }
-                                    
-                    } else {
-                        dayCell.innerHTML = "&nbsp;";
-                    }
-                    break;
-                case 5:
-                    if(days[day][d] == 5 || days[day][d] == 12 || days[day][d] == 19 || 
-                        days[day][d] == 26 || days[day][d] == 33 || days[day][d] == 40){
-                                    
-                        if(current_day.getMonth() == first_day.getMonth()){
-                            dayCell.innerHTML = current_day.getDate();
-                                        
-                            if(selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)]){
-                                      
-                                var count = document.createElement("div");
-                                count.className = "dayCount";
-                                count.innerHTML = selected[current_day.getFullYear() + "-" + 
-                                padZeros((current_day.getMonth() + 1),2) + "-" + 
-                                padZeros(current_day.getDate(),2)];
-                        
-                                dayCell.appendChild(count);
-                            }
-                             
-                            dayCell.setAttribute("value", current_day.getDate());
-                                        
-                            dayCell.className = "cCell day cellActive" + 
-                            ((current_day.getFullYear() == today.getFullYear() && 
-                                current_day.getMonth() == today.getMonth() && 
-                                current_day.getDate() == today.getDate()) ? " today" : "");
-                                        
-                            dayCell.onclick = function(){
-                                if(active_cell != null){
-                                    __$(active_cell).style.backgroundColor = default_color;
-                                    __$(active_cell).style.color = "#000";
-                                }
-                                            
-                                active_cell = this.id;
-                                __$(active_cell).style.backgroundColor = selected_color;
-                                __$(active_cell).style.color = "#fff";
-                                            
-                                targetControl.value = current_year + "-" + 
-                                    padZeros((months[current_month][0] + 1), 2) + "-" + 
-                                    padZeros(this.getAttribute("value"), 2);  
-                                            
-                                selected_date = new Date(current_year, months[current_month][0], this.getAttribute("value"));
-                            }
-                        } else {
-                            dayCell.innerHTML = "&nbsp;";
-                            dayCell.className = "cCell day cellInactive";
-                        }
-                                                                
-                        if(checkDay == 5){
-                            current_day.setDate(current_day.getDate() + 7);
-                        }                            
-                    } else {
-                        dayCell.innerHTML = "&nbsp;";
-                    }
-                    break;
-                case 6:
-                    if(days[day][d] == 6 || days[day][d] == 13 || days[day][d] == 20 || 
-                        days[day][d] == 27 || days[day][d] == 34 || days[day][d] == 41){
-                                    
-                        if(current_day.getMonth() == first_day.getMonth()){
-                            dayCell.innerHTML = current_day.getDate();
-                                        
-                            dayCell.setAttribute("value", current_day.getDate());
-                                        
-                            dayCell.className = "cCell day weekEndDay" + 
-                            ((current_day.getFullYear() == today.getFullYear() && 
-                                current_day.getMonth() == today.getMonth() && 
-                                current_day.getDate() == today.getDate()) ? " today" : "");
-                        } else {
-                            dayCell.innerHTML = "&nbsp;";
-                            dayCell.className = "cCell day cellInactive";
-                        }
-                                    
-                        if(checkDay == 6){
-                            current_day.setDate(current_day.getDate() + 7);
-                        }
-                                    
-                    } else {
-                        dayCell.innerHTML = "&nbsp;";
-                    }
-                    break;
-            }
+                    dayCell.className = "cCell day cellActive" + 
+                    ((current_day.getFullYear() == today.getFullYear() && 
+                        current_day.getMonth() == today.getMonth() && 
+                        current_day.getDate() == today.getDate()) ? " today" : "");
                     
-            row.appendChild(dayCell);
+                    dayCell.onclick = function(){
+                        var celldate = current_day.getFullYear() + "-" + padZeros((current_day.getMonth()),2) + 
+                        "-" + padZeros(__$(active_cell).getAttribute("value"));
+                        
+                        if(celldate == date){
+                            __$(active_cell).style.backgroundColor = initial_selected_color;
+                        } else if(active_cell != null){
+                            if(__$(active_cell).getAttribute("daytype") == "weekend"){
+                                __$(active_cell).style.backgroundColor = default_weekend_color;
+                            } else {
+                                __$(active_cell).style.backgroundColor = default_color;
+                            }
+                        }
+                        __$(active_cell).style.color = "#000";
+                        __$(active_cell).style.fontWeight = "normal";
+                                            
+                        active_cell = this.id;
+                        __$(active_cell).style.backgroundColor = selected_color;
+                        __$(active_cell).style.color = "#000";
+                        __$(active_cell).style.fontWeight = "bold";
+                                            
+                        targetControl.value = current_year + "-" + 
+                        padZeros((months[current_month][0] + 1), 2) + "-" + 
+                        padZeros(this.getAttribute("value"), 2);
+                                
+                        selected_date = new Date(current_year, months[current_month][0], this.getAttribute("value"));
+                    }
+                } else {                                        
+                    dayCell.className = "cCell day cellInactive";
+                    dayCell.style.color = "#999";
+                }
+                
+                current_day.setDate(current_day.getDate() + 1);
+            }
             if(found){
                 __$(active_cell).click();
-            }
+            }                
         }
-                    
-        carry_over_day.setDate(carry_over_day.getDate() + 1);
-                
+        
+        carry_over_day = new Date(current_day.getFullYear(), current_day.getMonth(), current_day.getDate());
     }
+      
 }
                         
-function createCalendar(control, target, date, selected){
+function createCalendar(control, target, date, selected, startweekdate, endweekdate){
     if(__$(control) && __$(target)){
         
         targetControl = __$(target);
@@ -523,26 +316,17 @@ function createCalendar(control, target, date, selected){
     
         __$(control).appendChild(main);
         
-        var mainrow1 = document.createElement("div");
-        mainrow1.className = "cRow";
-        
-        main.appendChild(mainrow1);
-        
         var mainrow2 = document.createElement("div");
         mainrow2.className = "cRow";
         
         main.appendChild(mainrow2);
         
-        var mainrow1cell = document.createElement("div");
-        mainrow1cell.className = "cCell";
-        
-        mainrow1.appendChild(mainrow1cell);
-        
         var bannerTable = document.createElement("div");
         bannerTable.className = "cTable";
-        bannerTable.style.width = "100%";
-        
-        mainrow1cell.appendChild(bannerTable);
+        bannerTable.style.width = "95%";
+        bannerTable.style.border = "1px solid #fff";
+                
+        __$("keyboard").appendChild(bannerTable);
         
         var bannerrow = document.createElement("div");
         bannerrow.className = "cRow";
@@ -551,6 +335,7 @@ function createCalendar(control, target, date, selected){
         
         var bannerrowcell1 = document.createElement("div");
         bannerrowcell1.className = "cCell";
+        bannerrowcell1.style.border = "1px solid #fff";
         
         bannerrowcell1.innerHTML = "<button onclick='subtractMonth()' class='btn'>-</button>" + 
         "<span id='month'></span><button onclick='addMonth()' class='btn'>+</button>";
@@ -560,6 +345,7 @@ function createCalendar(control, target, date, selected){
         var bannerrowcell2 = document.createElement("div");
         bannerrowcell2.className = "cCell";
         bannerrowcell2.style.textAlign = "right";
+        bannerrowcell2.style.padding = "0px";
         
         bannerrowcell2.innerHTML = "<button onclick='subtractYear()' class='btn'>" +
         "-</button><span id='year'></span><button onclick='addYear()' class='btn'>+</button>";
@@ -573,6 +359,6 @@ function createCalendar(control, target, date, selected){
         
         mainrow2.appendChild(mainrow2cell);
         
-        createMonth(date, selected);
+        createMonth(date, selected, date, startweekdate, endweekdate);
     }
 }

@@ -123,7 +123,7 @@ module ANCService
     
       # active_years = {}
     
-      patient.encounters.active.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
+      patient.encounters.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
         if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]       
           pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}        
         
@@ -172,7 +172,7 @@ module ANCService
     
       Encounter.find(:all, :conditions => ["encounter_type = ? AND patient_id = ?", 
           EncounterType.find_by_name("OBSTETRIC HISTORY").id, @patient.id]).each{|e| 
-        e.observations.active.each{|obs|
+        e.observations.each{|obs|
           concept = obs.concept.name.name rescue nil
           if(!concept.nil?)
             if search_set.include?(concept.upcase)
@@ -554,89 +554,89 @@ module ANCService
     
       @deliveries = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          Encounter.find(:all).collect{|e| e.encounter_id},
           ConceptName.find_by_name('PARITY').concept_id]).answer_string.to_i rescue nil
 
       @deliveries = @deliveries + (@range.length > 0 ? @range.length - 1 : @range.length) if !@deliveries.nil?
     
       @gravida = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          Encounter.find(:all).collect{|e| e.encounter_id},
           ConceptName.find_by_name('GRAVIDA').concept_id]).answer_string.to_i rescue nil
 
       @multipreg = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.active.find(:all, :conditions => ["encounter_type = ?", 
+          Encounter.find(:all, :conditions => ["encounter_type = ?", 
               EncounterType.find_by_name("OBSTETRIC HISTORY").id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string rescue nil
 
       @abortions = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          Encounter.find(:all).collect{|e| e.encounter_id},
           ConceptName.find_by_name('NUMBER OF ABORTIONS').concept_id]).answer_string.to_i rescue nil
 
       @stillbirths = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          Encounter.find(:all).collect{|e| e.encounter_id},
           ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string rescue nil
 
       #Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", 40, Encounter.active.find(:all, :conditions => ["patient_id = ?", 40]).collect{|e| e.encounter_id}, ConceptName.find_by_name('Caesarean section').concept_id])
     
       @csections = Observation.find(:all,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
-          Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('Caesarean section').concept_id]).length rescue nil
 
       @vacuum = Observation.find(:all,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
-          Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('Vacuum extraction delivery').concept_id]).length rescue nil
 
       @symphosio = Observation.find(:last, 
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          Encounter.find(:all).collect{|e| e.encounter_id},
           ConceptName.find_by_name('SYMPHYSIOTOMY').concept_id]).answer_string rescue nil
 
       @haemorrhage = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          Encounter.find(:all).collect{|e| e.encounter_id},
           ConceptName.find_by_name('HEMORRHAGE').concept_id]).answer_string rescue nil
 
       @preeclampsia = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.active.find(:all).collect{|e| e.encounter_id},
+          Encounter.find(:all).collect{|e| e.encounter_id},
           ConceptName.find_by_name('PRE-ECLAMPSIA').concept_id]).answer_string rescue nil
 
       @asthma = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('ASTHMA').concept_id]).answer_string.upcase rescue nil
 
       @hyper = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('HYPERTENSION').concept_id]).answer_string.upcase rescue nil
 
       @diabetes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('DIABETES').concept_id]).answer_string.upcase rescue nil
 
       @epilepsy = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('EPILEPSY').concept_id]).answer_string.upcase rescue nil
 
       @renal = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('RENAL DISEASE').concept_id]).answer_string.upcase rescue nil
 
       @fistula = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('FISTULA REPAIR').concept_id]).answer_string.upcase rescue nil
 
       @deform = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('SPINE OR LEG DEFORM').concept_id]).answer_string.upcase rescue nil
 
       @surgicals = Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
               @patient.id, EncounterType.find_by_name("SURGICAL HISTORY").id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('PROCEDURE DONE').concept_id]).collect{|o| 
         "#{o.answer_string} (#{o.obs_datetime.strftime('%d-%b-%Y')})"} rescue []
@@ -727,7 +727,7 @@ module ANCService
       syphil = {}
       @patient.encounters.find(:all, :conditions => ["encounter_type IN (?)", 
           EncounterType.find_by_name("LAB RESULTS").id]).each{|e| 
-        e.observations.active.each{|o| 
+        e.observations.each{|o| 
           syphil[o.concept.name.name.upcase] = o.answer_string.upcase
         }      
       }
@@ -742,10 +742,10 @@ module ANCService
 
       hb = {}; pos = 1; 
     
-      @patient.encounters.active.find(:all, 
+      @patient.encounters.find(:all, 
         :order => "encounter_datetime DESC", :conditions => ["encounter_type = ?", 
           EncounterType.find_by_name("LAB RESULTS").id]).each{|e| 
-        e.observations.active.each{|o| hb[o.concept.name.name.upcase + " " + 
+        e.observations.each{|o| hb[o.concept.name.name.upcase + " " + 
               pos.to_s] = o.answer_string.upcase; pos += 1 if o.concept.name.name.upcase == "HB TEST RESULT DATE";
         }      
       }
@@ -765,12 +765,12 @@ module ANCService
       @height = self.current_height.to_i
 
       @multiple = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all, :conditions => ["encounter_type = ?", 
+          @patient.id, Encounter.find(:all, :conditions => ["encounter_type = ?", 
               EncounterType.find_by_name("CURRENT PREGNANCY").id]).collect{|e| e.encounter_id},
           ConceptName.find_by_name('Multiple Gestation').concept_id]).answer_string rescue nil
 
       @who = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.active.find(:all).collect{|e| e.encounter_id},
+          @patient.id, Encounter.find(:all).collect{|e| e.encounter_id},
           ConceptName.find_by_name('WHO STAGE').concept_id]).answer_string.to_i rescue nil
 
       label = ZebraPrinter::StandardLabel.new   
@@ -832,17 +832,17 @@ module ANCService
     
       encounters = {}
 
-      @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+      @patient.encounters.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
           @current_range[0]["START"], @current_range[0]["END"]]).collect{|e|    
         encounters[e.encounter_datetime.strftime("%d/%b/%Y")] = {"USER" => User.find(e.creator).name}      
       }
 
-      @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+      @patient.encounters.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
           @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
         encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = ({} rescue "") if !e.type.nil?
       }
 
-      @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+      @patient.encounters.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
           @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
         e.observations.each{|o| 
           if o.to_a[0]
@@ -864,7 +864,7 @@ module ANCService
       @other_drugs = {}; 
       main_drugs = ["TTV", "SP", "Fefol", "NVP", "Albendazole", "TDF/3TC/EFV"]
     
-      @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
+      @patient.encounters.find(:all, :order => "encounter_datetime DESC", 
         :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
           EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e| 
         @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
@@ -1023,17 +1023,17 @@ module ANCService
     
       encounters = {}
 
-      @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+      @patient.encounters.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
           @current_range[0]["START"], @current_range[0]["END"]]).collect{|e|    
         encounters[e.encounter_datetime.strftime("%d/%b/%Y")] = {"USER" => User.find(e.creator).name}      
       }
 
-      @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+      @patient.encounters.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
           @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
         encounters[e.encounter_datetime.strftime("%d/%b/%Y")][e.type.name.upcase] = ({} rescue "") if !e.type.nil?
       }
 
-      @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+      @patient.encounters.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
           @current_range[0]["START"], @current_range[0]["END"]]).collect{|e| 
         e.observations.each{|o| 
           if o.to_a[0]
@@ -1055,7 +1055,7 @@ module ANCService
       @other_drugs = {}; 
       main_drugs = ["TTV", "SP", "Fefol", "NVP", "Albendazole", "TDF/3TC/EFV"]
     
-      @patient.encounters.active.find(:all, :order => "encounter_datetime DESC", 
+      @patient.encounters.find(:all, :order => "encounter_datetime DESC", 
         :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
           EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e| 
         @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
@@ -1358,15 +1358,30 @@ module ANCService
     end
     
     def hiv_status
-      self.patient.encounters.last(:joins => [:observations], :conditions => 
+      stat = self.patient.encounters.last(:joins => [:observations], :conditions => 
           ["encounter_type = ? AND obs.concept_id = ? AND ((obs.value_coded IN (?)" + 
             " OR obs.value_text = 'POSITIVE') OR (obs.value_coded IN (?) OR obs.value_text = 'NEGATIVE'))", 
           EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("HIV status").concept_id, 
           ConceptName.find(:all, :conditions => ["name = 'POSITIVE'"]).collect{|c| c.concept_id}, 
           ConceptName.find(:all, :conditions => ["name = 'NEGATIVE'"]).collect{|c| 
-            c.concept_id}]).observations.collect{|o| o.answer_string if o.answer_string.titleize == "Positive" || 
-          o.answer_string.titleize == "Negative"}.compact.last rescue "Unknown"
+            c.concept_id}]).observations.collect{|o| o.answer_string.strip if o.answer_string.titleize.squish == "Positive" || 
+          o.answer_string.titleize.squish == "Negative"}.compact.last rescue nil
 
+      stat = "Unknown" if stat.nil?
+      
+      stat
+    end
+    
+    def hiv_status_duration(session_date = Date.today)
+      stat = (session_date.to_date - self.patient.encounters.last(:joins => [:observations], :conditions => 
+          ["encounter_type = ? AND obs.concept_id = ? AND ((obs.value_coded IN (?)" + 
+            " OR obs.value_text = 'POSITIVE') OR (obs.value_coded IN (?) OR obs.value_text = 'NEGATIVE'))", 
+          EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("HIV status").concept_id, 
+          ConceptName.find(:all, :conditions => ["name = 'POSITIVE'"]).collect{|c| c.concept_id}, 
+          ConceptName.find(:all, :conditions => ["name = 'NEGATIVE'"]).collect{|c| 
+            c.concept_id}]).observations.collect{|o| 
+        o.answer_string if o.concept.id == ConceptName.find_by_name("HIV test date").concept_id
+      }.compact.last.squish.to_date).to_i / 30.0 rescue 0
     end
     
   end

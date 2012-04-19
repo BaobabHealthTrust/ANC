@@ -9,14 +9,14 @@ class DrugOrder < ActiveRecord::Base
   end
   
   def to_s 
-    # return order.instructions unless order.instructions.blank? rescue nil
+    return order.instructions unless order.instructions.blank? rescue nil
     s = "#{drug.name}: #{self.dose} #{self.units} #{frequency} for #{duration||'some'} days"
     s << " (prn)" if prn == 1
     s
   end
   
   def to_short_s
-    # return order.instructions unless order.instructions.blank? rescue nil
+    return order.instructions unless order.instructions.blank? rescue nil
     s = "#{drug.name}: #{self.dose} #{self.units} #{frequency} for #{duration||'some'} days"
     s << " (prn)" if prn == 1
     s
@@ -46,26 +46,28 @@ class DrugOrder < ActiveRecord::Base
 
   # Eventually it would be good for this to not be hard coded, and the data available in the concept table
   def self.doses_per_day(frequency)
-    return 1 if frequency == "ONCE A DAY (OD)"
-    return 2 if frequency == "TWICE A DAY (BD)"
-    return 3 if frequency == "THREE A DAY (TDS)"
-    return 4 if frequency == "FOUR TIMES A DAY (QID)"
-    return 5 if frequency == "FIVE TIMES A DAY (5X/D)"
-    return 6 if frequency == "SIX TIMES A DAY (Q4HRS)"
-    return 1 if frequency == "IN THE MORNING (QAM)"
-    return 1 if frequency == "ONCE A DAY AT NOON (QNOON)"
-    return 1 if frequency == "IN THE EVENING (QPM)"
-    return 1 if frequency == "ONCE A DAY AT NIGHT (QHS)"
-    return 0.5 if frequency == "EVERY OTHER DAY (QOD)"
-    return 1.to_f / 7.to_f if frequency == "ONCE A WEEK (QWK)"
-    return 1.to_f / 28.to_f if frequency == "ONCE A MONTH"
-    return 1.to_f / 14.to_f if frequency == "TWICE A MONTH"
+    return 1 if frequency.upcase == "ONCE A DAY (OD)"
+    return 2 if frequency.upcase == "TWICE A DAY (BD)"
+    return 3 if frequency.upcase == "THREE A DAY (TDS)"
+    return 4 if frequency.upcase == "FOUR TIMES A DAY (QID)"
+    return 5 if frequency.upcase == "FIVE TIMES A DAY (5X/D)"
+    return 6 if frequency.upcase == "SIX TIMES A DAY (Q4HRS)"
+    return 1 if frequency.upcase == "IN THE MORNING (QAM)"
+    return 1 if frequency.upcase == "ONCE A DAY AT NOON (QNOON)"
+    return 1 if frequency.upcase == "IN THE EVENING (QPM)"
+    return 1 if frequency.upcase == "ONCE A DAY AT NIGHT (QHS)"
+    return 0.5 if frequency.upcase == "EVERY OTHER DAY (QOD)"
+    return 1.to_f / 7.to_f if frequency.upcase == "ONCE A WEEK (QWK)"
+    return 1.to_f / 28.to_f if frequency.upcase == "ONCE A MONTH"
+    return 1.to_f / 14.to_f if frequency.upcase == "TWICE A MONTH"
     1
   end
   
   # prn should be 0 | 1
   def self.write_order(encounter, patient, obs, drug, start_date, auto_expire_date, dose, frequency, prn, instructions = nil, equivalent_daily_dose = nil)
-    encounter ||= patient.current_treatment_encounter
+    user_person_id = encounter.provider_id
+
+    #encounter ||= patient.current_treatment_encounter(start_date, user_person_id)
     units = drug.units || 'per dose'
     duration = (auto_expire_date.to_date - start_date.to_date).to_i rescue nil
     equivalent_daily_dose = nil
@@ -97,7 +99,7 @@ class DrugOrder < ActiveRecord::Base
       order = encounter.orders.create(
         :order_type_id => 1, 
         :concept_id => drug.concept_id, 
-        :orderer => User.current_user.user_id, 
+        :orderer => User.current.user_id, 
         :patient_id => patient.id,
         :start_date => start_date,
         :auto_expire_date => auto_expire_date,
@@ -121,7 +123,10 @@ class DrugOrder < ActiveRecord::Base
   def total_drug_supply(patient, encounter = nil, session_date = Date.today)
     if encounter.blank?  
       type = EncounterType.find_by_name("DISPENSING")
-      encounter = encounters.find(:first,:conditions =>["DATE(encounter_datetime) = ? AND encounter_type = ?",session_date,type.id])
+      encounter = encounters.find(:first,:conditions =>["encounter_datetime BETWEEN ? AND ? AND encounter_type = ?",
+                                  session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+                                  session_date.to_date.strftime('%Y-%m-%d 23:59:59'),
+                                  type.id])
     end
     
     return [] if encounter.blank?
@@ -129,10 +134,12 @@ class DrugOrder < ActiveRecord::Base
     amounts_brought = Observation.all(:conditions => 
       ['obs.concept_id = ? AND ' +
        'obs.person_id = ? AND ' +
-       "DATE(encounter.encounter_datetime) = '#{session_date.to_date}' AND " +
+       "encounter_datetime BETWEEN ? AND ? AND " +
        'drug_order.drug_inventory_id = ?',
         ConceptName.find_by_name("AMOUNT OF DRUG BROUGHT TO CLINIC").concept_id,
         patient.person.person_id,
+        session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+        session_date.to_date.strftime('%Y-%m-%d 23:59:59'),
         drug_inventory_id], 
       :include => [:encounter, [:order => :drug_order]])      
     total_brought = amounts_brought.sum{|amount| amount.value_numeric}
@@ -146,4 +153,48 @@ class DrugOrder < ActiveRecord::Base
   def amount_needed
     (duration * equivalent_daily_dose) - (quantity || 0)
   end
+
+  def total_required
+    (duration * equivalent_daily_dose)
+  end
+
+  def self.all_orders_complete(patient,encounter_date)                               
+    type = EncounterType.find_by_name('TREATMENT').id                           
+    all = Encounter.find(:all,                                                  
+      :conditions =>["patient_id = ? AND encounter_datetime BETWEEN ? AND ?           
+      AND encounter_type = ?",patient.id , 
+      encounter_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+      encounter_date.to_date.strftime('%Y-%m-%d 23:59:59') , 
+      type])              
+                                                                                
+    complete = true                                                             
+    (all || []).each do |encounter|                                             
+      encounter.drug_orders.each do | drug_order |                              
+        complete = (drug_order.amount_needed <= 0)                              
+        return complete unless complete                                         
+      end                                                                       
+    end                                                                         
+    return complete                                                             
+  end  
+  
+  def self.prescription_dates(patient,date)
+    type = EncounterType.find_by_name('TREATMENT').id                           
+    all = Encounter.find(:all,                                                  
+      :conditions =>["patient_id = ? AND encounter_datetime BETWEEN ? AND ?           
+      AND encounter_type = ?",patient.id , date.to_date.strftime('%Y-%m-%d 00:00:00'),                     
+                      date.to_date.strftime('%Y-%m-%d 23:59:59')  , type])                        
+                                                                                
+    start_date = nil ; end_date = nil                                        
+    (all || []).each do |encounter|                                             
+      encounter.orders.each do | order |
+        start_date = order.start_date.to_date if start_date.blank?
+        end_date = order.auto_expire_date.to_date if end_date.blank?
+                                                
+        end_date = order.auto_expire_date.to_date if (order.auto_expire_date.to_date < end_date)
+        start_date = order.start_date.to_date if (order.start_date.to_date < start_date)
+      end                                                                       
+    end                                                                         
+    return [start_date,end_date]
+  end
+
 end

@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <style type="text/css">
+
+      button {
+        min-height: 50px;
+        min-width: 350px;
+        margin: 5px;
+        margin-bottom: 10px;
+        font-size: 1.2em;
+        background-color: #6281a7;
+        color: #FFF;
+        font-weight: normal;
+        -moz-border-radius: 30px;
+        border: 5px outset #000;
+        padding: 10px;
+        cursor: pointer;
+      }
+
+    </style>
+  </head>
+  <body>
+  <center>
+    <h2 style="color: #6281a7;">Edit My Preferences</h2>
+    <button onclick="parent.window.location = '/user/edit/<%= current_user.user_id %>';">
+      Edit Name
+    </button>
+    <button onclick="parent.window.location = '/user/change_password/<%= current_user.user_id %>';">
+      Change Password
+    </button>
+    <button onclick="parent.window.location = '/user/properties/<%= current_user.user_id %>';">
+      Preferred Keyboard
+    </button>
+    <button onclick="parent.window.location = '/user/activities/<%= current_user.user_id %>';">
+      Activities
+    </button>
+  </center>
+</body>
+</html>

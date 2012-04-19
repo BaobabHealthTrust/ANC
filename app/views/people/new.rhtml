@@ -242,7 +242,9 @@
 
 <%= text_field_tag "person[addresses][address1]",  params[:address1],
 	{	:id => 'address1',
-	 	:helpText => 'Closest Landmark or Plot Number<br /><span style="font-size:0.7em;font-style:italic">(Please do not include these words: Next to, close, in front of, behind)</span>',
+	 	:helpText => 'Closest Landmark or Plot Number<br />' + 
+                  '<div style="font-size:0.7em;font-style:italic; margin-left: 40px;">' + 
+                  '(Please do not include these words: Next to, close, in front of, behind)</div>',
 	 	:allowFreeText => true, :ajaxURL => '',
 	 	:tt_pageStyleClass => "azButton",
 	 	:tt_onLoad => "set_ajaxURL_for_suggestions('/people/landmark?filter_value=' ,document.getElementById('person_addresses_city_village').value);$('nextButton').style.display = 'block';" }%>

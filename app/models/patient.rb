@@ -7,13 +7,15 @@ class Patient < ActiveRecord::Base
   has_many :patient_identifiers, :foreign_key => :patient_id, :dependent => :destroy, :conditions => {:voided => 0}
   has_many :patient_programs, :conditions => {:voided => 0}
   has_many :programs, :through => :patient_programs
-  # has_many :visits, :dependent => :destroy, :conditions => 'visit.voided = 0'
   has_many :relationships, :foreign_key => :person_a, :dependent => :destroy, :conditions => {:voided => 0}
   has_many :orders, :conditions => {:voided => 0}
   has_many :encounters, :conditions => {:voided => 0} do 
     def find_by_date(encounter_date)
       encounter_date = Date.today unless encounter_date
-      find(:all, :conditions => ["DATE(encounter_datetime) = DATE(?)", encounter_date]) # Use the SQL DATE function to compare just the date part
+      find(:all, :conditions => ["encounter_datetime BETWEEN ? AND ?", 
+           encounter_date.to_date.strftime('%Y-%m-%d 00:00:00'), 
+           encounter_date.to_date.strftime('%Y-%m-%d 23:59:59')
+      ]) # Use the SQL DATE function to compare just the date part
     end
   end
 

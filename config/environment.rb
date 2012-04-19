@@ -11,6 +11,8 @@ Rails::Initializer.run do |config|
   config.action_controller.session_store = :active_record_store
   config.active_record.schema_format = :sql
   # config.time_zone = 'UTC'
+	config.gem 'warden'
+	config.gem 'devise'
   
   config.action_controller.session = {
     :session_key => 'bart_session',

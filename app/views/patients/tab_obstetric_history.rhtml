@@ -127,8 +127,8 @@
             Eclampsia
           </td>
           <td style="border: 1px solid #000;"
-              align="center" <%= (@eclampsia.upcase != "NO" ? "class='selected'" : "") %>>
-            &nbsp;<%= (!@eclampsia.nil? ? (@eclampsia.upcase == "NO" ? "NO" : "YES") : "") %>&nbsp;
+              align="center" <%= (!@eclampsia.nil? && !@eclampsia.blank? ? ((@eclampsia.upcase != "NO" ? "class='selected'" : "")) : "") %>>
+            &nbsp;<%= (!@eclampsia.nil? && !@eclampsia.blank? ? (@eclampsia.upcase == "NO" ? "NO" : "YES") : "") %>&nbsp;
           </td>
         </tr>
       <% end %>

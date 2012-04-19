@@ -26,14 +26,22 @@ class PatientIdentifier < ActiveRecord::Base
     return checkdigit
   end
 
+  def self.site_prefix
+    site_prefix = GlobalProperty.find_by_property("site_prefix").property_value rescue nil
+    return site_prefix
+  end
+
   def self.next_available_arv_number
-    current_arv_code = Location.current_arv_code
+    current_arv_code = self.site_prefix
     type = PatientIdentifierType.find_by_name('ARV Number').id
     current_arv_number_identifiers = PatientIdentifier.find(:all,:conditions => ["identifier_type = ? AND voided = 0",type])
+
     assigned_arv_ids = current_arv_number_identifiers.collect{|identifier|
-      $1.to_i if identifier.identifier.match(/#{current_arv_code} *(\d+)/)
+      $1.to_i if identifier.identifier.match(/#{current_arv_code}-ARV- *(\d+)/)
     }.compact unless current_arv_number_identifiers.nil?
+
     next_available_number = nil
+
     if assigned_arv_ids.empty?
       next_available_number = 1
     else
@@ -55,28 +63,48 @@ class PatientIdentifier < ActiveRecord::Base
     return patient_identifier
   end
 
-  def self.out_of_range_arv_numbers(arv_number_range, start_date , end_date)
-    arv_number_id             = PatientIdentifierType.find_by_name('ARV Number').patient_identifier_type_id
-    national_identifier_id    = PatientIdentifierType.find_by_name('National id').patient_identifier_type_id
-    arv_start_number          = arv_number_range.first
-    arv_end_number            = arv_number_range.last
+  def self.next_filing_number(type = 'Filing Number')
+    available_numbers = self.find(:all,
+                                  :conditions => ['identifier_type = ?',
+                                  PatientIdentifierType.find_by_name(type).id]).map{ | i | i.identifier }
+    
+    filing_number_prefix = CoreService.get_global_property_value("filing.number.prefix") rescue "FN101,FN102" 
 
-    out_of_range_arv_numbers  = PatientIdentifier.find_by_sql(["SELECT patient_id, identifier, date_created FROM patient_identifier
-                                                                WHERE identifier_type = ? AND  identifier >= ?
-                                                                AND identifier <= ?
-                                                                AND (NOT EXISTS(SELECT * FROM patient_identifier
-                                                                    WHERE identifier_type = ? AND date_created >= ? AND date_created <= ?))",
-                                                                      arv_number_id,  arv_start_number,  arv_end_number,
-                                                                      arv_number_id, start_date, end_date])
-    out_of_range_arv_numbers_data = []
-    out_of_range_arv_numbers.each do |arv_num_data|
-      patient     = Person.find(arv_num_data[:patient_id].to_i)
-      national_id = PatientIdentifier.identifier(arv_num_data[:patient_id], national_identifier_id).identifier rescue ""
+    prefix = filing_number_prefix.split(",")[0][0..3] if type.match(/filing/i)
+    prefix = filing_number_prefix.split(",")[1][0..3] if type.match(/Archived/i)
 
-      out_of_range_arv_numbers_data <<[arv_num_data[:patient_id], arv_num_data[:identifier], patient.name,
-                national_id,patient.gender,patient.age,patient.birthdate,arv_num_data[:date_created].strftime("%Y-%m-%d %H:%M:%S")]
-    end
+    len_of_identifier = (filing_number_prefix.split(",")[0][-1..-1] + "00000").to_i if type.match(/filing/i)
+    len_of_identifier = (filing_number_prefix.split(",")[1][-1..-1] + "00000").to_i if type.match(/Archived/i)
+    possible_identifiers_range = GlobalProperty.find_by_property("filing.number.range").property_value.to_i rescue 300000
+    possible_identifiers = Array.new(possible_identifiers_range){|i|prefix + (len_of_identifier + i +1).to_s}
 
-    out_of_range_arv_numbers_data
+    ((possible_identifiers)-(available_numbers.compact.uniq)).first
   end
+
+  def after_save
+    if self.identifier_type == PatientIdentifierType.find_by_name("National ID").id
+      person = self.patient.person
+      patient_bin = PatientService.get_patient(person)
+      date_created = person.date_created.strftime('%Y-%m-%d %H:%M:%S') rescue Time.now().strftime('%Y-%m-%d %H:%M:%S')
+      first_name = patient_bin.name.split(" ")[0] rescue nil
+      last_name = patient_bin.name.split(" ")[1] rescue nil
+      birthdate_estimated = person.birthdate_estimated
+
+      ActiveRecord::Base.connection.execute <<EOF                             
+INSERT INTO openmrs_demographx.patient (patient_id,gender,birthdate,birthdate_estimated,creator,date_created,date_changed)
+VALUES(#{patient_bin.patient_id},"#{patient_bin.sex}","#{person.birthdate}",#{birthdate_estimated},#{person.creator},'#{date_created}','#{date_created}');
+EOF
+
+      ActiveRecord::Base.connection.execute <<EOF                             
+INSERT INTO openmrs_demographx.patient_name (patient_id,given_name,family_name,creator,date_created,date_changed)
+VALUES(#{patient_bin.patient_id},"#{first_name}","#{last_name}",#{person.creator},'#{date_created}','#{date_created}');
+EOF
+
+      ActiveRecord::Base.connection.execute <<EOF                             
+INSERT INTO openmrs_demographx.patient_identifier (patient_id,identifier,identifier_type,creator,date_created)
+VALUES(#{patient_bin.patient_id},"#{patient_bin.national_id}",1,#{person.creator},'#{date_created}');
+EOF
+    end rescue nil 
+  end
+
 end

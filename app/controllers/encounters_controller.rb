@@ -3,7 +3,7 @@ class EncountersController < ApplicationController
 
   def create
 
-    # raise params.inspect
+    # raise params.to_yaml
     
     if params[:void_encounter_id]
       @encounter = Encounter.find(params[:void_encounter_id])

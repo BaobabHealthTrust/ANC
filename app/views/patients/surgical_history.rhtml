@@ -35,7 +35,7 @@
     :condition => "__$('surgicals_available').value.toUpperCase() == 'YES'"
   } %>
 
-  <%= touch_date_tag "Date", @patient, nil,
+  <%= touch_date_tag "Date received", @patient, nil,
     {:id => "date_done1",
     :helptext => "Date Procedure Done",
     :tt_onUnLoad => "__$('observations__obs_datetime_surgical1').value = __$('date_done1').value",
@@ -67,7 +67,7 @@
       :optional => "true"
     } %>
 
-    <%= touch_date_tag "Date", @patient, nil,
+    <%= touch_date_tag "Date received", @patient, nil,
       {:id => "date_done#{e}",
       :helptext => "Date #{e}#{indice} Procedure Done",
       :condition => "__$('surgical#{e}').value != '' && __$('surgicals_available').value.toUpperCase() == 'YES'",

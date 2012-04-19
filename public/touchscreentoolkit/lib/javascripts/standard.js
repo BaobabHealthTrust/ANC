@@ -1701,7 +1701,8 @@ function showBestKeyboard(aPageNum) {
     switch (inputElement.getAttribute("field_type")) {
         case "password":
         case "full_keyboard":
-            showKeyboard(true, (tstUserKeyboardPref.toLowerCase() == "qwerty" ? true : false));
+            showKeyboard(true, (typeof(tstUserKeyboardPref) != 'undefined' && 
+                tstUserKeyboardPref.toLowerCase() == "qwerty" ? true : false));
             break;
         case "alpha":
             __$("keyboard").innerHTML = getPreferredKeyboard();
@@ -1724,14 +1725,25 @@ function showBestKeyboard(aPageNum) {
             
             var selected = {};
             var selecteddate = null;
+            var start_date_week = null;
+            var end_date_week = null;
             
             if(inputElement.getAttribute("selecteddays")){
                 selected = eval(inputElement.getAttribute("selecteddays"));
             }
             
+            if(inputElement.getAttribute("startweekdate")){
+                start_date_week = inputElement.getAttribute("startweekdate");
+            }
+            
+            if(inputElement.getAttribute("endweekdate")){
+                end_date_week = inputElement.getAttribute("endweekdate");
+            }
+            
             selecteddate = inputElement.value;
             
-            createCalendar("page" + aPageNum, inputElement.id, selecteddate, selected);            
+            createCalendar("page" + aPageNum, inputElement.id, selecteddate, 
+                selected, start_date_week, end_date_week);                  
             break;
         default:
             __$("keyboard").innerHTML = getPreferredKeyboard();
@@ -3972,6 +3984,10 @@ function checkCtrl(obj){
      
 function showCategory(category){
     var pos = checkCtrl(__$("content"));
+    
+    if(__$("category")){
+        document.body.removeChild(__$("category"));
+    }
     
     var cat = document.createElement("div");
     cat.id = "category";

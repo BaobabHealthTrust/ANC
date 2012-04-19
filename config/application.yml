@@ -1,0 +1,27 @@
+production:
+ create_from_remote: no
+ use.user.selected.activities: yes
+ filing.number.prefix: FN101,FN102
+ auto_set_appointment: true
+ demographics.middle_name: false
+ ask.multiple.phone.numbers: false
+ demographics.ground_phone: false
+ list.of.clinical.encounters.sequentially: weight and height,ttv,bp,visit type,obstetric history,medical history,surgical history,social history,lab results,anc examinations,current pregnancy,appointment,give drugs,update outcome
+
+development:
+ create_from_remote: no
+ use.user.selected.activities: yes
+ filing.number.prefix: FN101,FN102
+ auto_set_appointment: true
+ show.patient.confirmation: true
+ demographics.middle_name: false
+ ask.multiple.phone.numbers: false
+ demographics.ground_phone: false
+ list.of.clinical.encounters.sequentially: weight and height,ttv,bp,visit type,obstetric history,medical history,surgical history,social history,lab results,anc examinations,current pregnancy,appointment,give drugs,update outcome
+
+test: &TEST
+ create_from_remote: no
+ use.user.selected.activities: yes
+
+cucumber:
+  <<: *TEST

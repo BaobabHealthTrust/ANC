@@ -8,6 +8,6 @@ class Relationship < ActiveRecord::Base
   named_scope :guardian, :conditions => 'relationship_type.b_is_to_a = "Guardian"', :include => :type
   
   def to_s
-    self.type.b_is_to_a + ": " + relation.name
+    self.type.b_is_to_a + ": " + (relation.names.first.given_name + ' ' + relation.names.first.family_name rescue '')
   end
 end

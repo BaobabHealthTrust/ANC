@@ -11,7 +11,7 @@
 	<%= hidden_field_tag "encounter[encounter_type_name]", "EXAMINATION" %>
 	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-	<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+	<%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
 	<%session_date = session[:datetime] || Time.now() %>
 
 	<%= touch_numeric_tag "HEIGHT (CM)", @patient, nil,

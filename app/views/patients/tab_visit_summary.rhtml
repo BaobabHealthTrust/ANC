@@ -61,7 +61,9 @@
         <%if encounter.name == encounter_name%>
           <% color = cycle('even', 'odd') %>
           <li class="data <%= color %>" encounter_id="<%= encounter.id %>">
-            <% if session[:user_id] == encounter.creator %>
+            <% if (current_user.user_id == encounter.creator && 
+                (@roles.include?("registration clerk") || @roles.include?("vitals clerk")) ||
+              !(@roles.include?("registration clerk") || @roles.include?("vitals clerk"))) %>
               <div class="void" style="float:right;padding:7px;">
                 <img src="/images/cancel_flat_small_red.png"/>
               </div>
