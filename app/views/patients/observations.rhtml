@@ -62,7 +62,8 @@
     {:id => "enter_fundal_height",
     :helptext => "Fundus (weeks)",
     :tt_pageStyleClass => "NumbersWithUnknown",
-    :max => 42,       
+    :max => 42,    
+    :absoluteMax => 45,
     :tt_onLoad => "showCategory('ANC Examinations');"
   } %>
 
@@ -177,18 +178,29 @@
     }
   </script>
 
+  <% sup = ["", "st", "nd", "rd", "th", "th", "th"] %>
+
   <% 5.times do |counter| %>
     <% options[:condition] = "tstFormElements[#{counter + 3}].value != '' && tstFormElements[#{counter + 3}].value != 'None'" if counter > 0 %>
     <% options[:optional] = 'true' if counter > 0 %>
     <% counter += 1 %>
-    <% options[:helpText] = "Signs/Symptoms" %>
+    <% options[:helpText] = (counter > 1 ? "#{counter}<sup>#{sup[counter]}</sup> " : "") + "Danger Sign/Symptom" %>
     <% options[:position] = "#{counter + 1}" %>
     <% options[:id] = "sign#{counter}" %>
-    <% options[:tt_onUnLoad] = "selectedSigns += (selectedSigns.length > 0 ? '&' : '') + 'v#{counter}=' + __$('touchscreenInput' + " + 
-      "tstCurrentPage).value.replace(/\\s/g, '+'); if(__$('touchscreenInput' + tstCurrentPage).getAttribute('position')){" + 
-      "var url = __$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).getAttribute('ajaxURL'); " + 
-      "__$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).setAttribute('ajaxURL', " + 
-      "url.replace('search_string=', '') + (selectedSigns.length > 0 ? selectedSigns + '&search_string=' : 'search_string='));}" %>
+
+    <% options[:tt_onLoad] = (counter > 1 ? "__$('Unknown').style.display = 'none'; " : "") + "changeUnknownToNone();" %>
+
+    <% 
+    if (counter) < 5
+      options[:tt_onUnLoad] = "selectedSigns += (selectedSigns.length > 0 ? '&' : '') + 'v#{counter}=' + __$('touchscreenInput' + " + 
+        "tstCurrentPage).value.replace(/\\s/g, '+'); if(__$('touchscreenInput' + tstCurrentPage).getAttribute('position')){" + 
+        "var url = __$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).getAttribute('ajaxURL'); " + 
+        "__$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).setAttribute('ajaxURL', " + 
+        "url.replace('search_string=', '') + (selectedSigns.length > 0 ? selectedSigns + '&search_string=' : 'search_string='));}" 
+    else
+      options[:tt_onUnLoad] = ""
+    end
+  %>
 
     <%= text_field_tag("observations[][value_coded_or_text]", nil, options) %>
     <%= hidden_field_tag("observations[][value_text]", nil) %>

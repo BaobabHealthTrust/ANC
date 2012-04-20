@@ -177,16 +177,44 @@
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
+  <% options = [""] 
+
+  if ask_temperature
+    options << "Temperature"
+  end
+
+  if current_user.activities.include?("Weight and Height") && (params[:weight] || params[:height])
+    options << "Weight"
+    
+    if @anc_patient.age <= 18 || @anc_patient.current_height == 0
+      options << "Height"
+    end
+  end
+
+  if current_user.activities.include?("BP") && params[:bp]
+    options << "BP"
+  end
+
+%>
+
+  <%= select_tag("choice", options_for_select(options), 
+    {
+      :helpText => 'Select Task(s)', 
+      :id => "choice",        
+      :tt_onLoad => "showCategory('Vitals');",
+      :multiple => true
+    })%>
+
   <% if ask_temperature %>
     <label for="temperature">Temperature (C)</label>
     <%= text_field_tag "observations[][value_numeric]", nil,
       {:id => "temperature",
       :field_type => 'number',
       :helptext =>"Temperature",
-      :allowFreeText => 'true',       
-      :tt_onLoad => "showCategory('Vitals');",
+      :allowFreeText => 'true',
       :min => 20,
       :max => 45,
+      :condition => "getSelected().match(/Temperature/)",
       :units => 'Celcius',
       :validationRule => "([0-9]+\\.[0-9])|Unknown$",
       :validationMessage => "You must enter a decimal between 0 and 9 (for example: 36<b>.6</b>)",
@@ -205,11 +233,12 @@
         :min => 40, # number_with_precision(@patient.min_weight, :precision => 1),
         :max => 200, # number_with_precision(@patient.max_weight, :precision => 1),
         :absoluteMin => 40,
-        :absoluteMax => 200,      
+        :absoluteMax => 200,   
+        :condition => "getSelected().match(/Weight/)",   
         :tt_onLoad => "showCategory('Vitals');",
         :units => 'kg',
-        :validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
-        :validationMessage => "You must enter a number",
+        :validationRule => "([0-9]+(\\.[0-9]))|Unknown$",
+        :validationMessage => "You must enter a valid decimal number",
         :tt_pageStyleClass => "NumbersWithUnknownAndDecimal"} %>
       <%= hidden_field_tag("observations[][concept_name]", "WEIGHT (KG)") %>
       <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
@@ -236,6 +265,7 @@
           :max => number_with_precision(@anc_patient.max_height, :precision => 1),
           :absoluteMin => 10,
           :absoluteMax => 228,
+          :condition => "getSelected().match(/Height/)",
           :units => 'cm',
           :validationRule => "^([0-9]+)|Unknown$",
           :validationMessage => "You must enter numbers only (for example 157)",
@@ -261,6 +291,7 @@
           :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
           :tt_onUnLoad => "clearTimeout(timedEvent);",
           :absoluteMin => 0,
+          :condition => "getSelected().match(/BP/)",
           :max => 250
         }) %>
 
@@ -278,7 +309,7 @@
           :tt_onUnLoad => "clearTimeout(timedEvent);",
           :absoluteMin => 0,
           :max => 180,
-          :condition => "__$('systolic_blood_pressure').value.toLowerCase() != 'unknown'"
+          :condition => "getSelected().match(/BP/) && __$('systolic_blood_pressure').value.toLowerCase() != 'unknown'"
         }) %>
 
       <%= text_field_tag("observations[][value_numeric]", nil,options) %>

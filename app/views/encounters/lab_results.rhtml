@@ -72,6 +72,7 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%session_date = session[:datetime] || Time.now() %>
 
+  <% params[:update] = true %>
   <% if params[:update] %>
 
     <%= select_tag("choice", options_for_select(["", "HB Test Result", 

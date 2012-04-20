@@ -219,7 +219,8 @@ class PatientsController < ApplicationController
         end
       end
     }
-    # raise @anc_patient.hiv_status.to_yaml
+    
+    @next_task = main_next_task(Location.current_location.id, @patient) rescue nil
     
     render :layout => 'dynamic-dashboard'
   end
@@ -1165,8 +1166,7 @@ class PatientsController < ApplicationController
       "Presbyterian (C.C.A.P.)",
       "Seventh Day Adventist", 
       "Baptist", 
-      "Moslem",
-      "Other"]
+      "Moslem"]
     
     @religions = Observation.find(:all, :joins => [:concept, :encounter], 
       :conditions => ["obs.concept_id = ? AND NOT value_text IN (?) AND " + 
@@ -1176,6 +1176,9 @@ class PatientsController < ApplicationController
     
     @religions = religions + @religions
     
+    @religions = @religions.sort
+    
+    @religions << "Other"
     # raise @religions.to_yaml
   end
   

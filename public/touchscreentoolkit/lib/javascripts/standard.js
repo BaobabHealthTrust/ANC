@@ -1388,7 +1388,7 @@ function navigateToPage(destPage, validate, navback){
     }
 
     if(destPage < tstPages.length){
-        var condition = tstFormElements[tstPages[destPage]].getAttribute("condition");
+        var condition = tstFormElements[tstPages[destPage]].getAttribute("condition");        
         // skip destination page when a condition is false
         if (condition) {
             if (!eval(condition)) {

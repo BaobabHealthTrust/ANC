@@ -155,7 +155,9 @@
     :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100); showCategory('Current Pregnancy');",
     :tt_onUnLoad => 'clearTimeout(timedEvent);
     // if (__$("touchscreenInput" + tstCurrentPage).value == "Unknown" ) __$("lmp").value = tstEstimatedLMPDate;',
-    :tt_pageStyleClass => "exclude"
+    :tt_pageStyleClass => "exclude",
+    :min => ((session[:datetime] || Date.today).to_date - 42.week),
+    :absoluteMin => ((session[:datetime] || Date.today).to_date - 45.week)
   } %>
 
   <%= text_field_tag "Estimate LMP", nil,
@@ -199,7 +201,7 @@
 
   <% options = {
     :id => "tt_status_value",
-    :helptext => "Previous TT Doses",
+    :helptext => "Previous TT Doses before this pregnancy",
     :field_type => "number",
     :absoluteMin => "0",
     :max => "5",

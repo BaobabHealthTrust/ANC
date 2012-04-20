@@ -50,21 +50,51 @@ class ClinicController < GenericClinicController
   end
 
   def overview
-    @types = GlobalProperty.find_by_property("statistics.show_encounter_types").property_value rescue EncounterType.all.map(&:name).join(",")
+    simple_overview_property = CoreService.get_global_property_value("simple_application_dashboard") rescue nil
+
+    simple_overview = false
+    if simple_overview_property != nil
+      if simple_overview_property == 'true'
+        simple_overview = true
+      end
+    end
+
+    @types = CoreService.get_global_property_value("statistics.show_encounter_types") rescue EncounterType.all.map(&:name).join(",")
     @types = @types.split(/,/)
-    @me = Encounter.statistics(@types, :conditions => ["DATE(encounter_datetime) = ? AND encounter.creator = ?", 
-        (session[:datetime] ? session[:datetime].to_date : Date.today), current_user.user_id]) 
-    @today = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = ?', 
-        (session[:datetime] ? session[:datetime].to_date : Date.today)]) 
-    @year = Encounter.statistics(@types, :conditions => ['YEAR(encounter_datetime) = ?', 
-        (session[:datetime] ? session[:datetime].to_date.year : Date.today.year)]) 
-    @ever = Encounter.statistics(@types)
-    # render :template => 'clinic/overview', :layout => 'clinic'
+
+    @me = Encounter.statistics(@types,
+      :conditions => ['encounter_datetime BETWEEN ? AND ? AND encounter.creator = ?',
+                      Date.today.strftime('%Y-%m-%d 00:00:00'),
+                      Date.today.strftime('%Y-%m-%d 23:59:59'),
+                      current_user.user_id])
+    @today = Encounter.statistics(@types,
+      :conditions => ['encounter_datetime BETWEEN ? AND ?',
+                      Date.today.strftime('%Y-%m-%d 00:00:00'),
+                      Date.today.strftime('%Y-%m-%d 23:59:59')])
+
+    if !simple_overview
+      @year = Encounter.statistics(@types,
+        :conditions => ['encounter_datetime BETWEEN ? AND ?',
+                        Date.today.strftime('%Y-01-01 00:00:00'),
+                        Date.today.strftime('%Y-12-31 23:59:59')])
+      @ever = Encounter.statistics(@types)
+    end
+
+    @user = User.find(session[:user_id]).person.name rescue ""
+
+    if simple_overview
+        render :template => 'clinic/overview_simple.rhtml' , :layout => false
+        return
+    end
     render :layout => false
   end
 
   def user_activities
     render :layout => false
+  end
+  
+  def no_males
+    render :layout => "menu"
   end
   
 end

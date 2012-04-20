@@ -12,7 +12,7 @@
 <% form_tag :controller => "encounters", :action => "create" do |f| %>
   <%= hidden_field_tag "encounter[encounter_type_name]", "OBSTETRIC HISTORY" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", session[:datetime] || Date.today %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%session_date = session[:datetime] || Time.now() %>
 
@@ -53,7 +53,19 @@
     __$('ever_had_symphysiotomy').value = 'No';
     __$('ever_had_c_sections').value = 'No';
     __$('ever_had_a_vacuum_extraction').value = 'No';
+    }; if(__$('multiple_pregnancy').value.toLowerCase()=='no'){
+      __$('enter_number_of_abortions').setAttribute('absoluteMax', (parseInt(__$('enter_gravida').value) - 
+        parseInt(__$('enter_number_of_deliveries').value) - 1));
     }"
+  } %>
+
+  <%= touch_numeric_tag "NUMBER OF ABORTIONS", @patient, nil,
+    {:id => "enter_number_of_abortions",
+    :helptext => "Enter Number Of Abortions",
+    :tt_pageStyleClass => "NumbersWithUnknown",
+    :condition => "__$('enter_gravida').value > 1",
+    :min => 0,
+    :max => 5
   } %>
 
   <% (1..8).each{|e| %>
@@ -78,10 +90,12 @@
     {:id => "year_of_birth#{e}",
       :helptext => "Year of Birth #{e}#{indice} Child",
       :tt_pageStyleClass => "NumbersWithUnknown",
-      :absoluteMin => "1890", 
-      :min => (Date.today.year-50), 
-      :max => (Date.today.year-10), 
-      :absoluteMax => Date.today.year,
+      :absoluteMin => (@anc_patient.birth_year + 10), 
+      :min => (@anc_patient.birth_year + 13), 
+      :max => ((@anc_patient.birth_year + 50) > ((session[:datetime] || Date.today).year) ? 
+          ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 50)), 
+      :absoluteMax => ((@anc_patient.birth_year + 55) > ((session[:datetime] || Date.today).year) ? 
+          ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 55)),
       :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>
 
     <%= touch_text_field_tag "Place of Birth", @patient, nil,
@@ -153,15 +167,6 @@
 
   <% } %>
 
-  <%= touch_numeric_tag "NUMBER OF ABORTIONS", @patient, nil,
-    {:id => "enter_number_of_abortions",
-    :helptext => "Enter Number Of Abortions",
-    :tt_pageStyleClass => "NumbersWithUnknown",
-    :condition => "__$('enter_gravida').value > 1",
-    :min => 0,
-    :max => 5
-  } %>
-
 
   <% (1..8).each{|e| %>
 
@@ -186,10 +191,12 @@
     {:id => "year_of_birth#{e}",
       :helptext => "Year of #{e}#{indice} Abortion",
       :tt_pageStyleClass => "NumbersWithUnknown",
-      :absoluteMin => "1890", 
-      :min => (Date.today.year-50), 
-      :max => (Date.today.year-10), 
-      :absoluteMax => Date.today.year,
+      :absoluteMin => (@anc_patient.birth_year + 10), 
+      :min => (@anc_patient.birth_year + 13), 
+      :max => ((@anc_patient.birth_year + 50) > ((session[:datetime] || Date.today).year) ? 
+          ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 50)), 
+      :absoluteMax => ((@anc_patient.birth_year + 55) > ((session[:datetime] || Date.today).year) ? 
+          ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 55)),
       :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
 
     <%= touch_select_tag "Place of Birth", @patient, options_for_select(@place),

@@ -7,6 +7,7 @@ production:
  ask.multiple.phone.numbers: false
  demographics.ground_phone: false
  list.of.clinical.encounters.sequentially: weight and height,ttv,bp,visit type,obstetric history,medical history,surgical history,social history,lab results,anc examinations,current pregnancy,appointment,give drugs,update outcome
+ statistics.show_encounter_types: REGISTRATION,ANC VISIT TYPE,VITALS,OBSERVATIONS,TREATMENT
 
 development:
  create_from_remote: no
@@ -18,7 +19,8 @@ development:
  ask.multiple.phone.numbers: false
  demographics.ground_phone: false
  list.of.clinical.encounters.sequentially: weight and height,ttv,bp,visit type,obstetric history,medical history,surgical history,social history,lab results,anc examinations,current pregnancy,appointment,give drugs,update outcome
-
+ statistics.show_encounter_types: REGISTRATION,ANC VISIT TYPE,VITALS,OBSERVATIONS,TREATMENT
+   
 test: &TEST
  create_from_remote: no
  use.user.selected.activities: yes

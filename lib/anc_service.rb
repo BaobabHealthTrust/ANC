@@ -1384,6 +1384,10 @@ module ANCService
       }.compact.last.squish.to_date).to_i / 30.0 rescue 0
     end
     
+    def birth_year
+      self.person.birthdate.year rescue (Date.today - 13.year).year
+    end
+    
   end
   
 end

@@ -87,6 +87,10 @@
         </select>
         <select id="navigation_links">
           <option link="/encounter_types?patient_id=<%= @patient.id  %>" ttSize = "160px">Tasks</option>
+          
+          <% if !@next_task.nil? && @next_task.url != "/patients/show/#{@patient.id}" %>
+            <option link="<%= @next_task.url  %>" ttSize = "160px">Continue</option>
+          <% end %>
         </select>
       </td>
     </tr>
