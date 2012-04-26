@@ -33,7 +33,7 @@ echo "CREATE DATABASE $DATABASE;" | mysql --user=$USERNAME --password=$PASSWORD
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/openmrs_1_7_2_concept_server_full_db.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/schema_bart2_additions.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/defaults.sql
-mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/user_schema_modifications.sql
+# mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/user_schema_modifications.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/malawi_regions.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/mysql_functions.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/drug_ingredient.sql

@@ -26,7 +26,8 @@ class ApplicationController < GenericApplicationController
     @patient = Patient.find(patient.id) rescue nil
     @anc_patient = ANCService::ANC.new(@patient) rescue nil        
     
-    art_url = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
+    art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
+    anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
     
     # tasks[task] = [weight, path, encounter_type, concept_id, exception_concept_id, 
     #     scope, drug_concept_id, special_field_or_encounter_present, next_if_NOT_condition_met]    
@@ -73,38 +74,46 @@ class ApplicationController < GenericApplicationController
       "Update Outcome" => [14, "/patients/outcome/?patient_id=#{patient.id}", "UPDATE OUTCOME", 
         nil, nil, "TODAY", nil, true, (current_user_activities.include?("Update Outcome"))], 
       
-      "ART Initial" => [15, "http://#{art_url}/encounters/new/art_initial?action=show&controller=" + 
-          "encounter_types&encounter_type=ART+initial&id=show&patient_id=#{patient.id}", 
-        "ART INITIAL", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("ART Initial") && 
+      "HIV Clinic Registration" => [15, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
+          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/art_initial?action=show&controller=" + 
+          "encounter_types&encounter_type=ART+initial&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+        "HIV CLINIC REGISTRATION", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("ART Initial") && 
             @anc_patient.hiv_status.downcase == "positive")], 
       
-      "HIV Staging" => [16, "http://#{art_url}/encounters/new/hiv_staging?action=show&" + 
-          "controller=encounter_types&encounter_type=HIV+staging&id=show&patient_id=#{patient.id}", 
+      "HIV Staging" => [16, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
+          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/hiv_staging?action=show&" + 
+          "controller=encounter_types&encounter_type=HIV+staging&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
         "HIV STAGING", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("HIV Staging") && 
             @anc_patient.hiv_status.downcase == "positive")],  
       
-      "HIV Reception" => [17, "http://#{art_url}/encounters/new/hiv_reception?action=show" + 
-          "&controller=encounter_types&encounter_type=HIV+reception&id=show&patient_id=#{patient.id}", 
+      "HIV Reception" => [17, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
+          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/hiv_reception?action=show" + 
+          "&controller=encounter_types&encounter_type=HIV+reception&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
         "HIV RECEPTION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("HIV Reception") && 
             @anc_patient.hiv_status.downcase == "positive")], 
       
-      "ART Visit" => [18, "http://#{art_url}/encounters/new/art_visit?action=show&controller=" + 
-          "encounter_types&encounter_type=ART+visit&id=show&patient_id=#{patient.id}", "ART VISIT", 
-        nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Visit") && 
+      "HIV Consultation" => [18, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
+          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/art_visit?action=show&controller=" + 
+          "encounter_types&encounter_type=ART+visit&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+        "HIV CONSULTATION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Visit") && 
             @anc_patient.hiv_status.downcase == "positive")], 
       
-      "ART Adherence" => [19, "http://#{art_url}/encounters/new/art_adherence?action=show&controller" + 
-          "=encounter_types&encounter_type=ART+adherence&id=show&patient_id=#{patient.id}", "ART ADHERENCE", 
-        nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Adherence") && 
+      "ART Adherence" => [19, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
+          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/art_adherence?action=show&controller" + 
+          "=encounter_types&encounter_type=ART+adherence&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+        "ART ADHERENCE", nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Adherence") && 
             @anc_patient.hiv_status.downcase == "positive")],  
       
-      "Manage ART Prescriptions" => [20, "http://#{art_url}/encounters/new/art_adherence?action=show&controller" + 
-          "=encounter_types&encounter_type=ART+adherence&id=show&patient_id=#{patient.id}", "TREATMENT", 
-        nil, nil, "TODAY", nil, false, (current_user_activities.include?("Manage ART Prescriptions") && 
-            @anc_patient.hiv_status.downcase == "positive")],
-      
-      "ART Drug Dispensations" => [21, "http://#{art_url}/dispensations/new?patient_id=#{patient.id}", 
-        "DISPENSING", nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Drug Dispensations") && 
+      "Manage ART Prescriptions" => [20, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
+          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/art_adherence?action=show&controller" + 
+          "=encounter_types&encounter_type=ART+adherence&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+        "TREATMENT", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Manage ART Prescriptions") && 
             @anc_patient.hiv_status.downcase == "positive")]
     }
         
@@ -116,8 +125,34 @@ class ApplicationController < GenericApplicationController
     
     sorted_tasks = sorted_tasks.sort
     
+    foreign_links = [
+      "Manage ART Prescriptions",
+      "ART Adherence",
+      "HIV Clinic Consultation",
+      "HIV Reception",
+      "HIV Staging",
+      "HIV Clinic Registration"
+    ]
+    
     sorted_tasks.each do |pos, tsk|
       
+      if !art_link.nil? && !anc_link.nil? && foreign_links.include?(pos)
+        if !session[:token]
+          response = RestClient.post("http://#{art_link}/single_sign_on/get_token", 
+            {"login"=>session[:username], "password"=>session[:password]}) rescue nil
+          
+          if !response.nil?
+            response = JSON.parse(response)
+            
+            session[:token] = response["auth_token"]          
+          end
+               
+        end
+      end
+       
+      session.delete :datetime if session[:datetime].nil? || 
+      ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d")) == Date.today.strftime("%Y-%m-%d"))
+        
       next if tasks[tsk][8] == false
       
       case tasks[tsk][5]
