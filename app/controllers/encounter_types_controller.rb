@@ -79,27 +79,27 @@ class EncounterTypesController < ApplicationController
       "Update Outcome" => "/patients/outcome/?patient_id=#{patient.id}", 
       
       "HIV Clinic Registration" => "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-        "return_uri=http://#{anc_link}/patients/show/#{patient.id}&destination_uri=" + 
+        "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{patient.id}&destination_uri=" + 
         "http://#{art_link}/encounters/new/hiv_clinic_registration?patient_id=#{patient.id}&current_location=#{session[:location_id]}",
       
       "HIV Staging" => "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-        "return_uri=http://#{anc_link}/patients/show/#{patient.id}&destination_uri=" + 
+        "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{patient.id}&destination_uri=" + 
         "http://#{art_link}/encounters/new/hiv_staging?patient_id=#{patient.id}&current_location=#{session[:location_id]}",  
       
       "HIV Reception" => "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-        "return_uri=http://#{anc_link}/patients/show/#{patient.id}&destination_uri=" + 
+        "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{patient.id}&destination_uri=" + 
         "http://#{art_link}/encounters/new/hiv_reception?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
       
       "HIV Clinic Consultation" => "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-        "return_uri=http://#{anc_link}/patients/show/#{patient.id}&destination_uri=" + 
+        "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{patient.id}&destination_uri=" + 
         "http://#{art_link}/encounters/new/hiv_clinic_consultation?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
       
       "ART Adherence" => "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-        "return_uri=http://#{anc_link}/patients/show/#{patient.id}&destination_uri=" + 
+        "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{patient.id}&destination_uri=" + 
         "http://#{art_link}/encounters/new/art_adherence?patient_id=#{patient.id}&current_location=#{session[:location_id]}",  
       
       "Manage ART Prescriptions" => "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-        "return_uri=http://#{anc_link}/patients/show/#{patient.id}&destination_uri=" + 
+        "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{patient.id}&destination_uri=" + 
         "http://#{art_link}/encounters/new/art_adherence?patient_id=#{patient.id}&current_location=#{session[:location_id]}"
     } rescue {}
     

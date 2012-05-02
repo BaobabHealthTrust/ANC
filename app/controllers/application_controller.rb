@@ -75,44 +75,38 @@ class ApplicationController < GenericApplicationController
         nil, nil, "TODAY", nil, true, (current_user_activities.include?("Update Outcome"))], 
       
       "HIV Clinic Registration" => [15, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/art_initial?action=show&controller=" + 
-          "encounter_types&encounter_type=ART+initial&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/hiiv_clinic_registration?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
         "HIV CLINIC REGISTRATION", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("ART Initial") && 
             @anc_patient.hiv_status.downcase == "positive")], 
       
       "HIV Staging" => [16, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/hiv_staging?action=show&" + 
-          "controller=encounter_types&encounter_type=HIV+staging&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/hiv_staging?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
         "HIV STAGING", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("HIV Staging") && 
             @anc_patient.hiv_status.downcase == "positive")],  
       
       "HIV Reception" => [17, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/hiv_reception?action=show" + 
-          "&controller=encounter_types&encounter_type=HIV+reception&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/hiv_reception?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
         "HIV RECEPTION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("HIV Reception") && 
             @anc_patient.hiv_status.downcase == "positive")], 
       
-      "HIV Consultation" => [18, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/art_visit?action=show&controller=" + 
-          "encounter_types&encounter_type=ART+visit&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
-        "HIV CONSULTATION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Visit") && 
+      "HIV Clinic Consultation" => [18, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/hiv_clinic_consultation?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+        "HIV CLINIC CONSULTATION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Visit") && 
             @anc_patient.hiv_status.downcase == "positive")], 
       
       "ART Adherence" => [19, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/art_adherence?action=show&controller" + 
-          "=encounter_types&encounter_type=ART+adherence&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/art_adherence?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
         "ART ADHERENCE", nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Adherence") && 
             @anc_patient.hiv_status.downcase == "positive")],  
       
       "Manage ART Prescriptions" => [20, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/art_adherence?action=show&controller" + 
-          "=encounter_types&encounter_type=ART+adherence&id=show&patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
+          "/encounters/new/art_adherence?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
         "TREATMENT", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Manage ART Prescriptions") && 
             @anc_patient.hiv_status.downcase == "positive")]
     }

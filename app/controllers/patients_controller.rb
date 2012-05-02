@@ -222,6 +222,9 @@ class PatientsController < ApplicationController
     
     @next_task = main_next_task(Location.current_location.id, @patient) rescue nil
     
+    @time = @patient.encounters.first(:conditions => ["DATE(encounter_datetime) = ?", 
+        Date.today.strftime("%Y-%m-%d")]).encounter_datetime rescue Time.now
+    
     render :layout => 'dynamic-dashboard'
   end
 
@@ -1112,23 +1115,21 @@ class PatientsController < ApplicationController
             session[:token] = response["auth_token"]
           else 
             print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
-              next_task(@patient))
+              next_task(@patient)) and return
           end
         end
                 
         session.delete :datetime if session[:datetime].nil?
         
         print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
-          "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-            "return_uri=http://#{anc_link}/patients/show/#{@patient.id}&destination_uri=http://#{art_link}" + 
-            "/encounters/new/art_initial?patient_id=#{@patient.id}&current_location=#{session[:location_id]}")  
+          next_task(@patient)) and return  
       else
         print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
-          next_task(@patient))  
+          next_task(@patient)) and return  
       end
     else
       print_and_redirect("/patients/current_visit_label/?patient_id=#{@patient.id}", 
-        next_task(@patient))  
+        next_task(@patient))  and return 
     end
   end
 
@@ -1180,6 +1181,12 @@ class PatientsController < ApplicationController
     
     @religions << "Other"
     # raise @religions.to_yaml
+  end
+  
+  def next_url
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil 
+    
+    redirect_to next_task(@patient) and return
   end
   
   private

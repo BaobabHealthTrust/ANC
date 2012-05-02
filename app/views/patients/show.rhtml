@@ -2,8 +2,79 @@
   <!--
   tt_cancel_show = "/clinic";
   tt_cancel_destination = "/clinic";
+  
+  var start_time = [
+                      <%= (@time rescue Time.now).year %>, 
+                      <%= (@time rescue Time.now).month - 1 %>,
+                      <%= (@time rescue Time.now).day %>,
+                      <%= (@time rescue Time.now).hour %>,
+                      <%= (@time rescue Time.now).min %>
+                   ];
+  
+  function showTime(){
+    if(!__$("timeCtrl")){
+      if(__$("patient-dashboard-applicationname")){
+        var pos = checkCtrl(__$("patient-dashboard-applicationname"));
+        // [w, h, t, l]
+        
+        var timeCtrl = document.createElement("timeCtrl");
+        timeCtrl.id = "timeCtrl";
+        timeCtrl.style.position = "absolute";
+        timeCtrl.style.left = (pos[3] + 60) + "px";
+        timeCtrl.style.top = (pos[2] - 35) + "px";
+        
+        document.body.appendChild(timeCtrl);
+      }
+    }
+    if(__$("timeCtrl")){
+      var current_time = new Date();
+      var start = new Date(start_time[0], start_time[1], start_time[2], start_time[3], start_time[4]);      
+      var diff = current_time - start;
+      var hrs = Math.floor(diff / (60 * 60 * 1000));
+      var mins = Math.round(((diff % (60 * 60 * 1000)) / (60 * 60 * 1000)) * 60);
+      var duration = "<div class='table' style='margin: 5px; margin-left: 35px;'><div class='row'>" + (hrs > 0 ? "<div class='cell' " + 
+        "style='font-size: 1.2em; vertical-align: middle;'>" + hrs + "</div>" : "") + 
+        " <div class='cell' style='font-size: 0.5em; vertical-align: middle;'><sup>" + mins + "</sup>&frasl;<sub>60</sub></div>" + 
+        "<div class='cell' style=' vertical-align: middle; font-size: 1.2em;'> hrs</div></div></div>";
+      
+      __$("timeCtrl").innerHTML = duration;
+    }
+    
+    setTimeout("showTime()", 1000);
+  }
+  
+  setTimeout("showTime()", 500);
   //-->
 </script>
+
+<style type="text/css">
+  .table {
+    display: table;
+  }
+  .row {
+    display: table-row;
+  }
+  
+  .cell {
+    display: table-cell;
+  }
+  
+  #timeCtrl {
+    -moz-border-radius: 50px;
+    border: 1px solid #ccc;
+    width: 180px; 
+    height: 65px; 
+    font-size: 36px; 
+    background-color: rgb(153, 238, 153); 
+    color: rgb(0, 0, 0); 
+    opacity: 0.95; 
+    z-index: 100; 
+    text-align: center;
+    -moz-user-select: none;
+  }
+  
+</style>
+
 <form id = 'dashboard' action=''>
   <table cellpadding=10>
     <tr>
@@ -83,11 +154,11 @@
           <% if current_user.activities.include?("Current Pregnancy") %>
             <option value='/patients/tab_visit_history?patient_id=<%= @patient.id  %>'>Current Pregnancy</option>
           <% end %>
-            
+
         </select>
         <select id="navigation_links">
           <option link="/encounter_types?patient_id=<%= @patient.id  %>" ttSize = "160px">Tasks</option>
-          
+
           <% if !@next_task.nil? && @next_task.url != "/patients/show/#{@patient.id}" %>
             <option link="<%= @next_task.url  %>" ttSize = "160px">Continue</option>
           <% end %>

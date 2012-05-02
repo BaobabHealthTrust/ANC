@@ -79,7 +79,8 @@
           "HIV Test Result", "Syphilis Test Result", "Urine Protein"]), 
       {
         :helpText => 'Select Test(s)', :id => "choice", :multiple => true,       
-        :tt_onLoad => "showCategory('Lab Results');"
+        :tt_onLoad => "showCategory('Lab Results');",
+        :optional => :true
       })%>
 
   <% end %>
