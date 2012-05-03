@@ -1388,6 +1388,17 @@ module ANCService
       self.person.birthdate.year rescue (Date.today - 13.year).year
     end
     
+    def anc_visits(session_date = Date.today)
+      self.patient.encounters.all(:conditions => 
+          ["DATE(encounter_datetime) >= ? AND DATE(encounter_datetime) <= ? AND encounter_type = ?", 
+          (session_date - 6.month), (session_date + 6.month), 
+          EncounterType.find_by_name("ANC VISIT TYPE")]).collect{|e| 
+        e.observations.collect{|o| 
+          o.answer_string.to_i if o.concept.concept_names.first.name.downcase == "reason for visit"
+        }.compact
+      }.flatten rescue []
+    end
+    
   end
   
 end

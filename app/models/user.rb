@@ -50,7 +50,7 @@ class User < ActiveRecord::Base
 
 	def self.authenticate(username, password)
 		user = User.find_for_authentication(:username => username)
-		user.valid_password?(password) ? user : nil
+		user.valid_password?(password) ? user : nil if !user.nil?
 	end
 
 	def valid_password?(password)

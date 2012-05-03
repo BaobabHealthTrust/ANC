@@ -53,18 +53,18 @@
 </style>
 
 <%
-  task = @task
-  next_task = task.encounter_type.gsub('_',' ') rescue nil
+task = @task
+next_task = task.encounter_type.gsub('_',' ') rescue nil
 
-  xray = Observation.find(Observation.find(:last,                       
-            :conditions => ["person_id = ? AND concept_id = ?",                      
-            @person.id, ConceptName.find_by_name("Refer to x-ray?").concept_id,  
-            ])).to_s.strip.squish.upcase rescue '' 
+xray = Observation.find(Observation.find(:last,                       
+    :conditions => ["person_id = ? AND concept_id = ?",                      
+      @person.id, ConceptName.find_by_name("Refer to x-ray?").concept_id,  
+    ])).to_s.strip.squish.upcase rescue '' 
 
-  refered_to_htc = Observation.find(Observation.find(:last,                       
-            :conditions => ["person_id = ? AND concept_id = ?",                      
-            @person.id, ConceptName.find_by_name("Refer to HTC").concept_id,  
-            ])).to_s.strip.squish.upcase rescue '' 
+refered_to_htc = Observation.find(Observation.find(:last,                       
+    :conditions => ["person_id = ? AND concept_id = ?",                      
+      @person.id, ConceptName.find_by_name("Refer to HTC").concept_id,  
+    ])).to_s.strip.squish.upcase rescue '' 
 %>
 
 <%= javascript_include_tag "jquery" %>
@@ -81,22 +81,16 @@
     conntinue.innerHTML = '<span>Continue</span>'
     conntinue.setAttribute('onmousedown','continueToNext();')
 
-    <% if refered_to_htc.match(/: Yes/i) %>
-      conntinue.setAttribute("onmousedown","gotoUpdateHIVstatus();")
-    <% end %>
-
-    <%if Location.current_location.name.match(/HIV|ART/i) and not Location.current_location.name.match(/Reception/i)%>
-      weightGraph();
-    <%end%>
+    weightGraph();
   }
 
   function continueToNext(){
-    <%if @patient_bean.archived_filing_number.blank? %>
+<%if @patient_bean.archived_filing_number.blank? %>
       go();
-    <%else%>
+<%else%>
       messageBar = document.getElementById("messageBar");
       messageBar.style.display = 'block';
-    <%end%>
+<%end%>
   }
 
   function setNewFilingNumber() { 
@@ -115,42 +109,42 @@
   }
 
   function weightGraph(){
-    <% if Location.current_location.name.match(/HIV|ART/i) and Location.current_location.name.match(/Reception/i) %>
+<% if Location.current_location.name.match(/HIV|ART/i) and Location.current_location.name.match(/Reception/i) %>
       return
-    <% end %>
-     var patient_data = [
-      <% @min = Time.now
-         @max = Time.now
-         @obs = @person.observations.find_by_concept_name("WEIGHT (KG)")
-         @obs.sort_by{|obs| obs.obs_datetime}.each do |obs|
-           @min = obs.obs_datetime if obs.obs_datetime < @min %>
+<% end %>
+    var patient_data = [
+<% @min = Time.now
+@max = Time.now
+@obs = @person.observations.find_by_concept_name("WEIGHT (KG)")
+@obs.sort_by{|obs| obs.obs_datetime}.each do |obs|
+  @min = obs.obs_datetime if obs.obs_datetime < @min %>
         [<%= obs.obs_datetime.to_f -%>, <%= obs.value_numeric -%>],<% end %>
     ];
-    <% @min = @max - 1.year if @min > @max - 1.year %>
+<% @min = @max - 1.year if @min > @max - 1.year %>
 
     var patient_ticks = [
-    <% @first = Time.mktime(@min.year, @min.month, 1) # move to the start of the month
-     @last = Time.mktime(@max.year + (@max.month == 12 ? 1 : 0), @max.month + (@max.month < 12 ? 1 : -11), 1)
-     while (@first <= @last) do -%>
-    [<%= @first.to_f -%>, "<div class='xLabel'><%= @first.strftime("%b") -%><br/><b><%= @first.strftime("%Y") if @first.month == 1 -%></b></div>"],
-    <% @first = Time.mktime(@first.year + (@first.month == 12 ? 1 : 0), @first.month + (@first.month < 12 ? 1 : -11), 1) -%>
-    <% end -%>
-];
+<% @first = Time.mktime(@min.year, @min.month, 1) # move to the start of the month
+@last = Time.mktime(@max.year + (@max.month == 12 ? 1 : 0), @max.month + (@max.month < 12 ? 1 : -11), 1)
+while (@first <= @last) do -%>
+        [<%= @first.to_f -%>, "<div class='xLabel'><%= @first.strftime("%b") -%><br/><b><%= @first.strftime("%Y") if @first.month == 1 -%></b></div>"],
+  <% @first = Time.mktime(@first.year + (@first.month == 12 ? 1 : 0), @first.month + (@first.month < 12 ? 1 : -11), 1) -%>
+<% end -%>
+    ];
     
     var range = <%= 1.year.to_f -%>;
     var min = <%= @min.to_f -%>;
     var max = <%= @max.to_f -%>;
     var max_tick = "<%= @max.strftime("%d-%b") -%>";
-//    patient_data.push([max, 0]);
+    //    patient_data.push([max, 0]);
         
     function get_data(x1, x2) {
       return [{
-        color: "green",
-        data: patient_data,
-        points: { show: true},
-        lines: { show: true, fill: true, fillColor: "rgb(61,235,61)" },
-        bars: { show: true }
-      }]
+          color: "green",
+          data: patient_data,
+          points: { show: true},
+          lines: { show: true, fill: true, fillColor: "rgb(61,235,61)" },
+          bars: { show: true }
+        }]
     }
 
     var plot_options = {      
@@ -164,46 +158,46 @@
   }
 
   function submitPage(patient_id,concept_name) {
-     submitForm = document.getElementById("confirm");
+    submitForm = document.getElementById("confirm");
     
-     newElement = document.createElement("input");                             
-     newElement.setAttribute("name","encounter[encounter_type_name]");                 
-     newElement.setAttribute("type","hidden");                                 
-     newElement.value = "EXAMINATION";      
-     submitForm.appendChild(newElement);
+    newElement = document.createElement("input");                             
+    newElement.setAttribute("name","encounter[encounter_type_name]");                 
+    newElement.setAttribute("type","hidden");                                 
+    newElement.value = "EXAMINATION";      
+    submitForm.appendChild(newElement);
 
-     newElement = document.createElement("input");                             
-     newElement.setAttribute("name","encounter[patient_id]");                 
-     newElement.setAttribute("type","hidden");                                 
-     newElement.value = "<%=@person.id%>";      
-     submitForm.appendChild(newElement);
+    newElement = document.createElement("input");                             
+    newElement.setAttribute("name","encounter[patient_id]");                 
+    newElement.setAttribute("type","hidden");                                 
+    newElement.value = "<%=@person.id%>";      
+    submitForm.appendChild(newElement);
 
-     newElement = document.createElement("input");                             
-     newElement.setAttribute("name","encounter[provider_id]");                 
-     newElement.setAttribute("type","hidden");                                 
-     newElement.value = "<%=current_user.id%>";      
-     submitForm.appendChild(newElement);
+    newElement = document.createElement("input");                             
+    newElement.setAttribute("name","encounter[provider_id]");                 
+    newElement.setAttribute("type","hidden");                                 
+    newElement.value = "<%=current_user.id%>";      
+    submitForm.appendChild(newElement);
 
-     newElement = document.createElement("input");                             
-     newElement.setAttribute("name","observations[][concept_name]");                 
-     newElement.setAttribute("type","hidden");                                 
-     newElement.value = concept_name;      
-     submitForm.appendChild(newElement);
+    newElement = document.createElement("input");                             
+    newElement.setAttribute("name","observations[][concept_name]");                 
+    newElement.setAttribute("type","hidden");                                 
+    newElement.value = concept_name;      
+    submitForm.appendChild(newElement);
 
-     newElement = document.createElement("input");                             
-     newElement.setAttribute("name","observations[][patient_id]");                 
-     newElement.setAttribute("type","hidden");                                 
-     newElement.value = "<%=@person.id%>";      
-     submitForm.appendChild(newElement);
+    newElement = document.createElement("input");                             
+    newElement.setAttribute("name","observations[][patient_id]");                 
+    newElement.setAttribute("type","hidden");                                 
+    newElement.value = "<%=@person.id%>";      
+    submitForm.appendChild(newElement);
 
-     newElement = document.createElement("input");                             
-     newElement.setAttribute("name","observations[][value_coded_or_text]");                 
-     newElement.setAttribute("type","hidden");                                 
-     newElement.value = "NO";      
-     submitForm.appendChild(newElement);
+    newElement = document.createElement("input");                             
+    newElement.setAttribute("name","observations[][value_coded_or_text]");                 
+    newElement.setAttribute("type","hidden");                                 
+    newElement.value = "NO";      
+    submitForm.appendChild(newElement);
 
-     submitForm.action = "/encounters/create"
-     submitForm.submit(); 
+    submitForm.action = "/encounters/create"
+    submitForm.submit(); 
   }
 
   function gotoUpdateHIVstatus() {
@@ -213,21 +207,38 @@
 
 <body onload = "setTimeout('changeAttributes()',500);">
 
-<form method='post' action="/people/confirm" id = "confirm">
-  <%= hidden_field_tag(:found_person_id, @found_person_id) %>
-  <%= hidden_field_tag(:relation, @relation) %>
-</form>
+  <form method='post' action="/people/confirm" id = "confirm">
+    <%= hidden_field_tag(:found_person_id, @found_person_id) %>
+    <%= hidden_field_tag(:relation, @relation) %>
+  </form>
 
-<div id ='header'>
-  <h1><%= @patient_bean.name %>&nbsp;(<%= @patient_bean.sex %>)</h1>
-  <table>
-  <tr>
-    <th>Age:</th><td><%= @patient_bean.age %></td>
-  </tr>
-  <tr>
-    <th>National ID:</th><td><%= @patient_bean.national_id_with_dashes %></td>
-  </tr> 
-  </table>  
+  <div id ='header'>
+    <h1><%= @patient_bean.name %>&nbsp;(<%= @patient_bean.sex %>)</h1>
+    <table>
+      <tr>
+        <th>Age:</th><td><%= @patient_bean.age %></td>
+      </tr>
+      <tr>
+        <th>National ID:</th><td><%= @patient_bean.national_id_with_dashes %></td>
+      </tr> 
+    </table>
+    <div>
+      <table>
+        <tr style = "font-size:20px;">
+          <th>Next task</th><td><%= next_task %></td>          
+        </tr>
+      </table>
+    </div>
+  </div>
 
-<hr />
+  <hr />
 
+<%# if Location.current_location.name.match(/HIV|ART/i) and not Location.current_location.name.match(/Reception/i) %>
+  <div class = 'charts'>
+    <h3>Weight graph - History</h3>
+    <div id="charts" class="panel" style="width:930px;height:370px;"></div>
+    <div id="placeholder_details" style="height:50px;padding-top:15px;"></div>
+  </div>
+<%# end %>
+
+</body>

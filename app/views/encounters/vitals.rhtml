@@ -202,7 +202,8 @@
       :helpText => 'Select Task(s)', 
       :id => "choice",        
       :tt_onLoad => "showCategory('Vitals');",
-      :multiple => true
+      :multiple => true,
+      :condition => "#{options.length} > 2"
     })%>
 
   <% if ask_temperature %>
@@ -214,7 +215,7 @@
       :allowFreeText => 'true',
       :min => 20,
       :max => 45,
-      :condition => "getSelected().match(/Temperature/)",
+      :condition => "if(#{options.length} > 2){getSelected().match(/Temperature/)}else{true}",
       :units => 'Celcius',
       :validationRule => "([0-9]+\\.[0-9])|Unknown$",
       :validationMessage => "You must enter a decimal between 0 and 9 (for example: 36<b>.6</b>)",
@@ -234,7 +235,7 @@
         :max => 200, # number_with_precision(@patient.max_weight, :precision => 1),
         :absoluteMin => 40,
         :absoluteMax => 200,   
-        :condition => "getSelected().match(/Weight/)",   
+        :condition => "if(#{options.length} > 2){getSelected().match(/Weight/)}else{true}",   
         :tt_onLoad => "showCategory('Vitals');",
         :units => 'kg',
         :validationRule => "([0-9]+(\\.[0-9]))|Unknown$",
@@ -265,7 +266,7 @@
           :max => number_with_precision(@anc_patient.max_height, :precision => 1),
           :absoluteMin => 10,
           :absoluteMax => 228,
-          :condition => "getSelected().match(/Height/)",
+          :condition => "if(#{options.length} > 2){getSelected().match(/Height/)}else{true}",
           :units => 'cm',
           :validationRule => "^([0-9]+)|Unknown$",
           :validationMessage => "You must enter numbers only (for example 157)",
@@ -291,12 +292,13 @@
           :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
           :tt_onUnLoad => "clearTimeout(timedEvent);",
           :absoluteMin => 0,
-          :condition => "getSelected().match(/BP/)",
+          :condition => "if(#{options.length} > 2){getSelected().match(/BP/)}else{true}",
           :max => 250
         }) %>
 
       <%= text_field_tag("observations[][value_numeric]", nil,options) %>
-      <%= hidden_field_tag("observations[][concept_name]",  "SYSTOLIC BLOOD PRESSURE", {:id => 'systolic_blood_pressure_concept_name'}) %>
+      <%= hidden_field_tag("observations[][concept_name]",  "SYSTOLIC BLOOD PRESSURE", 
+        {:id => 'systolic_blood_pressure_concept_name'}) %>
       <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
       <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
 
@@ -309,7 +311,8 @@
           :tt_onUnLoad => "clearTimeout(timedEvent);",
           :absoluteMin => 0,
           :max => 180,
-          :condition => "getSelected().match(/BP/) && __$('systolic_blood_pressure').value.toLowerCase() != 'unknown'"
+          :condition => "/*((#{options.length} > 2) ? getSelected().match(/BP/) : true) && */" + 
+            "__$('systolic_blood_pressure').value.toLowerCase() != 'unknown'"
         }) %>
 
       <%= text_field_tag("observations[][value_numeric]", nil,options) %>

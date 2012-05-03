@@ -1,15 +1,36 @@
+<%
+task = @next_task
+next_task = task.encounter_type.gsub('_',' ') rescue nil
+%>
 <script type="text/javascript" language="javascript">
   <!--
   tt_cancel_show = "/clinic";
   tt_cancel_destination = "/clinic";
   
   var start_time = [
-                      <%= (@time rescue Time.now).year %>, 
-                      <%= (@time rescue Time.now).month - 1 %>,
-                      <%= (@time rescue Time.now).day %>,
-                      <%= (@time rescue Time.now).hour %>,
-                      <%= (@time rescue Time.now).min %>
-                   ];
+<%= (@time rescue Time.now).year %>, 
+<%= (@time rescue Time.now).month - 1 %>,
+<%= (@time rescue Time.now).day %>,
+<%= (@time rescue Time.now).hour %>,
+<%= (@time rescue Time.now).min %>
+  ];
+  
+  function showNexttask(){
+    if(!__$("nextTask")){
+      var pos = checkCtrl(__$("patient-dashboard-applicationname"));
+      // [w, h, t, l]
+        
+      var nextTask = document.createElement("nextTask");
+      nextTask.id = "nextTask";
+      nextTask.style.position = "absolute";
+      nextTask.style.left = (pos[3] + 10) + "px";
+      nextTask.style.top = (pos[2] + pos[1] + 1) + "px";
+        
+      document.body.appendChild(nextTask);
+    }
+    
+    __$("nextTask").innerHTML = "<b>Next Task:</b><br /><i><%= next_task %></i>";
+  }
   
   function showTime(){
     if(!__$("timeCtrl")){
@@ -44,6 +65,10 @@
   }
   
   setTimeout("showTime()", 500);
+
+<% if !next_task.nil? %>
+  setTimeout("showNexttask()", 500);
+<% end %>
   //-->
 </script>
 
@@ -54,11 +79,11 @@
   .row {
     display: table-row;
   }
-  
+
   .cell {
     display: table-cell;
   }
-  
+
   #timeCtrl {
     -moz-border-radius: 50px;
     border: 1px solid #ccc;
@@ -72,9 +97,21 @@
     text-align: center;
     -moz-user-select: none;
   }
-  
-</style>
 
+  #nextTask {
+    -moz-border-radius: 50px;
+    border: 1px solid #ccc;
+    width: 280px; 
+    height: 58px; 
+    font-size: 22px; 
+    background-color: #efc; 
+    color: rgb(0, 0, 0); 
+    opacity: 0.95; 
+    z-index: 100; 
+    text-align: center;
+    -moz-user-select: none;
+  }
+</style>
 <form id = 'dashboard' action=''>
   <table cellpadding=10>
     <tr>

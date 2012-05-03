@@ -3,6 +3,21 @@
   <!--
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+  
+  var anc_visits = <%= @anc_patient.anc_visits.to_json rescue [] %>;
+  
+  anc_visits.push("zero");
+  
+  function disablePastVisits(){
+    for(var i = 0; i < anc_visits.length; i++){
+      if(__$(anc_visits[i])){
+        __$(anc_visits[i]).className = "keyboardButton gray";
+        __$(anc_visits[i]).onmousedown = function(){}
+      }
+    }
+  }
+  
+  setTimeout("disablePastVisits()", 200);
   //-->
 </script>
 

@@ -17,6 +17,8 @@ class ApplicationController < GenericApplicationController
 
     current_user_activities = current_user.activities
     
+    normal_flow = CoreService.get_global_property_value("list.of.clinical.encounters.sequentially").split(",")
+    
     if current_user_activities.blank?
       task.encounter_type = "NO TASKS SELECTED"
       task.url = "/patients/show/#{patient.id}"
@@ -145,9 +147,14 @@ class ApplicationController < GenericApplicationController
       end
        
       session.delete :datetime if session[:datetime].nil? || 
-      ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d")) == Date.today.strftime("%Y-%m-%d"))
+        ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d")) == Date.today.strftime("%Y-%m-%d"))
         
-      next if tasks[tsk][8] == false
+      # next if tasks[tsk][8] == false
+      if tasks[tsk][8] == false
+        task.encounter_type = tsk        
+        task.url = "/patients/show/#{patient.id}"
+        return task
+      end
       
       case tasks[tsk][5]
       when "TODAY"
@@ -161,7 +168,10 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
         
@@ -172,7 +182,10 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
             
@@ -182,7 +195,10 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
         
@@ -193,12 +209,20 @@ class ApplicationController < GenericApplicationController
               patient.id, EncounterType.find_by_name(tasks[tsk][2]), session_date.to_date]) rescue []
         
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
         
-        task.encounter_type = tasks[tsk][2]
-        task.url = tasks[tsk][1]
+        task.encounter_type = tsk
+        
+        if normal_flow[0] == tsk.downcase
+          task.url = tasks[tsk][1]
+        else
+          task.url = "/patients/show/#{patient.id}"
+        end
         return task
       when "RECENT"
         
@@ -213,7 +237,10 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
         
@@ -226,7 +253,10 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
             
@@ -237,7 +267,10 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
         
@@ -250,12 +283,20 @@ class ApplicationController < GenericApplicationController
               (session_date.to_date - 6.month), (session_date.to_date + 6.month)]) rescue []
         
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
         
-        task.encounter_type = tasks[tsk][2]
-        task.url = tasks[tsk][1]
+        task.encounter_type = tsk
+        
+        if normal_flow[0] == tsk.downcase
+          task.url = tasks[tsk][1]
+        else
+          task.url = "/patients/show/#{patient.id}"
+        end
         return task
       when "EXISTS"
         
@@ -268,7 +309,10 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
         
@@ -279,7 +323,10 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
             
@@ -289,7 +336,10 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
         
@@ -300,12 +350,20 @@ class ApplicationController < GenericApplicationController
               patient.id, EncounterType.find_by_name(tasks[tsk][2])]) rescue []
         
           if available.length > 0
-            next
+            if normal_flow[0] == tsk.downcase
+              normal_flow -= [tsk.downcase]            
+              next
+            end
           end
         end
         
-        task.encounter_type = tasks[tsk][2]
-        task.url = tasks[tsk][1]
+        task.encounter_type = tsk
+        
+        if normal_flow[0] == tsk.downcase
+          task.url = tasks[tsk][1]
+        else
+          task.url = "/patients/show/#{patient.id}"
+        end
         return task
       end
       

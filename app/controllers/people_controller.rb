@@ -1,5 +1,6 @@
 class PeopleController < GenericPeopleController
-    
+   
+=begin     
   def confirm
     if params[:found_person_id]
       @patient = Patient.find(params[:found_person_id])
@@ -8,6 +9,7 @@ class PeopleController < GenericPeopleController
       redirect_to "/clinic" and return
     end
   end
+=end    
 
   def create
    

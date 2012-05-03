@@ -56,6 +56,8 @@
     }; if(__$('multiple_pregnancy').value.toLowerCase()=='no'){
       __$('enter_number_of_abortions').setAttribute('absoluteMax', (parseInt(__$('enter_gravida').value) - 
         parseInt(__$('enter_number_of_deliveries').value) - 1));
+      __$('enter_number_of_abortions').setAttribute('absoluteMin', (parseInt(__$('enter_gravida').value) - 
+        parseInt(__$('enter_number_of_deliveries').value) - 1));
     }"
   } %>
 

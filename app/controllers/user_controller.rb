@@ -2,40 +2,15 @@ class UserController < GenericUserController
 
   def activities
     # Don't show tasks that have been disabled
-    user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role.downcase}
-    
-=begin
-"Weight and Height",
-      "TTV Vaccination",
-      "BP", 
-      "ANC Visit Type",  
-      "Obstetric History",  
-      "Medical History",  
-      "Surgical History",  
-      "Social History", 
-      "Lab Results", 
-      "ANC Examination", 
-      "Current Pregnancy", 
-      "Manage Appointments", 
-      "Give Drugs", 
-      "Update Outcome", 
-"ART Initial", 
-"HIV Staging", 
-"HIV Reception", 
-"ART Visit", 
-"ART Adherence", 
-"Manage ART Prescriptions", 
-"ART Drug Dispensations"
-    
-=end    
+    user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role.downcase}    
     
     userroles = {}
     
-    userroles["clerk"] = ["Registration", "View Reports"]
+    userroles["clerk"] = CoreService.get_global_property_value("registration.clerk.roles").split(",") rescue ["Registration", "View Reports"]
     
-    userroles["hsa"] = ["Registration", "Weight and Height", "TTV Vaccination"]
+    userroles["hsa"] = CoreService.get_global_property_value("hsa.roles").split(",") rescue ["Registration", "Weight and Height", "TTV Vaccination"]
     
-    userroles["nurse"] = [
+    userroles["nurse"] = CoreService.get_global_property_value("nurse.roles").split(",") rescue [
       "Weight and Height",
       "TTV Vaccination",
       "BP", 
@@ -60,10 +35,8 @@ class UserController < GenericUserController
       "Registration", 
       "View Reports"]        
     
-    userroles["clinician"] = []
-    
-    userroles["nurse"].each{|role|
-      userroles["clinician"] << role
+    userroles["clinician"] = CoreService.get_global_property_value("clinician.roles").split(",") rescue userroles["nurse"].collect{|role|
+      role
     }
     
     collection = {}

@@ -19,12 +19,12 @@ class PatientsController < ApplicationController
     # raise @names.to_yaml
     
     @all_names = @all_encounters.collect{|e|
-      e.type.name.upcase
+      e.type.name.upcase.squish
     }.uniq
     
     @current_encounter_names = @patient.encounters.find(:all, 
       :conditions => ["DATE_FORMAT(encounter_datetime, '%Y-%m-%d') = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]).collect{|e|
-      e.name.upcase
+      e.name.upcase.squish
     }
     
     @obstretrics_alert = (@all_names.include?("OBSTETRIC HISTORY") ? false : true)
@@ -48,23 +48,23 @@ class PatientsController < ApplicationController
         case e.type.name
         when "OBSTETRIC HISTORY"
           e.observations.each{|o|
-            @sections["OBSTETRIC HISTORY"][o.concept.concept_names.name] = (o.answer_string rescue "") if !o.concept.nil?
+            @sections["OBSTETRIC HISTORY"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
           }
         when "MEDICAL HISTORY"
           e.observations.each{|o|
-            @sections["MEDICAL HISTORY"][o.concept.concept_names.name] = (o.answer_string rescue "") if !o.concept.nil?
+            @sections["MEDICAL HISTORY"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
           }
         when "SOCIAL HISTORY"
           e.observations.each{|o|
-            @sections["SOCIAL HISTORY"][o.concept.concept_names.name] = (o.answer_string rescue "") if !o.concept.nil?
+            @sections["SOCIAL HISTORY"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
           }
         when "SURGICAL HISTORY"
           e.observations.each{|o|
             if !o.concept.nil?
               if @sections["SURGICAL HISTORY"][o.concept.concept_names.name]
-                @sections["SURGICAL HISTORY"][o.concept.concept_names.name] += "; " + (o.answer_string rescue "") if !o.concept.nil?
+                @sections["SURGICAL HISTORY"][o.concept.concept_names.name] += "; " + (o.answer_string.squish rescue "") if !o.concept.nil?
               else
-                @sections["SURGICAL HISTORY"][o.concept.concept_names.name] = (o.answer_string rescue "") if !o.concept.nil?
+                @sections["SURGICAL HISTORY"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
               end   
             end
           }
@@ -72,11 +72,11 @@ class PatientsController < ApplicationController
           e.observations.each{|o|
             if !o.concept.nil?
               if @sections["LAB RESULTS"][o.concept.concept_names.name]
-                @sections["LAB RESULTS"][o.concept.concept_names.name] = ((o.answer_string rescue 0).to_i > 
-                    (@sections["LAB RESULTS"][o.concept.concept_names.name].to_i) ? (o.answer_string rescue 0) : 
+                @sections["LAB RESULTS"][o.concept.concept_names.name] = ((o.answer_string.squish rescue 0).to_i > 
+                    (@sections["LAB RESULTS"][o.concept.concept_names.name].to_i) ? (o.answer_string.squish rescue 0) : 
                     @sections["LAB RESULTS"][o.concept.concept_names.name] )  if !o.concept.nil? 
               else
-                @sections["LAB RESULTS"][o.concept.concept_names.name] = (o.answer_string rescue "") if !o.concept.nil?
+                @sections["LAB RESULTS"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
               end   
             end
           }
@@ -92,7 +92,7 @@ class PatientsController < ApplicationController
     # raise @sections.to_yaml
     
     @sections["OBSTETRIC HISTORY"].each{|o,a|
-      case o.titleize
+      case o.titleize.squish
       when "Parity"
         if a.to_i > 4
           @obstetrics_selected = true
@@ -141,7 +141,7 @@ class PatientsController < ApplicationController
     end
     
     @sections["MEDICAL HISTORY"].each{|o,a|
-      case o.titleize
+      case o.titleize.squish
       when "Asthma"
         if a.titleize == "Yes"
           @medics_selected = true
@@ -220,7 +220,9 @@ class PatientsController < ApplicationController
       end
     }
     
-    @next_task = main_next_task(Location.current_location.id, @patient) rescue nil
+    session_date = session[:datetime] || Date.today
+    
+    @next_task = main_next_task(Location.current_location.id, @patient, session_date.to_date) rescue nil        
     
     @time = @patient.encounters.first(:conditions => ["DATE(encounter_datetime) = ?", 
         Date.today.strftime("%Y-%m-%d")]).encounter_datetime rescue Time.now
@@ -526,7 +528,7 @@ class PatientsController < ApplicationController
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
           Encounter.find(:all, :conditions => ["encounter_type = ?", 
               EncounterType.find_by_name("OBSTETRIC HISTORY").id]).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string.upcase rescue nil
+          ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string.upcase.squish rescue nil
 
       @abortions = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
@@ -536,7 +538,7 @@ class PatientsController < ApplicationController
       @stillbirths = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
           Encounter.find(:all).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string.upcase rescue nil
+          ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string.upcase.squish rescue nil
 
       #Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", 40, Encounter.find(:all, :conditions => ["patient_id = ?", 40]).collect{|e| e.encounter_id}, ConceptName.find_by_name('Caesarean section').concept_id])
     
@@ -555,22 +557,22 @@ class PatientsController < ApplicationController
       @symphosio = Observation.find(:last, 
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
           Encounter.find(:all).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('SYMPHYSIOTOMY').concept_id]).answer_string.upcase rescue nil
+          ConceptName.find_by_name('SYMPHYSIOTOMY').concept_id]).answer_string.upcase.squish rescue nil
 
       @haemorrhage = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
           Encounter.find(:all).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('HEMORRHAGE').concept_id]).answer_string.upcase rescue nil
+          ConceptName.find_by_name('HEMORRHAGE').concept_id]).answer_string.upcase.squish rescue nil
 
       @preeclampsia = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
           Encounter.find(:all).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('PRE-ECLAMPSIA').concept_id]).answer_string.upcase rescue nil
+          ConceptName.find_by_name('PRE-ECLAMPSIA').concept_id]).answer_string.upcase.squish rescue nil
 
       @eclampsia = Observation.find(:last,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
           Encounter.find(:all).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('ECLAMPSIA').concept_id]).answer_string.upcase rescue nil
+          ConceptName.find_by_name('ECLAMPSIA').concept_id]).answer_string.upcase.squish rescue nil
     end
     
     # raise @eclampsia.blank?.to_yaml
@@ -583,37 +585,37 @@ class PatientsController < ApplicationController
     
     @asthma = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('ASTHMA').concept_id]).answer_string.upcase rescue nil
+        ConceptName.find_by_name('ASTHMA').concept_id]).answer_string.upcase.squish rescue nil
 
     @hyper = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('HYPERTENSION').concept_id]).answer_string.upcase rescue nil
+        ConceptName.find_by_name('HYPERTENSION').concept_id]).answer_string.upcase.squish rescue nil
 
     @diabetes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('DIABETES').concept_id]).answer_string.upcase rescue nil
+        ConceptName.find_by_name('DIABETES').concept_id]).answer_string.upcase.squish rescue nil
 
     @epilepsy = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('EPILEPSY').concept_id]).answer_string.upcase rescue nil
+        ConceptName.find_by_name('EPILEPSY').concept_id]).answer_string.upcase.squish rescue nil
 
     @renal = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('RENAL DISEASE').concept_id]).answer_string.upcase rescue nil
+        ConceptName.find_by_name('RENAL DISEASE').concept_id]).answer_string.upcase.squish rescue nil
 
     @fistula = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('FISTULA REPAIR').concept_id]).answer_string.upcase rescue nil
+        ConceptName.find_by_name('FISTULA REPAIR').concept_id]).answer_string.upcase.squish rescue nil
 
     @deform = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('SPINE OR LEG DEFORM').concept_id]).answer_string.upcase rescue nil
+        ConceptName.find_by_name('SPINE OR LEG DEFORM').concept_id]).answer_string.upcase.squish rescue nil
 
     @surgicals = Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
             @patient.id, EncounterType.find_by_name("SURGICAL HISTORY").id]).collect{|e| e.encounter_id},
         ConceptName.find_by_name('PROCEDURE DONE').concept_id]).collect{|o| 
-      "#{o.answer_string} (#{o.obs_datetime.strftime('%d-%b-%Y')})"} rescue []
+      "#{o.answer_string.squish} (#{o.obs_datetime.strftime('%d-%b-%Y')})"} rescue []
 
     @age = @anc_patient.age rescue 0
 
@@ -1157,6 +1159,8 @@ class PatientsController < ApplicationController
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil    
     @program_id = PatientProgram.find_by_patient_id(@patient.id, :conditions => ["program_id = ?", 
         Program.find_by_name("ANC PROGRAM").id]).patient_program_id rescue nil
+    
+    # raise @anc_patient.anc_visits.to_json.to_yaml
   end
   
   def social_history
