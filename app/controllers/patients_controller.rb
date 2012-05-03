@@ -615,7 +615,9 @@ class PatientsController < ApplicationController
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
             @patient.id, EncounterType.find_by_name("SURGICAL HISTORY").id]).collect{|e| e.encounter_id},
         ConceptName.find_by_name('PROCEDURE DONE').concept_id]).collect{|o| 
-      "#{o.answer_string.squish} (#{o.obs_datetime.strftime('%d-%b-%Y')})"} rescue []
+      "#{o.answer_string.squish} (#{Observation.find(o.id + 1, 
+      :conditions => ["concept_id = ?", ConceptName.find_by_name("Date Received").concept_id]
+      ).value_datetime.to_date.strftime('%d-%b-%Y') rescue "Unknown" })"} rescue []
 
     @age = @anc_patient.age rescue 0
 
