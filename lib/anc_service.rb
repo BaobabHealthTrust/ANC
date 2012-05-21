@@ -146,10 +146,10 @@ module ANCService
       pregnancies.each{|preg|
         if preg[1]["DATE OF LAST MENSTRUAL PERIOD"]
           preg[1]["START"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date
-          preg[1]["END"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 7.day + 9.month        
+          preg[1]["END"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 7.day + 45.week # 9.month        
         else
           preg[1]["START"] = preg[0].to_date
-          preg[1]["END"] = preg[0].to_date + 7.day + 9.month
+          preg[1]["END"] = preg[0].to_date + 7.day + 45.week # 9.month
         end
       
         if active_date >= preg[1]["START"] && active_date <= preg[1]["END"]
