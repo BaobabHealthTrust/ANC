@@ -29,7 +29,7 @@ class PatientsController < ApplicationController
     
     @obstretrics_alert = (@all_names.include?("OBSTETRIC HISTORY") ? false : true)
     
-    @medics_alert = (@all_names.include?("MEDICAL HISTORY") ? false : true)
+    @medics_alert = (@all_names.include?("MEDICAL HISTORY") || @all_names.include?("SURGICAL HISTORY") ? false : true)
     
     @social_alert = (@all_names.include?("SOCIAL HISTORY") ? false : true)
     
@@ -48,35 +48,35 @@ class PatientsController < ApplicationController
         case e.type.name
         when "OBSTETRIC HISTORY"
           e.observations.each{|o|
-            @sections["OBSTETRIC HISTORY"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
+            @sections["OBSTETRIC HISTORY"][o.concept.concept_names.map(& :name).first] = (o.answer_string.squish rescue "") if !o.concept.nil?
           }
         when "MEDICAL HISTORY"
           e.observations.each{|o|
-            @sections["MEDICAL HISTORY"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
+            @sections["MEDICAL HISTORY"][o.concept.concept_names.map(& :name).first] = (o.answer_string.squish rescue "") if !o.concept.nil?
           }
         when "SOCIAL HISTORY"
           e.observations.each{|o|
-            @sections["SOCIAL HISTORY"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
+            @sections["SOCIAL HISTORY"][o.concept.concept_names.map(& :name).first] = (o.answer_string.squish rescue "") if !o.concept.nil?
           }
         when "SURGICAL HISTORY"
           e.observations.each{|o|
             if !o.concept.nil?
-              if @sections["SURGICAL HISTORY"][o.concept.concept_names.name]
-                @sections["SURGICAL HISTORY"][o.concept.concept_names.name] += "; " + (o.answer_string.squish rescue "") if !o.concept.nil?
+              if @sections["SURGICAL HISTORY"][o.concept.concept_names.map(& :name).first]
+                @sections["SURGICAL HISTORY"][o.concept.concept_names.map(& :name).first] += "; " + (o.answer_string.squish rescue "") if !o.concept.nil?
               else
-                @sections["SURGICAL HISTORY"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
+                @sections["SURGICAL HISTORY"][o.concept.concept_names.map(& :name).first] = (o.answer_string.squish rescue "") if !o.concept.nil?
               end   
             end
           }
         when "LAB RESULTS" # || "VITALS"
           e.observations.each{|o|
             if !o.concept.nil?
-              if @sections["LAB RESULTS"][o.concept.concept_names.name]
-                @sections["LAB RESULTS"][o.concept.concept_names.name] = ((o.answer_string.squish rescue 0).to_i > 
-                    (@sections["LAB RESULTS"][o.concept.concept_names.name].to_i) ? (o.answer_string.squish rescue 0) : 
-                    @sections["LAB RESULTS"][o.concept.concept_names.name] )  if !o.concept.nil? 
+              if @sections["LAB RESULTS"][o.concept.concept_names.map(& :name).first]
+                @sections["LAB RESULTS"][o.concept.concept_names.map(& :name).first] = ((o.answer_string.squish rescue 0).to_i > 
+                    (@sections["LAB RESULTS"][o.concept.concept_names.map(& :name).first].to_i) ? (o.answer_string.squish rescue 0) : 
+                    @sections["LAB RESULTS"][o.concept.concept_names.map(& :name).first] )  if !o.concept.nil? 
               else
-                @sections["LAB RESULTS"][o.concept.concept_names.name] = (o.answer_string.squish rescue "") if !o.concept.nil?
+                @sections["LAB RESULTS"][o.concept.concept_names.map(& :name).first] = (o.answer_string.squish rescue "") if !o.concept.nil?
               end   
             end
           }
@@ -136,7 +136,7 @@ class PatientsController < ApplicationController
       end
     }    
     
-    if @sections["SURGICAL HISTORY"].length > 0
+    if @sections["SURGICAL HISTORY"].length > 1
       @medics_selected = true
     end
     
@@ -219,6 +219,8 @@ class PatientsController < ApplicationController
         end
       end
     }
+    
+    # raise @sections.to_yaml
     
     session_date = session[:datetime] || Date.today
     
@@ -543,10 +545,10 @@ class PatientsController < ApplicationController
       #Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", 40, Encounter.find(:all, :conditions => ["patient_id = ?", 40]).collect{|e| e.encounter_id}, ConceptName.find_by_name('Caesarean section').concept_id])
     
       @csections = Observation.find(:all,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
+        :conditions => ["person_id = ? AND encounter_id IN (?) AND (concept_id = ? AND value_coded = ?)", @patient.id,
           Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", @patient.id, 
               EncounterType.find_by_name("OBSTETRIC HISTORY").id]).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('Caesarean section').concept_id]).length rescue nil
+          ConceptName.find_by_name('Caesarean section').concept_id, ConceptName.find_by_name('Yes').concept_id]).length rescue nil
 
       @vacuum = Observation.find(:all,
         :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
@@ -647,7 +649,7 @@ class PatientsController < ApplicationController
     @patient.encounters.find(:all, :conditions => ["encounter_type IN (?)", 
         EncounterType.find_by_name("LAB RESULTS").id]).each{|e| 
       e.observations.each{|o| 
-        syphil[o.concept.concept_names.name.upcase] = o.answer_string.upcase
+        syphil[o.concept.concept_names.map(& :name).last.upcase] = o.answer_string.squish.upcase
       }      
     }
     
@@ -664,8 +666,8 @@ class PatientsController < ApplicationController
     @patient.encounters.find(:all, 
       :order => "encounter_datetime DESC", :conditions => ["encounter_type = ?", 
         EncounterType.find_by_name("LAB RESULTS").id]).each{|e| 
-      e.observations.each{|o| hb[o.concept.concept_names.name.upcase + " " + 
-            pos.to_s] = o.answer_string.upcase; pos += 1 if o.concept.concept_names.name.upcase == "HB TEST RESULT DATE";
+      e.observations.each{|o| hb[o.concept.concept_names.map(& :name).last.upcase + " " + 
+            pos.to_s] = o.answer_string.squish.upcase; pos += 1 if o.concept.concept_names.map(& :name).last.upcase == "HB TEST RESULT DATE";
       }      
     }
     
@@ -686,11 +688,11 @@ class PatientsController < ApplicationController
     @multiple = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["encounter_type = ?", 
             EncounterType.find_by_name("CURRENT PREGNANCY").id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Multiple Gestation').concept_id]).answer_string rescue nil
+        ConceptName.find_by_name('Multiple Gestation').concept_id]).answer_string.squish rescue nil
 
-    @who = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('WHO STAGE').concept_id]).answer_string.to_i rescue nil
+    @who = ConceptName.find_by_concept_name_id(Observation.find(:last, :conditions => 
+          ["person_id = ? AND concept_id = ?", @patient.id, 
+        ConceptName.find_by_name("WHO Stage").concept_id]).value_coded_name_id).name rescue nil
 
     render :layout => false
   end
@@ -841,7 +843,7 @@ class PatientsController < ApplicationController
   def pregnancy_history
     @patient = Patient.find(params[:patient_id]) rescue nil
     
-    @pregnancies = Patient.active_range
+    @pregnancies = @anc_patient.active_range
     
     @range = []
     
@@ -952,10 +954,10 @@ class PatientsController < ApplicationController
     Encounter.find(:all, :conditions => ["encounter_type = ? AND patient_id = ?", 
         EncounterType.find_by_name("OBSTETRIC HISTORY").id, @patient.id]).each{|e| 
       e.observations.each{|obs|
-        concept = obs.concept.concept_names.name rescue nil
+        concept = obs.concept.concept_names.map(& :name).last rescue nil
         if(!concept.nil?)
           if search_set.include?(concept.upcase)
-            if obs.concept.concept_names.name.upcase.eql?("YEAR OF BIRTH")
+            if obs.concept_id == (ConceptName.find_by_name("YEAR OF BIRTH").concept_id rescue nil)
               current_level += 1
             
               @obstetrics[current_level] = {}
@@ -964,8 +966,8 @@ class PatientsController < ApplicationController
             if @obstetrics[current_level]
               @obstetrics[current_level][concept.upcase] = obs.answer_string rescue nil
               
-              if concept.upcase == "YEAR OF BIRTH" && obs.answer_string.to_i == 0
-                @obstetrics[current_level][concept.upcase] = "Unknown"
+              if obs.concept_id == (ConceptName.find_by_name("YEAR OF BIRTH").concept_id rescue nil) && obs.answer_string.to_i == 0
+                @obstetrics[current_level]["YEAR OF BIRTH"] = "Unknown"
               end
             end
                         
@@ -998,47 +1000,6 @@ class PatientsController < ApplicationController
     render :layout => false
   end
   
-  def activated_range(patient_id, date = (session[:datetime] ? session[:datetime].to_date : Date.today))    
-    patient = Patient.find(patient_id) rescue nil
-    
-    current_range = {}
-    
-    active_date = date
-      
-    pregnancies = {}; 
-    
-    patient.encounters.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
-      if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]
-        pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}  
-        e.observations.each{|o| 
-          concept = o.concept.concept_names rescue nil
-          if concept
-            if o.concept.concept_names.name == "DATE OF LAST MENSTRUAL PERIOD"         
-              pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")][o.concept.concept_names.name] = o.answer_string 
-            end
-          end
-        } 
-      end      
-    }    
-    
-    pregnancies.each{|preg|
-      if preg[1]["DATE OF LAST MENSTRUAL PERIOD"]
-        preg[1]["START"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date
-        preg[1]["END"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 45.week
-      else
-        preg[1]["START"] = preg[0].to_date
-        preg[1]["END"] = preg[0].to_date + 45.week
-      end
-      
-      if active_date >= preg[1]["START"] && active_date <= preg[1]["END"]
-        current_range["START"] = preg[1]["START"]
-        current_range["END"] = preg[1]["END"]
-      end
-    }
-    
-    return [current_range, pregnancies]
-  end
-  
   def number_of_booked_patients
     date = params[:date].to_date
     encounter_type = EncounterType.find_by_name('APPOINTMENT')
@@ -1049,7 +1010,8 @@ class PatientsController < ApplicationController
         concept_id,encounter_type.id,date.strftime('%Y-%m-%d 00:00:00'),date.strftime('%Y-%m-%d 23:59:59')])
     count = count.values unless count.blank?
     count = '0' if count.blank?
-    render :text => count
+    
+    render :text => (count.first.to_i > 0 ? {params[:date] => count}.to_json : 0)
   end
 
   def tab_social_history
@@ -1097,7 +1059,8 @@ class PatientsController < ApplicationController
   end
 
   def obstertic_medical_examination_label
-    print_string = @anc_patient.obstetric_medical_history_label + @anc_patient.detailed_obstetric_history_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
+    print_string = "#{@anc_patient.detailed_obstetric_history_label}" + 
+      "#{@anc_patient.obstetric_medical_history_label}" rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
@@ -1138,8 +1101,8 @@ class PatientsController < ApplicationController
   end
 
   def current_visit_label
-    print_string = @anc_patient.visit_summary_label((session[:datetime] ? session[:datetime].to_date : Date.today)) + 
-      @anc_patient.visit_summary2_label((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
+    print_string = "#{@anc_patient.visit_summary_label((session[:datetime] ? session[:datetime].to_date : Date.today))}" + 
+      "#{@anc_patient.visit_summary2_label((session[:datetime] ? session[:datetime].to_date : Date.today))}" rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 

@@ -50,7 +50,7 @@
           EDD:
         </th>
         <td>
-          <%= @current_range[0]["END"].to_date.strftime("%d/%b/%Y") rescue "&nbsp;" %>
+          <%= (@current_range[0]["END"].to_date - 5.week).strftime("%d/%b/%Y") rescue "&nbsp;" %>
         </td>
         <th style="padding-left: 30px;">
           Planned Delivery Place:

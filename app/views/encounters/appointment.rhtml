@@ -305,13 +305,14 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
 
   <%= text_field_tag("observations[][value_datetime]", nil, #(Time.now + 1.month).year,
-    { :helpText => "Next Appointment",
+    { # :helpText => "Appointment",
       :field_type => 'calendar',
       :id => 'next_appointment_date',
       :startweekdate => "#{@pregnancystart.strftime("%Y-%m-%d")}",
       :endweekdate => "#{(@pregnancystart + 9.month).strftime("%Y-%m-%d")}",
       :tt_onLoad => "showCategory('Next Appointment'); __$('category').style.opacity = 0.75;",
-      :maxDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
+      :minDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
+      :ajaxCalendarUrl => "/patients/number_of_booked_patients?date=",
       :tt_onUnLoad => "hideInfo();"}) %>
 
   <%= submit_tag "Finish" %>

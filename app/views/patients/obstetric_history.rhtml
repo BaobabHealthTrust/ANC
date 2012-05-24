@@ -54,9 +54,9 @@
     __$('ever_had_c_sections').value = 'No';
     __$('ever_had_a_vacuum_extraction').value = 'No';
     }; if(__$('multiple_pregnancy').value.toLowerCase()=='no'){
-      __$('enter_number_of_abortions').setAttribute('absoluteMax', (parseInt(__$('enter_gravida').value) - 
-        parseInt(__$('enter_number_of_deliveries').value) - 1));
-      __$('enter_number_of_abortions').setAttribute('absoluteMin', (parseInt(__$('enter_gravida').value) - 
+      __$('enter_number_of_abortions').setAttribute('validationRule', '[' + (parseInt(__$('enter_gravida').value) - 
+        parseInt(__$('enter_number_of_deliveries').value) - 1) + ']');
+      __$('enter_number_of_abortions').setAttribute('validationMessage', 'Expected value is ' + (parseInt(__$('enter_gravida').value) - 
         parseInt(__$('enter_number_of_deliveries').value) - 1));
     }"
   } %>
@@ -66,8 +66,10 @@
     :helptext => "Enter Number Of Abortions",
     :tt_pageStyleClass => "NumbersWithUnknown",
     :condition => "__$('enter_gravida').value > 1",
-    :min => 0,
-    :max => 5
+    # :min => 0,
+    # :max => 5,
+    :validationRule => "[0-5]",
+    :validationMessage => "Check your value"
   } %>
 
   <% (1..8).each{|e| %>
@@ -115,7 +117,8 @@
       :condition => "__$('enter_number_of_deliveries').value >= #{e}",
       :field_type => "number",
       :tt_pageStyleClass => "NumbersWithUnknown",
-      :max => 9
+      :max => 9,
+      :min => 6
     } %>
 
     <%= touch_text_field_tag "Labour Duration", @patient, nil,
