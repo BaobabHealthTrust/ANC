@@ -7,9 +7,9 @@ url = url[url.index("/"), url.length - url.index("/")]
 %>
 <script type="text/javascript" language="javascript">
   <!--
-  tt_cancel_show = "<%= (!request.referrer.blank? ? "#{url}" : 
+  tt_cancel_show = "<%= (!request.referrer.blank? ? "/patients/show/#{@patient.id}" : 
     "/patients/current_visit/?patient_id=#{@patient.patient_id}") %>";
-  tt_cancel_destination = "<%= (!request.referrer.blank? ? "#{url}" : 
+  tt_cancel_destination = "<%= (!request.referrer.blank? ? "/patients/show/#{@patient.id}" : 
     "/patients/current_visit/?patient_id=#{@patient.patient_id}") %>";
 
   var generics = <%= @generics.sort.to_json %>;
@@ -34,7 +34,7 @@ url = url[url.index("/"), url.length - url.index("/")]
     min-width: 560px;
     background-color: #87d469;
     z-index: 1000;
-    -moz-border-radius: 20px;
+    border-radius: 20px;
     text-align: center;
     border: 2px outset #87d469;    
     font-size: 2em;

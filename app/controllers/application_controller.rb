@@ -97,7 +97,7 @@ class ApplicationController < GenericApplicationController
         "APPOINTMENT", nil, nil, "TODAY", nil, true, (current_user_activities.include?("Manage Appointments"))], 
       
       "Give Drugs" => [13, "/prescriptions/give_drugs/?patient_id=#{patient.id}", 
-        "TREATMENT", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Give Drugs"))], 
+        "TREATMENT", nil, nil, "TODAY", 7124, false, (current_user_activities.include?("Give Drugs"))], 
       
       "Update Outcome" => [14, "/patients/outcome/?patient_id=#{patient.id}", "UPDATE OUTCOME", 
         nil, nil, "TODAY", nil, true, (current_user_activities.include?("Update Outcome"))], 

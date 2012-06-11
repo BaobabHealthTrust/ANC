@@ -126,7 +126,7 @@ class PrescriptionsController < ApplicationController
       user_person_id = User.find_by_user_id(current_user.user_id).person_id
     end
 
-    @encounter = PatientService.current_treatment_encounter( @patient, session_date, user_person_id)
+    @encounter = encounter # PatientService.current_treatment_encounter( @patient, session_date, user_person_id)
     @diagnosis = Observation.find(params[:diagnosis]) rescue nil
     @suggestions.each do |suggestion|
       unless (suggestion.blank? || suggestion == '0' || suggestion == 'New Prescription')

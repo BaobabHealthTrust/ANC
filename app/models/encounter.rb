@@ -54,6 +54,11 @@ EOF
       # o = "TREATMENT NOT DONE" if self.patient.treatment_not_done
       o = "No prescriptions have been made" if o.blank?
       o
+    elsif name == 'DISPENSING'
+      o = orders.collect{|order| order.drug_order}.join(", ")
+      # o = "TREATMENT NOT DONE" if self.patient.treatment_not_done
+      o = "No TTV vaccine given" if o.blank?
+      o
     elsif name == 'VITALS'
       temp = observations.select {|obs| obs.concept.concept_names.map(&:name).collect{|n| n.upcase}.include?("TEMPERATURE (C)") && "#{obs.answer_string}".upcase != 'UNKNOWN' }
       weight = observations.select {|obs| obs.concept.concept_names.map(&:name).collect{|n| n.upcase}.include?("WEIGHT (KG)") && "#{obs.answer_string}".upcase != '0.0' }
