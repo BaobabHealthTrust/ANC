@@ -104,7 +104,7 @@ class ApplicationController < GenericApplicationController
       
       "HIV Clinic Registration" => [15, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/hiiv_clinic_registration?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
+          "/encounters/new/hiv_clinic_registration?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
         "HIV CLINIC REGISTRATION", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("HIV Clinic Registration") && 
             @anc_patient.hiv_status.downcase == "positive")], 
       
