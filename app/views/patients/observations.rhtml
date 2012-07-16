@@ -52,27 +52,29 @@
 </style>
 
 <% form_tag :controller => "encounters", :action => "create" do |f| %>
+
+  <%session_date = session[:datetime] || Time.now() %>
   <%= hidden_field_tag "encounter[encounter_type_name]", "OBSERVATIONS" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", session_date %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
-  <%session_date = session[:datetime] || Time.now() %>
 
   <%= touch_numeric_tag "FUNDUS", @patient, nil,
     {:id => "enter_fundal_height",
     :helptext => "Fundus (weeks)",
     :tt_pageStyleClass => "NumbersWithUnknown",
-    :max => 42,    
+    :min => "#{(!@anc_patient.fundus_by_lmp(session_date).nil? ? (@anc_patient.fundus_by_lmp(session_date).to_i - 2) : 42)}",
+    :max => "#{(!@anc_patient.fundus_by_lmp(session_date).nil? ? (@anc_patient.fundus_by_lmp(session_date).to_i + 2) : 42)}",
     :absoluteMax => 45,
     :tt_onLoad => "showCategory('ANC Examinations');"
-  } %>
+  }, session_date %>
 
   <% @presentation = ["", "Cephalic", "Breech", "Ball"] %>
 
   <%= touch_select_tag "PRESENTATION", @patient, options_for_select(@presentation),
     {:id => "presentation",
     :helptext => "Presentation",
-    :tt_pageStyleClass => "NoKeyboard" } %>
+    :tt_pageStyleClass => "NoKeyboard" }, session_date %>
 
   <% @position = ["", "Vertex", "Oblique", "Transverse", "Breech"] %>
 
@@ -80,13 +82,13 @@
     {:id => "position",
     :helptext => "Position",
     :tt_pageStyleClass => "NoKeyboard",
-    :condition => "__$('presentation').value != 'Ball'"} %>
+    :condition => "__$('presentation').value != 'Ball'"}, session_date %>
 
   <%= touch_select_tag "FETAL HEART BEAT", @patient, 
     options_for_select([["", ""], ["Heard", "Heard"], ["Not heard", "Not heard"], 
       ["Fetal Movement Felt (FMF)", "Fetal Movement Felt (FMF)"]]),
     {:id => "enter_fetal_heart",
-    :helptext => "Fetal Heart Rate" } %>
+    :helptext => "Fetal Heart Beat" }, session_date %>
 
 
   <%#--------------------------------------------------------%>
@@ -164,7 +166,7 @@
   <%#= hidden_field_tag("observations[][value_text]", nil) %>
   <%#= hidden_field_tag("observations[][concept_name]", "DIAGNOSIS", options) %>
   <%#= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%#= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+  <%#= hidden_field_tag("observations[][obs_datetime]", session_date) %>
 
   <% options[:tt_onLoad] = "setTimeout(updateNextFinish, 20); changeUnknownToNone();" %>
   <script>
@@ -206,7 +208,7 @@
     <%= hidden_field_tag("observations[][value_text]", nil) %>
     <%= hidden_field_tag("observations[][concept_name]", "DIAGNOSIS", options) %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+    <%= hidden_field_tag("observations[][obs_datetime]", session_date) %>
   <% end %>
 
   <%= submit_tag 'Finish' %>

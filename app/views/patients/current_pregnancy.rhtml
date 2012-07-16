@@ -53,6 +53,8 @@
 
         gestation = String(Math.floor(s / (24 * 60 * 60 * 7 * 1000)));
 
+        __$("week_of_first_visit").value = gestation;
+
         theDate.setMonth(theDate.getMonth() + 9);
 
         edod = (theDate.getDate() + "-" + month[theDate.getMonth()] + "-" + theDate.getFullYear());
@@ -114,6 +116,7 @@
     d.setMonth(d.getMonth() - parseInt(period));
     
     __$("lmp").value = d.getFullYear() + "-" + padZeros((d.getMonth() + 1), 2) + "-" + padZeros(d.getDate(),2);
+    __$("week_of_first_visit").value = Math.round(parseInt(period) * 30 / 7);
     
   }
 
@@ -131,11 +134,12 @@
 </style>
 
 <% form_tag :controller => "encounters", :action => "create" do |f| %>
+
+  <%session_date = session[:datetime] || Time.now() %>
   <%= hidden_field_tag "encounter[encounter_type_name]", "CURRENT PREGNANCY" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", session_date %>
   <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
-  <%session_date = session[:datetime] || Time.now() %>
 
   <% if !@patient.patient_programs.current.local.map(&:program).map(&:name).include?('ANC PROGRAM') %>
     <%= hidden_field_tag("programs[][patient_program_id]", nil) %>
@@ -161,7 +165,7 @@
   } %>
 
   <%= text_field_tag "Estimate LMP", nil,
-    {:id => "",
+    {:id => "estimate_lmp",
     :condition => "__$('lmp').value == 'Unknown'",
     :helpText => "Gestation (months)",
     :field_type => "number",
@@ -173,14 +177,14 @@
 %>
 
   <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"], ["Uknown", "Uknown"]]),
-    {:id => "week_of_first_visit",
+    {:id => "multiple_gestation",
     :helptext => "Is This a Multiple Pregnancy?" } %>
 
-  <%= touch_select_tag "Week of First Visit", @patient, 
-    options_for_select(["", "0-12", "13-24", "25-28", "28+"]),
-    {:id => "week_of_first_visit",
-    :helptext => "Week of First Visit",
-    :tt_onUnload => "checkLMP()" } %>
+  <%#= touch_select_tag "Week of First Visit", @patient,
+  options_for_select(["", "0-12", "13-24", "25-28", "28+"]),
+  {:id => "week_of_first_visit",
+  :helptext => "Week of First Visit",
+  :tt_onUnload => "checkLMP()" } %>
 
   <%= touch_text_field_tag "Planned delivery place", @patient, nil,
     {:id => "planned_delivery_place",
@@ -189,11 +193,15 @@
     :tt_onLoad => "addHereButton()",
     :tt_onUnLoad => "removeHereButton()" } %>
 
-  <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+  <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], 
+      ["Given Today", "Given Today"],
+      ["Given during previous ANC visit for current pregnancy", "Given during previous ANC visit for current pregnancy"],
+      ["Not given today or during current pregnancy", "Not given today or during current pregnancy"]
+    ]),
     {:id => "bed_net",
-    :helptext => "Bed Net Given?" } %>
+    :helptext => "Bed Net" } %>
 
-  <%= touch_date_tag "Date received", @patient, nil,
+  <%#= touch_date_tag "Date received", @patient, nil,
     {:id => "bed_date",
     :helptext => "Date Bet Net Given",
     :condition => "__$('bed_net').value == 'Yes'"
@@ -212,7 +220,13 @@
   <%= hidden_field_tag("observations[][concept_name]",  "TT STATUS", {:id => 'tt_status_concept_name'}) %>
   <%= text_field_tag("observations[][value_numeric]",   nil, options) %>
   <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
+  <%= hidden_field_tag("observations[][obs_datetime]",  session_date) %>
+
+  <%= hidden_field_tag("observations[][concept_name]",  "Week of First Visit") %>
+  <%= hidden_field_tag("observations[][value_numeric]",   nil, {
+      :id => "week_of_first_visit"}) %>
+  <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
+  <%= hidden_field_tag("observations[][obs_datetime]",  session_date) %>
 
   <%= submit_tag 'Finish' %>
 <% end %>

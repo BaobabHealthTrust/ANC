@@ -78,7 +78,7 @@
     <%= select_tag("choice", options_for_select(["", "HB Test Result", 
           "HIV Test Result", "Syphilis Test Result", "Urine Protein"]), 
       {
-        :helpText => 'Select Test(s)', :id => "choice", :multiple => true,       
+        :helpText => 'Select Available Test Results', :id => "choice", :multiple => true,       
         :tt_onLoad => "showCategory('Lab Results');",
         :optional => :true
       })%>
@@ -87,7 +87,7 @@
 
   <%= touch_text_field_tag "HB Test Result", @patient, nil,
     {:id => "hb_result",
-    :helptext => "HB Test Result",
+    :helptext => "HB Test Result (grams)",
     :field_type => "number",
     :tt_pageStyleClass => "NumbersWithUnknownAndDecimal",
     :min => 2,
@@ -98,7 +98,7 @@
 
   <%= touch_date_tag "HB Test Result Date", @patient, nil,
     {:id => "enter_date_hb1_result_given",
-    :helptext => "Date HB Test Result Given",
+    :helptext => "Date HB Test Result Done",
     :condition => "!__$('hb_result').value.match(/Not\\sDone/)#{ (params[:update] ? 
     " && getSelected().match(/HB\sTest\sResult/)" : "") }",
     :max => "#{session[:datetime].to_date rescue Date.today}" } %>
@@ -113,7 +113,7 @@
 
   <%= touch_date_tag "Syphilis Test Result Date", @patient, nil,
     {:id => "enter_date_syphilis_result_given",
-    :helptext => "Date Syphilis Test Result Given",
+    :helptext => "Date Syphilis Test Result Done",
     :max => "#{session[:datetime].to_date rescue Date.today}",
     :condition => "__$('syphilis_result').value != 'Not Done'#{ (params[:update] ? 
     " && getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
@@ -135,7 +135,7 @@
 
   <%= touch_date_tag "HIV test date", @patient, nil,
     {:id => "enter_date_result_given",
-    :helptext => "Date Result Given",
+    :helptext => "Date Result Done",
     :condition => "__$('new_test_result_at_current_facility').value != 'Not Done'#{ (params[:update] ? 
     " && getSelected().match(/HIV\sTest\sResult/)" : "") }",
     :tt_BeforeUnload => "checkHIVTestDate()",

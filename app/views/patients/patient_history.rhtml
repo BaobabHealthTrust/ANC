@@ -45,17 +45,17 @@
       <div style="display: table-row">
         <div style="display: table-cell">
           <% if current_user.activities.include?("Obstetric History") %>
-            <button class="<%= (@encounters.include?("OBSTETRIC HISTORY") ? "gray" : "blue") %>" 
-                    onclick="<%= (!@encounters.include?("OBSTETRIC HISTORY") ? "window.location = '/patients/obstetric_history/?patient_id=#{@patient.id}'" : "") %>" >
-              <span>Obstetric History</span>
+            <button class="blue"
+                    onclick="<%= "window.location = '/patients/obstetric_history/?patient_id=#{@patient.id}'" %>" >
+              <span><%= (@encounters.include?("OBSTETRIC HISTORY") ? "Update Obstetric History" : "Obstetric History") %></span>
             </button>
           <% end %>
         </div>
         <div style="display: table-cell">
           <% if current_user.activities.include?("Surgical History") %>
-            <button class="<%= (@encounters.include?("SURGICAL HISTORY") ? "gray" : "blue") %>"  
-                    onclick="<%= (!@encounters.include?("SURGICAL HISTORY") ? "window.location = '/patients/surgical_history/?patient_id=#{@patient.id}'" : "") %>">
-              <span>Surgical History</span>
+            <button class="blue"
+                    onclick="<%= "window.location = '/patients/surgical_history/?patient_id=#{@patient.id}'" %>">
+              <span><%= (@encounters.include?("SURGICAL HISTORY") ? "Update Surgical History" : "Surgical History") %></span>
             </button>
           <% end %>
         </div>
@@ -63,17 +63,17 @@
       <div style="display: table-row">
         <div style="display: table-cell">
           <% if current_user.activities.include?("Medical History") %>
-            <button class="<%= (@encounters.include?("MEDICAL HISTORY") ? "gray" : "blue") %>"  
-                    onclick="<%= (!@encounters.include?("MEDICAL HISTORY") ? "window.location = '/patients/medical_history/?patient_id=#{@patient.id}'" : "") %>">
-              <span>Medical History</span>
+            <button class="blue"
+                    onclick="<%= "window.location = '/patients/medical_history/?patient_id=#{@patient.id}'" %>">
+              <span><%= (@encounters.include?("MEDICAL HISTORY") ? "Update Medical History" : "Medical History") %></span>
             </button>
           <% end %>
         </div>
         <div style="display: table-cell">
           <% if current_user.activities.include?("Social History") %>
-            <button  class="<%= (@encounters.include?("SOCIAL HISTORY") ? "gray" : "blue") %>"  
-                     onclick="<%= (!@encounters.include?("SOCIAL HISTORY") ? "window.location = '/patients/social_history/?patient_id=#{@patient.id}'" : "") %>">
-              <span>Social History</span>
+            <button  class="blue"
+                     onclick="<%= "window.location = '/patients/social_history/?patient_id=#{@patient.id}'" %>">
+              <span><%= (@encounters.include?("SOCIAL HISTORY") ? "Update Social History" : "Social History") %></span>
             </button>
           <% end %>
         </div>

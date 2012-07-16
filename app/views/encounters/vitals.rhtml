@@ -172,9 +172,10 @@
     :allowFreeText => 'true',
   } %>
 
+  <%session_date = session[:datetime] || Time.now() %>
   <%= hidden_field_tag "encounter[encounter_type_name]", "VITALS" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", session_date %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
   <% options = [""] 
@@ -222,7 +223,7 @@
       :tt_pageStyleClass => "Numeric NumbersOnlyWithDecimal"} %>
     <%= hidden_field_tag("observations[][concept_name]", "TEMPERATURE (C)") %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+    <%= hidden_field_tag("observations[][obs_datetime]", session_date) %>
   <% end %>
 
   <% if current_user.activities.include?("Weight and Height") %>
@@ -243,7 +244,7 @@
         :tt_pageStyleClass => "NumbersWithUnknownAndDecimal"} %>
       <%= hidden_field_tag("observations[][concept_name]", "WEIGHT (KG)") %>
       <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-      <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+      <%= hidden_field_tag("observations[][obs_datetime]", session_date) %>
 
     <% end %>
 
@@ -254,7 +255,7 @@
         <%= hidden_field_tag "observations[][value_numeric]",@anc_patient.current_height %>
         <%= hidden_field_tag("observations[][concept_name]", "HEIGHT (CM)") %>
         <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-        <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+        <%= hidden_field_tag("observations[][obs_datetime]", session_date) %>
 
       <% else %>
 
@@ -273,7 +274,7 @@
           :tt_pageStyleClass => "Numeric NumbersWithUnknown"} %>
         <%= hidden_field_tag("observations[][concept_name]", "HEIGHT (CM)") %>
         <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-        <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+        <%= hidden_field_tag("observations[][obs_datetime]", session_date) %>
 
       <% end %>
 
@@ -286,31 +287,33 @@
 
       <% options = default.merge({
           :id => "systolic_blood_pressure",
-          :helptext => "Systolic Blood Pressure",
+          :helptext => "Systolic Blood Pressure (mm Hg)",
           :field_type => "number",
           :tt_pageStyleClass => "NumbersWithUnknown",
           :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
-          :tt_onUnLoad => "clearTimeout(timedEvent);",
-          :absoluteMin => 0,
+          :tt_onUnLoad => "clearTimeout(timedEvent); __$('diastolic_blood_pressure').setAttribute('absoluteMax', __$('systolic_blood_pressure').value)",
+          :absoluteMin => 1,
+          :min => 110,
           :condition => "if(#{options.length} > 2){getSelected().match(/BP/)}else{true}",
-          :max => 250
+          :max => 140
         }) %>
 
       <%= text_field_tag("observations[][value_numeric]", nil,options) %>
       <%= hidden_field_tag("observations[][concept_name]",  "SYSTOLIC BLOOD PRESSURE", 
         {:id => 'systolic_blood_pressure_concept_name'}) %>
       <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
-      <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
+      <%= hidden_field_tag("observations[][obs_datetime]",  session_date) %>
 
       <% options = default.merge({
           :id => "diastolic_blood_pressure",
-          :helptext => "Diastolic Blood Pressure",
+          :helptext => "Diastolic Blood Pressure (mm Hg)",
           :field_type => "number",
           :tt_pageStyleClass => "NumbersWithUnknown",
           :tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100);",
           :tt_onUnLoad => "clearTimeout(timedEvent);",
-          :absoluteMin => 0,
-          :max => 180,
+          :absoluteMin => 1,
+          :min => 60,
+          :max => 80,
           :condition => "/*((#{options.length} > 2) ? getSelected().match(/BP/) : true) && */" + 
             "__$('systolic_blood_pressure').value.toLowerCase() != 'unknown'"
         }) %>
@@ -318,7 +321,7 @@
       <%= text_field_tag("observations[][value_numeric]", nil,options) %>
       <%= hidden_field_tag("observations[][concept_name]",  "DIASTOLIC BLOOD PRESSURE", {:id => 'diastolic_blood_pressure_concept_name'}) %>
       <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
-      <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
+      <%= hidden_field_tag("observations[][obs_datetime]",  session_date) %>
 
     <% end %>
 
@@ -332,24 +335,24 @@
         <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'bmi'}) %>
         <%= hidden_field_tag("observations[][concept_name]", "BODY MASS INDEX, MEASURED") %>
         <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-        <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+        <%= hidden_field_tag("observations[][obs_datetime]", session_date) %>
 
       <% else %>
 
         <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'weight_for_height'}) %>
         <%= hidden_field_tag("observations[][concept_name]", "WT FOR HT") %>
         <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-        <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+        <%= hidden_field_tag("observations[][obs_datetime]", session_date) %>
 
         <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'weight_for_age'}) %>
         <%= hidden_field_tag("observations[][concept_name]", "WT FOR AGE") %>
         <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-        <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+        <%= hidden_field_tag("observations[][obs_datetime]", session_date) %>
 
         <%= hidden_field_tag("observations[][value_numeric]", nil, {:id => 'height_for_age'}) %>
         <%= hidden_field_tag("observations[][concept_name]", "HT FOR AGE") %>
         <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-        <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+        <%= hidden_field_tag("observations[][obs_datetime]", session_date) %>
 
       <% end %>
 

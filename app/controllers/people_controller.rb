@@ -21,7 +21,7 @@ class PeopleController < GenericPeopleController
     person = PatientService.create_patient_from_dde(params) if create_from_dde_server
 
     unless person.blank?
-      if use_filing_number and hiv_session
+      if use_filing_number and hiv_session and false
         PatientService.set_patient_filing_number(person.patient) 
         archived_patient = PatientService.patient_to_be_archived(person.patient)
         message = PatientService.patient_printing_message(person.patient,archived_patient,creating_new_patient = true)
@@ -115,8 +115,9 @@ class PeopleController < GenericPeopleController
 			end
 		end
 		@relation = params[:relation]
-		@people = PatientService.person_search(params)
+		@people = ANCService.person_search(params)
 		@patients = []
+
 		@people.each do | person |
 			patient = PatientService.get_patient(person) rescue nil
 			@patients << patient

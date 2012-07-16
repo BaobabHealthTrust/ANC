@@ -225,7 +225,7 @@ class PatientsController < ApplicationController
     session_date = session[:datetime] || Date.today
     
     @next_task = main_next_task(Location.current_location.id, @patient, session_date.to_date) rescue nil        
-    
+
     @time = @patient.encounters.first(:conditions => ["DATE(encounter_datetime) = ?", 
         Date.today.strftime("%Y-%m-%d")]).encounter_datetime rescue Time.now
     
@@ -917,7 +917,7 @@ class PatientsController < ApplicationController
     @current_district = @patient.person.addresses.first.state_province rescue ''
     @home_district = @patient.person.addresses.first.address2 rescue ''
 
-    @primary_phone = @anc_patient.phone_numbers[:cell_phone_number] # rescue ''
+    @primary_phone = @anc_patient.phone_numbers[:cell_phone_number] rescue ''
     @secondary_phone = @anc_patient.phone_numbers["Home Phone Number"] rescue ''
 
     @occupation = @anc_patient.get_attribute("occupation") rescue ''
@@ -932,7 +932,7 @@ class PatientsController < ApplicationController
   end
 
   def update_demographics
-    Person.update_demographics(params)
+    ANCService.update_demographics(params)
     redirect_to :action => 'demographics', :patient_id => params['person_id'] and return
   end
 
@@ -1054,8 +1054,12 @@ class PatientsController < ApplicationController
   end
   
   def print_history
+    if @anc_patient.gravida(session[:datetime] || Time.now()).to_i > 1
     print_and_redirect("/patients/obstertic_medical_examination_label/?patient_id=#{@patient.id}", 
-      next_task(@patient))  
+      next_task(@patient))
+    else
+      redirect_to next_task(@patient) and return
+    end
   end
 
   def obstertic_medical_examination_label
@@ -1151,7 +1155,17 @@ class PatientsController < ApplicationController
     @religions << "Other"
     # raise @religions.to_yaml
   end
-  
+
+  def graph
+		@person = Person.find(params[:patient_id]) rescue nil
+    render :layout => false
+  end
+
+  def weight_fundus_graph
+		@person = Person.find(params[:patient_id]) rescue nil
+    render :layout => false
+  end
+
   def next_url
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil 
     

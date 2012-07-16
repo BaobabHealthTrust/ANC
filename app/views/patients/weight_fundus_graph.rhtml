@@ -1,0 +1,101 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Weight Fundus Graph</title>
+    <script language="javascript" type="text/javascript" src="/javascripts/flot/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="/javascripts/flot/jquery.flot.js"></script>
+    <style type="text/css">
+
+      .xLabel {
+        font-size: 0.8em;
+        /*-moz-transform: rotate(45deg);*/
+      }
+
+      .legend {
+        opacity: 0.5;
+      }
+
+      .yAxis .tickLabel {
+        color: green;
+      }
+
+      .y2Axis .tickLabel {
+        color: rgb(192,0,0);
+      }
+    </style>
+  </head>
+  <body>
+    <b>Weight Fundus Graph - History</b>
+
+    <div id="placeholder" style="width:285px; height:195px; margin-left: -4px;"></div>
+
+    <script id="source" language="javascript" type="text/javascript">
+      var weights = [];
+      var fundi = [];
+      
+      var weights = [
+      <% @min = (!@anc_patient.lmp(session[:datetime] || Time.now()).nil? ?
+          @anc_patient.lmp(session[:datetime] || Time.now()) : Time.now).to_time
+      @max = (!@anc_patient.lmp(session[:datetime] || Time.now()).nil? ?
+          (@anc_patient.lmp(session[:datetime] || Time.now()) + 43.weeks) : Time.now).to_time
+
+      @obs = @person.observations.find_by_concept_name("WEIGHT (KG)")
+      @obs.sort_by{|obs| obs.obs_datetime}.each do |obs|
+        @min = obs.obs_datetime if obs.obs_datetime < @min %>
+      [<%= obs.obs_datetime.to_f -%>, <%= obs.value_numeric -%>],<% end %>
+  ];
+
+  fundi = [
+      <% @min = (!@anc_patient.lmp(session[:datetime] || Time.now()).nil? ?
+          @anc_patient.lmp(session[:datetime] || Time.now()) : Time.now).to_time
+      @max = (!@anc_patient.lmp(session[:datetime] || Time.now()).nil? ?
+          (@anc_patient.lmp(session[:datetime] || Time.now()) + 43.weeks) : Time.now).to_time
+
+      @fundals = @person.observations.find_by_concept_name("Fundus")
+      @fundals.sort_by{|obs| obs.obs_datetime}.each do |obs|
+        @min = obs.obs_datetime if obs.obs_datetime < @min %>
+      [<%= obs.obs_datetime.to_f -%>, <%= obs.value_numeric -%>],<% end %>
+  ];
+
+  var patient_ticks = [
+      <% @first = Time.mktime(@min.year, @min.month, 1) # move to the start of the month
+      @last = Time.mktime(@max.year + (@max.month == 12 ? 1 : 0), @max.month + (@max.month < 12 ? 1 : -11), 1)
+      while (@first <= @last) do -%>
+      [<%= @first.to_f -%>, "<div class='xLabel'><%= @first.strftime("%b") -%><br/><b><%= @first.strftime("%Y") if @first.month == 1 -%></b></div>"],
+        <% @first = Time.mktime(@first.year + (@first.month == 12 ? 1 : 0), @first.month + (@first.month < 12 ? 1 : -11), 1) -%>
+      <% end -%>
+  ];
+
+  var range = <%= 9.months.to_f -%>;
+  var min = <%= @min.to_f -%>;
+  var max = <%= @max.to_f -%>;
+  var max_tick = "<%= @max.strftime("%d-%b") -%>";
+  //    patient_data.push([max, 0]);
+
+  if(<%= !@anc_patient.lmp(session[:datetime] || Time.now()).blank? %> == true){
+    $(function () {
+                
+      $.plot($("#placeholder"),
+      [ { data: weights, label: "Weight (kg)", color: "green",
+          points: { show: true},
+          lines: { show: true, fill: false, fillColor: "rgb(61,235,61)" },
+          bars: { show: false } },
+        { data: fundi, label: "Fundus (wks)", yaxis: 2, color: "rgb(192,0,0)",
+          points: { show: true},
+          lines: { show: true, fill: false, fillColor: "rgb(235,61,61)" },
+          bars: { show: false } }],
+      {
+        xaxis: { min: max - range, max: max, ticks: patient_ticks },
+        yaxis: { min: 0, max: 120 },
+        y2axis: { min:0, max: 45,
+          tickFormatter: function (v, axis) { return v.toFixed(axis.tickDecimals) +"" }},
+        legend: { position: 'sw' } });
+    });
+  } else {
+    document.getElementById("placeholder").innerHTML =
+      "<div style='margin-left: 50px; font-style: italic;'><br/><br/>No complete data yet</div>";
+  }
+
+    </script>
+  </body>
+</html> 

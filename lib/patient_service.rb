@@ -477,7 +477,7 @@ module PatientService
     return false
   end
 
-  def self.get_patient_attribute_value(patient, attribute_name)
+  def self.get_patient_attribute_value(patient, attribute_name, session_date = Date.today)
 
     patient_bean = get_patient(patient.person)
     if patient_bean.sex.upcase == 'MALE'
@@ -492,10 +492,10 @@ module PatientService
     when "RESIDENCE"
       return patient_bean.address
     when "CURRENT_HEIGHT"
-      obs = patient.person.observations.recent(1).question("HEIGHT (CM)").all
+      obs = patient.person.observations.before(session_date).question("HEIGHT (CM)").all
       return obs.first.answer_string.to_f rescue 0
     when "CURRENT_WEIGHT"
-      obs = patient.person.observations.recent(1).question("WEIGHT (KG)").all
+      obs = patient.person.observations.before(session_date).question("WEIGHT (KG)").all
       return obs.first.answer_string.to_f rescue 0
     when "INITIAL_WEIGHT"
       obs = patient.person.observations.old(1).question("WEIGHT (KG)").all
@@ -547,25 +547,27 @@ module PatientService
     appointments
   end
   
-
-
   def self.get_patient_identifier(patient, identifier_type)
-    patient_identifier_type_id = PatientIdentifierType.find_by_name(identifier_type).patient_identifier_type_id rescue nil
+    patient_identifier_type_id = PatientIdentifierType.find_by_name(identifier_type).patient_identifier_type_id rescue nil   
     patient_identifier = PatientIdentifier.find(:first, :select => "identifier",
       :conditions  =>["patient_id = ? and identifier_type = ?", patient.id, patient_identifier_type_id],
       :order => "date_created DESC" ).identifier rescue nil
-    return patient_identifier
+      return patient_identifier      
   end
 
   def self.patient_printing_message(new_patient , archived_patient , creating_new_filing_number_for_patient = false)
     arv_code = Location.current_arv_code
-    
     new_patient_bean = get_patient(new_patient.person)
     archived_patient_bean = get_patient(archived_patient.person) rescue nil
     
     new_patient_name = new_patient_bean.name
     new_filing_number = patient_printing_filing_number_label(new_patient_bean.filing_number)
-    old_archive_filing_number = patient_printing_filing_number_label(new_patient_bean.archived_filing_number)
+    inactive_identifier = PatientIdentifier.inactive(:first,:order => 'date_created DESC',
+                           :conditions => ['identifier_type = ? AND patient_id = ?',PatientIdentifierType.
+                           find_by_name("Archived filing number").patient_identifier_type_id,
+                            archived_patient.person.id]).identifier rescue nil
+    old_archive_filing_number = patient_printing_filing_number_label(inactive_identifier)
+    
     unless archived_patient.blank?
       old_active_filing_number = patient_printing_filing_number_label(old_filing_number(archived_patient))
       new_archive_filing_number = patient_printing_filing_number_label(archived_patient_bean.archived_filing_number)
@@ -628,14 +630,6 @@ EOF
   <th style="text-align:left;">Old label</th>
   <th style="text-align:left;">New label</th>
 </tr>
-
-<tr>
-  <td style='text-align:left;'>Active → Dormant</td>
-  <td class = 'filing_instraction'>#{archived_patient_bean.name}</td>
-  <td class = 'old_label'>#{old_active_filing_number}</td>
-  <td class='new_label'>#{new_archive_filing_number}</td>
-</tr>
-
 <tr>
   <td style='text-align:left;'>Add → Active</td>
   <td class = 'filing_instraction'>#{new_patient_name}</td>
@@ -718,8 +712,8 @@ EOF
   end
 
   def self.drug_given_before(patient, date = Date.today)
-    clinic_encounters = ["APPOINTMENT", "VITALS","ART_INITIAL","HIV RECEPTION",
-      "ART VISIT","TREATMENT","DISPENSING",'ART ADHERENCE','HIV STAGING']
+    clinic_encounters = ["APPOINTMENT", "VITALS","HIV CLINIC CONSULTATION","HIV RECEPTION",
+      "HIV CLINIC REGISTRATION","TREATMENT","DISPENSING",'ART ADHERENCE','HIV STAGING']
     encounter_type_ids = EncounterType.find_all_by_name(clinic_encounters).collect{|e|e.id}
 
     latest_encounter_date = Encounter.find(:first,:conditions =>["patient_id=? AND encounter_datetime < ? AND 
@@ -786,7 +780,7 @@ EOF
     patient.mothers_surname = person.names.first.family_name2
     patient.eid_number = get_patient_identifier(person.patient, 'EID Number') rescue nil
     patient.pre_art_number = get_patient_identifier(person.patient, 'Pre ART Number (Old format)') rescue nil
-    patient.archived_filing_number = get_patient_identifier(person.patient, 'Archived filing number')rescue nil
+    patient.archived_filing_number = get_patient_identifier(person.patient, 'Archived filing number') rescue nil
     patient.filing_number = get_patient_identifier(person.patient, 'Filing Number')
     patient.occupation = get_attribute(person, 'Occupation')
     patient.cell_phone_number = get_attribute(person, 'Cell phone number')
@@ -794,6 +788,7 @@ EOF
     patient.home_phone_number = get_attribute(person, 'Home phone number')
     patient.guardian = art_guardian(person.patient) rescue nil 
     patient
+    
   end
   
   def self.art_guardian(patient)
@@ -834,10 +829,14 @@ EOF
 
   def self.patient_to_be_archived(patient)
     active_identifier_type = PatientIdentifierType.find_by_name("Filing Number")
-    PatientIdentifier.find_by_sql(["
+=begin    PatientIdentifier.find_by_sql(["
       SELECT * FROM patient_identifier
       WHERE voided = 1 AND identifier_type = ? AND void_reason = ? ORDER BY date_created DESC",
         active_identifier_type.id,"Archived - filing number given to:#{patient.id}"]).first.patient rescue nil
+=end
+   
+
+   PatientIdentifier.find_by_sql(["SELECT * FROM patient_identifier WHERE voided = 1 AND identifier_type = ? AND void_reason = 'Archived'  AND patient_id = ? ORDER BY date_created DESC",active_identifier_type.id,patient.id]).first.patient rescue nil
   end
 
   def self.set_patient_filing_number(patient) #changed from set_filing_number after being moved from patient model
@@ -1071,7 +1070,7 @@ EOF
        "patient"=>{"identifiers"=>{"National id" => p["person"]["value"]}},
        "birth_day"=>birthdate_day,
        "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
-       "names"=>{"family_name"=>"Mwale",
+       "names"=>{"family_name"=>p["person"]["family_name"],
        "given_name"=>p["person"]["given_name"],
        "middle_name"=>""},
        "birth_year"=>birthdate_year},

@@ -58,9 +58,9 @@
         </td>
         <td style="border-left: 1px solid #000;
             border-bottom: 1px solid #000;
-            border-right: 1px solid #000;"
+            border-right: 1px solid #000; font-size: 1.5em;"
             align="center" <%= (!@hiv_test.nil? ? (@hiv_test.upcase == "POSITIVE" ? "class='selected'" : "") : "") %>>
-          &nbsp;<%= @hiv_test %>&nbsp;
+          <%= (!@hiv_test.nil? ? (@hiv_test.upcase == "POSITIVE" ? "=" : "-") : "") %>&nbsp;
         </td>
       </tr>
       <tr>

@@ -1333,7 +1333,28 @@ module ANCService
     end
 
     def phone_numbers
-      PersonAttribute.phone_numbers(self.person.person_id)
+      # PersonAttribute.phone_numbers(self.person.person_id)
+      home_phone_id       = PersonAttributeType.find_by_name('HOME PHONE NUMBER').person_attribute_type_id
+      cell_phone_id       = PersonAttributeType.find_by_name('CELL PHONE NUMBER').person_attribute_type_id
+      office_phone_id     = PersonAttributeType.find_by_name('OFFICE PHONE NUMBER').person_attribute_type_id
+
+      phone_number_query  = "SELECT person_attribute_type.name AS attribute_type, person_attribute.value
+                            FROM  person_attribute, person_attribute_type
+                            WHERE person_attribute_type.person_attribute_type_id = person_attribute.person_attribute_type_id
+                            AND   person_attribute.person_attribute_type_id IN (#{home_phone_id}, #{cell_phone_id},#{office_phone_id})
+                            AND   person_id = #{self.person.person_id}"
+
+      phone_number_objects = PersonAttribute.find_by_sql(phone_number_query)
+
+      # create a hash of 'symbols' and 'values' like:
+      #   {cell_phone_number => '0123456789', home_phone_number => '0987654321'}
+      person_phone_numbers = phone_number_objects.reduce({}) do |result, number|
+        attribute_type          = number.attribute_type.downcase.gsub(" ", "_").to_sym
+        result[attribute_type]  = number.value
+        result
+      end
+
+      person_phone_numbers
     end
 
     def sex
@@ -1357,7 +1378,31 @@ module ANCService
         }.compact
       }.uniq.delete_if{|x| x == []}.flatten.max
     end
-    
+
+    def fundus_by_lmp(today = Date.today)
+      self.patient.encounters.collect{|e|
+        e.observations.collect{|o|
+          (((today.to_date - o.answer_string.to_date).to_i/7) rescue nil) if o.concept.concept_names.map(& :name).include?("Date of last menstrual period")
+        }.compact
+      }.uniq.delete_if{|x| x == []}.flatten.max
+    end
+
+    def lmp(today = Date.today)
+      self.patient.encounters.collect{|e|
+        e.observations.collect{|o|
+          (o.answer_string.to_date rescue nil) if o.concept.concept_names.map(& :name).include?("Date of last menstrual period") && o.answer_string.to_date <= today.to_date
+        }.compact
+      }.uniq.delete_if{|x| x == []}.flatten.max
+    end
+
+    def gravida(today = Date.today)
+      self.patient.encounters.collect{|e|
+        e.observations.collect{|o|
+          o.answer_string.to_i if o.concept.concept_names.map(& :name).include?("Gravida") && o.obs_datetime.to_date <= today.to_date
+        }.compact
+      }.uniq.delete_if{|x| x == []}.flatten.max
+    end
+
     def hiv_status
       stat = self.patient.encounters.last(:joins => [:observations], :conditions => 
           ["encounter_type = ? AND obs.concept_id = ? AND ((obs.value_coded IN (?)" + 
@@ -1399,7 +1444,277 @@ module ANCService
         }.compact
       }.flatten rescue []
     end
-    
+
   end
-  
+
+  def self.create_remote(received_params)
+    new_params = received_params["person"]
+    known_demographics = Hash.new()
+    new_params['gender'] == 'F' ? new_params['gender'] = "Female" : new_params['gender'] = "Male"
+
+    known_demographics = {
+      "occupation"=>"#{(new_params["attributes"]["occupation"] rescue [])}",
+      "education_level"=>"#{(new_params["attributes"]["education_level"] rescue [])}",
+      "religion"=>"#{(new_params["attributes"]["religion"] rescue [])}",
+      "patient_year"=>"#{new_params["birth_year"]}",
+      "patient"=>{
+        "gender"=>"#{new_params["gender"]}",
+        "birthplace"=>"#{new_params["addresses"]["address2"]}",
+        "creator" => 1,
+        "changed_by" => 1
+      },
+      "p_address"=>{
+        "identifier"=>"#{new_params["addresses"]["state_province"]}"},
+      "home_phone"=>{
+        "identifier"=>"#{(new_params["attributes"]["home_phone_number"] rescue [])}"},
+      "cell_phone"=>{
+        "identifier"=>"#{(new_params["attributes"]["cell_phone_number"] rescue [])}"},
+      "office_phone"=>{
+        "identifier"=>"#{(new_params["attributes"]["office_phone_number"] rescue [])}"},
+      "patient_id"=>"",
+      "patient_day"=>"#{new_params["birth_day"]}",
+      "patientaddress"=>{"city_village"=>"#{new_params["addresses"]["city_village"]}"},
+      "patient_name"=>{
+        "family_name"=>"#{new_params["names"]["family_name"]}",
+        "given_name"=>"#{new_params["names"]["given_name"]}", "creator" => 1
+      },
+      "patient_month"=>"#{new_params["birth_month"]}",
+      "patient_age"=>{
+        "age_estimate"=>"#{new_params["age_estimate"]}"
+      },
+      "age"=>{
+        "identifier"=>""
+      },
+      "current_ta"=>{
+        "identifier"=>"#{new_params["addresses"]["county_district"]}"}
+    }
+
+    demographics_params = CGI.unescape(known_demographics.to_param).split('&').map{|elem| elem.split('=')}
+
+    mechanize_browser = Mechanize.new
+
+    demographic_servers = JSON.parse(GlobalProperty.find_by_property("demographic_server_ips_and_local_port").property_value) rescue []
+
+    result = demographic_servers.map{|demographic_server, local_port|
+
+      begin
+
+        output = mechanize_browser.post("http://localhost:#{local_port}/patient/create_remote", demographics_params).body
+
+      rescue Timeout::Error
+        return 'timeout'
+      rescue
+        return 'creationfailed'
+      end
+
+      output if output and output.match(/person/)
+
+    }.sort{|a,b|b.length <=> a.length}.first
+
+    result ? JSON.parse(result) : nil
+  end
+
+  def self.person_search(params)
+    people = search_by_identifier(params[:identifier]) if !params[:identifier].nil?
+
+    return people.first unless people.blank? || people.size > 1
+
+    people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patient], :conditions => [
+        "gender = ? AND \
+     (person_name.given_name LIKE ? OR person_name_code.given_name_code LIKE ?) AND \
+     (person_name.family_name LIKE ? OR person_name_code.family_name_code LIKE ?)",
+        params[:gender],
+        params[:given_name],
+        (params[:given_name] || '').soundex,
+        params[:family_name],
+        (params[:family_name] || '').soundex
+      ]) if people.blank?
+
+    return people
+  end
+
+  def self.search_by_identifier(identifier)
+    people = PatientIdentifier.find_all_by_identifier(identifier).map{|id|
+      id.patient.person
+    } unless identifier.blank? rescue nil
+    return people unless people.blank?
+    create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    if create_from_dde_server
+      dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+      dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+      dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+      uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+      uri += "?value=#{identifier}"
+      p = JSON.parse(RestClient.get(uri)).first rescue nil
+
+      return [] if p.blank?
+
+      birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
+      birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
+      birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
+      birthdate_estimated = p["person"]["birthdate_estimated"]
+      gender = p["person"]["gender"] == "F" ? "Female" : "Male"
+
+      passed = {
+        "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
+          "age_estimate"=>"",
+          "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
+          "birth_month"=> birthdate_month ,
+          "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
+            "address2"=>p["person"]["data"]["addresses"]["address2"],
+            "city_village"=>p["person"]["data"]["addresses"]["city_village"],
+            "county_district"=>""},
+          "gender"=> gender ,
+          "patient"=>{"identifiers"=>{"National id" => p["person"]["value"]}},
+          "birth_day"=>birthdate_day,
+          "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
+          "names"=>{"family_name"=>p["person"]["family_name"],
+            "given_name"=>p["person"]["given_name"],
+            "middle_name"=>""},
+          "birth_year"=>birthdate_year},
+        "filter_district"=>"Chitipa",
+        "filter"=>{"region"=>"Northern Region",
+          "t_a"=>""},
+        "relation"=>""
+      }
+
+      return [self.create_from_form(passed["person"])]
+    end
+    return people
+  end
+
+	def self.create_from_form(params)
+		address_params = params["addresses"]
+		names_params = params["names"]
+		patient_params = params["patient"]
+		params_to_process = params.reject{|key,value| key.match(/addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) }
+		birthday_params = params_to_process.reject{|key,value| key.match(/gender/) }
+		person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate|occupation|identifiers/) }
+
+		if person_params["gender"].to_s == "Female"
+      person_params["gender"] = 'F'
+		elsif person_params["gender"].to_s == "Male"
+      person_params["gender"] = 'M'
+		end
+
+		person = Person.create(person_params)
+
+		unless birthday_params.empty?
+		  if birthday_params["birth_year"] == "Unknown"
+        self.set_birthdate_by_age(person, birthday_params["age_estimate"], person.session_datetime || Date.today)
+		  else
+        self.set_birthdate(person, birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"])
+		  end
+		end
+		person.save
+
+		person.names.create(names_params)
+		person.addresses.create(address_params) unless address_params.empty? rescue nil
+
+		person.person_attributes.create(
+		  :person_attribute_type_id => PersonAttributeType.find_by_name("Occupation").person_attribute_type_id,
+		  :value => params["occupation"]) unless params["occupation"].blank? rescue nil
+
+		person.person_attributes.create(
+		  :person_attribute_type_id => PersonAttributeType.find_by_name("Cell Phone Number").person_attribute_type_id,
+		  :value => params["cell_phone_number"]) unless params["cell_phone_number"].blank? rescue nil
+
+		person.person_attributes.create(
+		  :person_attribute_type_id => PersonAttributeType.find_by_name("Office Phone Number").person_attribute_type_id,
+		  :value => params["office_phone_number"]) unless params["office_phone_number"].blank? rescue nil
+
+		person.person_attributes.create(
+		  :person_attribute_type_id => PersonAttributeType.find_by_name("Home Phone Number").person_attribute_type_id,
+		  :value => params["home_phone_number"]) unless params["home_phone_number"].blank? rescue nil
+
+    # TODO handle the birthplace attribute
+
+		if (!patient_params.nil?)
+		  patient = person.create_patient
+
+		  patient_params["identifiers"].each{|identifier_type_name, identifier|
+        next if identifier.blank?
+        identifier_type = PatientIdentifierType.find_by_name(identifier_type_name) || PatientIdentifierType.find_by_name("Unknown id")
+        patient.patient_identifiers.create("identifier" => identifier, "identifier_type" => identifier_type.patient_identifier_type_id)
+		  } if patient_params["identifiers"]
+
+		  # This might actually be a national id, but currently we wouldn't know
+		  #patient.patient_identifiers.create("identifier" => patient_params["identifier"], "identifier_type" => PatientIdentifierType.find_by_name("Unknown id")) unless params["identifier"].blank?
+		end
+
+		return person
+	end
+
+  def self.set_birthdate_by_age(person, age, today = Date.today)
+    person.birthdate = Date.new(today.year - age.to_i, 7, 1)
+    person.birthdate_estimated = 1
+  end
+
+  def self.set_birthdate(person, year = nil, month = nil, day = nil)
+    raise "No year passed for estimated birthdate" if year.nil?
+
+    # Handle months by name or number (split this out to a date method)
+    month_i = (month || 0).to_i
+    month_i = Date::MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
+    month_i = Date::ABBR_MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
+
+    if month_i == 0 || month == "Unknown"
+      person.birthdate = Date.new(year.to_i,7,1)
+      person.birthdate_estimated = 1
+    elsif day.blank? || day == "Unknown" || day == 0
+      person.birthdate = Date.new(year.to_i,month_i,15)
+      person.birthdate_estimated = 1
+    else
+      person.birthdate = Date.new(year.to_i,month_i,day.to_i)
+      person.birthdate_estimated = 0
+    end
+  end
+
+  def self.update_demographics(params)
+    person = Person.find(params['person_id'])
+
+    if params.has_key?('person')
+      params = params['person']
+    end
+    
+    address_params = params["addresses"]
+    names_params = params["names"]
+    patient_params = params["patient"]
+    person_attribute_params = params["attributes"]
+
+    params_to_process = params.reject{|key,value| key.match(/addresses|patient|names|attributes/) }
+    birthday_params = params_to_process.reject{|key,value| key.match(/gender/) }
+
+    person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate/) }
+
+    if !birthday_params.empty?
+
+      if birthday_params["birth_year"] == "Unknown"
+        person.set_birthdate_by_age(birthday_params["age_estimate"])
+      else
+        person.set_birthdate(birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"])
+      end
+
+      person.birthdate_estimated = 1 if params["birthdate_estimated"] == 'true'
+      person.save
+    end
+
+    person.update_attributes(person_params) if !person_params.empty?
+    person.names.first.update_attributes(names_params) if names_params
+    person.addresses.first.update_attributes(address_params) if address_params
+
+    #update or add new person attribute
+    person_attribute_params.each{|attribute_type_name, attribute|
+      attribute_type = PersonAttributeType.find_by_name(attribute_type_name.humanize.titleize) || PersonAttributeType.find_by_name("Unknown id")
+      #find if attribute already exists
+      exists_person_attribute = PersonAttribute.find(:first, :conditions => ["person_id = ? AND person_attribute_type_id = ?", person.id, attribute_type.person_attribute_type_id]) rescue nil
+      if exists_person_attribute
+        exists_person_attribute.update_attributes({'value' => attribute})
+      else
+        person.person_attributes.create("value" => attribute, "person_attribute_type_id" => attribute_type.person_attribute_type_id)
+      end
+    } if person_attribute_params
+
+  end
+
 end

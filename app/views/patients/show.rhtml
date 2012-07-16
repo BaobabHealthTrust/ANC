@@ -1,6 +1,7 @@
 <%
 task = @next_task
 next_task = task.encounter_type.gsub('_',' ') rescue nil
+
 %>
 <script type="text/javascript" language="javascript">
   <!--
@@ -17,14 +18,14 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
   
   function showNexttask(){
     if(!__$("nextTask")){
-      var pos = checkCtrl(__$("patient-dashboard-applicationname"));
+      var pos = checkCtrl(__$("details"));
       // [w, h, t, l]
         
       var nextTask = document.createElement("nextTask");
       nextTask.id = "nextTask";
       nextTask.style.position = "absolute";
-      nextTask.style.left = (pos[3] + 10) + "px";
-      nextTask.style.top = (pos[2] + pos[1] + 1) + "px";
+      nextTask.style.left = (pos[3] + 730) + "px";
+      nextTask.style.top = (pos[2] + pos[1] + 25) + "px";
         
       document.body.appendChild(nextTask);
     }
@@ -34,20 +35,25 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
   
   function showTime(){
     if(!__$("timeCtrl")){
-      if(__$("patient-dashboard-applicationname")){
-        var pos = checkCtrl(__$("patient-dashboard-applicationname"));
-        // [w, h, t, l]
+      var timeCtrl = document.createElement("timeCtrl");
+      timeCtrl.id = "timeCtrl";
+      timeCtrl.style.position = "absolute";
         
-        var timeCtrl = document.createElement("timeCtrl");
-        timeCtrl.id = "timeCtrl";
-        timeCtrl.style.position = "absolute";
-        timeCtrl.style.left = (pos[3] + 60) + "px";
-        timeCtrl.style.top = (pos[2] - 35) + "px";
-        
-        document.body.appendChild(timeCtrl);
-      }
+      document.body.appendChild(timeCtrl);     
     }
+    
     if(__$("timeCtrl")){
+      var pos = checkCtrl(__$("details"));
+      var timeCtrl = __$("timeCtrl");
+      timeCtrl.style.left = (pos[3] + 770) + "px";
+      timeCtrl.style.top = (pos[2] + pos[1] - 38) + "px";
+      
+      if(__$("nextTask")){
+        var nextTask = __$("nextTask");
+        nextTask.style.left = (pos[3] + 730) + "px";
+        nextTask.style.top = (pos[2] + pos[1] + 25) + "px";
+      }
+
       var current_time = new Date();
       var start = new Date(start_time[0], start_time[1], start_time[2], start_time[3], start_time[4]);      
       var diff = current_time - start;
@@ -67,7 +73,7 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
   setTimeout("showTime()", 500);
 
 <% if !next_task.nil? %>
-  setTimeout("showNexttask()", 500);
+    setTimeout("showNexttask()", 500);
 <% end %>
   //-->
 </script>
@@ -88,7 +94,7 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
     border-radius: 50px;
     border: 1px solid #ccc;
     width: 180px; 
-    height: 65px; 
+    height: 60px;
     font-size: 36px; 
     background-color: rgb(153, 238, 153); 
     color: rgb(0, 0, 0); 
@@ -101,9 +107,9 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
   #nextTask {
     border-radius: 50px;
     border: 1px solid #ccc;
-    width: 280px; 
-    height: 58px; 
-    font-size: 22px; 
+    width: 260px;
+    height: 50px;
+    font-size: 18px;
     background-color: #efc; 
     color: rgb(0, 0, 0); 
     opacity: 0.95; 
@@ -122,6 +128,7 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
         <h1 id='project_name'>
           <span style="color: #6281A7;">anc</span>
         </h1>
+        <div id="custom_banner" path="/patients/weight_fundus_graph/?patient_id=<%= @patient.id  %>"></div>
         <span id='patient_name'>
           <%= @anc_patient.name %>
         </span>
@@ -142,7 +149,7 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
           <div value="No">On CPT?</div>
         </div-->
         <select id="links">
-          <% if current_user.activities.include?("Obstetric History") ||  
+          <% if current_user.activities.include?("Obstetric History") ||
               current_user.activities.include?("Medical History") ||
               current_user.activities.include?("Surgical History") ||
               current_user.activities.include?("Social History") %>
@@ -150,7 +157,7 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
           <% end %>
 
           <% if current_user.activities.include?("ANC Visit Type") %>
-            <option value='/patients/<%= (!@current_encounter_names.include?("ANC VISIT TYPE") ? 
+            <option value='/patients/<%= (!@current_encounter_names.include?("ANC VISIT TYPE") ?
                         "visit_type" : "current_visit") %>/?patient_id=<%= @patient.id  %>'>Current Visit</option>
                   <% end %>
 

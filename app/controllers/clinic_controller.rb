@@ -10,6 +10,8 @@ class ClinicController < GenericClinicController
 
     @roles = User.find(current_user.user_id).user_roles.collect{|r| r.role} rescue []
 
+    # raise session.to_yaml
+
     render :layout => 'dynamic-dashboard'
   end
 

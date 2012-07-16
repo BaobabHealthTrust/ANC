@@ -2,6 +2,8 @@
 RAILS_GEM_VERSION = '2.3.5' unless defined? RAILS_GEM_VERSION
 BART_VERSION = '2.0 beta'
 
+require 'thread'
+
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
 
@@ -29,6 +31,7 @@ require 'bantu_soundex'
 require 'json'
 require 'colorfy_strings'
 require 'rest-client'
+require 'mechanize'
 
 ActiveSupport::Inflector.inflections do |inflect|
   inflect.irregular 'person_address', 'person_address'

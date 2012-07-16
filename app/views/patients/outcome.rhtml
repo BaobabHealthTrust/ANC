@@ -26,7 +26,7 @@
   </select>
   
   <%= touch_select_tag "OUTCOME", @patient,
-    options_for_select([["", ""], ["Admitted", "Admitted"], ["Referred", "Referred"]]),
+    options_for_select([["", ""], ["Sent Home", "Sent Home"], ["Admitted", "Admitted"], ["Referred", "Referred"]]),
     {:id => "outcome",
     :helptext => "Outcome",
     :condition => "__$('outcome_available').value.toUpperCase() == 'YES'"

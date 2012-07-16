@@ -270,6 +270,11 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     
   }
 
+  function setGestationWeekLabel(){
+    if(__$("chart").getElementsByTagName("div")[0].getElementsByTagName("div")[0]){
+      __$("chart").getElementsByTagName("div")[0].getElementsByTagName("div")[0].innerHTML="Gestation Week";
+    }
+  }
 </script>
 
 <%= hidden_field_tag "lmp", "#{@pregnancystart}" %>
@@ -278,19 +283,19 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   <%= hidden_field_tag "encounter[encounter_type_name]", "APPOINTMENT" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>  
+  <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
 
   <label for='time_until_next_visit'>Time Until Next Appointment</label>
-  
-  <% 
+
+  <%
   current = (session[:datetime] ? session[:datetime].to_date : Date.today).strftime("%Y-%m-%d")
   trimester = @weeks
-  
-  periods = {22 => "20-24 weeks", 30 => "28-32 weeks", 36 => "36 weeks", 0 => "Other"} 
-  
+
+  periods = {22 => "20-24 weeks", 30 => "28-32 weeks", 36 => "36 weeks", 0 => "Other"}
+
   actual = periods.collect{|p, v| [v, p] if p > trimester || p == 0}
 %>
-  
+
   <%= select_tag("time_until_next_visit", options_for_select(actual),
     {:helpText => 'Gestation Weeks at Next Visit',
       :tt_onLoad => "showCategory('Next Appointment'); calculateGivenRange('#{params[:start_date]}','#{params[:end_date]}')",
@@ -299,7 +304,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
   <%
   absolute_min = params[:start_date].to_date.year rescue Date.today.year
   absolute_max = params[:end_date].to_date.year + 1 rescue Date.today.year + 1%>
-  
+
   <%= hidden_field_tag("observations[][concept_name]", "RETURN VISIT DATE") %>
   <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
   <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
@@ -310,7 +315,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
       :id => 'next_appointment_date',
       :startweekdate => "#{@pregnancystart.strftime("%Y-%m-%d")}",
       :endweekdate => "#{(@pregnancystart + 9.month).strftime("%Y-%m-%d")}",
-      :tt_onLoad => "showCategory('Next Appointment'); __$('category').style.opacity = 0.75;",
+      :tt_onLoad => "showCategory('Next Appointment'); __$('category').style.opacity = 0.75; setGestationWeekLabel();",
       :minDate => "#{ ((session[:datetime] ? session[:datetime].to_date : Date.today) + 6.month).strftime("%Y-%m-%d") }",
       :ajaxCalendarUrl => "/patients/number_of_booked_patients?date=",
       :tt_onUnLoad => "hideInfo();"}) %>

@@ -37,23 +37,6 @@ class ApplicationController < GenericApplicationController
       "HIV Clinic Registration"
     ]
     
-    art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
-    anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
-    
-    if !art_link.nil? && !anc_link.nil? # && foreign_links.include?(pos)
-      if !session[:token]
-        response = RestClient.post("http://#{art_link}/single_sign_on/get_token", 
-          {"login"=>session[:username], "password"=>session[:password]}) rescue nil
-          
-        if !response.nil?
-          response = JSON.parse(response)
-            
-          session[:token] = response["auth_token"]          
-        end
-               
-      end
-    end
-       
     session.delete :datetime if session[:datetime].nil? || 
       ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d")) == Date.today.strftime("%Y-%m-%d"))
         
@@ -85,13 +68,13 @@ class ApplicationController < GenericApplicationController
         "SOCIAL HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Social History"))], 
       
       "Lab Results" => [9, "/encounters/new/lab_results/?patient_id=#{patient.id}", 
-        "LAB RESULTS", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Lab Results"))], 
-      
-      "ANC Examination" => [10, "/patients/observations/?patient_id=#{patient.id}", 
-        "OBSERVATIONS", nil, nil, "TODAY", nil, true, (current_user_activities.include?("ANC Examination"))], 
-      
-      "Current Pregnancy" => [11, "/patients/current_pregnancy/?patient_id=#{patient.id}", 
+        "LAB RESULTS", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Lab Results"))],
+
+      "Current Pregnancy" => [10, "/patients/current_pregnancy/?patient_id=#{patient.id}",
         "CURRENT PREGNANCY", nil, nil, "RECENT", nil, true, (current_user_activities.include?("Current Pregnancy"))], 
+      
+      "ANC Examination" => [11, "/patients/observations/?patient_id=#{patient.id}",
+        "OBSERVATIONS", nil, nil, "TODAY", nil, true, (current_user_activities.include?("ANC Examination"))], 
       
       "Manage Appointments" => [12, "/encounters/new/appointment/?patient_id=#{patient.id}", 
         "APPOINTMENT", nil, nil, "TODAY", nil, true, (current_user_activities.include?("Manage Appointments"))], 
@@ -100,45 +83,87 @@ class ApplicationController < GenericApplicationController
         "TREATMENT", nil, nil, "TODAY", 7124, false, (current_user_activities.include?("Give Drugs"))], 
       
       "Update Outcome" => [14, "/patients/outcome/?patient_id=#{patient.id}", "UPDATE OUTCOME", 
-        nil, nil, "TODAY", nil, true, (current_user_activities.include?("Update Outcome"))], 
-      
-      "HIV Clinic Registration" => [15, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/hiv_clinic_registration?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
-        "HIV CLINIC REGISTRATION", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("HIV Clinic Registration") && 
-            @anc_patient.hiv_status.downcase == "positive")], 
-      
-      "HIV Staging" => [16, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/hiv_staging?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
-        "HIV STAGING", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("HIV Staging") && 
-            @anc_patient.hiv_status.downcase == "positive")],  
-      
-      "HIV Reception" => [17, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/hiv_reception?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
-        "HIV RECEPTION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("HIV Reception") && 
-            @anc_patient.hiv_status.downcase == "positive")], 
-      
-      "HIV Clinic Consultation" => [18, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/hiv_clinic_consultation?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
-        "HIV CLINIC CONSULTATION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("HIV Clinic Consultation") && 
-            @anc_patient.hiv_status.downcase == "positive")], 
-      
-      "ART Adherence" => [19, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/art_adherence?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
-        "ART ADHERENCE", nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Adherence") && 
-            @anc_patient.hiv_status.downcase == "positive")],  
-      
-      "Manage ART Prescriptions" => [20, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" + 
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" + 
-          "/encounters/new/art_adherence?patient_id=#{patient.id}&current_location=#{session[:location_id]}", 
-        "TREATMENT", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Manage ART Prescriptions") && 
-            @anc_patient.hiv_status.downcase == "positive")]
+        nil, nil, "TODAY", nil, true, (current_user_activities.include?("Update Outcome"))]
     }
+
+    session["patient_id_map"] = {} if session["patient_id_map"].nil?
+
+    # Get patient id mapping
+    if @anc_patient.hiv_status.downcase == "positive" && session["patient_id_map"][@patient.id].nil?
+
+      @external_id = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).person_id # rescue nil
+
+      if !@external_id.nil? && !@external_id.blank?
+        session["patient_id_map"][@patient.id] = @external_id rescue nil
+      end
+
+    end
+
+    if @anc_patient.hiv_status.downcase == "positive" && !session["patient_id_map"][@patient.id].nil?
+
+      art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
+      anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+
+      if !art_link.nil? && !anc_link.nil? # && foreign_links.include?(pos)
+        if !session[:token]
+          response = RestClient.post("http://#{art_link}/single_sign_on/get_token",
+            {"login"=>session[:username], "password"=>session[:password]}) rescue nil
+
+          if !response.nil?
+            response = JSON.parse(response)
+
+            session[:token] = response["auth_token"]
+          end
+
+        end
+      end
+       
+      @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters.collect{|e| e.type.name}
+    
+      additional_tasks = {}
+
+
+      additional_tasks["HIV Clinic Registration"] = [15, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+          "/encounters/new/hiv_clinic_registration?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
+        "HIV CLINIC REGISTRATION", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("HIV Clinic Registration") &&
+            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("HIV CLINIC REGISTRATION")
         
+      
+      additional_tasks["HIV Staging"] = [16, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+          "/encounters/new/hiv_staging?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
+        "HIV STAGING", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("HIV Staging") &&
+            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("HIV STAGING")
+      
+      additional_tasks["HIV Reception"] = [17, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+          "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
+        "HIV RECEPTION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("HIV Reception") &&
+            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("HIV RECEPTION")
+      
+      additional_tasks["HIV Clinic Consultation"] = [18, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+          "/encounters/new/hiv_clinic_consultation?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
+        "HIV CLINIC CONSULTATION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("HIV Clinic Consultation") &&
+            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("HIV CLINIC CONSULTATION")
+      
+      additional_tasks["ART Adherence"] = [19, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+          "/encounters/new/art_adherence?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
+        "ART ADHERENCE", nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Adherence") &&
+            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("ART ADHERENCE")
+      
+      additional_tasks["Manage ART Prescriptions"] = [20, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+          "/encounters/new/art_adherence?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
+        "TREATMENT", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Manage ART Prescriptions") &&
+            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("TREATMENT")
+    
+
+      tasks = tasks.merge(additional_tasks) if @anc_patient.hiv_status.downcase == "positive" && !(session["patient_id_map"][@patient.id] rescue nil).nil?
+    end
+    
     sorted_tasks = {}
     
     tasks.each{|t,v|
@@ -151,7 +176,7 @@ class ApplicationController < GenericApplicationController
       
       # next if tasks[tsk][8] == false
       if tasks[tsk][8] == false
-        task.encounter_type = tsk        
+        task.encounter_type = tsk
         task.url = "/patients/show/#{patient.id}"
         return task
       end
@@ -162,41 +187,41 @@ class ApplicationController < GenericApplicationController
         checked_already = false
         
         if !tasks[tsk][3].nil? && checked_already == false    # Check for presence of specific concept_id
-          available = Encounter.find(:all, :joins => [:observations], :conditions => 
+          available = Encounter.find(:all, :joins => [:observations], :conditions =>
               ["patient_id = ? AND encounter_type = ? AND obs.concept_id = ? AND DATE(encounter_datetime) = ?",
               patient.id, EncounterType.find_by_name(tasks[tsk][2]), tasks[tsk][3], session_date.to_date]) rescue []
         
           checked_already = tasks[tsk][7]
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
         end
         
         if !tasks[tsk][4].nil? && checked_already == false   # Check for concept exclusions from encounter_type group
-          available = Encounter.find(:all, :joins => [:observations], :conditions => 
+          available = Encounter.find(:all, :joins => [:observations], :conditions =>
               ["patient_id = ? AND encounter_type = ? AND NOT obs.concept_id = ? AND DATE(encounter_datetime) = ?",
               patient.id, EncounterType.find_by_name(tasks[tsk][2]), tasks[tsk][4], session_date.to_date]) rescue []
         
           checked_already = tasks[tsk][7]
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
         end
             
         if !tasks[tsk][6].nil? && checked_already == false   # Check for drug concept if available
-          available = patient.orders.all(:conditions => ["concept_id = ? AND start_date = ?", 
+          available = patient.orders.all(:conditions => ["concept_id = ? AND start_date = ?",
               tasks[tsk][6], session_date.to_date]) rescue []
         
           checked_already = tasks[tsk][7]
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
@@ -204,13 +229,13 @@ class ApplicationController < GenericApplicationController
         
         # Else check for availability of encounter_type
         if checked_already == false
-          available = Encounter.find(:all, :joins => [:observations], :conditions => 
+          available = Encounter.find(:all, :joins => [:observations], :conditions =>
               ["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
               patient.id, EncounterType.find_by_name(tasks[tsk][2]), session_date.to_date]) rescue []
         
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
@@ -229,46 +254,46 @@ class ApplicationController < GenericApplicationController
         checked_already = false
         
         if !tasks[tsk][3].nil? && checked_already == false    # Check for presence of specific concept_id
-          available = Encounter.find(:all, :joins => [:observations], :conditions => 
-              ["patient_id = ? AND encounter_type = ? AND obs.concept_id = ? " + 
+          available = Encounter.find(:all, :joins => [:observations], :conditions =>
+              ["patient_id = ? AND encounter_type = ? AND obs.concept_id = ? " +
                 "AND (DATE(encounter_datetime) >= ? AND DATE(encounter_datetime) <= ?)",
-              patient.id, EncounterType.find_by_name(tasks[tsk][2]), tasks[tsk][3], 
+              patient.id, EncounterType.find_by_name(tasks[tsk][2]), tasks[tsk][3],
               (session_date.to_date - 6.month), (session_date.to_date + 6.month)]) rescue []
         
           checked_already = tasks[tsk][7]
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
         end
         
         if !tasks[tsk][4].nil? && checked_already == false   # Check for concept exclusions from encounter_type group
-          available = Encounter.find(:all, :joins => [:observations], :conditions => 
-              ["patient_id = ? AND encounter_type = ? AND NOT obs.concept_id = ? " + 
+          available = Encounter.find(:all, :joins => [:observations], :conditions =>
+              ["patient_id = ? AND encounter_type = ? AND NOT obs.concept_id = ? " +
                 "AND (DATE(encounter_datetime) >= ? AND DATE(encounter_datetime) <= ?)",
-              patient.id, EncounterType.find_by_name(tasks[tsk][2]), tasks[tsk][4], 
+              patient.id, EncounterType.find_by_name(tasks[tsk][2]), tasks[tsk][4],
               (session_date.to_date - 6.month), (session_date.to_date + 6.month)]) rescue []
         
           checked_already = tasks[tsk][7]
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
         end
             
         if !tasks[tsk][6].nil? && checked_already == false   # Check for drug concept if available
-          available = patient.orders.all(:conditions => ["concept_id = ? AND start_date = ? " + 
-                "AND (DATE(start_date) >= ? AND DATE(start_date) <= ?)", 
+          available = patient.orders.all(:conditions => ["concept_id = ? AND start_date = ? " +
+                "AND (DATE(start_date) >= ? AND DATE(start_date) <= ?)",
               tasks[tsk][6], (session_date.to_date - 6.month), (session_date.to_date + 6.month)]) rescue []
         
           checked_already = tasks[tsk][7]
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
@@ -276,15 +301,15 @@ class ApplicationController < GenericApplicationController
         
         # Else check for availability of encounter_type
         if checked_already == false
-          available = Encounter.find(:all, :joins => [:observations], :conditions => 
-              ["patient_id = ? AND encounter_type = ? " + 
+          available = Encounter.find(:all, :joins => [:observations], :conditions =>
+              ["patient_id = ? AND encounter_type = ? " +
                 "AND (DATE(encounter_datetime) >= ? AND DATE(encounter_datetime) <= ?)",
-              patient.id, EncounterType.find_by_name(tasks[tsk][2]), 
+              patient.id, EncounterType.find_by_name(tasks[tsk][2]),
               (session_date.to_date - 6.month), (session_date.to_date + 6.month)]) rescue []
         
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
@@ -303,41 +328,41 @@ class ApplicationController < GenericApplicationController
         checked_already = false
           
         if !tasks[tsk][3].nil? && checked_already == false    # Check for presence of specific concept_id
-          available = Encounter.find(:all, :joins => [:observations], :conditions => 
+          available = Encounter.find(:all, :joins => [:observations], :conditions =>
               ["patient_id = ? AND encounter_type = ? AND obs.concept_id = ?",
               patient.id, EncounterType.find_by_name(tasks[tsk][2]), tasks[tsk][3]]) rescue []
         
           checked_already = tasks[tsk][7]
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
         end
         
         if !tasks[tsk][4].nil? && checked_already == false   # Check for concept exclusions from encounter_type group
-          available = Encounter.find(:all, :joins => [:observations], :conditions => 
+          available = Encounter.find(:all, :joins => [:observations], :conditions =>
               ["patient_id = ? AND encounter_type = ? AND NOT obs.concept_id = ?",
               patient.id, EncounterType.find_by_name(tasks[tsk][2]), tasks[tsk][4]]) rescue []
         
           checked_already = tasks[tsk][7]
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
         end
             
         if !tasks[tsk][6].nil? && checked_already == false   # Check for drug concept if available
-          available = patient.orders.all(:conditions => ["concept_id = ?", 
+          available = patient.orders.all(:conditions => ["concept_id = ?",
               tasks[tsk][6]]) rescue []
         
           checked_already = tasks[tsk][7]
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
@@ -345,13 +370,13 @@ class ApplicationController < GenericApplicationController
         
         # Else check for availability of encounter_type
         if checked_already == false
-          available = Encounter.find(:all, :joins => [:observations], :conditions => 
+          available = Encounter.find(:all, :joins => [:observations], :conditions =>
               ["patient_id = ? AND encounter_type = ?",
               patient.id, EncounterType.find_by_name(tasks[tsk][2])]) rescue []
         
           if available.length > 0
             if normal_flow[0] == tsk.downcase
-              normal_flow -= [tsk.downcase]            
+              normal_flow -= [tsk.downcase]
               next
             end
           end
@@ -417,8 +442,8 @@ class ApplicationController < GenericApplicationController
         # Only the most recent obs
         # For example, if there are mutliple REFER TO CLINICIAN = yes, than only take the most recent one
         if (task.has_obs_scope == 'RECENT')
-          o = patient.person.observations.recent(1).first(:conditions => 
-              ['encounter_id IN (?) AND concept_id =? AND DATE(obs_datetime)=?', 
+          o = patient.person.observations.recent(1).first(:conditions =>
+              ['encounter_id IN (?) AND concept_id =? AND DATE(obs_datetime)=?',
               todays_encounters.map(&:encounter_id), task.has_obs_concept_id,session_date])
           
           obs = 0 if (o.value_coded == task.has_obs_value_coded && o.value_drug == task.has_obs_value_drug &&
@@ -432,7 +457,7 @@ class ApplicationController < GenericApplicationController
       end
 
       if task.has_obs_value_drug && task.has_obs_scope == 'TODAY'
-        obs = patient.orders.first(:conditions => ["concept_id = ? AND start_date = ?", 
+        obs = patient.orders.first(:conditions => ["concept_id = ? AND start_date = ?",
             task.has_obs_value_drug, session_date])
         
         skip = true if obs.present?
@@ -440,9 +465,9 @@ class ApplicationController < GenericApplicationController
       
       # Only if this encounter type exists
       if (task.has_obs_scope == 'EXISTS')
-        obs = patient.person.observations.first(:conditions => ['encounter_id IN (?)', 
-            active_encounters.all(:conditions => ["encounter_type = ?", 
-                EncounterType.find_by_name(task.encounter_type).id]).map(&:encounter_id)])        
+        obs = patient.person.observations.first(:conditions => ['encounter_id IN (?)',
+            active_encounters.all(:conditions => ["encounter_type = ?",
+                EncounterType.find_by_name(task.encounter_type).id]).map(&:encounter_id)])
         
         skip = true if obs.present?
       end
@@ -477,7 +502,7 @@ class ApplicationController < GenericApplicationController
       return task
     end
   end
-  
+
   private
 
   def find_patient
