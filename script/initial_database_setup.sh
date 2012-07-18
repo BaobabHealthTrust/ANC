@@ -29,8 +29,8 @@ DATABASE=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}'][
 echo "DROP DATABASE $DATABASE;" | mysql --user=$USERNAME --password=$PASSWORD
 echo "CREATE DATABASE $DATABASE;" | mysql --user=$USERNAME --password=$PASSWORD
 
-
-mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/openmrs_1_7_2_concept_server_full_db.sql
+mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/schema.sql
+mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/openmrs_metadata_1_7.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/schema_bart2_additions.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/defaults.sql
 # mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/user_schema_modifications.sql
@@ -52,7 +52,7 @@ mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/create_dde_server_con
 #mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/bart2_role_privileges.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/migrate/create_weight_height_for_ages.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/migrate/insert_weight_for_ages.sql
-#mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/regimens.sql
+mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/migrate/global_property.sql
 
 #rake openmrs:bootstrap:load:defaults RAILS_ENV=$ENV
 #rake openmrs:bootstrap:load:site SITE=$SITE RAILS_ENV=production#
