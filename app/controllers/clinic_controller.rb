@@ -82,7 +82,9 @@ class ClinicController < GenericClinicController
       @ever = Encounter.statistics(@types)
     end
 
-    @user = User.find(session[:user_id]).person.name rescue ""
+    # raise current_user.to_yaml
+    
+    @user = current_user.name rescue ""
 
     if simple_overview
         render :template => 'clinic/overview_simple.rhtml' , :layout => false
