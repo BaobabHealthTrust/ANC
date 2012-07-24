@@ -119,7 +119,11 @@ class ApplicationController < GenericApplicationController
       end
        
       @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters.collect{|e| e.type.name}
-    
+
+      tasks["Weight and Height"][1] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
+          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+          "/encounters/new/vitals?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+
       additional_tasks = {}
 
 

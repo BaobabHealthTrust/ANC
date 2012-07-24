@@ -19,17 +19,17 @@
   <%= hidden_field_tag("programs[][date_enrolled]", session[:datetime] || Date.today ) %>
   <%= hidden_field_tag("programs[][states][][state]", "Admitted") %>
 
-  <select id="outcome_available" name="outcome_available" helpText="Update Outcome?"
+  <!--select id="outcome_available" name="outcome_available" helpText="Update Outcome?"
     tt_onLoad="showCategory('Update Outcome');">
     <option value="YES">Yes</option>
     <option value="NO">No</option>
-  </select>
+  </select-->
   
   <%= touch_select_tag "OUTCOME", @patient,
     options_for_select([["", ""], ["Sent Home", "Sent Home"], ["Admitted", "Admitted"], ["Referred", "Referred"]]),
     {:id => "outcome",
     :helptext => "Outcome",
-    :condition => "__$('outcome_available').value.toUpperCase() == 'YES'"
+    # :condition => "__$('outcome_available').value.toUpperCase() == 'YES'"
   } %>
 
   <%#= touch_select_tag "Admission Section", @patient,

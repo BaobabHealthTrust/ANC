@@ -176,7 +176,11 @@
   }
 %>
 
-  <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"], ["Uknown", "Uknown"]]),
+  <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""],
+                        ["Yes", "Yes"], ["No", "No"],
+                        ["Triplets", "Triplets"],
+                        ["Quadruplet", "Quadruplet"],
+                        ["Uknown", "Uknown"]]),
     {:id => "multiple_gestation",
     :helptext => "Is This a Multiple Pregnancy?" } %>
 

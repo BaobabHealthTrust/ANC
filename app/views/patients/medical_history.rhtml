@@ -38,5 +38,17 @@
     {:id => "do_you_have_a_spine_or_leg_deform?",
     :helptext => "Does Client have Leg or Spine Deformity?" } %>
 
+  <%= touch_select_tag "Blood transfusion", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "blood_transfusion",
+    :helptext => "Ever had a blood transfusion?" } %>
+
+  <%= touch_select_tag "Sexually transmitted infection", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "sti",
+    :helptext => "Ever had a sexually transmitted infection?" } %>
+
+  <%= touch_select_tag "Allergy", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "sti",
+    :helptext => "Are you allergic to any drugs?" } %>
+
   <%= submit_tag 'Finish' %>
 <% end %>

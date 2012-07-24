@@ -36,16 +36,22 @@
     }",
     :tt_pageStyleClass => "NumbersOnly"} %>
 
-  <%= touch_select_tag "MULTIPLE GESTATION", @patient, options_for_select([["", ""], ["No", "No"], ["Yes", "Yes"]]),
+  <%= touch_select_tag "MULTIPLE GESTATION", @patient,
+    options_for_select([["", ""],
+                        ["Yes", "Yes"],
+                        ["No", "No"],
+                        ["Triplets", "Triplets"],
+                        ["Quadruplet", "Quadruplet"]
+                      ]),
     {:id => "multiple_pregnancy",
-    :helptext => "Ever Had Multiple Pregnancy?",
+    :helptext => "Have you ever had twins?",
     :condition => "__$('enter_gravida').value > 1"
   } %>
   <%= touch_numeric_tag "PARITY", @patient, nil,
     {:id => "enter_number_of_deliveries",
     :helptext => "Enter Number Of Deliveries",
     :tt_pageStyleClass => "NumbersWithUnknown",
-    :condition => "((__$('multiple_pregnancy').value == 'No' && (__$('enter_gravida').value) > 1) || (__$('multiple_pregnancy').value == 'Yes' && __$('enter_gravida').value > 1))",
+    :condition => "__$('enter_gravida').value > 1",
     :tt_onLoad => "if(__$('multiple_pregnancy').value == 'No'){__$('touchscreenInput' + " + 
       "tstCurrentPage).setAttribute('absoluteMax', (__$('enter_gravida').value - 1))}",
     :tt_onUnLoad => "if(__$('enter_number_of_deliveries').value == 0){
@@ -58,7 +64,8 @@
         parseInt(__$('enter_number_of_deliveries').value) - 1) + ']');
       __$('enter_number_of_abortions').setAttribute('validationMessage', 'Expected value is ' + (parseInt(__$('enter_gravida').value) - 
         parseInt(__$('enter_number_of_deliveries').value) - 1));
-    }"
+    } else {__$('enter_number_of_abortions').removeAttribute('validationRule'); " +
+    "__$('enter_number_of_abortions').removeAttribute('validationMessage')}"
   } %>
 
   <%= touch_numeric_tag "NUMBER OF ABORTIONS", @patient, nil,

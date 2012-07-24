@@ -794,7 +794,7 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
         
         optionsList += '<li id=\'' + (j-1) + '\' ';
         if (selectOptions[j].value) {
-            optionsList += " id='option"+selectOptions[j].value +"' tstValue='"+selectOptions[j].value +"'";
+            optionsList += " id=\"option"+selectOptions[j].value +"\" tstValue=\""+selectOptions[j].value +"\"";
             selected = j;
         } 
         
@@ -1615,6 +1615,12 @@ function clearInput(){
 }
 
 function showMessage(aMessage, withCancel, timed) {
+    if(typeof(tstMessageBar) == "undefined"){
+        __$("content").innerHTML += "<div id='messageBar' class='messageBar'></div>";
+        
+        tstMessageBar = __$('messageBar');
+    }
+    
     var messageBar = tstMessageBar;
     messageBar.innerHTML = aMessage +
     "<br />" + (typeof(withCancel) != "undefined" ? (withCancel == true ?
@@ -2151,6 +2157,10 @@ function press(pressedChar){
     inputTarget = tstInputTarget;
     var singleButtonMode = inputTarget.getAttribute("singleButtonMode");
     if (singleButtonMode)
+        inputTarget.value = "";
+
+    var unknownClickedEarlier = inputTarget.value.toLowerCase();
+    if (unknownClickedEarlier == "unknown")
         inputTarget.value = "";
 
     if (pressedChar.length == 1) {
