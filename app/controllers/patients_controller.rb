@@ -219,12 +219,12 @@ class PatientsController < ApplicationController
         end
       end
     }
-    
-    # raise @sections.to_yaml
-    
+
     session_date = session[:datetime] || Date.today
     
     @next_task = main_next_task(Location.current_location.id, @patient, session_date.to_date) rescue nil        
+
+    # raise current_user.activities.collect{|u| u.downcase}.include?("update outcome").to_yaml
 
     @time = @patient.encounters.first(:conditions => ["DATE(encounter_datetime) = ?", 
         Date.today.strftime("%Y-%m-%d")]).encounter_datetime rescue Time.now
@@ -452,7 +452,11 @@ class PatientsController < ApplicationController
     
     @encounters = @patient.encounters.find(:all, 
       :conditions => ["DATE(encounter_datetime) = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]) rescue []
-    
+
+    @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters # .collect{|e| e.type.name}
+
+    @encounters = @encounters + @external_encounters
+
     @encounter_names = @encounters.map{|encounter| encounter.name}.uniq rescue []
     
     role_encounter = {
@@ -488,7 +492,7 @@ class PatientsController < ApplicationController
     activities.each{|role|
       active_names << role_encounter[role] if @encounter_names.include?(role_encounter[role])
     }
-    
+
     @encounter_names = active_names.uniq
 
     @encounter_names = @encounter_names.reverse
@@ -692,7 +696,7 @@ class PatientsController < ApplicationController
 
     @who = ConceptName.find_by_concept_name_id(Observation.find(:last, :conditions => 
           ["person_id = ? AND concept_id = ?", @patient.id, 
-        ConceptName.find_by_name("WHO Stage").concept_id]).value_coded_name_id).name rescue nil
+          ConceptName.find_by_name("WHO Stage").concept_id]).value_coded_name_id).name rescue nil
 
     render :layout => false
   end
@@ -1055,8 +1059,8 @@ class PatientsController < ApplicationController
   
   def print_history
     if @anc_patient.gravida(session[:datetime] || Time.now()).to_i > 1
-    print_and_redirect("/patients/obstertic_medical_examination_label/?patient_id=#{@patient.id}", 
-      next_task(@patient))
+      print_and_redirect("/patients/obstertic_medical_examination_label/?patient_id=#{@patient.id}",
+        next_task(@patient))
     else
       redirect_to next_task(@patient) and return
     end
@@ -1172,6 +1176,46 @@ class PatientsController < ApplicationController
     redirect_to next_task(@patient) and return
   end
   
+  def go_to_art
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil
+  end
+
+  def proceed_to_pmtct
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil
+
+    if session["proceed_to_art"].nil?
+      session["proceed_to_art"] = {}
+    end
+
+    session["proceed_to_art"][@patient.id] = true
+
+    if params["to art"].downcase == "yes"
+
+      art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
+      anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+
+      if !art_link.nil? && !anc_link.nil? # && foreign_links.include?(pos)
+        if !session[:token]
+          response = RestClient.post("http://#{art_link}/single_sign_on/get_token",
+            {"login"=>session[:username], "password"=>session[:password]}) rescue nil
+
+          if !response.nil?
+            response = JSON.parse(response)
+
+            session[:token] = response["auth_token"]
+          end
+
+        end
+      end
+       
+      redirect_to "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&current_location=#{session[:location_id]}&" +
+        "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+        "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}" and return
+    else
+      redirect_to "/patients/show/#{@patient.id}" and return
+    end
+  end
+
   private
 
 end

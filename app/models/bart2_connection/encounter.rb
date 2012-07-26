@@ -4,6 +4,8 @@ class Bart2Connection::Encounter < ActiveRecord::Base
   set_primary_key :encounter_id
   include Bart2Connection::Openmrs
   has_many :observations, :class_name => "Bart2Connection::Observation", :dependent => :destroy, :conditions => {:voided => 0}
+  has_many :drug_orders, :class_name => "Bart2Connection::DrugOrder",  :through   => :orders,  :foreign_key => 'order_id'
+  has_many :orders, :class_name => "Bart2Connection::Order", :dependent => :destroy, :conditions => {:voided => 0}
   belongs_to :type, :class_name => "Bart2Connection::EncounterType", :foreign_key => :encounter_type, :conditions => {:retired => 0}
   belongs_to :provider, :class_name => "Bart2Connection::Person", :foreign_key => :provider_id, :conditions => {:voided => 0}
   belongs_to :patient, :class_name => "Bart2Connection::Patient", :conditions => {:voided => 0}

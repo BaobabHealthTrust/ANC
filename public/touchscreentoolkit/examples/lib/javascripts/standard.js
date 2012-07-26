@@ -2160,7 +2160,7 @@ function press(pressedChar){
         inputTarget.value = "";
 
     var unknownClickedEarlier = inputTarget.value.toLowerCase();
-    if (unknownClickedEarlier == "unknown")
+    if (unknownClickedEarlier == "unknown" || unknownClickedEarlier == "n/a")
         inputTarget.value = "";
 
     if (pressedChar.length == 1) {

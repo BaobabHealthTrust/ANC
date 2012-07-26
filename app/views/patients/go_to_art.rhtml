@@ -1,0 +1,18 @@
+<script type="text/javascript" language="javascript">
+  <!--
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+  //-->
+</script>
+
+<% form_tag :controller => "patients", :action => "proceed_to_pmtct" do |f| %>
+
+  <%= hidden_field_tag("patient_id", "#{@patient.id}") %>
+
+  <%= select_tag "to art",
+    options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {
+    :helptext => "Do you want to proceed to PMTCT Care?"
+  } %>
+
+<% end %>

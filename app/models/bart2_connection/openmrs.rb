@@ -44,6 +44,9 @@ module Bart2Connection::Openmrs
     super
     # self.changed_by = User.current.id if self.attributes.has_key?("changed_by") and User.current != nil
     self.changed_by = User.first.id if self.attributes.has_key?("changed_by") and User.first != nil
+
+    self.changed_by = User.first if self.attributes.has_key?("changed_by") and User.current.nil?
+    
     self.date_changed = Time.now if self.attributes.has_key?("date_changed")
   end
 
@@ -53,12 +56,14 @@ module Bart2Connection::Openmrs
     if !Person.migrated_datetime.to_s.empty?
       self.location_id = Person.migrated_location if self.attributes.has_key?("location_id")
       # self.creator = Person.migrated_creator if self.attributes.has_key?("creator")
-      self.creator = User.first.id if self.attributes.has_key?("creator") and (self.creator.blank? || self.creator == 0)and User.first != nil
+      self.creator = User.first.id if self.attributes.has_key?("creator") and (self.creator.blank? ||
+          self.creator == 0)and User.first != nil
       self.date_created = Person.migrated_datetime if self.attributes.has_key?("date_created")
     else
       self.location_id = Location.current_health_center.id if self.attributes.has_key?("location_id") and (self.location_id.blank? || self.location_id == 0) and Location.current_health_center != nil
       # self.creator = User.current.id if self.attributes.has_key?("creator") and (self.creator.blank? || self.creator == 0)and User.current != nil
-      self.creator = User.first.id if self.attributes.has_key?("creator") and (self.creator.blank? || self.creator == 0)and User.first != nil
+      self.creator = User.first.id if self.attributes.has_key?("creator") and (self.creator.blank? ||
+          self.creator == 0)and User.first != nil
       self.date_created = Time.now if self.attributes.has_key?("date_created")
     end
 

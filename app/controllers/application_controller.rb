@@ -15,7 +15,7 @@ class ApplicationController < GenericApplicationController
     #for ANC Clinic
     task = Task.first rescue Task.new()    
 
-    current_user_activities = current_user.activities
+    current_user_activities = current_user.activities.collect{|u| u.downcase}
     
     normal_flow = CoreService.get_global_property_value("list.of.clinical.encounters.sequentially").split(",")
     
@@ -28,15 +28,6 @@ class ApplicationController < GenericApplicationController
     @patient = Patient.find(patient.id) rescue nil
     @anc_patient = ANCService::ANC.new(@patient) rescue nil        
     
-    foreign_links = [
-      "Manage ART Prescriptions",
-      "ART Adherence",
-      "HIV Clinic Consultation",
-      "HIV Reception",
-      "HIV Staging",
-      "HIV Clinic Registration"
-    ]
-    
     session.delete :datetime if session[:datetime].nil? || 
       ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d")) == Date.today.strftime("%Y-%m-%d"))
         
@@ -44,46 +35,46 @@ class ApplicationController < GenericApplicationController
     #     scope, drug_concept_id, special_field_or_encounter_present, next_if_NOT_condition_met]    
     tasks = {
       "Weight and Height" => [1, "/encounters/new/vitals/?patient_id=#{patient.id}&weight=1&height=1", 
-        "VITALS", 5089, nil, "TODAY", nil, true, (current_user_activities.include?("Weight and Height"))],
+        "VITALS", 5089, nil, "TODAY", nil, true, (current_user_activities.include?("Weight and Height".downcase))],
       
       "TTV Vaccination" => [2, "/prescriptions/ttv/?patient_id=#{patient.id}", 
-        "DISPENSING", nil, nil, "TODAY", 7124, false, (current_user_activities.include?("TTV Vaccination"))], 
+        "DISPENSING", nil, nil, "TODAY", 7124, false, (current_user_activities.include?("TTV Vaccination".downcase))],
       
       "BP" => [3, "/encounters/new/vitals/?patient_id=#{patient.id}&bp=1", "VITALS", 
-        5085, nil, "TODAY", nil, true, (current_user_activities.include?("BP"))],
+        5085, nil, "TODAY", nil, true, (current_user_activities.include?("BP".downcase))],
       
       "ANC Visit Type" => [4, "/patients/visit_type/?patient_id=#{patient.id}", 
-        "ANC VISIT TYPE", nil, nil, "TODAY", nil, true, (current_user_activities.include?("ANC Visit Type"))],  
+        "ANC VISIT TYPE", nil, nil, "TODAY", nil, true, (current_user_activities.include?("ANC Visit Type".downcase))],
       
       "Obstetric History" => [5, "/patients/obstetric_history/?patient_id=#{patient.id}", 
-        "OBSTETRIC HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Obstetric History"))], 
+        "OBSTETRIC HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Obstetric History".downcase))],
       
       "Medical History" => [6, "/patients/medical_history/?patient_id=#{patient.id}", 
-        "MEDICAL HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Medical History"))],  
+        "MEDICAL HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Medical History".downcase))],
       
       "Surgical History" => [7, "/patients/surgical_history/?patient_id=#{patient.id}", 
-        "SURGICAL HISTORY", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("Surgical History"))],  
+        "SURGICAL HISTORY", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("Surgical History".downcase))],
       
       "Social History" => [8, "/patients/social_history/?patient_id=#{patient.id}", 
-        "SOCIAL HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Social History"))], 
+        "SOCIAL HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Social History".downcase))],
       
       "Lab Results" => [9, "/encounters/new/lab_results/?patient_id=#{patient.id}", 
-        "LAB RESULTS", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Lab Results"))],
+        "LAB RESULTS", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Lab Results".downcase))],
 
       "Current Pregnancy" => [10, "/patients/current_pregnancy/?patient_id=#{patient.id}",
-        "CURRENT PREGNANCY", nil, nil, "RECENT", nil, true, (current_user_activities.include?("Current Pregnancy"))], 
+        "CURRENT PREGNANCY", nil, nil, "RECENT", nil, true, (current_user_activities.include?("Current Pregnancy".downcase))],
       
       "ANC Examination" => [11, "/patients/observations/?patient_id=#{patient.id}",
-        "OBSERVATIONS", nil, nil, "TODAY", nil, true, (current_user_activities.include?("ANC Examination"))], 
+        "OBSERVATIONS", nil, nil, "TODAY", nil, true, (current_user_activities.include?("ANC Examination".downcase))],
       
       "Manage Appointments" => [12, "/encounters/new/appointment/?patient_id=#{patient.id}", 
-        "APPOINTMENT", nil, nil, "TODAY", nil, true, (current_user_activities.include?("Manage Appointments"))], 
+        "APPOINTMENT", nil, nil, "TODAY", nil, true, (current_user_activities.include?("Manage Appointments".downcase))],
       
       "Give Drugs" => [13, "/prescriptions/give_drugs/?patient_id=#{patient.id}", 
-        "TREATMENT", nil, nil, "TODAY", 7124, false, (current_user_activities.include?("Give Drugs"))], 
+        "TREATMENT", nil, nil, "TODAY", 7124, false, (current_user_activities.include?("Give Drugs".downcase))] # ,
       
-      "Update Outcome" => [14, "/patients/outcome/?patient_id=#{patient.id}", "UPDATE OUTCOME", 
-        nil, nil, "TODAY", nil, true, (current_user_activities.include?("Update Outcome"))]
+      # "Update Outcome" => [17, "/patients/outcome/?patient_id=#{patient.id}", "UPDATE OUTCOME",
+      #  nil, nil, "TODAY", nil, true, (current_user_activities.include?("Update Outcome".downcase))]
     }
 
     session["patient_id_map"] = {} if session["patient_id_map"].nil?
@@ -93,13 +84,17 @@ class ApplicationController < GenericApplicationController
 
       @external_id = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).person_id # rescue nil
 
+      @external_user_id = Bart2Connection::User.find_by_username(current_user.username).id rescue nil
+
       if !@external_id.nil? && !@external_id.blank?
         session["patient_id_map"][@patient.id] = @external_id rescue nil
+        session["user_internal_external_id_map"] = @external_user_id rescue nil        
       end
 
     end
 
-    if @anc_patient.hiv_status.downcase == "positive" && !session["patient_id_map"][@patient.id].nil?
+    if @anc_patient.hiv_status.downcase == "positive" and !session["patient_id_map"][@patient.id].nil? and
+        !session["user_internal_external_id_map"].nil?
 
       art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
       anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
@@ -120,52 +115,103 @@ class ApplicationController < GenericApplicationController
        
       @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters.collect{|e| e.type.name}
 
-      tasks["Weight and Height"][1] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/vitals?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+      # raise @external_encounters.to_yaml
+      
+      if session["patient_vitals_map"].nil?
+        session["patient_vitals_map"] = {}
+      end
 
+      if @anc_patient.current_weight.to_i > 0 and @anc_patient.current_height.to_i > 0 and
+          !session["patient_vitals_map"][@patient.id]
+        
+        bmi = ((@anc_patient.current_weight.to_f/(@anc_patient.current_height.to_f *
+              @anc_patient.current_height.to_f)) * 10000).round(1) rescue 0
+
+        vitals_params = {
+          "obs"=>{
+            "obs_set_0"=>{
+              "value_numeric"=>"#{@anc_patient.current_weight}",
+              "value_coded_or_text_multiple"=>[""],
+              "value_drug"=>"",
+              "value_modifier"=>"",
+              "value_coded"=>"",
+              "value_boolean"=>"",
+              "obs_group_id"=>"",
+              "order_id"=>"",
+              "value_text"=>"",
+              "patient_id"=>"#{session["patient_id_map"][@patient.id]}",
+              "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
+              DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
+              "concept_name"=>"WEIGHT (KG)",
+              "value_coded_or_text"=>"",
+              "value_datetime"=>""
+            },
+            "obs_set_1"=>{
+              "value_numeric"=>"#{@anc_patient.current_height}",
+              "value_coded_or_text_multiple"=>[""],
+              "value_drug"=>"",
+              "value_modifier"=>"",
+              "value_coded"=>"",
+              "value_boolean"=>"",
+              "obs_group_id"=>"",
+              "order_id"=>"",
+              "value_text"=>"",
+              "patient_id"=>"#{session["patient_id_map"][@patient.id]}",
+              "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
+              DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
+              "concept_name"=>"HEIGHT (CM)",
+              "value_coded_or_text"=>"",
+              "value_datetime"=>""
+            },
+            "obs_set_2"=>{
+              "value_numeric"=>"",
+              "value_coded_or_text_multiple"=>[""],
+              "value_drug"=>"",
+              "value_modifier"=>"",
+              "value_coded"=>"",
+              "value_boolean"=>"",
+              "obs_group_id"=>"",
+              "order_id"=>"",
+              "value_text"=>"",
+              "patient_id"=>"#{session["patient_id_map"][@patient.id]}",
+              "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
+              DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
+              "concept_name"=>"BODY MASS INDEX, MEASURED",
+              "value_coded_or_text"=>"#{bmi}",
+              "value_datetime"=>""
+            }
+          },
+          "encounter"=>{
+            "encounter_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
+            DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
+            "provider_id"=>"#{session["user_internal_external_id_map"]}",
+            "patient_id"=>"#{session["patient_id_map"][@patient.id]}",
+            "encounter_type_name"=>"VITALS"
+          },
+          "location"=>(Location.current_location.id rescue Location.first.location_id)
+        }
+
+        # Create a VITALS encounter and associated obs in ART
+      
+        result = RestClient.post("http://#{art_link}/encounters/create_remote", vitals_params)
+
+        session["patient_vitals_map"][@patient.id] = result
+      end
+      
       additional_tasks = {}
 
+      if (!session["proceed_to_art"].nil? and session["proceed_to_art"][@patient.id].nil? and
+            !@external_encounters.collect{|u| u.downcase}.include?("hiv reception"))
 
-      additional_tasks["HIV Clinic Registration"] = [15, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/hiv_clinic_registration?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
-        "HIV CLINIC REGISTRATION", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("HIV Clinic Registration") &&
-            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("HIV CLINIC REGISTRATION")
+        additional_tasks["HIV Reception"] = [14, "/patients/go_to_art?patient_id=#{@patient.id}",
+          "HIV RECEPTION", nil, nil, "TODAY", nil, false, (current_user_activities.collect{|u| u.downcase}.include?("hiv reception") &&
+              @anc_patient.hiv_status.downcase == "positive")] 
         
+      end
       
-      additional_tasks["HIV Staging"] = [16, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/hiv_staging?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
-        "HIV STAGING", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("HIV Staging") &&
-            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("HIV STAGING")
-      
-      additional_tasks["HIV Reception"] = [17, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
-        "HIV RECEPTION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("HIV Reception") &&
-            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("HIV RECEPTION")
-      
-      additional_tasks["HIV Clinic Consultation"] = [18, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/hiv_clinic_consultation?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
-        "HIV CLINIC CONSULTATION", nil, nil, "TODAY", nil, false, (current_user_activities.include?("HIV Clinic Consultation") &&
-            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("HIV CLINIC CONSULTATION")
-      
-      additional_tasks["ART Adherence"] = [19, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/art_adherence?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
-        "ART ADHERENCE", nil, nil, "TODAY", nil, false, (current_user_activities.include?("ART Adherence") &&
-            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("ART ADHERENCE")
-      
-      additional_tasks["Manage ART Prescriptions"] = [20, "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/art_adherence?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}",
-        "TREATMENT", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Manage ART Prescriptions") &&
-            @anc_patient.hiv_status.downcase == "positive")] if !@external_encounters.include?("TREATMENT")
-    
-
-      tasks = tasks.merge(additional_tasks) if @anc_patient.hiv_status.downcase == "positive" && !(session["patient_id_map"][@patient.id] rescue nil).nil?
+      if !(session["user_internal_external_id_map"] rescue nil).nil?
+        tasks = tasks.merge(additional_tasks) if @anc_patient.hiv_status.downcase == "positive" && !(session["patient_id_map"][@patient.id] rescue nil).nil?
+      end
     end
     
     sorted_tasks = {}
@@ -175,7 +221,7 @@ class ApplicationController < GenericApplicationController
     }
     
     sorted_tasks = sorted_tasks.sort
-    
+
     sorted_tasks.each do |pos, tsk|
       
       # next if tasks[tsk][8] == false
@@ -197,7 +243,7 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -211,7 +257,7 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -224,7 +270,7 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -238,7 +284,7 @@ class ApplicationController < GenericApplicationController
               patient.id, EncounterType.find_by_name(tasks[tsk][2]), session_date.to_date]) rescue []
         
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -247,7 +293,7 @@ class ApplicationController < GenericApplicationController
         
         task.encounter_type = tsk
         
-        if normal_flow[0] == tsk.downcase
+        if normal_flow[0].downcase == tsk.downcase
           task.url = tasks[tsk][1]
         else
           task.url = "/patients/show/#{patient.id}"
@@ -266,7 +312,7 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -282,7 +328,7 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -296,7 +342,7 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -312,7 +358,7 @@ class ApplicationController < GenericApplicationController
               (session_date.to_date - 6.month), (session_date.to_date + 6.month)]) rescue []
         
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -321,7 +367,7 @@ class ApplicationController < GenericApplicationController
         
         task.encounter_type = tsk
         
-        if normal_flow[0] == tsk.downcase
+        if normal_flow[0].downcase == tsk.downcase
           task.url = tasks[tsk][1]
         else
           task.url = "/patients/show/#{patient.id}"
@@ -338,7 +384,7 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -352,7 +398,7 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -365,7 +411,7 @@ class ApplicationController < GenericApplicationController
         
           checked_already = tasks[tsk][7]
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -379,7 +425,7 @@ class ApplicationController < GenericApplicationController
               patient.id, EncounterType.find_by_name(tasks[tsk][2])]) rescue []
         
           if available.length > 0
-            if normal_flow[0] == tsk.downcase
+            if normal_flow[0].downcase == tsk.downcase
               normal_flow -= [tsk.downcase]
               next
             end
@@ -388,7 +434,7 @@ class ApplicationController < GenericApplicationController
         
         task.encounter_type = tsk
         
-        if normal_flow[0] == tsk.downcase
+        if normal_flow[0].downcase == tsk.downcase
           task.url = tasks[tsk][1]
         else
           task.url = "/patients/show/#{patient.id}"

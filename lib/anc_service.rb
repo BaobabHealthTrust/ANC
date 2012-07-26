@@ -64,27 +64,27 @@ module ANCService
   
     def current_weight
       obs = self.person.observations.recent(1).question("WEIGHT (KG)").all
-      obs.first.value_numeric rescue 0
+      obs.last.value_numeric || obs.last.value_text rescue 0
     end
   
     def current_height
       obs = self.person.observations.recent(1).question("HEIGHT (CM)").all
-      obs.first.value_numeric rescue 0
+      obs.last.value_numeric || obs.last.value_text rescue 0
     end
   
     def initial_weight
       obs = self.person.observations.recent(1).question("WEIGHT (KG)").all
-      obs.last.value_numeric rescue 0
+      obs.first.value_numeric || obs.first.value_text rescue 0
     end
   
     def initial_height
       obs = self.person.observations.recent(1).question("HEIGHT (CM)").all
-      obs.last.value_numeric rescue 0
+      obs.first.value_numeric || obs.first.value_text rescue 0
     end
 
     def initial_bmi
       obs = self.person.observations.recent(1).question("BMI").all
-      obs.last.value_numeric rescue nil
+      obs.first.value_numeric rescue nil
     end
 
     def min_weight
