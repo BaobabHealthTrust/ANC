@@ -1076,9 +1076,12 @@ class PatientsController < ApplicationController
     patient = ANCService::ANC.new(@patient)
     
     if params[:cango2art] && patient.hiv_status.upcase == "POSITIVE"
-      art_link = GlobalProperty.find_by_property("art_link").property_value rescue nil
-      anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
-      
+      # art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
+      # anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+
+      art_link = CoreService.get_global_property_value("art_link") rescue nil
+      anc_link = CoreService.get_global_property_value("anc_link") rescue nil
+
       if !art_link.nil? && !anc_link.nil?
         if !session[:token]
           response = RestClient.post("http://#{art_link}/single_sign_on/get_token", 
@@ -1191,8 +1194,11 @@ class PatientsController < ApplicationController
 
     if params["to art"].downcase == "yes"
 
-      art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
-      anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+      # art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
+      # anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+
+      art_link = CoreService.get_global_property_value("art_link") rescue nil
+      anc_link = CoreService.get_global_property_value("anc_link") rescue nil
 
       if !art_link.nil? && !anc_link.nil? # && foreign_links.include?(pos)
         if !session[:token]
@@ -1207,7 +1213,11 @@ class PatientsController < ApplicationController
 
         end
       end
-       
+      
+      # raise ("http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&current_location=#{session[:location_id]}&" +
+      #  "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+      #  "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}").inspect
+
       redirect_to "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&current_location=#{session[:location_id]}&" +
         "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
         "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}" and return

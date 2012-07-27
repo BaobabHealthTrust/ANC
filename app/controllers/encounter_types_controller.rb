@@ -10,18 +10,12 @@ class EncounterTypesController < ApplicationController
     } rescue current_user.activities 
     
     hiv_specs = [
-      "ART Drug Dispensations",
-      "Manage ART Prescriptions",
-      "ART Adherence",
-      "HIV Clinic Consultation",
-      "HIV Reception",
-      "HIV Staging",
-      "HIV Clinic Registration"
+      "HIV Reception"
     ]
     
     status = @anc_patient.hiv_status.downcase rescue "unknown"
     
-    @available_encounter_types = @available_encounter_types - ["Registration"]
+    @available_encounter_types = @available_encounter_types - ["Registration", "View Reports"]
     
     @available_encounter_types = @available_encounter_types - hiv_specs if status != "positive"
     
@@ -29,9 +23,12 @@ class EncounterTypesController < ApplicationController
 
   def show
     # raise params.to_yaml
-    art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
-    anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
-    
+    # art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
+    # anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+
+    art_link = CoreService.get_global_property_value("art_link") rescue nil
+    anc_link = CoreService.get_global_property_value("anc_link") rescue nil
+
     patient = Patient.find(params[:patient_id]) rescue nil
 
     @patient = Patient.find(patient.id) rescue nil
@@ -97,8 +94,11 @@ class EncounterTypesController < ApplicationController
 
     if @anc_patient.hiv_status.downcase == "positive" && !session["patient_id_map"][@patient.id].nil?
 
-      art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
-      anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+      # art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
+      # anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+
+      art_link = CoreService.get_global_property_value("art_link") rescue nil
+      anc_link = CoreService.get_global_property_value("anc_link") rescue nil
 
       if !art_link.nil? && !anc_link.nil? # && foreign_links.include?(pos)
         if !session[:token]
@@ -116,6 +116,12 @@ class EncounterTypesController < ApplicationController
 
       @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters.collect{|e| e.type.name}
 
+      
+      paths["HIV Reception"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
+        "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
+        "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+
+=begin
       paths["HIV Clinic Registration"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
           "/encounters/new/hiv_clinic_registration?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
@@ -124,11 +130,9 @@ class EncounterTypesController < ApplicationController
       paths["HIV Staging"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
           "/encounters/new/hiv_staging?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+=end
 
-      paths["HIV Reception"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
-          "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
-
+=begin
       paths["HIV Clinic Consultation"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
           "/encounters/new/hiv_clinic_consultation?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
@@ -140,7 +144,8 @@ class EncounterTypesController < ApplicationController
       paths["Manage ART Prescriptions"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
           "/encounters/new/art_adherence?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
-
+=end
+      
     end
 
     redirect_to "#{paths[params[:encounter_type]]}" and return

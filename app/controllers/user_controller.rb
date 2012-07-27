@@ -24,14 +24,8 @@ class UserController < GenericUserController
       "Current Pregnancy", 
       "Manage Appointments", 
       "Give Drugs", 
-      "Update Outcome", 
-      "HIV Clinic Registration", 
-      "HIV Staging", 
+      "Update Outcome",  
       "HIV Reception", 
-      "HIV Clinic Consultation", 
-      "ART Adherence", 
-      "Manage ART Prescriptions", 
-      "ART Drug Dispensations", 
       "Registration", 
       "View Reports"]        
     

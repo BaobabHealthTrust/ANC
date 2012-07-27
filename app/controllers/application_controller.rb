@@ -100,8 +100,11 @@ class ApplicationController < GenericApplicationController
     if @anc_patient.hiv_status.downcase == "positive" and !session["patient_id_map"][@patient.id].nil? and
         !session["user_internal_external_id_map"].nil?
 
-      art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
-      anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+      # art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
+      # anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+
+      art_link = CoreService.get_global_property_value("art_link") rescue nil
+      anc_link = CoreService.get_global_property_value("anc_link") rescue nil
 
       if !art_link.nil? && !anc_link.nil? # && foreign_links.include?(pos)
         if !session[:token]
