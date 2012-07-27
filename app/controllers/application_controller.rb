@@ -82,6 +82,10 @@ class ApplicationController < GenericApplicationController
     # Get patient id mapping
     if @anc_patient.hiv_status.downcase == "positive" && session["patient_id_map"][@patient.id].nil?
 
+      if session["proceed_to_art"].nil?
+        session["proceed_to_art"] = {}
+      end
+
       @external_id = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).person_id # rescue nil
 
       @external_user_id = Bart2Connection::User.find_by_username(current_user.username).id rescue nil
