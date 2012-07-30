@@ -197,9 +197,9 @@ module ANCService
         }      
       }
     
-      # raise @obstetrics.to_yaml
+      # raise @anc_patient.to_yaml
     
-      @pregnancies = @anc_patient.active_range
+      @pregnancies = self.active_range
     
       @range = []
     
