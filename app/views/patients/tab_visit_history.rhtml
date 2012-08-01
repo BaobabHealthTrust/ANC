@@ -180,10 +180,12 @@
 
         out = []
 
+        # raise @encounters.to_yaml
+        
         @encounters.each{|v,k|
-          out << [k["ANC VISIT TYPE"]["REASON FOR VISIT"].squish.to_i, v]
+          out << [k["ANC VISIT TYPE"]["REASON FOR VISIT"].squish.to_i, v] rescue []
         }
-        out = out.sort
+        out = out.sort.compact
 
         out.each do |key, element|
           
@@ -235,13 +237,13 @@
                   encounter["CURRENT PREGNANCY"]["TT STATUS"].to_i : "&nbsp;") rescue "&nbsp;" %>&nbsp;
             </td>
             <td class="topic leftTop" align="center">
-              <%= (@drugs[encounter[0]]["TTV"] > 0 ? 1 : "&nbsp;")  rescue "&nbsp;"; %>&nbsp;
+              <%= (@drugs[element]["TTV"] > 0 ? 1 : "&nbsp;")  rescue "&nbsp;"; %>&nbsp;
             </td>
             <td class="leftTop" align="center">
-              <%= (@drugs[encounter[0]]["SP"].to_i > 0 ? @drugs[encounter[0]]["SP"].to_i : "&nbsp;") rescue "&nbsp;";  %>
+              <%= (@drugs[element]["SP"].to_i > 0 ? @drugs[element]["SP"].to_i : "&nbsp;") rescue "&nbsp;";  %>
             </td>
             <td class="leftTop" align="center">
-              <%= (@drugs[encounter[0]]["Fefol"].to_i > 0 ? @drugs[encounter[0]]["Fefol"].to_i : "&nbsp;") rescue "&nbsp;";  %>
+              <%= (@drugs[element]["Fefol"].to_i > 0 ? @drugs[element]["Fefol"].to_i : "&nbsp;") rescue "&nbsp;";  %>
             </td>
             <!--td class="leftTop" align="center">
   <%#= (@drugs[encounter[0]]["NVP"].to_i > 0 ? @drugs[encounter[0]]["NVP"].to_i : "&nbsp;") rescue "&nbsp;";  %>
@@ -253,7 +255,7 @@
   <%#= (@drugs[encounter[0]]["TDF/3TC/EFV"].to_i > 0 ? @drugs[encounter[0]]["TDF/3TC/EFV"].to_i : "&nbsp;") rescue "&nbsp;";  %>
             </td-->
             <td class="leftTop" align="center">
-              <%= (@drugs[encounter[0]]["NVP"].to_i > 0 ? @drugs[encounter[0]]["NVP"].to_i : "&nbsp;") rescue "&nbsp;"; %>
+              <%= (@drugs[element]["NVP"].to_i > 0 ? @drugs[element]["NVP"].to_i : "&nbsp;") rescue "&nbsp;"; %>
             </td>
             <td class="leftTop" align="center" colspan="2">
               <%= (encounter["LAB RESULTS"]["TAKING CO-TRIMOXAZOLE PREVENTIVE THERAPY"].upcase == "YES" ? "Y" : "N") rescue "&nbsp;" %>

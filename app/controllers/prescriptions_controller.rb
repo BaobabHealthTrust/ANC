@@ -98,58 +98,128 @@ class PrescriptionsController < ApplicationController
     redirect_to next_task(@patient) 
   end
   
-  def create   
-    @suggestions = params[:suggestion] || ['New Prescription']
-    @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
+  def create
     
-    encounter = Encounter.new(params[:encounter])
-    encounter.encounter_datetime ||= session[:datetime]
-    encounter.save
- 
-    if !params[:formulation]
-      redirect_to next_task(@patient) and return
-    end
-    
-    unless params[:location]
-      session_date = session[:datetime] || params[:encounter_datetime] || Time.now()
-    else
-      session_date = params[:encounter_datetime] #Use encounter_datetime passed during import
-    end
-    # set current location via params if given
-    Location.current_location = Location.find(params[:location]) if params[:location]
-    
-    if params[:filter] and !params[:filter][:provider].blank?
-      user_person_id = User.find_by_username(params[:filter][:provider]).person_id
-    elsif params[:location] # migration
-      user_person_id = params[:provider_id]
-    else
-      user_person_id = User.find_by_user_id(current_user.user_id).person_id
-    end
+    if params[:prescription]
 
-    @encounter = encounter # PatientService.current_treatment_encounter( @patient, session_date, user_person_id)
-    @diagnosis = Observation.find(params[:diagnosis]) rescue nil
-    @suggestions.each do |suggestion|
-      unless (suggestion.blank? || suggestion == '0' || suggestion == 'New Prescription')
-        @order = DrugOrder.find(suggestion)
-        DrugOrder.clone_order(@encounter, @patient, @diagnosis, @order)
-      else
+      params[:prescription].each do |prescription|
         
-        @formulation = (params[:formulation] || '').upcase
-        @drug = Drug.find_by_name(@formulation) rescue nil
-        unless @drug
-          flash[:notice] = "No matching drugs found for formulation #{params[:formulation]}"
-          render :new
-          return
-        end  
-        start_date = session_date
-        auto_expire_date = session_date.to_date + params[:duration].to_i.days
-        prn = params[:prn].to_i
-        if params[:type_of_prescription] == "variable"
-          DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug, start_date, auto_expire_date, [params[:morning_dose], params[:afternoon_dose], params[:evening_dose], params[:night_dose]], 'VARIABLE', prn)
+        @suggestions = prescription[:suggestion] || ['New Prescription']
+        @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
+
+        encounter = Encounter.new(params[:encounter])
+        encounter.encounter_datetime ||= session[:datetime]
+        encounter.save
+
+        if !prescription[:formulation]
+          redirect_to next_task(@patient) and return
+        end
+
+        unless params[:location]
+          session_date = session[:datetime] || params[:encounter_datetime] || Time.now()
         else
-          DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug, start_date, auto_expire_date, params[:dose_strength], params[:frequency], prn)
-        end  
-      end  
+          session_date = params[:encounter_datetime] #Use encounter_datetime passed during import
+        end
+        # set current location via params if given
+        Location.current_location = Location.find(params[:location]) if params[:location]
+
+        if prescription[:filter] and !prescription[:filter][:provider].blank?
+          user_person_id = User.find_by_username(prescription[:filter][:provider]).person_id
+        elsif params[:location] # migration
+          user_person_id = params[:provider_id]
+        else
+          user_person_id = User.find_by_user_id(current_user.user_id).person_id
+        end
+
+        @encounter = encounter # PatientService.current_treatment_encounter( @patient, session_date, user_person_id)
+        @diagnosis = Observation.find(prescription[:diagnosis]) rescue nil
+        @suggestions.each do |suggestion|
+          unless (suggestion.blank? || suggestion == '0' || suggestion == 'New Prescription')
+            @order = DrugOrder.find(suggestion)
+            DrugOrder.clone_order(@encounter, @patient, @diagnosis, @order)
+          else
+
+            @formulation = (prescription[:formulation] || '').upcase
+            @drug = Drug.find_by_name(@formulation) rescue nil
+            unless @drug
+              flash[:notice] = "No matching drugs found for formulation #{prescription[:formulation]}"
+              render :new
+              return
+            end
+            start_date = session_date
+            auto_expire_date = session_date.to_date + prescription[:duration].to_i.days
+            prn = prescription[:prn].to_i
+            if prescription[:type_of_prescription] == "variable"
+              DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug,
+                start_date, auto_expire_date, [prescription[:morning_dose],
+                  prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]], 'VARIABLE', prn)
+            else
+              DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug,
+                start_date, auto_expire_date, prescription[:dose_strength], prescription[:frequency], prn)
+            end
+          end
+        end
+      
+      end
+
+    else
+      
+      @suggestions = params[:suggestion] || ['New Prescription']
+      @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
+
+      encounter = Encounter.new(params[:encounter])
+      encounter.encounter_datetime ||= session[:datetime]
+      encounter.save
+
+      if !params[:formulation]
+        redirect_to next_task(@patient) and return
+      end
+
+      unless params[:location]
+        session_date = session[:datetime] || params[:encounter_datetime] || Time.now()
+      else
+        session_date = params[:encounter_datetime] #Use encounter_datetime passed during import
+      end
+      # set current location via params if given
+      Location.current_location = Location.find(params[:location]) if params[:location]
+
+      if params[:filter] and !params[:filter][:provider].blank?
+        user_person_id = User.find_by_username(params[:filter][:provider]).person_id
+      elsif params[:location] # migration
+        user_person_id = params[:provider_id]
+      else
+        user_person_id = User.find_by_user_id(current_user.user_id).person_id
+      end
+
+      @encounter = encounter # PatientService.current_treatment_encounter( @patient, session_date, user_person_id)
+      @diagnosis = Observation.find(params[:diagnosis]) rescue nil
+      @suggestions.each do |suggestion|
+        unless (suggestion.blank? || suggestion == '0' || suggestion == 'New Prescription')
+          @order = DrugOrder.find(suggestion)
+          DrugOrder.clone_order(@encounter, @patient, @diagnosis, @order)
+        else
+
+          @formulation = (params[:formulation] || '').upcase
+          @drug = Drug.find_by_name(@formulation) rescue nil
+          unless @drug
+            flash[:notice] = "No matching drugs found for formulation #{params[:formulation]}"
+            render :new
+            return
+          end
+          start_date = session_date
+          auto_expire_date = session_date.to_date + params[:duration].to_i.days
+          prn = params[:prn].to_i
+          if params[:type_of_prescription] == "variable"
+            DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug,
+              start_date, auto_expire_date, [params[:morning_dose],
+                params[:afternoon_dose], params[:evening_dose], params[:night_dose]], 'VARIABLE', prn)
+          else
+            DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug,
+              start_date, auto_expire_date, params[:dose_strength], params[:frequency], prn)
+          end
+        end
+      end
+
     end
     
 =begin    

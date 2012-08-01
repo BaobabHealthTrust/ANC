@@ -68,7 +68,6 @@ url = url[url.index("/"), url.length - url.index("/")]
 
 </form>
 
-
 <div style="z-index:11;bottom:28px; height: 64px; width: 435px; left: 230px;
      right: -66px; position: absolute;">
   <!--button id="viewSelectedOnlyButton" class="button navButton blue" style="min-width:350px;"
@@ -86,44 +85,46 @@ url = url[url.index("/"), url.length - url.index("/")]
   </button-->
 </div>
 <script type="text/javascript" language="javascript">
-<!--
+  <!--
 
-var freq_defs = {"OD": "ONCE A DAY (OD)",
-  "BD": "TWICE A DAY (BD)",
-  "TDS": "THREE A DAY (TDS)",
-  "Q4HRS": "SIX TIMES A DAY (Q4HRS)",
-  "QHS": "ONCE A DAY AT NIGHT (QHS)",
-  "NOCTE": "ONCE A DAY AT NIGHT (NOCTE)",
-  "QOD": "EVERY OTHER DAY (QOD)",
-  "QPM": "IN THE EVENING (QPM)",
-  "QAM": "IN THE MORNING (QAM)",
-  "QWK": "ONCE A WEEK (QWK)",
-  "QID": "FOUR TIMES A DAY (QID)",
-  "5X/D": "FIVE TIMES A DAY (5X/D)",
-  "5XD": "FIVE TIMES A DAY (5XD)",
-  "QNOON": "ONCE A DAY AT NOON (QNOON)"};
+  var freq_defs = {"OD": "ONCE A DAY (OD)",
+    "BD": "TWICE A DAY (BD)",
+    "TDS": "THREE A DAY (TDS)",
+    "Q4HRS": "SIX TIMES A DAY (Q4HRS)",
+    "QHS": "ONCE A DAY AT NIGHT (QHS)",
+    "NOCTE": "ONCE A DAY AT NIGHT (NOCTE)",
+    "QOD": "EVERY OTHER DAY (QOD)",
+    "QPM": "IN THE EVENING (QPM)",
+    "QAM": "IN THE MORNING (QAM)",
+    "QWK": "ONCE A WEEK (QWK)",
+    "QID": "FOUR TIMES A DAY (QID)",
+    "5X/D": "FIVE TIMES A DAY (5X/D)",
+    "5XD": "FIVE TIMES A DAY (5XD)",
+    "QNOON": "ONCE A DAY AT NOON (QNOON)"};
 
-function __$(id){
-  return document.getElementById(id);
-}
-
-function createMethods(){
-  for(var freq in freq_defs){
-    __$("option" + freq).setAttribute("freq", freq)
-    __$("option" + freq).onmousedown = function(){
-      __$("alertBox").innerHTML = freq_defs[this.getAttribute("freq")];
-      __$("alertBox").style.display = "block";
-      
-      setTimeout("hideAlert()", 2000);
-    }    
+  function __$(id){
+    return document.getElementById(id);
   }
-}
 
-function hideAlert(){
-  __$("alertBox").style.display = "none";
-}  
+  function createMethods(){
+    for(var freq in freq_defs){
+      if(__$("option" + freq)){
+        __$("option" + freq).setAttribute("freq", freq)
+        __$("option" + freq).onmousedown = function(){
+          __$("alertBox").innerHTML = freq_defs[this.getAttribute("freq")];
+          __$("alertBox").style.display = "block";
+      
+          setTimeout("hideAlert()", 2000);
+        }
+      }
+    }
+  }
 
-setTimeout("createMethods()", 200);
+  function hideAlert(){
+    __$("alertBox").style.display = "none";
+  }
 
-//-->
+  setTimeout("createMethods()", 200);
+
+  //-->
 </script>

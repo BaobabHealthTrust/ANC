@@ -2014,7 +2014,7 @@ function removeGenerics(){
         for(var j = 0; j < fields.length; j++){            
             var field = document.createElement("input");
             field.type = "hidden";
-            field.name = fields[j];
+            field.name = "prescription[][" + fields[j] + "]";
             field.value = __$("ulDoses").children[i].getAttribute(fields[j]);
 
             document.forms[0].appendChild(field);
