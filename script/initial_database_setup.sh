@@ -24,12 +24,14 @@ set -x # turns on stacktrace mode which gives useful debug information
 
 # Install gems
 
-sudo gem install devise -v="1.0.11" --include-dependencies --verbose
-sudo gem install warden -v="0.10.3" --include-dependencies --verbose
-sudo gem install devise -v="1.0.11" --include-dependencies --verbose
-sudo gem install composite_primary_keys -v="2.3.5.1" --include-dependencies --verbose
-sudo gem install json -v="1.6.1" --include-dependencies --verbose
-sudo gem install rest-client -v="1.6.7" --include-dependencies --verbose
+sudo gem install gems/*.gem --local --include-dependencies --verbose
+
+# sudo gem install devise -v="1.0.11" --include-dependencies --verbose
+# sudo gem install warden -v="0.10.3" --include-dependencies --verbose
+# sudo gem install devise -v="1.0.11" --include-dependencies --verbose
+# sudo gem install composite_primary_keys -v="2.3.5.1" --include-dependencies --verbose
+# sudo gem install json -v="1.6.1" --include-dependencies --verbose
+# sudo gem install rest-client -v="1.6.7" --include-dependencies --verbose
 
 USERNAME=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}']['username']"`
 PASSWORD=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}']['password']"`
