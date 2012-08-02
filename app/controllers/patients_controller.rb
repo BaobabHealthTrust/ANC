@@ -766,7 +766,7 @@ class PatientsController < ApplicationController
         end
       }      
     }
-    
+
     render :layout => false
   end
 

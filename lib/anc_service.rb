@@ -869,8 +869,8 @@ module ANCService
 
       @drugs = {};
       @other_drugs = {};
-      main_drugs = ["TTV", "SP", "Fefol", "NVP", "TDF/3TC/EFV"]
-
+      main_drugs = ["TTV", "SP", "Fefol", "NVP", "Albendazole"]
+    
       @patient.encounters.find(:all, :order => "encounter_datetime DESC",
         :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?",
           EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e|
@@ -892,7 +892,7 @@ module ANCService
           end
         }
       }
-    
+
       label = ZebraPrinter::StandardLabel.new
 
       label.draw_line(20,25,800,2,0)
@@ -920,7 +920,7 @@ module ANCService
       label.draw_text("FeFo",664,140,0,2,1,1,false)
       label.draw_text("(tabs)",655,158,0,2,1,1,false)
       label.draw_text("Albe.",740,140,0,2,1,1,false)
-      label.draw_text("(mg)",740,156,0,2,1,1,false)
+      label.draw_text("(tabs)",740,156,0,2,1,1,false)
       label.draw_text("Age",35,158,0,2,1,1,false)
       label.draw_text("Height",99,158,0,2,1,1,false)
       label.draw_text("Pres.",178,158,0,2,1,1,false)
@@ -1072,7 +1072,7 @@ module ANCService
 
       @drugs = {}; 
       @other_drugs = {}; 
-      main_drugs = ["TTV", "SP", "Fefol", "NVP", "Albendazole", "TDF/3TC/EFV"]
+      main_drugs = ["TTV", "SP", "Fefol", "NVP", "Albendazole"]
     
       @patient.encounters.find(:all, :order => "encounter_datetime DESC", 
         :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
@@ -1095,7 +1095,7 @@ module ANCService
           end
         }      
       }
-    
+
       label = ZebraPrinter::StandardLabel.new
 
       label.draw_line(20,25,800,2,0)
@@ -1115,9 +1115,9 @@ module ANCService
       label.draw_line(706,130,2,175,0)
       label.draw_text("Planned Delivery Place: #{@current_range[0]["PLANNED DELIVERY PLACE"] rescue ""}",28,66,0,2,1,1,false)
       label.draw_text("Bed Net Given: #{@current_range[0]["MOSQUITO NET"] rescue ""}",28,99,0,2,1,1,false)
-      label.draw_text("TDF",28,138,0,2,1,1,false)
-      label.draw_text("3TC",28,156,0,2,1,1,false)
-      label.draw_text("EFV",28,174,0,2,1,1,false)
+      label.draw_text("",28,138,0,2,1,1,false)
+      label.draw_text("",28,156,0,2,1,1,false)
+      label.draw_text("",28,174,0,2,1,1,false)
       label.draw_text("NVP",78,140,0,2,1,1,false)
       label.draw_text("Baby",77,158,0,1,1,1,false)
       label.draw_text("(ml)",77,176,0,1,1,1,false)
@@ -1133,28 +1133,39 @@ module ANCService
 
       @i = 0
 
-      encounters.sort.each do |encounter|
+      out = []
+
+      encounters.each{|v,k|
+        out << [k["ANC VISIT TYPE"]["REASON FOR VISIT"].squish.to_i, v] rescue []
+      }
+      out = out.sort.compact
+
+      # raise out.to_yaml
+
+      out.each do |key, element|
+
+        encounter = encounters[element]
         @i = @i + 1
       
-        if encounter[0] == target_date.to_date.strftime("%d/%b/%Y")
+        if element == target_date.to_date.strftime("%d/%b/%Y")
         
-          tdf = (@drugs[encounter[0]]["TDF/3TC/EFV"].to_i > 0 ? @drugs[encounter[0]]["TDF/3TC/EFV"].to_i : "") rescue ""
+          tdf = ""
           
           label.draw_text(tdf,28,200,0,2,1,1,false)
         
-          nvp = (@drugs[encounter[0]]["NVP"].to_i > 0 ? @drugs[encounter[0]]["NVP"].to_i : "") rescue ""
+          nvp = (@drugs[element]["NVP"].to_i > 0 ? @drugs[element]["NVP"].to_i : "") rescue ""
           
           label.draw_text(nvp,77,200,0,2,1,1,false)
       
-          cpt = (encounters[encounter[0]]["LAB RESULTS"]["TAKING CO-TRIMOXAZOLE PREVENTIVE THERAPY"].upcase == "YES" ? "Y" : "N") rescue ""
+          cpt = (encounters[element]["LAB RESULTS"]["TAKING CO-TRIMOXAZOLE PREVENTIVE THERAPY"].upcase == "YES" ? "Y" : "N") rescue ""
         
           label.draw_text(cpt,124,200,0,2,1,1,false)
         
-          art = (encounters[encounter[0]]["LAB RESULTS"]["ON ART"].upcase == "YES" ? "Y" : "N") rescue ""
+          art = (encounters[element]["LAB RESULTS"]["ON ART"].upcase == "YES" ? "Y" : "N") rescue ""
         
           label.draw_text(art,164,200,0,2,1,1,false)
         
-          sign = encounters[encounter[0]]["OBSERVATIONS"]["DIAGNOSIS"].humanize rescue ""
+          sign = encounters[element]["OBSERVATIONS"]["DIAGNOSIS"].humanize rescue ""
         
           sign = paragraphate(sign.to_s, 13, 5)
         
@@ -1162,10 +1173,10 @@ module ANCService
             label.draw_text(sign[m],198,(200 + (18 * m)),0,2,1,1,false)
           }
         
-          med = encounters[encounter[0]]["UPDATE OUTCOME"]["OUTCOME"].humanize + "; " rescue ""
-          oth = (@other_drugs[encounter[0]].collect{|d, v| 
+          med = encounters[element]["UPDATE OUTCOME"]["OUTCOME"].humanize + "; " rescue ""
+          oth = (@other_drugs[element].collect{|d, v|
               "#{d}: #{ (v.to_s.match(/\.[1-9]/) ? v : v.to_i) }"
-            }.join("; ")) if @other_drugs[encounter[0]].length > 0 rescue ""
+            }.join("; ")) if @other_drugs[element].length > 0 rescue ""
           
           med = paragraphate(med.to_s + oth.to_s, 17, 5)
         
@@ -1173,7 +1184,7 @@ module ANCService
             label.draw_text(med[m],370,(200 + (18 * m)),0,2,1,1,false)
           }
         
-          nex = encounters[encounter[0]]["APPOINTMENT"]["APPOINTMENT DATE"] rescue []
+          nex = encounters[element]["APPOINTMENT"]["APPOINTMENT DATE"] rescue []
         
           if nex != []
             date = nex.to_date
@@ -1187,9 +1198,15 @@ module ANCService
             label.draw_text(nex[m],610,(200 + (18 * m)),0,2,1,1,false)
           }
         
-          use = encounters[encounter[0]]["USER"] rescue ""
-          
-          label.draw_text(use,710,200,0,2,1,1,false)
+          use = encounters[element]["USER"] rescue ""
+
+          use = paragraphate(use.to_s, 5, 5)
+
+          (0..(use.length)).each{|m|
+            label.draw_text(use[m],710,(200 + (18 * m)),0,2,1,1,false)
+          }
+
+          # label.draw_text(use,710,200,0,2,1,1,false)
         
         end
       end
