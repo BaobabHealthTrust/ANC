@@ -1218,9 +1218,9 @@ class PatientsController < ApplicationController
       #  "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
       #  "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}").inspect
 
-      redirect_to "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&current_location=#{session[:location_id]}&" +
+      redirect_to "http://#{art_link}/single_sign_on/single_sign_in?current_location=#{session[:location_id]}&" +
         "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-        "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}" and return
+        "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}&auth_token=#{session[:token]}" and return
     else
       redirect_to "/patients/show/#{@patient.id}" and return
     end
