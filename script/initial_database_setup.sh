@@ -24,7 +24,11 @@ set -x # turns on stacktrace mode which gives useful debug information
 
 # Install gems
 
-sudo gem install ../gems/*.gem --local --include-dependencies --verbose
+cd ../gems
+
+sudo gem install *.gem --local --include-dependencies --verbose
+
+cd ../script
 
 # sudo gem install devise -v="1.0.11" --include-dependencies --verbose
 # sudo gem install warden -v="0.10.3" --include-dependencies --verbose
