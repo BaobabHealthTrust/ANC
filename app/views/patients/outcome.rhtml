@@ -42,7 +42,7 @@
   <%= touch_select_tag "REFERRAL CLINIC IF REFERRED", @patient, nil,
     {:id => "referral",
     :helptext => "Referral Facility",
-    :condition => "__$('outcome').value == 'Referred' && __$('outcome_available').value.toUpperCase() == 'YES'",
+    :condition => "__$('outcome').value == 'Referred'",
     :ajaxURL => "/encounters/static_locations?search_string=" } %>
 
   <%= submit_tag 'Finish' %>
