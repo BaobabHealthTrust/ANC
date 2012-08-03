@@ -15,35 +15,35 @@
   <%session_date = session[:datetime] || Time.now() %>
 
   <%= touch_select_tag "ASTHMA", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "ever_had_asthma?",
+    {:id => "ever_had_asthma?", :tt_requireNextClick => false,
     :helptext => "Ever Had Asthma?", :tt_onLoad => "showCategory('Medical History');" } %>
   <%= touch_select_tag "HYPERTENSION", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "ever_had_hypertension?",
+    {:id => "ever_had_hypertension?", :tt_requireNextClick => false,
     :helptext => "Ever Had Hypertension?" } %>
   <%= touch_select_tag "DIABETES", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "ever_had_diabetes?",
+    {:id => "ever_had_diabetes?", :tt_requireNextClick => false,
     :helptext => "Ever Had Diabetes?" } %>
   <%= touch_select_tag "EPILEPSY", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "ever_had_epilepsy?",
+    {:id => "ever_had_epilepsy?", :tt_requireNextClick => false,
     :helptext => "Ever Had Epilepsy?" } %>
   <%= touch_select_tag "RENAL DISEASE", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "ever_had_renal_disease?",
+    {:id => "ever_had_renal_disease?", :tt_requireNextClick => false,
     :helptext => "Ever Had Renal Disease?" } %>
 
   <%= touch_select_tag "FISTULA REPAIR", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "ever_had_a_fistula_repair?",
+    {:id => "ever_had_a_fistula_repair?", :tt_requireNextClick => false,
     :helptext => "Ever Had A Fistula Repair?" } %>
 
   <%= touch_select_tag "Spine or Leg Deform", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "do_you_have_a_spine_or_leg_deform?",
+    {:id => "do_you_have_a_spine_or_leg_deform?", :tt_requireNextClick => false,
     :helptext => "Does Client have Leg or Spine Deformity?" } %>
 
   <%= touch_select_tag "Blood transfusion", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "blood_transfusion",
+    {:id => "blood_transfusion", :tt_requireNextClick => false,
     :helptext => "Ever had a blood transfusion?" } %>
 
   <%= touch_select_tag "Sexually transmitted infection", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "sti",
+    {:id => "sti", :tt_requireNextClick => false,
     :helptext => "Ever had a sexually transmitted infection?" } %>
 
   <%= touch_select_tag "Allergy", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
