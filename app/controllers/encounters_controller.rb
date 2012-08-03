@@ -101,10 +101,7 @@ class EncountersController < ApplicationController
       
     redirect_to "/patients/print_history/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") == 
       "SOCIAL HISTORY"
-    
-    redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}&cango2art=1" and return if (encounter.type.name.upcase rescue "") == 
-      "UPDATE OUTCOME"
-       
+
     @anc_patient = (ANCService::ANC.new(@patient) rescue nil) if @anc_patient.nil?
     
     @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil

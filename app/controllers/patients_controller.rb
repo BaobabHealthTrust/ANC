@@ -1058,16 +1058,13 @@ class PatientsController < ApplicationController
   end
   
   def print_history
-    if @anc_patient.gravida(session[:datetime] || Time.now()).to_i > 1
-      print_and_redirect("/patients/obstetric_medical_examination_label/?patient_id=#{@patient.id}",
+    print_and_redirect("/patients/obstetric_medical_examination_label/?patient_id=#{@patient.id}",
         next_task(@patient))
-    else
-      redirect_to next_task(@patient) and return
-    end
   end
 
   def obstetric_medical_examination_label
-    print_string = "#{@anc_patient.detailed_obstetric_history_label}" + 
+    print_string = "#{(@anc_patient.gravida(session[:datetime] || Time.now()).to_i > 1 ? 
+      @anc_patient.detailed_obstetric_history_label : "")}" +
       "#{@anc_patient.obstetric_medical_history_label}" rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end

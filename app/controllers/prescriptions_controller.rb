@@ -112,6 +112,9 @@ class PrescriptionsController < ApplicationController
         encounter.save
 
         if !prescription[:formulation]
+          redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") ==
+            "TREATMENT"
+    
           redirect_to next_task(@patient) and return
         end
 
@@ -172,6 +175,9 @@ class PrescriptionsController < ApplicationController
       encounter.save
 
       if !params[:formulation]
+        redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") ==
+          "TREATMENT"
+    
         redirect_to next_task(@patient) and return
       end
 
@@ -229,7 +235,10 @@ class PrescriptionsController < ApplicationController
       render :text => 'import success' and return
     end
 =end
-    
+
+    redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (@encounter.type.name.upcase rescue "") ==
+      "TREATMENT"
+       
     redirect_to next_task(@patient)
   
   end
