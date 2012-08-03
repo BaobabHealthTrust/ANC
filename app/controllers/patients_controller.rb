@@ -1,7 +1,8 @@
 class PatientsController < ApplicationController
   before_filter :find_patient, :except => [:void]
   
-  def show 
+  def show
+    
     @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
 
     @encounters = @patient.encounters.find(:all) # , :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
@@ -1198,7 +1199,7 @@ class PatientsController < ApplicationController
       anc_link = CoreService.get_global_property_value("anc_link") rescue nil
 
       if !art_link.nil? && !anc_link.nil? # && foreign_links.include?(pos)
-        if !session[:token]
+        if !session[:token] || session[:token].blank?
           response = RestClient.post("http://#{art_link}/single_sign_on/get_token",
             {"login"=>session[:username], "password"=>session[:password]}) rescue nil
 
@@ -1215,7 +1216,8 @@ class PatientsController < ApplicationController
       #  "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
       #  "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}").inspect
 
-      redirect_to "http://#{art_link}/single_sign_on/single_sign_in?current_location=#{session[:location_id]}&" +
+      redirect_to "http://#{art_link}/single_sign_on/single_sign_in?current_location=#{
+      (!session[:location_id].nil? and !session[:location_id].blank? ? session[:location_id] : "721")}&" +
         "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
         "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}&auth_token=#{session[:token]}" and return
     else
