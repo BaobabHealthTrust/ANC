@@ -420,7 +420,7 @@ function askFormulation(){
     qtblcell3_1.innerHTML = "<ul id='ulDosages' class='popup'></ul>";
     
     qtblrow3.appendChild(qtblcell3_1);
-    
+
     var f = 0;
     for(var dose in drugslist[current_concept_id]){
         var li = document.createElement("li");
@@ -1909,7 +1909,70 @@ function processDrug(concept_id){
     
     drug += "Drug: <i>" + __$("editDosage").value + "</i>; Type: <i>" + type + 
     "</i>; Dur.: <i>" + duration + "</i>; PRN: <i>" + prn + "</i>";
-     
+
+    if(type == "Standard"){
+
+        switch(frequency.toUpperCase()){
+            case "OD":
+                morning = dose_strength;
+                break;
+            case "BD":
+                morning = dose_strength;
+                evening = dose_strength;
+                break;
+            case "TDS":
+                morning = dose_strength;
+                afternoon = dose_strength;
+                evening = dose_strength;
+                break;
+            case "Q4HRS":
+                morning = dose_strength;
+                afternoon = dose_strength;
+                evening = dose_strength;
+                night = dose_strength;
+                break;
+            case "NOCTE":
+                night = dose_strength;
+                break;
+            case "QOD":
+                night = dose_strength;
+                break;
+            case "QPM":
+                evening = dose_strength;
+                break;
+            case "QAM":
+                morning = dose_strength;
+                break;
+            case "QWK":
+                morning = dose_strength / 7;
+                break;
+            case "QID":
+                morning = dose_strength;
+                afternoon = dose_strength;
+                evening = dose_strength;
+                night = dose_strength;
+                break;
+            case "5XD":
+                morning = dose_strength * 2;
+                afternoon = dose_strength;
+                evening = dose_strength;
+                night = dose_strength;
+                break;
+            case "5X/D":
+                morning = dose_strength * 2;
+                afternoon = dose_strength;
+                evening = dose_strength;
+                night = dose_strength;
+                break;
+            case "QHS":
+                night = dose_strength;
+                break;
+            case "QNOON":
+                afternoon = dose_strength;
+                break;
+        }
+    }
+
     li.id = "li" + concept_id;
     
     li.setAttribute("generic", __$("inputTxt").value.trim());
@@ -1992,19 +2055,6 @@ function removeDrug(){
 
 // Remove the created interface and create corresponding controls ready for storage
 function removeGenerics(){    
-    /*     
-    li.setAttribute("generic", __$("inputTxt").value.trim());
-    li.setAttribute("formulation", __$("editDosage").value.trim());
-    li.setAttribute("type_of_prescription", type.toLowerCase());
-    li.setAttribute("dose_strength", dose_strength);
-    li.setAttribute("frequency", frequency);
-    li.setAttribute("morning_dose", morning);
-    li.setAttribute("afternoon_dose", afternoon);
-    li.setAttribute("evening_dose", evening);
-    li.setAttribute("night_dose", night);
-    li.setAttribute("duration", duration);
-    li.setAttribute("prn", prn);        
-     */
     
     var fields = ["generic", "formulation", "type_of_prescription", "dose_strength", 
     "frequency", "morning_dose", "afternoon_dose", "evening_dose", "night_dose",
@@ -2021,70 +2071,6 @@ function removeGenerics(){
         }
     }
     
-/*for(var i in __$("ulDoses").children){        
-        var formulation = 
-        __$("ulDoses").children[i].children[0].children[0]
-        .children[0].innerHTML.replace(/\<i\>/gi, "").replace(/\<\/i\>/gi, "").split(";")
-        
-        formulation.push("Concept_id: " + __$("ulDoses").children[i].getAttribute("concept_id"));
-        
-        var concept_id = __$("ulDoses").children[i].getAttribute("concept_id");
-        
-        var dosage = formulation[0].split(":")[1].trim();
-        var frequency = formulation[1].split(":")[1].trim();
-        var duration = formulation[2].split(":")[1].trim();
-        var prn = formulation[3].split(":")[1].trim();
-        
-        var parent_diagnosis = document.createElement("input");
-        parent_diagnosis.type = "hidden";
-        parent_diagnosis.name = "prescriptions[][concept_name]";
-        parent_diagnosis.value = "DIAGNOSIS";
-
-        document.forms[0].appendChild(parent_diagnosis);
-
-        var valueCodedText = document.createElement("input");
-        valueCodedText.type = "hidden";
-        valueCodedText.name = "prescriptions[][value_coded_or_text]";
-        valueCodedText.value = "";
-
-        document.forms[0].appendChild(valueCodedText);
-
-        var concept = document.createElement("input");
-        concept.type = "hidden";
-        concept.name = "prescriptions[][formulation]";
-        concept.value = dosage;
-
-        document.forms[0].appendChild(concept);
-
-        var patientid = document.createElement("input");
-        patientid.type = "hidden";
-        patientid.name = "prescriptions[][patient_id]";
-        patientid.value = current_patient_id;
-
-        document.forms[0].appendChild(patientid);
-        
-        var frequencyFld = document.createElement("input");
-        frequencyFld.type = "hidden";
-        frequencyFld.name = "prescriptions[][frequency]";
-        frequencyFld.value = frequency;
-
-        document.forms[0].appendChild(frequencyFld);        
-
-        var durationFld = document.createElement("input");
-        durationFld.type = "hidden";
-        durationFld.name = "prescriptions[][duration]";
-        durationFld.value = duration;
-
-        document.forms[0].appendChild(durationFld);            
-
-        var prnFld = document.createElement("input");
-        prnFld.type = "hidden";
-        prnFld.name = "prescriptions[][prn]";
-        prnFld.value = prn;
-
-        document.forms[0].appendChild(prnFld);   
-        
-    }*/
 }
 
 /*

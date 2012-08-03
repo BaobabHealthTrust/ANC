@@ -161,7 +161,8 @@
     // if (__$("touchscreenInput" + tstCurrentPage).value == "Unknown" ) __$("lmp").value = tstEstimatedLMPDate;',
     :tt_pageStyleClass => "exclude",
     :min => ((session[:datetime] || Date.today).to_date - 42.week),
-    :absoluteMin => ((session[:datetime] || Date.today).to_date - 45.week)
+    :absoluteMin => ((session[:datetime] || Date.today).to_date - 45.week),
+    :absoluteMax => ((session[:datetime] || Date.today).to_date - 1.week)
   } %>
 
   <%= text_field_tag "Estimate LMP", nil,
@@ -171,8 +172,8 @@
     :field_type => "number",
     :tt_pageStyleClass => "NumbersOnly",
     :tt_onUnload => "setDate(__$('touchscreenInput' + tstCurrentPage).value);",
-    :max => 9,
-    :absoluteMax => 12
+    :max => 6,
+    :absoluteMax => 10
   }
 %>
 

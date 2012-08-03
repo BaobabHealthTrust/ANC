@@ -64,7 +64,8 @@ class DrugOrder < ActiveRecord::Base
   end
   
   # prn should be 0 | 1
-  def self.write_order(encounter, patient, obs, drug, start_date, auto_expire_date, dose, frequency, prn, instructions = nil, equivalent_daily_dose = nil)
+  def self.write_order(encounter, patient, obs, drug, start_date, auto_expire_date, dose,
+      frequency, prn, instructions = nil, equivalent_daily_dose = nil)
     user_person_id = encounter.provider_id
 
     #encounter ||= patient.current_treatment_encounter(start_date, user_person_id)
@@ -72,29 +73,31 @@ class DrugOrder < ActiveRecord::Base
     duration = (auto_expire_date.to_date - start_date.to_date).to_i rescue nil
     equivalent_daily_dose = nil
     drug_order = nil       
-    if (frequency == "VARIABLE")
-      if instructions.blank?
-        instructions = "#{drug.name}:"
-        instructions += " IN THE MORNING (QAM):#{dose[0]} #{units}" unless dose[0].blank? || dose[0].to_f == 0
-        instructions += " ONCE A DAY AT NOON (QNOON):#{dose[1]} #{units}" unless dose[1].blank? || dose[1].to_f == 0
-        instructions += " IN THE EVENING (QPM):#{dose[2]} #{units}" unless dose[2].blank? || dose[2].to_f == 0
-        instructions += " ONCE A DAY AT NIGHT (QHS):#{dose[3]} #{units}" unless dose[3].blank? || dose[3].to_f == 0
-        instructions += " for #{duration} days" 
-        instructions += " (prn)" if prn == 1        
-      end  
-      if dose.is_a?(Array)
-        total_dose = dose.sum{|amount| amount.to_f rescue 0 }
-        return nil if total_dose.blank?
-        dose = total_dose
-      end  
-      equivalent_daily_dose ||= dose
-    else
-      equivalent_daily_dose ||= dose.to_f * DrugOrder.doses_per_day(frequency)
-      if instructions.blank?
-        instructions = "#{drug.name}: #{dose} #{units} #{frequency} for #{duration||'some'} days"
-        instructions += " (prn)" if prn == 1
-      end
+    # if (frequency == "VARIABLE")
+    
+    if instructions.blank?
+      instructions = "#{drug.name}:"
+      instructions += " IN THE MORNING (QAM):#{dose[0]} #{units}" unless dose[0].blank? || dose[0].to_f == 0
+      instructions += " ONCE A DAY AT NOON (QNOON):#{dose[1]} #{units}" unless dose[1].blank? || dose[1].to_f == 0
+      instructions += " IN THE EVENING (QPM):#{dose[2]} #{units}" unless dose[2].blank? || dose[2].to_f == 0
+      instructions += " ONCE A DAY AT NIGHT (QHS):#{dose[3]} #{units}" unless dose[3].blank? || dose[3].to_f == 0
+      instructions += " for #{duration} days"
+      instructions += " (prn)" if prn == 1
     end
+    if dose.is_a?(Array)
+      total_dose = dose.sum{|amount| amount.to_f rescue 0 }
+      return nil if total_dose.blank?
+      dose = total_dose
+    end
+    equivalent_daily_dose ||= dose
+
+    #else
+    #  equivalent_daily_dose ||= dose.to_f * DrugOrder.doses_per_day(frequency)
+    #  if instructions.blank?
+    #    instructions = "#{drug.name}: #{dose} #{units} #{frequency} for #{duration||'some'} days"
+    #    instructions += " (prn)" if prn == 1
+    #  end
+    # end
     ActiveRecord::Base.transaction do
       order = encounter.orders.create(
         :order_type_id => 1, 
@@ -124,18 +127,18 @@ class DrugOrder < ActiveRecord::Base
     if encounter.blank?  
       type = EncounterType.find_by_name("DISPENSING")
       encounter = encounters.find(:first,:conditions =>["encounter_datetime BETWEEN ? AND ? AND encounter_type = ?",
-                                  session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
-                                  session_date.to_date.strftime('%Y-%m-%d 23:59:59'),
-                                  type.id])
+          session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+          session_date.to_date.strftime('%Y-%m-%d 23:59:59'),
+          type.id])
     end
     
     return [] if encounter.blank?
    
     amounts_brought = Observation.all(:conditions => 
-      ['obs.concept_id = ? AND ' +
-       'obs.person_id = ? AND ' +
-       "encounter_datetime BETWEEN ? AND ? AND " +
-       'drug_order.drug_inventory_id = ?',
+        ['obs.concept_id = ? AND ' +
+          'obs.person_id = ? AND ' +
+          "encounter_datetime BETWEEN ? AND ? AND " +
+          'drug_order.drug_inventory_id = ?',
         ConceptName.find_by_name("AMOUNT OF DRUG BROUGHT TO CLINIC").concept_id,
         patient.person.person_id,
         session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
@@ -163,9 +166,9 @@ class DrugOrder < ActiveRecord::Base
     all = Encounter.find(:all,                                                  
       :conditions =>["patient_id = ? AND encounter_datetime BETWEEN ? AND ?           
       AND encounter_type = ?",patient.id , 
-      encounter_date.to_date.strftime('%Y-%m-%d 00:00:00'),
-      encounter_date.to_date.strftime('%Y-%m-%d 23:59:59') , 
-      type])              
+        encounter_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+        encounter_date.to_date.strftime('%Y-%m-%d 23:59:59') ,
+        type])
                                                                                 
     complete = true                                                             
     (all || []).each do |encounter|                                             
@@ -182,7 +185,7 @@ class DrugOrder < ActiveRecord::Base
     all = Encounter.find(:all,                                                  
       :conditions =>["patient_id = ? AND encounter_datetime BETWEEN ? AND ?           
       AND encounter_type = ?",patient.id , date.to_date.strftime('%Y-%m-%d 00:00:00'),                     
-                      date.to_date.strftime('%Y-%m-%d 23:59:59')  , type])                        
+        date.to_date.strftime('%Y-%m-%d 23:59:59')  , type])
                                                                                 
     start_date = nil ; end_date = nil                                        
     (all || []).each do |encounter|                                             

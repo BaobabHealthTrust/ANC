@@ -274,6 +274,8 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
     if(__$("chart").getElementsByTagName("div")[0].getElementsByTagName("div")[0]){
       __$("chart").getElementsByTagName("div")[0].getElementsByTagName("div")[0].innerHTML="Gestation Week";
     }
+
+    setTimeout("setGestationWeekLabel()", 100);
   }
 </script>
 
