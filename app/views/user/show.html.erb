@@ -17,7 +17,7 @@
     background: none repeat scroll 0 0 white;
     border: 1px solid black;
     margin: 10px;
-    width: 98%;
+    width: 73%;
   }
 
   .userdata td, .userdata th {
@@ -47,7 +47,7 @@
 <h1>User information</h1>
 <br />
 <div class = 'user_info'>
-<table class = 'userdata'>
+<table class = 'userdata'  style="float:left">
   <tr>
     <th class='blue'>Username:&nbsp;</th>
     <td class='blue'>&nbsp;<%=@user.username%></td>
@@ -69,6 +69,7 @@
     <td class='blue'>&nbsp;<%=@user.date_created.strftime('%A  %d, %B, %Y') rescue '&nbsp;'%></td>
   </tr>
 </table>
+
 <div>
 <table id = 'button_container' style = "float:right;">
   <tr>
@@ -82,6 +83,20 @@
     <td>
       <button id="change_password" class="silver" style="margin-top:10px;"
         onmousedown="document.location = '/user/change_password?id=<%= @user.id -%>'"><span>Change Password</span>
+      </button>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <button id="edit" class="silver" style="margin-top:10px;"
+        onmousedown="document.location = '/user/add_role?id=<%= @user.id -%>'"><span>Add Role</span>
+      </button>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <button id="change_password" class="silver" style="margin-top:10px;"
+        onmousedown="document.location = '/user/delete_role?id=<%= @user.id -%>'"><span>Delete Role</span>
       </button>
     </td>
   </tr>

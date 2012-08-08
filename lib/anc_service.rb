@@ -1198,15 +1198,15 @@ module ANCService
             label.draw_text(nex[m],610,(200 + (18 * m)),0,2,1,1,false)
           }
         
-          use = encounters[element]["USER"] rescue ""
+          use = (encounters[element]["USER"].split(" ") rescue []).collect{|n| n[0,1].upcase + "."}.join("")  rescue ""
+          
+          # use = paragraphate(use.to_s, 5, 5)
 
-          use = paragraphate(use.to_s, 5, 5)
+          # (0..(use.length)).each{|m|
+          #   label.draw_text(use[m],710,(200 + (18 * m)),0,2,1,1,false)
+          # }
 
-          (0..(use.length)).each{|m|
-            label.draw_text(use[m],710,(200 + (18 * m)),0,2,1,1,false)
-          }
-
-          # label.draw_text(use,710,200,0,2,1,1,false)
+          label.draw_text(use,710,200,0,2,1,1,false)
         
         end
       end
