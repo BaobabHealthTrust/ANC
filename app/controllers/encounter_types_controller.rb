@@ -79,20 +79,20 @@ class EncounterTypesController < ApplicationController
       "Update Outcome" => "/patients/outcome/?patient_id=#{patient.id}"
     } rescue {}
 
-    session["patient_id_map"] = {} if session["patient_id_map"].nil?
+    session["patient_id_map"] = {["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] => {}} if session["patient_id_map"].nil?
 
     # Get patient id mapping
-    if @anc_patient.hiv_status.downcase == "positive" && session["patient_id_map"][@patient.id].nil?
+    if @anc_patient.hiv_status.downcase == "positive" && session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil?
 
       @external_id = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).person_id # rescue nil
 
       if !@external_id.nil? && !@external_id.blank?
-        session["patient_id_map"][@patient.id] = @external_id rescue nil
+        session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = @external_id rescue nil
       end
 
     end
 
-    if @anc_patient.hiv_status.downcase == "positive" && !session["patient_id_map"][@patient.id].nil?
+    if @anc_patient.hiv_status.downcase == "positive" && !session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil?
 
       # art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
       # anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
@@ -119,31 +119,31 @@ class EncounterTypesController < ApplicationController
       
       paths["HIV Reception"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
         "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-        "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+        "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&current_location=#{session[:location_id]}"
 
 =begin
       paths["HIV Clinic Registration"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/hiv_clinic_registration?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+          "/encounters/new/hiv_clinic_registration?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&current_location=#{session[:location_id]}"
 
 
       paths["HIV Staging"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/hiv_staging?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+          "/encounters/new/hiv_staging?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&current_location=#{session[:location_id]}"
 =end
 
 =begin
       paths["HIV Clinic Consultation"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/hiv_clinic_consultation?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+          "/encounters/new/hiv_clinic_consultation?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&current_location=#{session[:location_id]}"
 
       paths["ART Adherence"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/art_adherence?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+          "/encounters/new/art_adherence?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&current_location=#{session[:location_id]}"
 
       paths["Manage ART Prescriptions"] = "http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&" +
           "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-          "/encounters/new/art_adherence?patient_id=#{session["patient_id_map"][@patient.id]}&current_location=#{session[:location_id]}"
+          "/encounters/new/art_adherence?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&current_location=#{session[:location_id]}"
 =end
       
     end

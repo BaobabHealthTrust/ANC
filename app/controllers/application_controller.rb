@@ -78,9 +78,11 @@ class ApplicationController < GenericApplicationController
     }
 
     session["patient_id_map"] = {} if session["patient_id_map"].nil?
+    session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
 
     # Get patient id mapping
-    if @anc_patient.hiv_status.downcase == "positive" && session["patient_id_map"][@patient.id].nil?
+    if @anc_patient.hiv_status.downcase == "positive" &&
+        session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil?
 
       if session["proceed_to_art"].nil?
         session["proceed_to_art"] = {}
@@ -91,13 +93,14 @@ class ApplicationController < GenericApplicationController
       @external_user_id = Bart2Connection::User.find_by_username(current_user.username).id rescue nil
 
       if !@external_id.nil? && !@external_id.blank?
-        session["patient_id_map"][@patient.id] = @external_id rescue nil
+        session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = @external_id rescue nil
         session["user_internal_external_id_map"] = @external_user_id rescue nil        
       end
 
     end
 
-    if @anc_patient.hiv_status.downcase == "positive" and !session["patient_id_map"][@patient.id].nil? and
+    if @anc_patient.hiv_status.downcase == "positive" and
+        !session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil? and
         !session["user_internal_external_id_map"].nil?
 
       # art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
@@ -146,7 +149,7 @@ class ApplicationController < GenericApplicationController
               "obs_group_id"=>"",
               "order_id"=>"",
               "value_text"=>"",
-              "patient_id"=>"#{session["patient_id_map"][@patient.id]}",
+              "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
               "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
               DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
               "concept_name"=>"WEIGHT (KG)",
@@ -163,7 +166,7 @@ class ApplicationController < GenericApplicationController
               "obs_group_id"=>"",
               "order_id"=>"",
               "value_text"=>"",
-              "patient_id"=>"#{session["patient_id_map"][@patient.id]}",
+              "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
               "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
               DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
               "concept_name"=>"HEIGHT (CM)",
@@ -180,7 +183,7 @@ class ApplicationController < GenericApplicationController
               "obs_group_id"=>"",
               "order_id"=>"",
               "value_text"=>"",
-              "patient_id"=>"#{session["patient_id_map"][@patient.id]}",
+              "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
               "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
               DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
               "concept_name"=>"BODY MASS INDEX, MEASURED",
@@ -192,7 +195,7 @@ class ApplicationController < GenericApplicationController
             "encounter_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
             DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
             "provider_id"=>"#{session["user_internal_external_id_map"]}",
-            "patient_id"=>"#{session["patient_id_map"][@patient.id]}",
+            "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
             "encounter_type_name"=>"VITALS"
           },
           "location"=>(Location.current_location.id rescue Location.first.location_id)
@@ -217,7 +220,7 @@ class ApplicationController < GenericApplicationController
       end
       
       if !(session["user_internal_external_id_map"] rescue nil).nil?
-        tasks = tasks.merge(additional_tasks) if @anc_patient.hiv_status.downcase == "positive" && !(session["patient_id_map"][@patient.id] rescue nil).nil?
+        tasks = tasks.merge(additional_tasks) if @anc_patient.hiv_status.downcase == "positive" && !(session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] rescue nil).nil?
       end
     end
     
