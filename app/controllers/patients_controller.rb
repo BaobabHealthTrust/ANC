@@ -748,8 +748,9 @@ class PatientsController < ApplicationController
     main_drugs = ["TTV", "SP", "Fefol", "NVP", "TDF/3TC/EFV"]
     
     @patient.encounters.find(:all, :order => "encounter_datetime DESC", 
-      :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
-        EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e| 
+      :conditions => ["(encounter_type = ? OR encounter_type = ?) AND encounter_datetime >= ? AND encounter_datetime <= ?",
+        EncounterType.find_by_name("TREATMENT").id, EncounterType.find_by_name("DISPENSING").id, 
+        @current_range[0]["START"], @current_range[0]["END"]]).each{|e|        
       @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
       @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
       e.orders.each{|o| 

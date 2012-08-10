@@ -872,8 +872,9 @@ module ANCService
       main_drugs = ["TTV", "SP", "Fefol", "NVP", "Albendazole"]
     
       @patient.encounters.find(:all, :order => "encounter_datetime DESC",
-        :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?",
-          EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e|
+        :conditions => ["(encounter_type = ? OR encounter_type = ?) AND encounter_datetime >= ? AND encounter_datetime <= ?",
+          EncounterType.find_by_name("TREATMENT").id, EncounterType.find_by_name("DISPENSING").id,
+          @current_range[0]["START"], @current_range[0]["END"]]).each{|e|
         @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")];
         @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")];
         e.orders.each{|o|
@@ -1074,26 +1075,27 @@ module ANCService
       @other_drugs = {}; 
       main_drugs = ["TTV", "SP", "Fefol", "NVP", "Albendazole"]
     
-      @patient.encounters.find(:all, :order => "encounter_datetime DESC", 
-        :conditions => ["encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", 
-          EncounterType.find_by_name("TREATMENT").id, @current_range[0]["START"], @current_range[0]["END"]]).each{|e| 
-        @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
-        @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")]; 
-        e.orders.each{|o| 
-          if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])          
+      @patient.encounters.find(:all, :order => "encounter_datetime DESC",
+        :conditions => ["(encounter_type = ? OR encounter_type = ?) AND encounter_datetime >= ? AND encounter_datetime <= ?",
+          EncounterType.find_by_name("TREATMENT").id, EncounterType.find_by_name("DISPENSING").id,
+          @current_range[0]["START"], @current_range[0]["END"]]).each{|e|
+        @drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@drugs[e.encounter_datetime.strftime("%d/%b/%Y")];
+        @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")] = {} if !@other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")];
+        e.orders.each{|o|
+          if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])
             if o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")] == "NVP"
               if o.drug_order.drug.name.upcase.include?("ML")
                 @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
               else
                 @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
               end
-            else            
+            else
               @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
-            end          
+            end
           else
             @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
           end
-        }      
+        }
       }
 
       label = ZebraPrinter::StandardLabel.new
@@ -1116,7 +1118,7 @@ module ANCService
       label.draw_text("Planned Delivery Place: #{@current_range[0]["PLANNED DELIVERY PLACE"] rescue ""}",28,66,0,2,1,1,false)
       label.draw_text("Bed Net Given: #{@current_range[0]["MOSQUITO NET"] rescue ""}",28,99,0,2,1,1,false)
       label.draw_text("",28,138,0,2,1,1,false)
-      label.draw_text("",28,156,0,2,1,1,false)
+      label.draw_text("TTV",28,156,0,2,1,1,false)
       label.draw_text("",28,174,0,2,1,1,false)
       label.draw_text("NVP",78,140,0,2,1,1,false)
       label.draw_text("Baby",77,158,0,1,1,1,false)
@@ -1149,9 +1151,9 @@ module ANCService
       
         if element == target_date.to_date.strftime("%d/%b/%Y")
         
-          tdf = ""
+          ttv = (@drugs[element]["TTV"] > 0 ? 1 : "")
           
-          label.draw_text(tdf,28,200,0,2,1,1,false)
+          label.draw_text(ttv,28,200,0,2,1,1,false)
         
           nvp = (@drugs[element]["NVP"].to_i > 0 ? @drugs[element]["NVP"].to_i : "") rescue ""
           
