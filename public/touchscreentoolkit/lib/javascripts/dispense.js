@@ -603,7 +603,7 @@ function askPrescriptionType(){
                 showMessage("Please select a value first", false, false)
             } else {
                 if(__$("btnForwardPrescriptionType").innerHTML == "<span>Done</span>"){
-                    processDrug(current_concept_id);
+                    processDrug(current_concept_id, "true");
                 } else if(__$("editPrescriptionType").value == "Variable"){
                     askMorningDose();
                 } else {
@@ -1884,7 +1884,7 @@ function closePopUps(){
     clearTextInput();
 }
 
-function processDrug(concept_id){
+function processDrug(concept_id, statdose){
     var li = document.createElement("li");
     
     var pos = __$("ulDoses").getElementsByTagName("li").length % 2;
@@ -1895,7 +1895,7 @@ function processDrug(concept_id){
     
     var drug = "";
     
-    var duration = (__$("editDuration") ? __$("editDuration").value : "1");
+    var duration = (__$("editDuration") ? (typeof(statdose) != "undefined" ? "1" : __$("editDuration").value) : "1");
     var prn = (__$("editPRN") ? __$("editPRN").value : "No");
     var type = (__$("editPrescriptionType") ? (__$("editPrescriptionType").value == 
         "Stat Dose" ? "Standard" : __$("editPrescriptionType").value) : "Standard");
