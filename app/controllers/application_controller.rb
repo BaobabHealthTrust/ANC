@@ -84,9 +84,8 @@ class ApplicationController < GenericApplicationController
     if @anc_patient.hiv_status.downcase == "positive" &&
         session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil?
 
-      if session["proceed_to_art"].nil?
-        session["proceed_to_art"] = {}
-      end
+      session["proceed_to_art"] = {} if session["proceed_to_art"].nil?
+      session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
 
       @external_id = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).person_id # rescue nil
 
@@ -123,16 +122,18 @@ class ApplicationController < GenericApplicationController
         end
       end
        
-      @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters.collect{|e| e.type.name}
+      @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters.find(:all,
+        :conditions => ["encounter_datetime = ?", (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")]).collect{|e| e.type.name}
 
       # raise @external_encounters.to_yaml
       
-      if session["patient_vitals_map"].nil?
-        session["patient_vitals_map"] = {}
-      end
+      
+      session["patient_vitals_map"] = {} if session["patient_vitals_map"].nil?
+      session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
 
+      # Send vitals to ART
       if @anc_patient.current_weight.to_i > 0 and @anc_patient.current_height.to_i > 0 and
-          !session["patient_vitals_map"][@patient.id]
+          session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil?
         
         bmi = ((@anc_patient.current_weight.to_f/(@anc_patient.current_height.to_f *
               @anc_patient.current_height.to_f)) * 10000).round(1) rescue 0
@@ -205,12 +206,13 @@ class ApplicationController < GenericApplicationController
       
         result = RestClient.post("http://#{art_link}/encounters/create_remote", vitals_params)
 
-        session["patient_vitals_map"][@patient.id] = result
+        session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = true
       end
       
       additional_tasks = {}
 
-      if (!session["proceed_to_art"].nil? and session["proceed_to_art"][@patient.id].nil? and
+      if (!session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil? and
+            session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil? and
             !@external_encounters.collect{|u| u.downcase}.include?("hiv reception"))
 
         additional_tasks["HIV Reception"] = [14, "/patients/go_to_art?patient_id=#{@patient.id}",

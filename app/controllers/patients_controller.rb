@@ -2,7 +2,8 @@ class PatientsController < ApplicationController
   before_filter :find_patient, :except => [:void]
   
   def show
-    
+    # session = {}
+    # raise session.to_yaml
     @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
 
     @encounters = @patient.encounters.find(:all) # , :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
@@ -1060,12 +1061,12 @@ class PatientsController < ApplicationController
   
   def print_history
     print_and_redirect("/patients/obstetric_medical_examination_label/?patient_id=#{@patient.id}",
-        next_task(@patient))
+      next_task(@patient))
   end
 
   def obstetric_medical_examination_label
     print_string = "#{(@anc_patient.gravida(session[:datetime] || Time.now()).to_i > 1 ? 
-      @anc_patient.detailed_obstetric_history_label : "")}" +
+    @anc_patient.detailed_obstetric_history_label : "")}" +
       "#{@anc_patient.obstetric_medical_history_label}" rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate an obstetric and medical history label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
@@ -1183,12 +1184,11 @@ class PatientsController < ApplicationController
 
   def proceed_to_pmtct
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil
+    
+    session["proceed_to_art"] = {} if session["proceed_to_art"].nil?
+    session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
 
-    if session["proceed_to_art"].nil?
-      session["proceed_to_art"] = {}
-    end
-
-    session["proceed_to_art"][@patient.id] = true
+    session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = true
 
     if params["to art"].downcase == "yes"
 
