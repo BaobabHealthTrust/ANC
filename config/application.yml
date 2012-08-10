@@ -6,7 +6,7 @@ production:
  demographics.middle_name: false
  ask.multiple.phone.numbers: false
  demographics.ground_phone: false
- list.of.clinical.encounters.sequentially: weight and height,ttv vaccination,bp,anc visit type,obstetric history,medical history,surgical history,social history,lab results,current pregnancy,anc examination,manage appointments,give drugs,hiv reception
+ list.of.clinical.encounters.sequentially: ttv vaccination,weight and height,bp,anc visit type,obstetric history,medical history,surgical history,social history,lab results,current pregnancy,anc examination,manage appointments,give drugs,hiv reception
  statistics.show_encounter_types: REGISTRATION,ANC VISIT TYPE,VITALS,OBSERVATIONS,TREATMENT
  registration.clerk.roles: Registration,View Reports
  hsa.roles: Registration,Weight and Height,TTV Vaccination
@@ -26,7 +26,7 @@ development:
  demographics.middle_name: false
  ask.multiple.phone.numbers: false
  demographics.ground_phone: false
- list.of.clinical.encounters.sequentially: weight and height,ttv vaccination,bp,anc visit type,obstetric history,medical history,surgical history,social history,lab results,current pregnancy,anc examination,manage appointments,give drugs,hiv reception
+ list.of.clinical.encounters.sequentially: ttv vaccination,weight and height,bp,anc visit type,obstetric history,medical history,surgical history,social history,lab results,current pregnancy,anc examination,manage appointments,give drugs,hiv reception
  statistics.show_encounter_types: REGISTRATION,ANC VISIT TYPE,VITALS,OBSERVATIONS,TREATMENT
  registration.clerk.roles: Registration,Weight and Height,View Reports
  hsa.roles: Registration,Weight and Height,TTV Vaccination

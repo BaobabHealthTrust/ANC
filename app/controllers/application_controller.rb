@@ -34,10 +34,10 @@ class ApplicationController < GenericApplicationController
     # tasks[task] = [weight, path, encounter_type, concept_id, exception_concept_id, 
     #     scope, drug_concept_id, special_field_or_encounter_present, next_if_NOT_condition_met]    
     tasks = {
-      "Weight and Height" => [1, "/encounters/new/vitals/?patient_id=#{patient.id}&weight=1&height=1", 
+      "Weight and Height" => [2, "/encounters/new/vitals/?patient_id=#{patient.id}&weight=1&height=1",
         "VITALS", 5089, nil, "TODAY", nil, true, (current_user_activities.include?("Weight and Height".downcase))],
       
-      "TTV Vaccination" => [2, "/prescriptions/ttv/?patient_id=#{patient.id}", 
+      "TTV Vaccination" => [1, "/prescriptions/ttv/?patient_id=#{patient.id}",
         "DISPENSING", nil, nil, "TODAY", 7124, false, (current_user_activities.include?("TTV Vaccination".downcase))],
       
       "BP" => [3, "/encounters/new/vitals/?patient_id=#{patient.id}&bp=1", "VITALS", 

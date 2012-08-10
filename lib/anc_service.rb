@@ -785,7 +785,7 @@ module ANCService
       label.draw_line(25,190,115,1,0)
       label.draw_text("Height",28,76,0,2,1,1,false)
       label.draw_text("Multiple Pregnancy",28,106,0,2,1,1,false)
-      label.draw_text("WHO Clinical Stage",28,136,0,2,1,1,false)
+      label.draw_text("",28,136,0,2,1,1,false)
       label.draw_text("Lab Results",28,161,0,1,1,2,false)
       label.draw_text("Date",190,170,0,2,1,1,false)
       label.draw_text("Result",325,170,0,2,1,1,false)
@@ -813,7 +813,7 @@ module ANCService
     
       label.draw_text(@height,270,76,0,2,1,1,false)
       label.draw_text(@multiple,270,106,0,2,1,1,false)
-      label.draw_text(@who,270,136,0,2,1,1,false)
+      # label.draw_text(@who,270,136,0,2,1,1,false)
         
       label.draw_text(@hiv_test_date,188,196,0,2,1,1,false)
       label.draw_text(@syphilis_date,188,226,0,2,1,1,false)
