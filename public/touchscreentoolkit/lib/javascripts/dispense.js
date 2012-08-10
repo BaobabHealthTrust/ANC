@@ -1902,7 +1902,7 @@ function processDrug(concept_id, statdose){
     var dose_strength = (__$("editDoseStrength") ? __$("editDoseStrength").value : 
         __$("editDosage").getAttribute("strength"));
     var frequency = (__$("editFrequency") ? __$("editFrequency").value : "1");
-    var morning = (__$("editMorningDose") ? __$("editMorningDose").value : (typeof(statdose) != "undefined" ? "1" : null));
+    var morning = (__$("editMorningDose") ? __$("editMorningDose").value : (typeof(statdose) != "undefined" ? dose_strength : null));
     var afternoon = (__$("editAfternoonDose") ? __$("editAfternoonDose").value : null);
     var evening = (__$("editEveningDose") ? __$("editEveningDose").value : null);
     var night = (__$("editNightDose") ? __$("editNightDose").value : null);
