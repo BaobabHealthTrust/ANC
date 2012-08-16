@@ -80,6 +80,11 @@ class GenericPeopleController < ApplicationController
 				end
 			end
 			if found_person
+
+        patient = DDEService::Patient.new(found_person.patient)
+
+        patient.check_old_national_id(params[:identifier])
+
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
 				else
@@ -120,10 +125,16 @@ class GenericPeopleController < ApplicationController
 		@found_person_id = params[:found_person_id] 
 		@relation = params[:relation]
 		@person = Person.find(@found_person_id) rescue nil
-		@task = main_next_task(Location.current_location, @person.patient, session_date.to_date)
+    @current_hiv_program_state = PatientProgram.find(:first, :joins => :location, :conditions => ["program_id = ? AND patient_id = ? AND location.location_id = ?", Program.find_by_concept_id(Concept.find_by_name('HIV PROGRAM').id).id,@person.patient, Location.current_health_center]).patient_states.last.program_workflow_state.concept.fullname rescue ''
+    @transferred_out = @current_hiv_program_state.upcase == "PATIENT TRANSFERRED OUT"? true : nil
+    defaulter = Patient.find_by_sql("SELECT current_defaulter(#{@person.patient.patient_id}, '#{session_date}') 
+                                     AS defaulter 
+                                     FROM patient_program LIMIT 1")[0].defaulter
+    @defaulted = defaulter == 0 ? nil : true     
+    @task = main_next_task(Location.current_location, @person.patient, session_date.to_date)
 		@arv_number = PatientService.get_patient_identifier(@person, 'ARV Number')
-		@patient_bean = PatientService.get_patient(@person)
-		render :layout => 'menu'
+		@patient_bean = PatientService.get_patient(@person)                                                             
+    render :layout => false	
 	end
 
 	def tranfer_patient_in
@@ -245,6 +256,14 @@ class GenericPeopleController < ApplicationController
     end
 
     if params[:person][:patient] && success
+		  	if !params[:identifier].empty?	
+					patient_identifier = PatientIdentifier.new
+					patient_identifier.type = PatientIdentifierType.find_by_name("National id")
+					patient_identifier.identifier = params[:identifier]
+					patient_identifier.patient = person.patient
+					patient_identifier.save!
+				end
+
       PatientService.patient_national_id_label(person.patient)
       unless (params[:relation].blank?)
         redirect_to search_complete_url(person.id, params[:relation]) and return
@@ -307,7 +326,7 @@ class GenericPeopleController < ApplicationController
   # List traditional authority containing the string given in params[:value]
   def traditional_authority
     district_id = District.find_by_name("#{params[:filter_value]}").id
-    traditional_authority_conditions = ["name LIKE (?) AND district_id = ?", "#{params[:search_string]}%", district_id]
+    traditional_authority_conditions = ["name LIKE (?) AND district_id = ?", "%#{params[:search_string]}%", district_id]
 
     traditional_authorities = TraditionalAuthority.find(:all,:conditions => traditional_authority_conditions, :order => 'name')
     traditional_authorities = traditional_authorities.map do |t_a|
@@ -316,15 +335,27 @@ class GenericPeopleController < ApplicationController
     render :text => traditional_authorities.join('') + "<li value='Other'>Other</li>" and return
   end
 
-    # Regions containing the string given in params[:value]
-  def region
+	# Regions containing the string given in params[:value]
+  def region_of_origin
     region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
 
-    regions = Region.find(:all,:conditions => region_conditions, :order => 'name')
+    regions = Region.find(:all,:conditions => region_conditions, :order => 'region_id')
     regions = regions.map do |r|
       "<li value='#{r.name}'>#{r.name}</li>"
     end
-    render :text => regions.join('') and return
+    render :text => regions.join('')  and return
+  end
+  
+  def region
+    region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
+
+    regions = Region.find(:all,:conditions => region_conditions, :order => 'region_id')
+    regions = regions.map do |r|
+      if r.name != "Foreign"
+        "<li value='#{r.name}'>#{r.name}</li>"
+      end
+    end
+    render :text => regions.join('')  and return
   end
 
     # Districts containing the string given in params[:value]
@@ -350,7 +381,7 @@ class GenericPeopleController < ApplicationController
     # Villages containing the string given in params[:value]
   def village
     traditional_authority_id = TraditionalAuthority.find_by_name("#{params[:filter_value]}").id
-    village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "#{params[:search_string]}%", traditional_authority_id]
+    village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "%#{params[:search_string]}%", traditional_authority_id]
 
     villages = Village.find(:all,:conditions => village_conditions, :order => 'name')
     villages = villages.map do |v|
@@ -394,7 +425,7 @@ class GenericPeopleController < ApplicationController
     result_hash = {}
 
     if PatientService.art_patient?(patient)
-      clinic_encounters = ["APPOINTMENT","ART VISIT","VITALS","HIV STAGING",'ART ADHERENCE','DISPENSING','ART_INITIAL']
+      clinic_encounters = ["APPOINTMENT","HIV CLINIC CONSULTATION","VITALS","HIV STAGING",'ART ADHERENCE','DISPENSING','HIV CLINIC REGISTRATION']
       clinic_encounter_ids = EncounterType.find(:all,:conditions => ["name IN (?)",clinic_encounters]).collect{| e | e.id }
       first_encounter_date = patient.encounters.find(:first,
         :order => 'encounter_datetime',
@@ -447,7 +478,7 @@ class GenericPeopleController < ApplicationController
     result_hash = {}
     
     if PatientService.art_patient?(patient)
-      clinic_encounters = ["APPOINTMENT","ART VISIT","VITALS","HIV STAGING",'ART ADHERENCE','DISPENSING','ART_INITIAL']
+      clinic_encounters = ["APPOINTMENT","HIV CLINIC CONSULTATION","VITALS","HIV STAGING",'ART ADHERENCE','DISPENSING','HIV CLINIC REGISTRATION']
       clinic_encounter_ids = EncounterType.find(:all,:conditions => ["name IN (?)",clinic_encounters]).collect{| e | e.id }
       first_encounter_date = patient.encounters.find(:first, 
         :order => 'encounter_datetime',
