@@ -230,7 +230,24 @@ class PatientsController < ApplicationController
 
     @time = @patient.encounters.first(:conditions => ["DATE(encounter_datetime) = ?", 
         Date.today.strftime("%Y-%m-%d")]).encounter_datetime rescue Time.now
-    
+
+    @art_link = CoreService.get_global_property_value("art_link") rescue nil
+    @anc_link = CoreService.get_global_property_value("anc_link") rescue nil
+
+    if !@art_link.nil? && !@anc_link.nil? # && foreign_links.include?(pos)
+      if !session[:token] || session[:token].blank?
+        response = RestClient.post("http://#{@art_link}/single_sign_on/get_token",
+          {"login"=>session[:username], "password"=>session[:password]}) rescue nil
+
+        if !response.nil?
+          response = JSON.parse(response)
+
+          session[:token] = response["auth_token"]
+        end
+
+      end
+    end
+
     render :layout => 'dynamic-dashboard'
   end
 
@@ -1213,12 +1230,12 @@ class PatientsController < ApplicationController
         end
       end
       
-      # raise ("http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&current_location=#{session[:location_id]}&" +
+      # raise ("http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&location=#{session[:location_id]}&" +
       #  "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
       #  "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}").inspect
 
       redirect_to "http://#{art_link}/single_sign_on/single_sign_in?current_time=#{
-      (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}&current_location=#{
+      (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}&location=#{
       (!session[:location_id].nil? and !session[:location_id].blank? ? session[:location_id] : "721")}&" +
         "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
         "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&auth_token=#{session[:token]}" and return
