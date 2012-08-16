@@ -204,10 +204,26 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
           <option link="/encounter_types?patient_id=<%= @patient.id  %>" ttSize = "160px">Tasks</option>
 
           <% if !@next_task.nil? && @next_task.url != "/patients/show/#{@patient.id}" %>
+
             <option link="<%= @next_task.url  %>" ttSize = "160px">Continue</option>
+
           <% else %>
+
             <option link="/patients/outcome/?patient_id=<%= @patient.id %>" ttSize = "160px">Update Outcome</option>
+
+            <% if current_user.activities.include?("HIV Reception") %>
+
+              <option link="<%= "http://#{@art_link}/single_sign_on/single_sign_in?current_time=#{
+              (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}&location=#{
+              (!session[:location_id].nil? and !session[:location_id].blank? ? session[:location_id] : "721")}&" +
+                "return_uri=http://#{@anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{@art_link}" +
+                "/patients/print_demographics/#{session["patient_id_map"]["#{
+              (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&auth_token=#{
+                      session[:token]}" %>" ttSize = "160px">Print ART Demographics</option>
+                    <% end %>
+
           <% end %>
+
         </select>
       </td>
     </tr>

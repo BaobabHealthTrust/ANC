@@ -16,9 +16,12 @@
 
   <%= touch_select_tag "Patient currently smokes", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "smoker", :tt_requireNextClick => false,
-    :helptext => "Does patient smoke?", :tt_onLoad => "showCategory('Social History');" } %>
+    :helptext => "Does patient smoke?", 
+    :tt_onLoad => "__$('nextButton').style.display='none'; showCategory('Social History');" } %>
   <%= touch_select_tag "Patient currently consumes alcohol", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "alcohol", :tt_requireNextClick => false,
+    {:id => "alcohol", 
+    :tt_requireNextClick => false,
+    :tt_onLoad => "__$('nextButton').style.display='none';",
     :helptext => "Do you take alcohol?" } %>
   <%#= touch_select_tag "Nutrition status", @patient, options_for_select([["", ""], ["Good", "Good"], ["Malnourished", "Malnourished"], ["Obese", "Obese"]]),
     {:id => "nutrition",
@@ -28,13 +31,16 @@
     options_for_select([["", ""], ["Single", "Single"], ["Engaged", "Engaged"],
       ["Married", "Married"], ["Separated", "Separated"], ["Divorced", "Divorced"],
       ["Widowed", "Widowed"], ["Other", "Other"]]),
-    {:id => "civil_status", :tt_requireNextClick => false,
+    {:id => "civil_status", 
+    :tt_requireNextClick => false,
+    :tt_onLoad => "__$('nextButton').style.display='none';",
     :helptext => "Marital status" } %>
 
   <%= touch_text_field_tag "Other civil status comment", @patient, nil,
     {
     :id => "other_civil_status",
     :helpText => "Specify other marital status",
+    :tt_onLoad => "__$('nextButton').style.display='none';",
     :condition => "__$('civil_status').value == 'Other'"
   } %>
 
@@ -51,13 +57,16 @@
   :helptext => "Religion" } %>
 
   <%= touch_select_tag "Religion", @patient, options_for_select(@religions),
-    {:id => "religion", :tt_requireNextClick => false,
+    {:id => "religion", 
+    :tt_requireNextClick => false,
+    :tt_onLoad => "__$('nextButton').style.display='none';",
     :helptext => "Religion" } %>
 
   <%= touch_text_field_tag "Other", @patient, nil,
     {
     :id => "other",
     :helpText => "Specify other religion",
+    :tt_onLoad => "__$('nextButton').style.display='block';",
     :condition => "__$('religion').value == 'Other'"
   } %>
 
