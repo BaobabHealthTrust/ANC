@@ -43,16 +43,16 @@ class PeopleController < GenericPeopleController
     #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
     #then we create person from remote machine
     if create_from_remote
-      person_from_remote = PatientService.create_remote_person(params)
-      person = PatientService.create_from_form(person_from_remote["person"]) unless person_from_remote.blank?
+      person_from_remote = ANCService.create_remote(params)
+      person = ANCService.create_from_form(person_from_remote["person"]) unless person_from_remote.blank?
 
       if !person.blank?
         success = true
-        person.patient.remote_national_id
+        # person.patient.remote_national_id
       end
     else
       success = true
-      person = PatientService.create_from_form(params[:person])
+      person = ANCService.create_from_form(params[:person])
     end
 
     encounter = Encounter.new(params[:encounter])
@@ -104,6 +104,11 @@ class PeopleController < GenericPeopleController
       end
       
 			if found_person
+
+        patient = DDEService::Patient.new(found_person.patient)
+
+        patient.check_old_national_id(params[:identifier])
+
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
 				else
