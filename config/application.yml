@@ -32,8 +32,8 @@ development:
  hsa.roles: Registration,Weight and Height,TTV Vaccination
  nurse.roles: Weight and Height,TTV Vaccination,BP,ANC Visit Type,Obstetric History,Medical History,Surgical History,Social History,Lab Results,ANC Examination,Current Pregnancy,Manage Appointments,Give Drugs,Update Outcome,HIV Clinic Registration,HIV Staging,HIV Reception,HIV Clinic Consultation,ART Adherence,Manage ART Prescriptions,ART Drug Dispensations,Registration,View Reports
  clinician.roles: Weight and Height,TTV Vaccination,BP,ANC Visit Type,Obstetric History,Medical History,Surgical History,Social History,Lab Results,ANC Examination,Current Pregnancy,Manage Appointments,Give Drugs,Update Outcome,HIV Clinic Registration,HIV Staging,HIV Reception,HIV Clinic Consultation,ART Adherence,Manage ART Prescriptions,ART Drug Dispensations,Registration,View Reports
- create.from.remote: false
- create.from.dde.server: true
+ create.from.remote: true
+ create.from.dde.server: false
  anc_link: localhost:3005
  art_link: localhost:3000
  
