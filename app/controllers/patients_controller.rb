@@ -472,7 +472,7 @@ class PatientsController < ApplicationController
     @encounters = @patient.encounters.find(:all, 
       :conditions => ["DATE(encounter_datetime) = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]) rescue []
 
-    @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters # .collect{|e| e.type.name}
+    @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters rescue [] # .collect{|e| e.type.name}
 
     @encounters = @encounters + @external_encounters
 
