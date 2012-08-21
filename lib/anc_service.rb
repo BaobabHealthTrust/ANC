@@ -1575,7 +1575,10 @@ module ANCService
       id.patient.person
     } unless identifier.blank? rescue nil
     return people unless people.blank?
+    
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    create_from_remote = CoreService.get_global_property_value('create.from.remote').to_s == "true" rescue false
+
     if create_from_dde_server
       dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
       dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
@@ -1608,15 +1611,60 @@ module ANCService
           "names"=>{"family_name"=>p["person"]["family_name"],
             "given_name"=>p["person"]["given_name"],
             "middle_name"=>""},
-          "birth_year"=>birthdate_year},
-        "filter_district"=>"Chitipa",
-        "filter"=>{"region"=>"Northern Region",
-          "t_a"=>""},
-        "relation"=>""
+          "birth_year"=>birthdate_year}
+      }
+
+      return [self.create_from_form(passed["person"])]
+
+    elsif create_from_remote
+      known_demographics = {:person => {:patient => { :identifiers => {"National id" => identifier }}}}
+      
+      servers = CoreService.get_global_property_value("remote_servers.parent")
+
+      server_address_and_port = servers.to_s.split(':')
+
+      server_address = server_address_and_port.first
+      server_port = server_address_and_port.second
+
+      login = CoreService.get_global_property_value("remote_bart.username").split(/,/) rescue ""
+      password = CoreService.get_global_property_value("remote_bart.password").split(/,/) rescue ""
+      location = CoreService.get_global_property_value("remote_bart.location").split(/,/) rescue nil
+      machine = CoreService.get_global_property_value("remote_machine.account_name").split(/,/) rescue ''
+
+      uri = "http://#{server_address}:#{server_port}/people/remote_demographics"
+      
+      p = JSON.parse(RestClient.post(uri, known_demographics)).first # rescue nil
+
+      return [] if p.blank?
+
+      birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
+      birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
+      birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
+      birthdate_estimated = p["person"]["birthdate_estimated"] rescue nil
+      gender = p["person"]["gender"] == "F" ? "Female" : "Male" rescue nil
+
+      passed = {
+        "person"=>{"occupation"=>(p["person"]["attributes"]["occupation"] rescue nil),
+          "age_estimate"=>"",
+          "cell_phone_number"=>(p["person"]["attributes"]["cell_phone_number"] rescue nil),
+          "birth_month"=> birthdate_month ,
+          "addresses"=>{"address1"=>(p["person"]["addresses"]["county_district"] rescue nil),
+            "address2"=>(p["person"]["addresses"]["address2"] rescue nil),
+            "city_village"=>(p["person"]["addresses"]["city_village"] rescue nil),
+            "county_district"=>""},
+          "gender"=> gender ,
+          "patient"=>{"identifiers"=>{"National id" => (p["person"]["value"] rescue nil)}},
+          "birth_day"=>birthdate_day,
+          "home_phone_number"=>(p["person"]["attributes"]["home_phone_number"] rescue nil),
+          "names"=>{"family_name"=>(p["person"]["family_name"] rescue nil),
+            "given_name"=>(p["person"]["given_name"] rescue nil),
+            "middle_name"=>""},
+          "birth_year"=>(birthdate_year rescue nil)}
       }
 
       return [self.create_from_form(passed["person"])]
     end
+
     return people
   end
 

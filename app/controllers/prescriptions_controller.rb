@@ -355,7 +355,7 @@ class PrescriptionsController < ApplicationController
     # @frequencies = Drug.frequencies
 
     # raise drugs(941).to_yaml
-
+    
     @generics = generic
     @frequencies = drug_frequency
     @diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []    

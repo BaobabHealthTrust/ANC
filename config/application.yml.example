@@ -16,6 +16,11 @@ production:
  create.from.dde.server: true
  anc_link: localhost:3005
  art_link: localhost:3000
+ remote_servers.parent: localhost:3000
+ remote_bart.username: admin
+ remote_bart.password: test
+ remote_bart.location: 721
+ remote_machine.account_name: localhost
  
 development:
  create_from_remote: no
@@ -36,6 +41,11 @@ development:
  create.from.dde.server: false
  anc_link: localhost:3005
  art_link: localhost:3000
+ remote_servers.parent: localhost:3000
+ remote_bart.username: admin
+ remote_bart.password: test
+ remote_bart.location: 721
+ remote_machine.account_name: localhost
  
 test: &TEST
  create_from_remote: no
