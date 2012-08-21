@@ -1637,32 +1637,24 @@ module ANCService
 
       return [] if p.blank?
 
-      birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
-      birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
-      birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
-      birthdate_estimated = p["person"]["birthdate_estimated"] rescue nil
-      gender = p["person"]["gender"] == "F" ? "Female" : "Male" rescue nil
+      results = p.second if p.second and p.first.match /person/
 
-      passed = {
-        "person"=>{"occupation"=>(p["person"]["attributes"]["occupation"] rescue nil),
-          "age_estimate"=>"",
-          "cell_phone_number"=>(p["person"]["attributes"]["cell_phone_number"] rescue nil),
-          "birth_month"=> birthdate_month ,
-          "addresses"=>{"address1"=>(p["person"]["addresses"]["county_district"] rescue nil),
-            "address2"=>(p["person"]["addresses"]["address2"] rescue nil),
-            "city_village"=>(p["person"]["addresses"]["city_village"] rescue nil),
-            "county_district"=>""},
-          "gender"=> gender ,
-          "patient"=>{"identifiers"=>{"National id" => (p["person"]["value"] rescue nil)}},
-          "birth_day"=>birthdate_day,
-          "home_phone_number"=>(p["person"]["attributes"]["home_phone_number"] rescue nil),
-          "names"=>{"family_name"=>(p["person"]["family_name"] rescue nil),
-            "given_name"=>(p["person"]["given_name"] rescue nil),
-            "middle_name"=>""},
-          "birth_year"=>(birthdate_year rescue nil)}
-      }
+      # TODO need better logic here to select the best result or merge them
+      # Currently returning the longest result - assuming that it has the most information
+      # Can't return multiple results because there will be redundant data from sites
+      # result = results.sort{|a,b|b.length <=> a.length}.first
+      # result ? person = JSON.parse(result) : nil
+      #Stupid hack to structure the hash for openmrs 1.7
+      results["occupation"] = results["attributes"]["occupation"]
+      results["cell_phone_number"] = results["attributes"]["cell_phone_number"]
+      results["home_phone_number"] =  results["attributes"]["home_phone_number"]
+      results["office_phone_number"] = results["attributes"]["office_phone_number"]
+      results["attributes"].delete("occupation")
+      results["attributes"].delete("cell_phone_number")
+      results["attributes"].delete("home_phone_number")
+      results["attributes"].delete("office_phone_number")
 
-      return [self.create_from_form(passed["person"])]
+      return [self.create_from_form(results)]
     end
 
     return people

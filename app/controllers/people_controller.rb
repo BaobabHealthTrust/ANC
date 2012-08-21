@@ -79,7 +79,7 @@ class PeopleController < GenericPeopleController
 		found_person = nil
 		if params[:identifier]
       
-			local_results = PatientService.search_by_identifier(params[:identifier])
+			local_results = ANCService.search_by_identifier(params[:identifier])
 
 			if local_results.length > 1
 				@people = PatientService.person_search(params)
@@ -94,8 +94,9 @@ class PeopleController < GenericPeopleController
 				# TODO - figure out how to write a test for this
 				# This is sloppy - creating something as the result of a GET
 				if create_from_remote        
-					found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
-					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
+					found_person_data = ANCService.search_by_identifier(params[:identifier]).first rescue nil
+
+					found_person = ANCService.create_from_form(found_person_data['person']) unless found_person_data.nil?
 				end
 			end
       
@@ -105,9 +106,11 @@ class PeopleController < GenericPeopleController
       
 			if found_person
 
-        patient = DDEService::Patient.new(found_person.patient)
+        if create_from_dde_server
+          patient = DDEService::Patient.new(found_person.patient)
 
-        patient.check_old_national_id(params[:identifier])
+          patient.check_old_national_id(params[:identifier])
+        end
 
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
