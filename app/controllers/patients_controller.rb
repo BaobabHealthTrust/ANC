@@ -1234,9 +1234,9 @@ class PatientsController < ApplicationController
       #  "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
       #  "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}").inspect
 
-      redirect_to "http://#{art_link}/single_sign_on/single_sign_in?current_time=#{
-      (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}&location=#{
+      redirect_to "http://#{art_link}/single_sign_on/single_sign_in?location=#{
       (!session[:location_id].nil? and !session[:location_id].blank? ? session[:location_id] : "721")}&" +
+        (!session[:datetime].nil? ? "current_time=#{ (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}&" : "") +
         "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
         "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&auth_token=#{session[:token]}" and return
     else
