@@ -1203,15 +1203,13 @@ class PatientsController < ApplicationController
   def proceed_to_pmtct
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil
     
-    session["proceed_to_art"] = {} if session["proceed_to_art"].nil?
-    session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
-
-    session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = true
-
     if params["to art"].downcase == "yes"
 
       # art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
       # anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+
+      token = session[:token]
+      location_id = session[:location_id]
 
       art_link = CoreService.get_global_property_value("art_link") rescue nil
       anc_link = CoreService.get_global_property_value("anc_link") rescue nil
@@ -1222,24 +1220,36 @@ class PatientsController < ApplicationController
             {"login"=>session[:username], "password"=>session[:password]}) rescue nil
 
           if !response.nil?
-            response = JSON.parse(response)
+            response = JSON.parse(response) rescue ""
 
+            token = response["auth_token"]
             session[:token] = response["auth_token"]
+          else
+            flash[:error] = "Could not get valid token"
+            redirect_to next_task(@patient) and return
           end
 
         end
       end
-      
-      # raise ("http://#{art_link}/single_sign_on/single_sign_in?auth_token=#{session[:token]}&location=#{session[:location_id]}&" +
-      #  "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-      #  "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}").inspect
+
+      session["proceed_to_art"] = {} if session["proceed_to_art"].nil?
+      session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
+
+      session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = true
 
       redirect_to "http://#{art_link}/single_sign_on/single_sign_in?location=#{
-      (!session[:location_id].nil? and !session[:location_id].blank? ? session[:location_id] : "721")}&" +
-        (!session[:datetime].nil? ? "current_time=#{ (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}&" : "") +
+      (!location_id.nil? and !location_id.blank? ? location_id : "721")}&current_location=#{
+      (!location_id.nil? and !location_id.blank? ? location_id : "721")}&" +
+        (!session[:datetime].blank? ? "current_time=#{ (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}&" : "") +
         "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-        "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&auth_token=#{session[:token]}" and return
+        "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&auth_token=#{token}" and return
     else
+
+      session["proceed_to_art"] = {} if session["proceed_to_art"].nil?
+      session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
+
+      session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = true
+
       redirect_to "/patients/show/#{@patient.id}" and return
     end
   end

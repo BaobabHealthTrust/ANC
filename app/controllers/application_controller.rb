@@ -18,7 +18,13 @@ class ApplicationController < GenericApplicationController
     current_user_activities = current_user.activities.collect{|u| u.downcase}
     
     normal_flow = CoreService.get_global_property_value("list.of.clinical.encounters.sequentially").split(",")
-    
+
+    flow = {}
+
+    (0..(normal_flow.length-1)).each{|n|
+      flow[normal_flow[n].downcase] = n+1
+    }
+
     if current_user_activities.blank?
       task.encounter_type = "NO TASKS SELECTED"
       task.url = "/patients/show/#{patient.id}"
@@ -34,43 +40,43 @@ class ApplicationController < GenericApplicationController
     # tasks[task] = [weight, path, encounter_type, concept_id, exception_concept_id, 
     #     scope, drug_concept_id, special_field_or_encounter_present, next_if_NOT_condition_met]    
     tasks = {
-      "Weight and Height" => [2, "/encounters/new/vitals/?patient_id=#{patient.id}&weight=1&height=1",
+      "Weight and Height" => [flow["Weight and Height".downcase], "/encounters/new/vitals/?patient_id=#{patient.id}&weight=1&height=1",
         "VITALS", 5089, nil, "TODAY", nil, true, (current_user_activities.include?("Weight and Height".downcase))],
       
-      "TTV Vaccination" => [1, "/prescriptions/ttv/?patient_id=#{patient.id}",
+      "TTV Vaccination" => [flow["TTV Vaccination".downcase], "/prescriptions/ttv/?patient_id=#{patient.id}",
         "DISPENSING", nil, nil, "TODAY", 7124, false, (current_user_activities.include?("TTV Vaccination".downcase))],
       
-      "BP" => [3, "/encounters/new/vitals/?patient_id=#{patient.id}&bp=1", "VITALS", 
+      "BP" => [flow["BP".downcase], "/encounters/new/vitals/?patient_id=#{patient.id}&bp=1", "VITALS",
         5085, nil, "TODAY", nil, true, (current_user_activities.include?("BP".downcase))],
       
-      "ANC Visit Type" => [4, "/patients/visit_type/?patient_id=#{patient.id}", 
+      "ANC Visit Type" => [flow["ANC Visit Type".downcase], "/patients/visit_type/?patient_id=#{patient.id}",
         "ANC VISIT TYPE", nil, nil, "TODAY", nil, true, (current_user_activities.include?("ANC Visit Type".downcase))],
       
-      "Obstetric History" => [5, "/patients/obstetric_history/?patient_id=#{patient.id}", 
+      "Obstetric History" => [flow["Obstetric History".downcase], "/patients/obstetric_history/?patient_id=#{patient.id}",
         "OBSTETRIC HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Obstetric History".downcase))],
       
-      "Medical History" => [6, "/patients/medical_history/?patient_id=#{patient.id}", 
+      "Medical History" => [flow["Medical History".downcase], "/patients/medical_history/?patient_id=#{patient.id}",
         "MEDICAL HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Medical History".downcase))],
       
-      "Surgical History" => [7, "/patients/surgical_history/?patient_id=#{patient.id}", 
+      "Surgical History" => [flow["Surgical History".downcase], "/patients/surgical_history/?patient_id=#{patient.id}",
         "SURGICAL HISTORY", nil, nil, "EXISTS", nil, false, (current_user_activities.include?("Surgical History".downcase))],
       
-      "Social History" => [8, "/patients/social_history/?patient_id=#{patient.id}", 
+      "Social History" => [flow["Social History".downcase], "/patients/social_history/?patient_id=#{patient.id}",
         "SOCIAL HISTORY", nil, nil, "EXISTS", nil, true, (current_user_activities.include?("Social History".downcase))],
       
-      "Lab Results" => [9, "/encounters/new/lab_results/?patient_id=#{patient.id}", 
+      "Lab Results" => [flow["Lab Results".downcase], "/encounters/new/lab_results/?patient_id=#{patient.id}",
         "LAB RESULTS", nil, nil, "TODAY", nil, false, (current_user_activities.include?("Lab Results".downcase))],
 
-      "Current Pregnancy" => [10, "/patients/current_pregnancy/?patient_id=#{patient.id}",
+      "Current Pregnancy" => [flow["Current Pregnancy".downcase], "/patients/current_pregnancy/?patient_id=#{patient.id}",
         "CURRENT PREGNANCY", nil, nil, "RECENT", nil, true, (current_user_activities.include?("Current Pregnancy".downcase))],
       
-      "ANC Examination" => [11, "/patients/observations/?patient_id=#{patient.id}",
+      "ANC Examination" => [flow["ANC Examination".downcase], "/patients/observations/?patient_id=#{patient.id}",
         "OBSERVATIONS", nil, nil, "TODAY", nil, true, (current_user_activities.include?("ANC Examination".downcase))],
       
-      "Manage Appointments" => [12, "/encounters/new/appointment/?patient_id=#{patient.id}", 
+      "Manage Appointments" => [flow["Manage Appointments".downcase], "/encounters/new/appointment/?patient_id=#{patient.id}",
         "APPOINTMENT", nil, nil, "TODAY", nil, true, (current_user_activities.include?("Manage Appointments".downcase))],
       
-      "Give Drugs" => [13, "/prescriptions/give_drugs/?patient_id=#{patient.id}", 
+      "Give Drugs" => [flow["Give Drugs".downcase], "/prescriptions/give_drugs/?patient_id=#{patient.id}",
         "TREATMENT", nil, nil, "TODAY", 7124, false, (current_user_activities.include?("Give Drugs".downcase))] # ,
       
       # "Update Outcome" => [17, "/patients/outcome/?patient_id=#{patient.id}", "UPDATE OUTCOME",
@@ -215,7 +221,7 @@ class ApplicationController < GenericApplicationController
             session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil? and
             !@external_encounters.collect{|u| u.downcase}.include?("hiv reception"))
 
-        additional_tasks["HIV Reception"] = [14, "/patients/go_to_art?patient_id=#{@patient.id}",
+        additional_tasks["HIV Reception"] = [flow["HIV Reception".downcase], "/patients/go_to_art?patient_id=#{@patient.id}",
           "HIV RECEPTION", nil, nil, "TODAY", nil, false, (current_user_activities.collect{|u| u.downcase}.include?("hiv reception") &&
               @anc_patient.hiv_status.downcase == "positive")] 
         
