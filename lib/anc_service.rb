@@ -167,9 +167,9 @@ module ANCService
       @patient = self.patient rescue nil
     
       @obstetrics = {}
-      search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "PREGNANCY", "LABOUR DURATION", 
-        "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", 
-        "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
+      search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "BIRTHPLACE", "PREGNANCY", "GESTATION", "LABOUR DURATION",
+      "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE",
+      "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
       current_level = 0
     
       Encounter.find(:all, :conditions => ["encounter_type = ? AND patient_id = ?", 
@@ -264,12 +264,12 @@ module ANCService
     
       (1..(@obstetrics.length + 1)).each do |pos|
       
-        @place = (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? 
-              @obstetrics[pos]["PLACE OF BIRTH"] : "") : "").gsub(/Centre/i, 
+        @place = (@obstetrics[pos] ? (@obstetrics[pos]["BIRTHPLACE"] ?
+              @obstetrics[pos]["BIRTHPLACE"] : "") : "").gsub(/Centre/i,
           "C.").gsub(/Health/i, "H.").gsub(/Center/i, "C.")
           
-        @gest = (@obstetrics[pos] ? (@obstetrics[pos]["PREGNANCY"] ? 
-              @obstetrics[pos]["PREGNANCY"] : "") : "")
+        @gest = (@obstetrics[pos] ? (@obstetrics[pos]["GESTATION"] ?
+              @obstetrics[pos]["GESTATION"] : "") : "")
           
         @gest = (@gest.length > 5 ? truncate(@gest, 5) : @gest)
               
@@ -1532,7 +1532,7 @@ module ANCService
 
       begin
 
-        output = RestClient.post("http://#{demographic_server}:#{local_port}/patient/create_remote", known_demographics)
+        output = RestClient.post("http://#{demographic_server}:#{local_port}/people/create_remote", known_demographics)
 
       rescue Timeout::Error
         return 'timeout'

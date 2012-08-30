@@ -88,9 +88,10 @@
             </td>
             <td>
               <%= (@obstetrics[pos] ? (@obstetrics[pos]["PLACE OF BIRTH"] ? @obstetrics[pos]["PLACE OF BIRTH"] : "&nbsp;") : "&nbsp;") %>
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["BIRTHPLACE"] ? @obstetrics[pos]["BIRTHPLACE"] : "&nbsp;") : "&nbsp;") %>
             </td>
             <td>
-              <%= (@obstetrics[pos] ? (@obstetrics[pos]["PREGNANCY"] ? @obstetrics[pos]["PREGNANCY"] : "&nbsp;") : "&nbsp;") %>
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["GESTATION"] ? @obstetrics[pos]["GESTATION"] : "&nbsp;") : "&nbsp;") %>
             </td>
             <td>
               <%= (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? @obstetrics[pos]["LABOUR DURATION"] : "&nbsp;") : "&nbsp;") %>

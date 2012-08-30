@@ -42,6 +42,7 @@ class PeopleController < GenericPeopleController
     #then we create person from remote machine
     if create_from_remote
       person_from_remote = ANCService.create_remote(params)
+      
       person = ANCService.create_from_form(person_from_remote["person"]) unless person_from_remote.blank?
 
       if !person.blank?

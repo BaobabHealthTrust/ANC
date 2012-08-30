@@ -970,15 +970,20 @@ class PatientsController < ApplicationController
     # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     
     @obstetrics = {}
-    search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "PREGNANCY", "LABOUR DURATION", 
+    search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "BIRTHPLACE", "PREGNANCY", "GESTATION", "LABOUR DURATION",
       "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE", 
       "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
     current_level = 0
+
+    concepts = []
     
     Encounter.find(:all, :conditions => ["encounter_type = ? AND patient_id = ?", 
         EncounterType.find_by_name("OBSTETRIC HISTORY").id, @patient.id]).each{|e| 
       e.observations.each{|obs|
         concept = obs.concept.concept_names.map(& :name).last rescue nil
+
+        concepts << concept
+        
         if(!concept.nil?)
           if search_set.include?(concept.upcase)
             if obs.concept_id == (ConceptName.find_by_name("YEAR OF BIRTH").concept_id rescue nil)
@@ -1000,7 +1005,7 @@ class PatientsController < ApplicationController
       }      
     }
     
-    # raise @obstetrics.to_yaml
+    # raise concepts.to_yaml
     
     @pregnancies = @anc_patient.active_range
     
