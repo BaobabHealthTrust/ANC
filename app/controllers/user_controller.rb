@@ -61,7 +61,7 @@ class UserController < GenericUserController
       current_role = "clerk"
     end
     
-    @privileges =   userroles[current_role]
+    @privileges =   userroles[current_role] rescue []
 
     @activities = current_user.activities.reject{|activity| 
       CoreService.get_global_property_value("disable_tasks").split(",").include?(activity)
@@ -73,7 +73,7 @@ class UserController < GenericUserController
 
     @privileges = @privileges.collect do |privilege|
       privilege.gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
-    end
+    end rescue []
     #@privileges += ['Manage prescriptions','Manage appointments', 'Dispensation']  
     @privileges.sort!
     @patient_id = params[:patient_id]
