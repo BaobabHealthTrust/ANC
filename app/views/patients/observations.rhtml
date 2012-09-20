@@ -76,6 +76,22 @@
     :helptext => "Presentation",
     :tt_pageStyleClass => "NoKeyboard" }, session_date %>
 
+  <%# @cephalic = ["", "Right Occipito Anterior", "Left Occipito Anterior"] %>
+
+  <%#= touch_select_tag "Cephalic", @patient, options_for_select(@cephalic),
+    {:id => "cephalic",
+    :helptext => "Cephalic Type",
+    :tt_pageStyleClass => "NoKeyboard",
+    :condition => "__$('presentation').value == 'Cephalic'" }, session_date %>
+
+  <%# @breech = ["", "Right Sacro Anterior", "Left Sacro Anterior"] %>
+
+  <%#= touch_select_tag "Breech", @patient, options_for_select(@breech),
+    {:id => "breech",
+    :helptext => "Breech Type",
+    :tt_pageStyleClass => "NoKeyboard",
+    :condition => "__$('presentation').value == 'Breech'" }, session_date %>
+
   <% @position = ["", "Vertex", "Oblique", "Transverse", "Breech"] %>
 
   <%= touch_select_tag "POSITION", @patient, options_for_select(@position),

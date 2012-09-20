@@ -774,7 +774,7 @@ class PatientsController < ApplicationController
         if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])          
           if o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")] == "NVP"
             if o.drug_order.drug.name.upcase.include?("ML")
-              @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+              @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = ((o.drug_order.amount_needed/25.0).ceil * 25) rescue 0
             else
               @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
             end
@@ -1247,7 +1247,7 @@ class PatientsController < ApplicationController
       (!location_id.nil? and !location_id.blank? ? location_id : "721")}&" +
         (!session[:datetime].blank? ? "current_time=#{ (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}&" : "") +
         "return_uri=http://#{anc_link}/patients/next_url?patient_id=#{@patient.id}&destination_uri=http://#{art_link}" +
-        "/encounters/new/hiv_reception?patient_id=#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}&auth_token=#{token}" and return
+        "/encounters/new/hiv_reception/#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}?from_anc=true&auth_token=#{token}" and return
     else
 
       session["proceed_to_art"] = {} if session["proceed_to_art"].nil?

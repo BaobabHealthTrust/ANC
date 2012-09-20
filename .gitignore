@@ -13,3 +13,4 @@ schema.rb
 mockups
 nbproject
 .project
+*.lock

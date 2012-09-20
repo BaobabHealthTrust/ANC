@@ -157,7 +157,7 @@ module DDEService
 
           national_id = DDEService.create_patient_from_dde(person, true)
 
-          self.set_identifier("National id", national_id)
+          # self.set_identifier("National id", national_id)
 
         end
       end

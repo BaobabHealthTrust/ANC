@@ -1085,7 +1085,7 @@ module ANCService
           if main_drugs.include?(o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")])
             if o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")] == "NVP"
               if o.drug_order.drug.name.upcase.include?("ML")
-                @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
+                @drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] =  ((o.drug_order.amount_needed/25.0).ceil * 25) rescue 0
               else
                 @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
               end

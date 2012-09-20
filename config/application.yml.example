@@ -21,6 +21,7 @@ production:
  remote_bart.password: test
  remote_bart.location: 721
  remote_machine.account_name: localhost
+ portal_url: 192.100.100.200:80
  
 development:
  create_from_remote: no
@@ -46,6 +47,7 @@ development:
  remote_bart.password: test
  remote_bart.location: 721
  remote_machine.account_name: localhost
+ portal_url: 192.100.100.200:80
  
 test: &TEST
  create_from_remote: no
