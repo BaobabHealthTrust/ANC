@@ -147,7 +147,7 @@ class PrescriptionsController < ApplicationController
             @drug = Drug.find_by_name(@formulation) rescue nil
             unless @drug
               flash[:notice] = "No matching drugs found for formulation #{prescription[:formulation]}"
-              render :new
+              render :give_drugs, :patient_id => params[:patient_id]
               return
             end
             start_date = session_date
@@ -213,7 +213,7 @@ class PrescriptionsController < ApplicationController
           @drug = Drug.find_by_name(@formulation) rescue nil
           unless @drug
             flash[:notice] = "No matching drugs found for formulation #{params[:formulation]}"
-            render :new
+            render :give_drugs, :patient_id => params[:patient_id]
             return
           end
           start_date = session_date

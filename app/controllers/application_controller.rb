@@ -86,8 +86,10 @@ class ApplicationController < GenericApplicationController
     session["patient_id_map"] = {} if session["patient_id_map"].nil?
     session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
 
+    same_database = (CoreService.get_global_property_value("same_database") == "true" ? true : false) rescue false
+
     # Get patient id mapping
-    if @anc_patient.hiv_status.downcase == "positive" &&
+    if @anc_patient.hiv_status.downcase == "positive" && 
         session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil?
 
       session["proceed_to_art"] = {} if session["proceed_to_art"].nil?
@@ -114,6 +116,7 @@ class ApplicationController < GenericApplicationController
       art_link = CoreService.get_global_property_value("art_link") rescue nil
       anc_link = CoreService.get_global_property_value("anc_link") rescue nil
 
+      # Check ART if valid
       if !art_link.nil? && !anc_link.nil? # && foreign_links.include?(pos)
         if !session[:token]
           response = RestClient.post("http://#{art_link}/single_sign_on/get_token",
@@ -126,110 +129,113 @@ class ApplicationController < GenericApplicationController
           end
 
         end
-      end
+        # end
        
-      @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters.find(:all,
-        :conditions => ["encounter_datetime = ?", (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")]).collect{|e| e.type.name}
+        @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters.find(:all,
+          :conditions => ["encounter_datetime = ?", (session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")]).collect{|e| e.type.name}
 
-      # raise @external_encounters.to_yaml
+        # raise @external_encounters.to_yaml
       
       
-      session["patient_vitals_map"] = {} if session["patient_vitals_map"].nil?
-      session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
+        session["patient_vitals_map"] = {} if session["patient_vitals_map"].nil?
+        session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
 
-      # Send vitals to ART
-      if @anc_patient.current_weight.to_i > 0 and @anc_patient.current_height.to_i > 0 and
-          session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil?
+        # Send vitals to ART
+        if @anc_patient.current_weight.to_i > 0 and @anc_patient.current_height.to_i > 0 and same_database == false and
+            session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil?
         
-        bmi = ((@anc_patient.current_weight.to_f/(@anc_patient.current_height.to_f *
-              @anc_patient.current_height.to_f)) * 10000).round(1) rescue 0
+          bmi = ((@anc_patient.current_weight.to_f/(@anc_patient.current_height.to_f *
+                @anc_patient.current_height.to_f)) * 10000).round(1) rescue 0
 
-        vitals_params = {
-          "obs"=>{
-            "obs_set_0"=>{
-              "value_numeric"=>"#{@anc_patient.current_weight}",
-              "value_coded_or_text_multiple"=>[""],
-              "value_drug"=>"",
-              "value_modifier"=>"",
-              "value_coded"=>"",
-              "value_boolean"=>"",
-              "obs_group_id"=>"",
-              "order_id"=>"",
-              "value_text"=>"",
-              "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
-              "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
-              DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
-              "concept_name"=>"WEIGHT (KG)",
-              "value_coded_or_text"=>"",
-              "value_datetime"=>""
+          vitals_params = {
+            "obs"=>{
+              "obs_set_0"=>{
+                "value_numeric"=>"#{@anc_patient.current_weight}",
+                "value_coded_or_text_multiple"=>[""],
+                "value_drug"=>"",
+                "value_modifier"=>"",
+                "value_coded"=>"",
+                "value_boolean"=>"",
+                "obs_group_id"=>"",
+                "order_id"=>"",
+                "value_text"=>"",
+                "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
+                "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
+                DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
+                "concept_name"=>"WEIGHT (KG)",
+                "value_coded_or_text"=>"",
+                "value_datetime"=>""
+              },
+              "obs_set_1"=>{
+                "value_numeric"=>"#{@anc_patient.current_height}",
+                "value_coded_or_text_multiple"=>[""],
+                "value_drug"=>"",
+                "value_modifier"=>"",
+                "value_coded"=>"",
+                "value_boolean"=>"",
+                "obs_group_id"=>"",
+                "order_id"=>"",
+                "value_text"=>"",
+                "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
+                "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
+                DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
+                "concept_name"=>"HEIGHT (CM)",
+                "value_coded_or_text"=>"",
+                "value_datetime"=>""
+              },
+              "obs_set_2"=>{
+                "value_numeric"=>"",
+                "value_coded_or_text_multiple"=>[""],
+                "value_drug"=>"",
+                "value_modifier"=>"",
+                "value_coded"=>"",
+                "value_boolean"=>"",
+                "obs_group_id"=>"",
+                "order_id"=>"",
+                "value_text"=>"",
+                "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
+                "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
+                DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
+                "concept_name"=>"BODY MASS INDEX, MEASURED",
+                "value_coded_or_text"=>"#{bmi}",
+                "value_datetime"=>""
+              }
             },
-            "obs_set_1"=>{
-              "value_numeric"=>"#{@anc_patient.current_height}",
-              "value_coded_or_text_multiple"=>[""],
-              "value_drug"=>"",
-              "value_modifier"=>"",
-              "value_coded"=>"",
-              "value_boolean"=>"",
-              "obs_group_id"=>"",
-              "order_id"=>"",
-              "value_text"=>"",
-              "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
-              "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
+            "encounter"=>{
+              "encounter_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
               DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
-              "concept_name"=>"HEIGHT (CM)",
-              "value_coded_or_text"=>"",
-              "value_datetime"=>""
+              "provider_id"=>"#{session["user_internal_external_id_map"]}",
+              "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
+              "encounter_type_name"=>"VITALS"
             },
-            "obs_set_2"=>{
-              "value_numeric"=>"",
-              "value_coded_or_text_multiple"=>[""],
-              "value_drug"=>"",
-              "value_modifier"=>"",
-              "value_coded"=>"",
-              "value_boolean"=>"",
-              "obs_group_id"=>"",
-              "order_id"=>"",
-              "value_text"=>"",
-              "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
-              "obs_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
-              DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
-              "concept_name"=>"BODY MASS INDEX, MEASURED",
-              "value_coded_or_text"=>"#{bmi}",
-              "value_datetime"=>""
-            }
-          },
-          "encounter"=>{
-            "encounter_datetime"=>"#{(session[:datetime] ? session[:datetime].to_time : (session[:datetime] ? session[:datetime].to_time :
-            DateTime.now()).strftime("%Y-%m-%d %H:%M"))}",
-            "provider_id"=>"#{session["user_internal_external_id_map"]}",
-            "patient_id"=>"#{session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id]}",
-            "encounter_type_name"=>"VITALS"
-          },
-          "location"=>(Location.current_location.id rescue Location.first.location_id)
-        }
+            "location"=>(Location.current_location.id rescue Location.first.location_id)
+          }
 
-        # Create a VITALS encounter and associated obs in ART
+          # Create a VITALS encounter and associated obs in ART
       
-        result = RestClient.post("http://#{art_link}/encounters/create_remote", vitals_params)
+          result = RestClient.post("http://#{art_link}/encounters/create_remote", vitals_params)
 
-        session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = true
-      end
+          session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = true
+        end
       
-      additional_tasks = {}
+        additional_tasks = {}
 
-      if (!session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil? and
-            session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil? and
-            !@external_encounters.collect{|u| u.downcase}.include?("hiv reception"))
+        if (!session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil? and
+              session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil? and
+              !@external_encounters.collect{|u| u.downcase}.include?("hiv reception"))
 
-        additional_tasks["HIV Reception"] = [flow["HIV Reception".downcase], "/patients/go_to_art?patient_id=#{@patient.id}",
-          "HIV RECEPTION", nil, nil, "TODAY", nil, false, (current_user_activities.collect{|u| u.downcase}.include?("hiv reception") &&
-              @anc_patient.hiv_status.downcase == "positive")] 
+          additional_tasks["HIV Reception"] = [flow["HIV Reception".downcase], "/patients/go_to_art?patient_id=#{@patient.id}",
+            "HIV RECEPTION", nil, nil, "TODAY", nil, false, (current_user_activities.collect{|u| u.downcase}.include?("hiv reception") &&
+                @anc_patient.hiv_status.downcase == "positive")]
         
-      end
+        end
       
-      if !(session["user_internal_external_id_map"] rescue nil).nil?
-        tasks = tasks.merge(additional_tasks) if @anc_patient.hiv_status.downcase == "positive" && !(session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] rescue nil).nil?
+        if !(session["user_internal_external_id_map"] rescue nil).nil?
+          tasks = tasks.merge(additional_tasks) if @anc_patient.hiv_status.downcase == "positive" && !(session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] rescue nil).nil?
+        end
       end
+      # End check ART
+      
     end
     
     sorted_tasks = {}

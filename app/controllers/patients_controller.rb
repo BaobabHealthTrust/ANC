@@ -1207,11 +1207,35 @@ class PatientsController < ApplicationController
 
   def proceed_to_pmtct
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil
-    
-    if params["to art"].downcase == "yes"
+    @anc_patient = ANCService::ANC.new(@patient) rescue nil      
 
-      # art_link = GlobalProperty.find_by_property("art_link").property_value.gsub(/http\:\/\//, "") rescue nil
-      # anc_link = GlobalProperty.find_by_property("anc_link").property_value rescue nil
+    if (params["to art"].downcase == "yes" rescue false) || (params["to_art"].downcase == "yes" rescue false)
+      
+      # Get patient id mapping
+      if @anc_patient.hiv_status.downcase == "positive" &&
+          session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id].nil?
+
+        session["proceed_to_art"] = {} if session["proceed_to_art"].nil?
+        session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"] = {} if session["proceed_to_art"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"].nil?
+
+        same_database = (CoreService.get_global_property_value("same_database") == "true" ? true : false) rescue false
+
+        if same_database == false
+          @external_id = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).person_id rescue nil
+
+          @external_user_id = Bart2Connection::User.find_by_username(current_user.username).id rescue nil
+        else
+           @external_id = @patient.id
+
+          @external_user_id = current_user.id
+        end
+
+        if !@external_id.nil? && !@external_id.blank?
+          session["patient_id_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = @external_id rescue nil
+          session["user_internal_external_id_map"] = @external_user_id rescue nil
+        end
+
+      end
 
       token = session[:token]
       location_id = session[:location_id]

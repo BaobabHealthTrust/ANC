@@ -38,16 +38,7 @@
   }
     
   function set_diagnosis_for_suggestions() {
-    changeNextButtonText('Select Prescription');
-    var diagnosis = $('diagnosis').value; 
-    $('infoBar'+tstCurrentPage).innerHTML = "Current Weight: <%= @patient.current_weight -%>KG; Current Height: <%= @patient.current_height -%>CM"
-    $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', "/prescriptions/suggested?patient_id=<%= @patient.patient_id %>&diagnosis=" + diagnosis + "&search_string=");
-    
-    var text = "Common prescriptions"
-    var helpText = $('helpText'+tstCurrentPage);
-    helpText.innerHTML = text;
-    if (selectedValue('diagnosis') != "NO DIAGNOSIS") helpText.innerHTML += " for " + selectedValue('diagnosis');    
-    listSuggestions(tstCurrentPage);     
+      
   }
 
 

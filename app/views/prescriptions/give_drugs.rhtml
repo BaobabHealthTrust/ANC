@@ -12,9 +12,9 @@ url = url[url.index("/"), url.length - url.index("/")]
   tt_cancel_destination = "<%= (!request.referrer.blank? ? "/patients/show/#{@patient.id}" : 
     "/patients/current_visit/?patient_id=#{@patient.patient_id}") %>";
 
-  var generics = <%= @generics.sort.to_json %>;
-  var frequencies = <%= @frequencies.to_json %>;
-  var diagnosisList = <%= @diagnosis.to_json %>;
+  var generics = <%= @generics.sort.to_json rescue {} %>;
+  var frequencies = <%= @frequencies.to_json rescue {} %>;
+  var diagnosisList = <%= @diagnosis.to_json rescue {} %>;
   var patient_id = <%= params[:patient_id] rescue "" %>;
 
   var search_path = "/prescriptions/load_frequencies_and_dosages";

@@ -22,6 +22,7 @@ production:
  remote_bart.location: 721
  remote_machine.account_name: localhost
  portal_url: 192.100.100.200:80
+ same_database: false
  
 development:
  create_from_remote: no
@@ -48,6 +49,7 @@ development:
  remote_bart.location: 721
  remote_machine.account_name: localhost
  portal_url: 192.100.100.200:80
+ same_database: false
  
 test: &TEST
  create_from_remote: no

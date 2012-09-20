@@ -201,7 +201,7 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
 
         </select>
         <select id="navigation_links">
-          <option link="/encounter_types?patient_id=<%= @patient.id  %>" ttSize = "160px">Tasks</option>
+          <!--option link="/encounter_types?patient_id=<%= @patient.id  %>" ttSize = "160px">Tasks</option-->
 
           <% if !@next_task.nil? && @next_task.url != "/patients/show/#{@patient.id}" %>
 
@@ -222,6 +222,7 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
                       session[:token]}" %>" ttSize = "160px">Print ART Visit</option>
                     <% end %>
 
+            <option link="/patients/proceed_to_pmtct?patient_id=<%= @patient.id  %>&to_art=yes" ttSize = "160px">ART</option>
           <% end %>
 
         </select>
