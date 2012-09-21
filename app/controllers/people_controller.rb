@@ -41,9 +41,9 @@ class PeopleController < GenericPeopleController
     #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
     #then we create person from remote machine
     if create_from_remote
-      person_from_remote = ANCService.create_remote(params)
+      person_from_remote = PatientService.create_remote(params)
       
-      person = ANCService.create_from_form(person_from_remote["person"]) unless person_from_remote.blank?
+      person = PatientService.create_from_form(person_from_remote["person"]) unless person_from_remote.blank?
 
       if !person.blank?
         success = true
@@ -51,7 +51,7 @@ class PeopleController < GenericPeopleController
       end
     else
       success = true
-      person = ANCService.create_from_form(params[:person])
+      person = PatientService.create_from_form(params[:person])
     end
 
     encounter = Encounter.new(params[:encounter])
@@ -78,7 +78,7 @@ class PeopleController < GenericPeopleController
 		found_person = nil
 		if params[:identifier]
       
-			local_results = ANCService.search_by_identifier(params[:identifier])
+			local_results = PatientService.search_by_identifier(params[:identifier])
 
 			if local_results.length > 1
 				@people = PatientService.person_search(params)
@@ -93,9 +93,9 @@ class PeopleController < GenericPeopleController
 				# TODO - figure out how to write a test for this
 				# This is sloppy - creating something as the result of a GET
 				if create_from_remote        
-					found_person_data = ANCService.search_by_identifier(params[:identifier]).first rescue nil
+					found_person_data = PatientService.search_by_identifier(params[:identifier]).first rescue nil
 
-					found_person = ANCService.create_from_form(found_person_data['person']) unless found_person_data.nil?
+					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
 				end
 			end
       
@@ -122,7 +122,7 @@ class PeopleController < GenericPeopleController
 			end
 		end
 		@relation = params[:relation]
-		@people = ANCService.person_search(params)
+		@people = PatientService.person_search(params)
 		@patients = []
 
 		@people.each do | person |
