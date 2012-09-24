@@ -12,42 +12,77 @@ class GenericPeopleController < ApplicationController
 	end
 
 	def create_remote
-		person_params = {"occupation"=> params[:occupation],
-			"age_estimate"=> params['patient_age']['age_estimate'],
-			"cell_phone_number"=> params['cell_phone']['identifier'],
-			"birth_month"=> params[:patient_month],
-			"addresses"=>{ "address2" => params['p_address']['identifier'],
-						"address1" => params['p_address']['identifier'],
-			"city_village"=> params['patientaddress']['city_village'],
-			"county_district"=> params[:birthplace] },
-			"gender" => params['patient']['gender'],
-			"birth_day" => params[:patient_day],
-			"names"=> {"family_name2"=>"Unknown",
-			"family_name"=> params['patient_name']['family_name'],
-			"given_name"=> params['patient_name']['given_name'] },
-			"birth_year"=> params[:patient_year] }
 
 		#raise person_params.to_yaml
 		if current_user.blank?
 		  user = User.authenticate('admin', 'test')
 		  sign_in(:user, user) if !user.blank?
-      set_current_user		  
+      set_current_user
 		end rescue []
 
 		if Location.current_location.blank?
 			Location.current_location = Location.find(CoreService.get_global_property_value('current_health_center_id'))
 		end rescue []
 
-		person = PatientService.create_from_form(person_params)
-		if person
-			patient = Patient.new()
-			patient.patient_id = person.id
-			patient.save
-			PatientService.patient_national_id_label(patient)
-		end
+    if create_from_dde_server
+
+      passed_params = {"region" => "" ,
+     "person"=>{"occupation"=> params["occupation"] ,
+     "age_estimate"=> params["patient_age"]["age_estimate"] ,
+     "cell_phone_number"=> params["cell_phone"]["identifier"] ,
+     "birth_month"=> params["patient_month"],
+     "addresses"=>{"address1"=> "",
+     "address2"=>  "",
+     "city_village"=>  params["patientaddress"]["city_village"] ,
+     "county_district"=> params["patient"]["birthplace"] },
+     "gender"=>  params["patient"]["gender"],
+     "patient"=>"",
+     "birth_day"=>  params["patient_day"] ,
+     "home_phone_number"=> params["home_phone"]["identifier"] ,
+     "names"=>{"family_name"=> params["patient_name"]["family_name"],
+     "given_name"=> params["patient_name"]["given_name"],
+     "middle_name"=> params["patient_name"]["middle_name"] },
+     "birth_year"=> params["patient_year"] },
+     "filter_district"=> params["patient"]["birthplace"] ,
+     "filter"=>{"region"=> "" ,
+     "t_a"=> params["current_ta"]["identifier"] ,
+     "t_a_a"=>""},
+     "relation"=>"",
+     "p"=>{"'address2_a'"=>"",
+     "addresses"=>{"county_district_a"=>"",
+     "city_village_a"=>""}},
+     "identifier"=>""}
+
+      person = PatientService.create_patient_from_dde(passed_params)
+    else
+      person_params = {"occupation"=> params[:occupation],
+        "age_estimate"=> params['patient_age']['age_estimate'],
+        "cell_phone_number"=> params['cell_phone']['identifier'],
+        "birth_month"=> params[:patient_month],
+        "addresses"=>{ "address2" => params['p_address']['identifier'],
+              "address1" => params['p_address']['identifier'],
+        "city_village"=> params['patientaddress']['city_village'],
+        "county_district"=> params[:birthplace] },
+        "gender" => params['patient']['gender'],
+        "birth_day" => params[:patient_day],
+        "names"=> {"family_name2"=>"Unknown",
+        "family_name"=> params['patient_name']['family_name'],
+        "given_name"=> params['patient_name']['given_name'] },
+        "birth_year"=> params[:patient_year] }
+
+      person = PatientService.create_from_form(person_params)
+
+      if person
+        patient = Patient.new()
+        patient.patient_id = person.id
+        patient.save
+        PatientService.patient_national_id_label(patient)
+      end
+    end
+
 		render :text => PatientService.remote_demographics(person).to_json
 	end
-
+  
 	def remote_demographics
 		# Search by the demographics that were passed in and then return demographics
 		people = PatientService.find_person_by_demographics(params)
