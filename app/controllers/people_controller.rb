@@ -41,7 +41,8 @@ class PeopleController < GenericPeopleController
     #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
     #then we create person from remote machine
     if create_from_remote
-      person_from_remote = PatientService.create_remote(params)
+      
+      person_from_remote = PatientService.create_remote_person(params)
       
       person = PatientService.create_from_form(person_from_remote["person"]) unless person_from_remote.blank?
 
