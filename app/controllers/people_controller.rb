@@ -93,9 +93,10 @@ class PeopleController < GenericPeopleController
 			else
 				# TODO - figure out how to write a test for this
 				# This is sloppy - creating something as the result of a GET
-				if create_from_remote        
-					found_person_data = PatientService.search_by_identifier(params[:identifier]).first rescue nil
-
+				if create_from_remote
+          
+					#found_person_data = PatientService.search_by_identifier(params[:identifier]).first rescue nil
+          found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
 					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
 				end
 			end
@@ -125,7 +126,6 @@ class PeopleController < GenericPeopleController
 		@relation = params[:relation]
 		@people = PatientService.person_search(params)
 		@patients = []
-
 		@people.each do | person |
 			patient = PatientService.get_patient(person) rescue nil
 			@patients << patient

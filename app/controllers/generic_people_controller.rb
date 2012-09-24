@@ -129,7 +129,7 @@ class GenericPeopleController < ApplicationController
 		end
 		@relation = params[:relation]
 		@people = PatientService.person_search(params)
-		@patients = []
+ 		@patients = []
 		@people.each do | person |
 			patient = PatientService.get_patient(person) rescue nil
 			@patients << patient
@@ -617,6 +617,14 @@ class GenericPeopleController < ApplicationController
     @person = Person.find(params[:id])
 		@patient_bean = PatientService.get_patient(@person)
 		render :layout => 'menu'
+  end
+
+  def demographics_remote
+    identifier = params[:person][:patient][:identifiers]["national_id"]
+    people = PatientService.search_by_identifier(identifier)
+    render :text => "" and return  if people.blank?
+    render :text => PatientService.remote_demographics(people.first).to_json rescue ""
+    return
   end
   
 private
