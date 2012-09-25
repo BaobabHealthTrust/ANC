@@ -80,14 +80,14 @@ module PatientService
       @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
     
       uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"                          
-      recieved_params = RestClient.post(uri,passed_params)      
+      received_params = RestClient.post(uri,passed_params)
                                           
       national_id = JSON.parse(recieved_params)["npid"]["value"]
     else
       national_id = params["person"]["patient"]["identifiers"]["National_id"]
     end
       
-	  person = self.create_from_form(params[:person] || params["person"])
+	  person = self.create_from_form(params[:person] || received_params["person"])
     identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
     person.patient.patient_identifiers.create("identifier" => national_id, 
       "identifier_type" => identifier_type.patient_identifier_type_id) unless national_id.blank?
