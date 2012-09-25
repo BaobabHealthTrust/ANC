@@ -265,9 +265,9 @@ module PatientService
       :conditions => {:property => "remote_bart.password"}).property_value.split(/,/) rescue ''
 
     if server_port.blank?
-      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/demographics_remote"
+      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/create_remote"
     else
-      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics_remote"
+      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/create_remote"
     end
     output = RestClient.post(uri,known_demographics)
 
@@ -295,9 +295,7 @@ module PatientService
   def self.find_remote_person(known_demographics)
 
     servers = GlobalProperty.find(:first, :conditions => {:property => "remote_servers.parent"}).property_value.split(/,/) rescue nil
-
     server_address_and_port = servers.to_s.split(':')
-
     server_address = server_address_and_port.first
     server_port = server_address_and_port.second
 
