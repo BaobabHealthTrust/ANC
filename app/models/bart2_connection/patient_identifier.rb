@@ -14,6 +14,43 @@ class Bart2Connection::PatientIdentifier < ActiveRecord::Base
 
     return people.first unless people.blank?
 
+    create_from_remote = CoreService.get_global_property_value('create.from.remote').to_s == "true" rescue false
+
+    if create_from_remote
+       servers = GlobalProperty.find(:first,
+      :conditions => {:property => "remote_servers.parent"}).property_value.split(/,/) rescue nil
+    server_address_and_port = servers.to_s.split(':')
+    server_address = server_address_and_port.first
+    server_port = server_address_and_port.second
+    login = GlobalProperty.find(:first,
+      :conditions => {:property => "remote_bart.username"}).property_value.split(/,/) rescue ''
+    password = GlobalProperty.find(:first,
+      :conditions => {:property => "remote_bart.password"}).property_value.split(/,/) rescue ''
+
+    if server_port.blank?
+      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/create_remote"
+    else
+      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/create_remote"
+    end
+    known_demographics = {:person => {:patient => {:identifiers =>{"national_id" => identifier}}}}
+    output = RestClient.post(uri,known_demographics)
+
+    results = []
+    results.push output if output and output.match(/person/)
+    result = results.sort{|a,b|b.length <=> a.length}.first          
+    result ? person = JSON.parse(result) : nil
+
+
+     return self.create_from_form(person["person"])
+
+    end
+
+
+
+
+
+
+
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
     
     if create_from_dde_server
