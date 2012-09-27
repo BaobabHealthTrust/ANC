@@ -495,7 +495,7 @@ module PatientService
     label.draw_barcode(50,180,0,1,5,15,120,false,"#{patient_bean.national_id}")
     label.draw_multi_text("#{patient_bean.name.titleize}")
     label.draw_multi_text("#{patient_bean.national_id_with_dashes} #{patient_bean.birth_date}#{sex}")
-    label.draw_multi_text("#{patient_bean.address}")
+    label.draw_multi_text("#{patient_bean.state_province}, #{patient_bean.current_residence} " )
     label.print(1)
   end
 
@@ -849,6 +849,7 @@ EOF
 		patient.birthdate_estimated = person.birthdate_estimated
 		patient.home_district = person.addresses.first.address2
 		patient.traditional_authority = person.addresses.first.county_district
+    patient.state_province = person.addresses.first.state_province
 		patient.current_residence = person.addresses.first.city_village
 		patient.landmark = person.addresses.first.address1
 		patient.mothers_surname = person.names.first.family_name2
@@ -860,7 +861,7 @@ EOF
 		patient.cell_phone_number = get_attribute(person, 'Cell phone number')
 		patient.office_phone_number = get_attribute(person, 'Office phone number')
 		patient.home_phone_number = get_attribute(person, 'Home phone number')
-		patient.guardian = art_guardian(person.patient) rescue nil 
+		patient.guardian = art_guardian(person.patient) rescue nil
 		patient
 	end
   
