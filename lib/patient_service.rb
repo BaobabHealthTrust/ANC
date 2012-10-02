@@ -82,12 +82,12 @@ module PatientService
       uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"                          
       received_params = RestClient.post(uri,passed_params)
                                           
-      national_id = JSON.parse(recieved_params)["npid"]["value"]
+      national_id = JSON.parse(received_params)["npid"]["value"]
     else
       national_id = params["person"]["patient"]["identifiers"]["National_id"]
     end
       
-	  person = self.create_from_form(params[:person] || received_params["person"])
+	  person = self.create_from_form(params[:person] || params["person"])
     identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
     person.patient.patient_identifiers.create("identifier" => national_id, 
       "identifier_type" => identifier_type.patient_identifier_type_id) unless national_id.blank?
@@ -495,7 +495,7 @@ module PatientService
     label.draw_barcode(50,180,0,1,5,15,120,false,"#{patient_bean.national_id}")
     label.draw_multi_text("#{patient_bean.name.titleize}")
     label.draw_multi_text("#{patient_bean.national_id_with_dashes} #{patient_bean.birth_date}#{sex}")
-    label.draw_multi_text("#{patient_bean.address}")
+    label.draw_multi_text("#{patient_bean.state_province}, #{patient_bean.current_residence} " )
     label.print(1)
   end
 
@@ -849,6 +849,7 @@ EOF
 		patient.birthdate_estimated = person.birthdate_estimated
 		patient.home_district = person.addresses.first.address2
 		patient.traditional_authority = person.addresses.first.county_district
+    patient.state_province = person.addresses.first.state_province
 		patient.current_residence = person.addresses.first.city_village
 		patient.landmark = person.addresses.first.address1
 		patient.mothers_surname = person.names.first.family_name2
@@ -860,7 +861,7 @@ EOF
 		patient.cell_phone_number = get_attribute(person, 'Cell phone number')
 		patient.office_phone_number = get_attribute(person, 'Office phone number')
 		patient.home_phone_number = get_attribute(person, 'Home phone number')
-		patient.guardian = art_guardian(person.patient) rescue nil 
+		patient.guardian = art_guardian(person.patient) rescue nil
 		patient
 	end
   
@@ -1139,11 +1140,13 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
   end
   
   def self.search_by_identifier(identifier)
-    people = PatientIdentifier.find_all_by_identifier(identifier).map{|id| 
+    identifier_without_dashes = identifier.gsub("-","").strip
+    people = PatientIdentifier.find(:all ,
+    :conditions =>["identifier = ? OR identifier =?", identifier,identifier_without_dashes]).map{|id|
       id.patient.person
     } unless identifier.blank? rescue nil
     return people unless people.blank?
-
+    
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
     if create_from_dde_server 
       dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""

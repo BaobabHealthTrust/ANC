@@ -180,18 +180,17 @@ class GenericUserController < ApplicationController
   end
 
   def update
-    #find_by_person_id(params[:id])
     @user = User.find(params[:id])
-
+  
     username = params[:user]['username'] rescue current_user.username
 
     if username
       @user.update_attributes(:username => username)
     end
-
+  
     PersonName.find(:all,:conditions =>["voided = 0 AND person_id = ?",@user.person_id]).each do | person_name |
       person_name.voided = 1
-      person_name.voided_by = current_user.person_id
+      person_name.voided_by = current_user.id
       person_name.date_voided = Time.now()
       person_name.void_reason = 'Edited name'
       person_name.save
@@ -234,17 +233,17 @@ class GenericUserController < ApplicationController
         flash[:notice] = "You have successfuly added the role of #{params[:user_role][:role_id]}"
         redirect_to :action => "show"
       else
-      user_roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role}
+      user_roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role.role}
       all_roles = Role.find(:all).collect{|r|r.role}
       @roles = (all_roles - user_roles)
-      @show_super_user = true if UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role != "superuser" }
+      @show_super_user = true if UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role.role != "superuser" }
    end
   end
 
   def delete_role
     @user = User.find(params[:id])
     unless request.post?
-      @roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role}
+      @roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role.role}
     else
       role = Role.find_by_role(params[:user_role][:role_id]).role
       user_role =  UserRole.find_by_role_and_user_id(role,@user.user_id)

@@ -14,6 +14,65 @@ class Bart2Connection::PatientIdentifier < ActiveRecord::Base
 
     return people.first unless people.blank?
 
+    create_from_remote = CoreService.get_global_property_value('create.from.remote').to_s == "true" rescue false
+
+    if create_from_remote
+       servers = GlobalProperty.find(:first,
+      :conditions => {:property => "remote_servers.parent"}).property_value.split(/,/) rescue nil
+    server_address_and_port = servers.to_s.split(':')
+    server_address = server_address_and_port.first
+    server_port = server_address_and_port.second
+    login = GlobalProperty.find(:first,
+      :conditions => {:property => "remote_bart.username"}).property_value.split(/,/) rescue ''
+    password = GlobalProperty.find(:first,
+      :conditions => {:property => "remote_bart.password"}).property_value.split(/,/) rescue ''
+
+    if server_port.blank?
+      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/demographics_remote"
+    else
+      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics_remote"
+    end
+    known_demographics = {:person => {:patient => {:identifiers =>{"national_id" => identifier}}}}
+    output = RestClient.post(uri,known_demographics)
+
+    results = []
+    results.push output if output and output.match(/person/)
+    result = results.sort{|a,b|b.length <=> a.length}.first          
+    result ? p = JSON.parse(result) : nil
+
+
+    
+      return [] if p.blank?
+
+      gender = p["person"]["gender"] == "F" ? "Female" : "Male"
+
+      passed = {
+        "person"=>{"occupation"=>p["person"]["attributes"]["occupation"],
+          "age_estimate"=> p["person"]["age_estimate"] ,
+          "cell_phone_number"=>p["person"]["attributes"]["cell_phone_number"],
+          "birth_month"=> p["person"]["birth_month"] ,
+          "addresses"=>{"address1"=>p["person"]["addresses"]["county_district"],
+            "address2"=>p["person"]["addresses"]["address2"],
+            "city_village"=>p["person"]["addresses"]["city_village"],
+            "county_district"=>""},
+          "gender"=> gender ,
+          "patient"=>{"identifiers"=>{"National id" => p["person"]["patient"]["identifiers"]["National id"] }},
+          "birth_day"=> p["person"]["birth_day"] ,
+          "home_phone_number"=>p["person"]["attributes"]["home_phone_number"],
+          "names"=>{"family_name"=> p["person"]["names"]["family_name"] ,
+            "given_name"=> p["person"]["names"]["given_name"],
+            "middle_name"=> "" },
+          "birth_year"=> p["person"]["birth_year"] },
+        "filter_district"=>"Chitipa",
+        "filter"=>{"region"=>"Northern Region",
+          "t_a"=>""},
+        "relation"=>""
+      }
+
+      return [self.create_from_form(passed["person"])].first
+
+    end
+
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
     
     if create_from_dde_server

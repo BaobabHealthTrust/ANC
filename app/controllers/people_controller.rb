@@ -97,7 +97,7 @@ class PeopleController < GenericPeopleController
           
 					#found_person_data = PatientService.search_by_identifier(params[:identifier]).first rescue nil
           found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
-					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
+					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.blank?
 				end
 			end
       
