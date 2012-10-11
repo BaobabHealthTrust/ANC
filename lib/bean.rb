@@ -15,7 +15,7 @@ class PatientBean
    :cd4_count_date, :cd4_count, :pregnant, :who_clinical_conditions, :tlc, :tlc_date, :tb_status_at_initiation,
    :ever_received_art, :last_art_drugs_taken, :last_art_drugs_date_taken,
    :first_positive_hiv_test_site, :first_positive_hiv_test_date, :first_positive_hiv_test_arv_number,
-   :first_positive_hiv_test_type, :months_on_art
+   :first_positive_hiv_test_type, :months_on_art,:state_province
 
 	def initialize(name)
 		@name = name
