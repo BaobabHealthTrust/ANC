@@ -23,7 +23,7 @@ production:
  remote_machine.account_name: localhost
  portal_url: 192.100.100.200:80
  same_database: false
- demographic_server_ips_and_local_port: {"127.0.0.1":"3000"}
+ # demographic_server_ips_and_local_port: {"127.0.0.1":"3000"}
  
 development:
  create_from_remote: no
@@ -51,7 +51,7 @@ development:
  remote_machine.account_name: localhost
  portal_url: 192.100.100.200:80
  same_database: false
- demographic_server_ips_and_local_port: {"127.0.0.1":"3000"}
+ # demographic_server_ips_and_local_port: {"127.0.0.1":"3000"}
  
 test: &TEST
  create_from_remote: no
