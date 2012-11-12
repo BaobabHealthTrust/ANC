@@ -849,7 +849,7 @@ EOF
 		patient.birthdate_estimated = person.birthdate_estimated
 		patient.home_district = person.addresses.first.address2
 		patient.traditional_authority = person.addresses.first.county_district
-    patient.state_province = person.addresses.first.state_province
+    patient.state_province = person.addresses.first.state_province rescue person.addresses.first.city_village
 		patient.current_residence = person.addresses.first.city_village
 		patient.landmark = person.addresses.first.address1
 		patient.mothers_surname = person.names.first.family_name2
