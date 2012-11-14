@@ -168,8 +168,8 @@ module ANCService
     
       @obstetrics = {}
       search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "BIRTHPLACE", "PREGNANCY", "GESTATION", "LABOUR DURATION",
-      "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE",
-      "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
+        "METHOD OF DELIVERY", "CONDITION AT BIRTH", "BIRTH WEIGHT", "ALIVE",
+        "AGE AT DEATH", "UNITS OF AGE OF CHILD", "PROCEDURE DONE"]
       current_level = 0
     
       Encounter.find(:all, :conditions => ["encounter_type = ? AND patient_id = ?", 
@@ -196,7 +196,14 @@ module ANCService
           end
         }      
       }
-    
+
+      #grab units of age of child
+      unit = Observation.find(:last,
+        :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
+          ConceptName.find_by_name('UNITS OF AGE OF CHILD').concept_id]).answer_string.squish rescue nil
+
+      
+
       # raise @anc_patient.to_yaml
     
       @pregnancies = self.active_range
@@ -245,6 +252,9 @@ module ANCService
       label.draw_text("now?",690,85,0,2,1,1,false)
       label.draw_text("Age at",745,65,0,2,1,1,false)
       label.draw_text("death*",745,85,0,2,1,1,false)
+      label.draw_text("-" + unit, 745,105,0,2,1,1,false) if unit
+
+
     
       label.draw_line(20,60,800,2,0)
       label.draw_line(20,60,2,245,0)
@@ -570,17 +580,17 @@ module ANCService
       
       @multipreg = Observation.find(:last,
         :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
-         ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string.squish rescue nil
+          ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string.squish rescue nil
 
       abortions = Observation.find(:last,
         :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
-         ConceptName.find_by_name('NUMBER OF ABORTIONS').concept_id]).answer_string.squish rescue nil
+          ConceptName.find_by_name('NUMBER OF ABORTIONS').concept_id]).answer_string.squish rescue nil
 
       @abortions = abortions.to_i rescue abortions
 
       @stillbirths = Observation.find(:last,
         :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
-         ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string.squish rescue nil
+          ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string.squish rescue nil
 
       #Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", 40, Encounter.active.find(:all, :conditions => ["patient_id = ?", 40]).collect{|e| e.encounter_id}, ConceptName.find_by_name('Caesarean section').concept_id])
     
@@ -590,7 +600,7 @@ module ANCService
 
       @vacuum = Observation.find(:all,
         :conditions => ["person_id = ? AND value_coded = ?", @patient.id,
-         ConceptName.find_by_name('Vacuum extraction delivery').concept_id]).length rescue nil
+          ConceptName.find_by_name('Vacuum extraction delivery').concept_id]).length rescue nil
 
       @symphosio = Observation.find(:last, 
         :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
