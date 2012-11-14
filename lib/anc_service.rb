@@ -553,88 +553,76 @@ module ANCService
       @pregnancies.each{|preg|
         @range << preg[0].to_date
       }
-    
-      @deliveries = Observation.find(:last,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.find(:all).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('PARITY').concept_id]).answer_string.squish.to_i rescue nil
+   
+      deliveries = Observation.find(:last,
+        :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
+          ConceptName.find_by_name('PARITY').concept_id]).answer_string.squish rescue nil
+
+      @deliveries = deliveries.to_i rescue deliveries if deliveries
 
       @deliveries = @deliveries + (@range.length > 0 ? @range.length - 1 : @range.length) if !@deliveries.nil?
     
-      @gravida = Observation.find(:last,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.find(:all).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('GRAVIDA').concept_id]).answer_string.squish.to_i rescue nil
+      gravida = Observation.find(:last,
+        :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
+          ConceptName.find_by_name('GRAVIDA').concept_id]).answer_string.squish rescue nil
 
+      @gravida = gravida.to_i rescue gravida
+      
       @multipreg = Observation.find(:last,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.find(:all, :conditions => ["encounter_type = ?", 
-              EncounterType.find_by_name("OBSTETRIC HISTORY").id]).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string.squish rescue nil
+        :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
+         ConceptName.find_by_name('MULTIPLE GESTATION').concept_id]).answer_string.squish rescue nil
 
-      @abortions = Observation.find(:last,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.find(:all).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('NUMBER OF ABORTIONS').concept_id]).answer_string.squish.to_i rescue nil
+      abortions = Observation.find(:last,
+        :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
+         ConceptName.find_by_name('NUMBER OF ABORTIONS').concept_id]).answer_string.squish rescue nil
+
+      @abortions = abortions.to_i rescue abortions
 
       @stillbirths = Observation.find(:last,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.find(:all).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string.squish rescue nil
+        :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
+         ConceptName.find_by_name('STILL BIRTH').concept_id]).answer_string.squish rescue nil
 
       #Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", 40, Encounter.active.find(:all, :conditions => ["patient_id = ?", 40]).collect{|e| e.encounter_id}, ConceptName.find_by_name('Caesarean section').concept_id])
     
       @csections = Observation.find(:all,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND (concept_id = ? AND value_coded = ?)", @patient.id,
-          Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        :conditions => ["person_id = ? AND (concept_id = ? AND value_coded = ?)", @patient.id,
           ConceptName.find_by_name('Caesarean section').concept_id, ConceptName.find_by_name('Yes').concept_id]).length rescue nil
 
       @vacuum = Observation.find(:all,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND value_coded = ?", @patient.id,
-          Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('Vacuum extraction delivery').concept_id]).length rescue nil
+        :conditions => ["person_id = ? AND value_coded = ?", @patient.id,
+         ConceptName.find_by_name('Vacuum extraction delivery').concept_id]).length rescue nil
 
       @symphosio = Observation.find(:last, 
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.find(:all).collect{|e| e.encounter_id},
+        :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('SYMPHYSIOTOMY').concept_id]).answer_string.squish rescue nil
 
       @haemorrhage = Observation.find(:last,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.find(:all).collect{|e| e.encounter_id},
+        :conditions => ["person_id = ? AND concept_id = ?", @patient.id,         
           ConceptName.find_by_name('HEMORRHAGE').concept_id]).answer_string.squish rescue nil
 
       @preeclampsia = Observation.find(:last,
-        :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?", @patient.id,
-          Encounter.find(:all).collect{|e| e.encounter_id},
+        :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('PRE-ECLAMPSIA').concept_id]).answer_string.squish rescue nil
 
-      @asthma = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+      @asthma = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('ASTHMA').concept_id]).answer_string.squish.upcase rescue nil
 
-      @hyper = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+      @hyper = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('HYPERTENSION').concept_id]).answer_string.squish.upcase rescue nil
 
-      @diabetes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+      @diabetes = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('DIABETES').concept_id]).answer_string.squish.upcase rescue nil
 
-      @epilepsy = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+      @epilepsy = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('EPILEPSY').concept_id]).answer_string.squish.upcase rescue nil
 
-      @renal = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+      @renal = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('RENAL DISEASE').concept_id]).answer_string.squish.upcase rescue nil
 
-      @fistula = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+      @fistula = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('FISTULA REPAIR').concept_id]).answer_string.squish.upcase rescue nil
 
-      @deform = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+      @deform = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('SPINE OR LEG DEFORM').concept_id]).answer_string.squish.upcase rescue nil
 
       @surgicals = Observation.find(:all, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
