@@ -479,8 +479,7 @@ class ApplicationController < GenericApplicationController
   def main_next_task(location, patient, session_date = Date.today)
 
     if use_user_selected_activities
-      form = next_form(location , patient , session_date) rescue nil      
-      return form if form      
+      return next_form(location , patient , session_date)
     end
     all_tasks = Task.all(:order => 'sort_weight ASC')
     todays_encounters = patient.encounters.find_by_date(session_date)
