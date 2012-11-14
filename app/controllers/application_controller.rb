@@ -3,6 +3,7 @@ class ApplicationController < GenericApplicationController
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
     task = main_next_task(Location.current_location, patient,session_date)
+    
     begin
       return task.url if task.present? && task.url.present?
       return "/patients/show/#{patient.id}" 
@@ -478,9 +479,10 @@ class ApplicationController < GenericApplicationController
   def main_next_task(location, patient, session_date = Date.today)
 
     if use_user_selected_activities
-      return next_form(location , patient , session_date)
+      form = next_form(location , patient , session_date) rescue nil      
+      return form if form      
     end
-    all_tasks = self.all(:order => 'sort_weight ASC')
+    all_tasks = Task.all(:order => 'sort_weight ASC')
     todays_encounters = patient.encounters.find_by_date(session_date)
     todays_encounter_types = todays_encounters.map{|e| e.type.name rescue ''}.uniq rescue []
     
