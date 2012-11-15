@@ -1482,6 +1482,7 @@ module ANCService
   end
 
   def self.create_remote(received_params)
+   
     new_params = received_params["person"]
     known_demographics = Hash.new()
     new_params['gender'] == 'F' ? new_params['gender'] = "Female" : new_params['gender'] = "Male"
@@ -1522,26 +1523,20 @@ module ANCService
       "current_ta"=>{
         "identifier"=>"#{new_params["addresses"]["county_district"]}"}
     }
+    link = CoreService.get_global_property_value("art_link") 
+    begin
+      
+      output = RestClient.post("http://#{link}/people/create_remote", known_demographics)
+        
+    rescue Timeout::Error
+      return 'timeout'
+    rescue
+      return 'creation failed'
+    end
+    
+    output if output and output.match(/person/)
 
-    demographic_servers = JSON.parse(CoreService.get_global_property_value('demographic_server_ips_and_local_port')) # rescue []
-
-    result = demographic_servers.map{|demographic_server, local_port|
-
-      begin
-
-        output = RestClient.post("http://#{demographic_server}:#{local_port}/people/create_remote", known_demographics)
-
-      rescue Timeout::Error
-        return 'timeout'
-      rescue
-        return 'creation failed'
-      end
-
-      output if output and output.match(/person/)
-
-    }.sort{|a,b|b.length <=> a.length}.first
-
-    result ? JSON.parse(result) : nil
+    output ? JSON.parse(output) : nil
   end
 
   def self.person_search(params)
