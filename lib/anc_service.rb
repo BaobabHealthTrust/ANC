@@ -201,7 +201,6 @@ module ANCService
       unit = Observation.find(:last,
         :conditions => ["person_id = ? AND concept_id = ?", @patient.id,
           ConceptName.find_by_name('UNITS OF AGE OF CHILD').concept_id]).answer_string.squish rescue nil
-
       
 
       # raise @anc_patient.to_yaml
@@ -252,7 +251,7 @@ module ANCService
       label.draw_text("now?",690,85,0,2,1,1,false)
       label.draw_text("Age at",745,65,0,2,1,1,false)
       label.draw_text("death*",745,85,0,2,1,1,false)
-      label.draw_text("-" + unit, 745,105,0,2,1,1,false) if unit
+      label.draw_text("(" + unit[0..2] + ".)", 745,105,0,2,1,1,false) if unit
 
 
     
