@@ -10,9 +10,14 @@ class Reports
     @start_age = start_age
     @end_age = end_age
     @type = type
-    
-    @enddate = ((@end_date.to_date - 5.month).strftime("%Y-%m-01").to_date - 1.day).strftime("%Y-%m-%d")
-    @startdate = (@enddate.to_date).strftime("%Y-%m-01")
+
+    unless (@type == "monthly report")
+      @enddate = ((@end_date.to_date - 5.month).strftime("%Y-%m-01").to_date - 1.day).strftime("%Y-%m-%d")
+      @startdate = (@enddate.to_date).strftime("%Y-%m-01")
+    else
+     @enddate = @end_date
+     @startdate = @start_date
+    end
     
     @cohortpatients = Encounter.find(:all, :joins => [:observations], :group => [:patient_id], 
       :select => ["MAX(obs_datetime) encounter_datetime, patient_id"], 
@@ -21,7 +26,7 @@ class Reports
         EncounterType.find_by_name("ANC VISIT TYPE").id, 
         ConceptName.find_by_name("Reason For Visit").concept_id, 
         @startdate, @enddate]).collect{|e| e.patient_id}.uniq
-    
+  
   end
 
   def new_women_registered

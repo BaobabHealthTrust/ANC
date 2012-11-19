@@ -11,17 +11,17 @@ class ReportsController < ApplicationController
 
 		case params[:selSelect]
 		when "day"
-		@start_date = params[:day]
-		@end_date = params[:day]
+      @start_date = params[:day]
+      @end_date = params[:day]
 		when "week"
-		@start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) -
-		("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
-		@end_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) +
-		6 - ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
+      @start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) -
+        ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
+      @end_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) +
+        6 - ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
 		when "month"
 			@start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
 			@end_date = ("#{params[:selYear]}-#{params[:selMonth]}-#{ (params[:selMonth].to_i != 12 ?
-		("#{params[:selYear]}-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : "31") }").to_date.strftime("%Y-%m-%d")
+        ("#{params[:selYear]}-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : "31") }").to_date.strftime("%Y-%m-%d")
 		when "year"
 			@start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
 			@end_date = ("#{params[:selYear]}-12-31").to_date.strftime("%Y-%m-%d")
@@ -111,24 +111,24 @@ class ReportsController < ApplicationController
     @facility = Location.current_health_center.name rescue ''
     
 		@start_date = nil
-		@end_date = nil
+    @end_date = nil
 		@start_age = params[:startAge]
 		@end_age = params[:endAge]
 		@type = params[:selType]
 
 		case params[:selSelect]
 		when "day"
-		@start_date = params[:day]
-		@end_date = params[:day]
+      @start_date = params[:day]
+      @end_date = params[:day]
 		when "week"
-		@start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) -
-		("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
-		@end_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) +
-		6 - ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
+      @start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) -
+        ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
+      @end_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) +
+        6 - ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
 		when "month"
 			@start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
 			@end_date = ("#{params[:selYear]}-#{params[:selMonth]}-#{ (params[:selMonth].to_i != 12 ?
-		("#{params[:selYear]}-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : "31") }").to_date.strftime("%Y-%m-%d")
+        ("#{params[:selYear]}-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : "31") }").to_date.strftime("%Y-%m-%d")
 		when "year"
 			@start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
 			@end_date = ("#{params[:selYear]}-12-31").to_date.strftime("%Y-%m-%d")
@@ -140,7 +140,10 @@ class ReportsController < ApplicationController
 			@start_date = params[:start_date]
 			@end_date = params[:end_date]
 		end
-    
+
+    @start_date = params[:start_date] if params[:start_date]
+    @end_date = params[:end_date] if params[:end_date]
+
 		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type)
 
     @new_women_registered = report.new_women_registered

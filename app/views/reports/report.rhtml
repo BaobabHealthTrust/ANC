@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Cohort Report Selection</title>
+    <title>Report</title>
     <%= stylesheet_link_tag "form" %>
     <%= stylesheet_link_tag fancy_or_high_contrast_touch %>
     <link href="/stylesheets/dashboard.css" media="screen" rel="stylesheet" type="text/css" />
@@ -141,7 +141,11 @@
                             &nbsp;
                           </td>
                           <td style="background-color: #999; color: #fff; font-weight: bold;" colspan="2">
-                            Booking Cohort
+                            <%if params[:selType].downcase == "monthly report"%>
+                              Monthly Report
+                            <%else%>
+                               Booking Cohort
+                            <%end%>
                           </td>
                         </tr>
                         <tr>
