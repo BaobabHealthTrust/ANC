@@ -1,0 +1,13 @@
+<script>
+  tt_cancel_destination = "/people?active_tab=tab3";
+</script>
+<form id='outcome' action="/reports/report" method='post'>
+  <label for="report"></label>
+
+  <%= hidden_field_tag "selType", "monthly report" %><br>
+
+  <%= text_field_tag("start_date", nil, {:field_type => 'date', :helpText => 'Start date'}) %> <br>
+  <%= text_field_tag("end_date", nil, {:field_type => 'date', :helpText => 'End date'})%><br>
+
+  <%= submit_tag value="Submit"%>
+</form>
