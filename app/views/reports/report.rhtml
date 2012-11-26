@@ -46,11 +46,19 @@
       <div style="background-color: #fff; height: 660px; width: 99%; padding: 5px;">
         <table style="width: 100%; border: 1px solid #999; -moz-user-select: none;">
           <tr>
+            <%if params[:selType] != "monthly report"%>
             <th style="font-size: 1.8em; color: #eee; background-color: #999; padding: 10px;">
               ANC C<span style="font-size: 0.8em">LINIC</span> - 
               F<span style="font-size: 0.8em">ACILITY</span> M<span style="font-size: 0.8em">ONTHLY</span>
               R<span style="font-size: 0.8em">EPORT</span>
             </th>
+            <%else%>
+            <th style="font-size: 1.8em; color: #eee; background-color: #999; padding: 10px;">
+              ANC C<span style="font-size: 0.8em">LINIC</span> -
+              F<span style="font-size: 0.8em">ACILITY</span> C<span style="font-size: 0.8em">USCTOM</span>
+              R<span style="font-size: 0.8em">EPORT</span>
+            </th>
+            <%end%>
           </tr>
           <tr>
             <td style="border: 1px solid #999;">
@@ -111,7 +119,7 @@
                             &nbsp;
                           </td>
                           <td style="background-color: #999; color: #fff; font-weight: bold;" colspan="3">
-                            Reporting Month
+                         <%if params[:selType] != "monthly report"%>   Reporting Month <%else%>   Reporting Period<%end%>
                           </td>
                         </tr>
                         <tr>
@@ -142,7 +150,7 @@
                           </td>
                           <td style="background-color: #999; color: #fff; font-weight: bold;" colspan="2">
                             <%if params[:selType].downcase == "monthly report"%>
-                              Monthly Report
+                              Custom Report
                             <%else%>
                                Booking Cohort
                             <%end%>
