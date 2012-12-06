@@ -405,7 +405,26 @@ class Reports
         ConceptName.find_by_name("Date Antiretrovirals Started").concept_id, 
         "Before This Pregnancy", 
         @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id}
-    
+
+		national_id = PatientIdentifierType.find_by_name("National id").id
+		patient_ids = PatientIdentifier.find(:all, :select => ['identifier, identifier_type'], :conditions => ["identifier_type = ?", national_id]).collect{|ident|
+			 ident.identifier}.join(",")
+		paramz = Hash.new
+        
+		paramz["ids"] = patient_ids
+		paramz["start_date"] = @startdate
+		paramz["end_date"] = @enddate
+         
+		server = CoreService.get_global_property_value("remote_servers.parent")
+
+		login = CoreService.get_global_property_value("remote_bart.username").split(/,/) rescue ""
+		password = CoreService.get_global_property_value("remote_bart.password").split(/,/) rescue ""
+				
+		uri = "http://#{login}:#{password}@#{server}/encounters/export_on_art_patients"		
+
+		p = JSON.parse(RestClient.post(uri, paramz))
+		return p
+           
 	end
 
 	def on_art_zero_to_27

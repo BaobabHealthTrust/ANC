@@ -55,7 +55,7 @@
             <%else%>
             <th style="font-size: 1.8em; color: #eee; background-color: #999; padding: 10px;">
               ANC C<span style="font-size: 0.8em">LINIC</span> -
-              F<span style="font-size: 0.8em">ACILITY</span> C<span style="font-size: 0.8em">USCTOM</span>
+              F<span style="font-size: 0.8em">ACILITY</span> C<span style="font-size: 0.8em">USTOM</span>
               R<span style="font-size: 0.8em">EPORT</span>
             </th>
             <%end%>
@@ -149,7 +149,7 @@
                             &nbsp;
                           </td>
                           <td style="background-color: #999; color: #fff; font-weight: bold;" colspan="2">
-                            <%if params[:selType].downcase == "monthly report"%>
+                            <%if ((params[:selType])? params[:selType] : "").downcase == "monthly report"%>
                               Custom Report
                             <%else%>
                                Booking Cohort
