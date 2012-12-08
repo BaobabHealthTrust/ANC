@@ -73,7 +73,8 @@ class Reports
     
     Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
       :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+        EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
         @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e|
       [e.patient_id, e.form_id]
@@ -85,7 +86,8 @@ class Reports
     
     Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
       :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+        EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
         @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y != 1}.collect{|x, y| x}.uniq
     
@@ -95,7 +97,8 @@ class Reports
     
     Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
       :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+        EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
         @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y != 2}.collect{|x, y| x}.uniq
     
@@ -105,7 +108,8 @@ class Reports
     
     Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
       :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+        EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
         @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y != 3}.collect{|x, y| x}.uniq
     
@@ -116,7 +120,8 @@ class Reports
     
     Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
       :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)" ,
+      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)" ,
+        EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
         @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y != 4}.collect{|x, y| x}.uniq
     
@@ -127,7 +132,8 @@ class Reports
     
     Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
       :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+        EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
         @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y < 5}.collect{|x, y| x}.uniq
     

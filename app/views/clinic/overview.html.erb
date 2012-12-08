@@ -63,26 +63,20 @@
 
 </style>
 <div id="tab" style="background-color: #fff; border-top: 1px #fff solid; margin-top: 0px;">
-  <h2 style="text-align: center; color: #6281a7; margin-top: -2px; margin-bottom: 0px;">Current Patient Statistics</h2>
+  <h2 style="text-align: center; color: #6281a7; margin-top: -2px; margin-bottom: 0px;">Current Visit Statistics</h2>
   <table id="stats" style="height: 315px; margin-bottom: 8px;" cellpadding="5">
     <tr style="color: #fff; background-color: #6281a7;">
-      <th style="text-align:left;">Task Type</th>
+      <th style="text-align:left;">Total with: </th>
       <th>Me</th>
       <th>Today</th>
       <th>This Year</th>
-      <th>Total to Date</th>
     </tr>
     <% @types.each do |type| %>
       <tr class="<%= cycle('even', 'odd') %>">
-        <td style="text-align:left;"><%= (type == "HIV STATUS" ? "HIV Status" :
-              (type == "PMTCT MANAGEMENT" ? "PMTCT Management" : (type == "OBSERVATIONS" ? 
-                  "ANC Management" : (type == "TREATMENT" ? "Drug Administration" : 
-                    (type == "APPOINTMENT" ? "Appointments" : (type == "UPDATE OUTCOME" ? "Outcome Updates" : 
-                        type.titleize)))))) %></td>
+        <td style="text-align:left;"><%=  type.titleize + (type.to_s == '1' ? ' visit' : ' visits') %></td>
         <td><%= @me[type] %></td>
         <td><%= @today[type] %></td>
         <td><%= @year[type] %></td>
-        <td><%= @ever[type] %></td>
       </tr>
     <% end %>
   </table>

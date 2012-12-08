@@ -18,8 +18,8 @@ class ClinicController < GenericClinicController
 
   def reports
     @reports = [#['/reports/select/','Booking Cohort Report'],
-                 ['/reports/report_limits', 'Monthly Report'] ,
-                 ['/reports/select?type=anc_cohort', 'Booking Cohort Report']]
+      ['/reports/report_limits', 'Monthly Report'] ,
+      ['/reports/select?type=anc_cohort', 'Booking Cohort Report']]
 
     # render :template => 'clinic/reports', :layout => 'clinic'
     render :layout => false
@@ -27,11 +27,11 @@ class ClinicController < GenericClinicController
 
   def supervision
     @supervision_tools = [["Data that was Updated", "summary_of_records_that_were_updated"],
-                          ["Drug Adherence Level",    "adherence_histogram_for_all_patients_in_the_quarter"],
-                          ["Visits by Day",           "visits_by_day"],
-                          ["Non-eligible Patients in Cohort", "non_eligible_patients_in_cohort"]]
+      ["Drug Adherence Level",    "adherence_histogram_for_all_patients_in_the_quarter"],
+      ["Visits by Day",           "visits_by_day"],
+      ["Non-eligible Patients in Cohort", "non_eligible_patients_in_cohort"]]
 
-   @landing_dashboard = 'clinic_supervision'
+    @landing_dashboard = 'clinic_supervision'
 
     render :template => 'clinic/supervision', :layout => 'clinic' 
   end
@@ -56,44 +56,36 @@ class ClinicController < GenericClinicController
   end
 
   def overview
-    simple_overview_property = CoreService.get_global_property_value("simple_application_dashboard") rescue nil
+    @types = ["1", "2", "3", "4", ">5"]
 
-    simple_overview = false
-    if simple_overview_property != nil
-      if simple_overview_property == 'true'
-        simple_overview = true
-      end
-    end
-
-    @types = CoreService.get_global_property_value("statistics.show_encounter_types") rescue EncounterType.all.map(&:name).join(",")
-    @types = @types.split(/,/)
-
-    @me = Encounter.statistics(@types,
-      :conditions => ['encounter_datetime BETWEEN ? AND ? AND encounter.creator = ?',
-                      Date.today.strftime('%Y-%m-%d 00:00:00'),
-                      Date.today.strftime('%Y-%m-%d 23:59:59'),
-                      current_user.user_id])
-    @today = Encounter.statistics(@types,
-      :conditions => ['encounter_datetime BETWEEN ? AND ?',
-                      Date.today.strftime('%Y-%m-%d 00:00:00'),
-                      Date.today.strftime('%Y-%m-%d 23:59:59')])
-
-    if !simple_overview
-      @year = Encounter.statistics(@types,
-        :conditions => ['encounter_datetime BETWEEN ? AND ?',
-                        Date.today.strftime('%Y-01-01 00:00:00'),
-                        Date.today.strftime('%Y-12-31 23:59:59')])
-      @ever = Encounter.statistics(@types)
-    end
-
-    # raise current_user.to_yaml
+    @me = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, ">5" => 0}
+    @today = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, ">5" => 0}
+    @year = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, ">5" => 0}
+    @ever = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, ">5" => 0}
     
+    Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
+      :select => ["encounter.creator, encounter_datetime AS date, MAX(value_numeric) form_id"],
+      :conditions => ["encounter_type = ? AND concept_id = ? AND encounter_datetime BETWEEN (?) AND (?) AND encounter.voided = 0",
+        EncounterType.find_by_name("ANC VISIT TYPE").id,
+        ConceptName.find_by_name("Reason for visit").concept_id,
+        "#{Date.today.strftime('%Y-01-01')} 00:00:00", "#{Date.today.strftime('%Y-12-31')} 23:59:59"]).each do |data|
+ 
+      cat = data.form_id.to_i
+      cat = cat > 4 ? ">5" : cat.to_s
+      
+      if data.date.to_date == Date.today
+        
+        if data.creator.to_i == current_user.user_id.to_i
+          @me["#{cat}"] += 1
+        end
+        @today["#{cat}"] += 1
+      end
+      
+      @year["#{cat}"] += 1
+    end
+  
     @user = current_user.name rescue ""
 
-    if simple_overview
-        render :template => 'clinic/overview_simple.rhtml' , :layout => false
-        return
-    end
     render :layout => false
   end
 
