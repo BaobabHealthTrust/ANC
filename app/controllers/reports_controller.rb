@@ -26,6 +26,7 @@ class ReportsController < ApplicationController
 			@start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
 			@end_date = ("#{params[:selYear]}-12-31").to_date.strftime("%Y-%m-%d")
 		when "quarter"
+
 			day = params[:selQtr].to_s.match(/^min=(.+)&max=(.+)$/)
 			@start_date = (day ? day[1] : Date.today.strftime("%Y-%m-%d"))
 			@end_date = (day ? day[2] : Date.today.strftime("%Y-%m-%d"))
@@ -33,7 +34,7 @@ class ReportsController < ApplicationController
 			@start_date = params[:start_date]
 			@end_date = params[:end_date]
 		end
-
+ 
 		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type)
 
 		@observations_1 = report.observations_1
@@ -141,8 +142,8 @@ class ReportsController < ApplicationController
 			@end_date = params[:end_date]
 		end
 
-    @start_date = params[:start_date] if params[:start_date]
-    @end_date = params[:end_date] if params[:end_date]
+    @start_date = params[:start_date] if !params[:start_date].blank?
+    @end_date = params[:end_date] if !params[:end_date].blank?
 
 		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type)
 

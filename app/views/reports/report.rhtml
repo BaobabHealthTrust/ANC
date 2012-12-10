@@ -650,13 +650,12 @@
                           <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
                               border-left: 1px solid #999; width: 60%;">
                             <form id="on_cpt__1" method="post" action="decompose">
-                              <input type="hidden" value="<%= @on_cpt__1.join(",") %>" name="patients" />
-                              Women on CPT
+                               Women on CPT
                             </form>
                           </td>
                           <td style="border: 1px solid #999;">
                             <a href="javascript:document.getElementById('on_cpt__1').submit()">
-                              <%= @on_cpt__1.length %>
+                              <%= ((@on_cpt__1.to_i > 0)? ">= " + @on_cpt__1.to_s :  @on_cpt__1)%>
                             </a>
                           </td>
                         </tr>
