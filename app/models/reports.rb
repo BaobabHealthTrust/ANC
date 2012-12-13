@@ -378,40 +378,37 @@ class Reports
 
 	def not_on_art   
     
-    hiv_pos = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
+    	Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
       :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
       :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (encounter_datetime >= ? " + 
           "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
         ConceptName.find_by_name("HIV status").concept_id, 
         ConceptName.find_by_name("Positive").concept_id, "Positive", 
         @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id}
-    
-        ((hiv_pos.length)? hiv_pos.length : 0) - ((@bart_patient_identifiers.length)? @bart_patient_identifiers.length : 0)    
-	end
-
+    end
 
 	def on_art_before
     
-		patients = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
-      :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
-      :conditions => ["concept_id = ? AND value_text = ? AND (encounter_datetime >= ? " + 
-          "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
-        ConceptName.find_by_name("Date Antiretrovirals Started").concept_id, 
-        "Before This Pregnancy", 
-        @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id}  rescue []
+		#patients = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
+     # :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
+     # :conditions => ["concept_id = ? AND value_text = ? AND (encounter_datetime >= ? " + 
+      #    "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
+       # ConceptName.find_by_name("Date Antiretrovirals Started").concept_id, 
+       # "Before This Pregnancy", 
+       # @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id}  rescue []
         
-        return ((patients.concat(@bart_patient_identifiers)).uniq rescue (@bart_patient_identifiers.length > 0) ? @bart_patient_identifiers : []) 
+        return @bart_patient_identifiers rescue []
 	end
 
 	def on_art_zero_to_27
     
-		local =	Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
-		  :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
-		  :conditions => ["concept_id = ? AND value_text = ? AND (encounter_datetime >= ? " + 
-		      "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
-		    ConceptName.find_by_name("Date Antiretrovirals Started").concept_id, 
-		    "At 0-27 weeks of Pregnancy", 
-		    @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id} rescue []
+		#local =	Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
+		 # :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
+		 # :conditions => ["concept_id = ? AND value_text = ? AND (encounter_datetime >= ? " + 
+		   #   "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
+		   # ConceptName.find_by_name("Date Antiretrovirals Started").concept_id, 
+		   # "At 0-27 weeks of Pregnancy", 
+		    #@startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id} rescue []
 	   
 		remote =   Observation.find_by_sql("SELECT p.identifier, o.value_datetime, o.person_id FROM obs o 
 			JOIN patient_identifier p ON p.patient_id = o.person_id
@@ -423,19 +420,20 @@ class Reports
 					return ob.person_id if (check <= (27*7).days && check >= 0.days)
 				end
 			} rescue []
-		return (local.concat(remote)).uniq
+
+		return remote
     
 	end
 
 	def on_art_28_plus
     
-		local  = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
-      :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
-      :conditions => ["concept_id = ? AND value_text = ? AND (encounter_datetime >= ? " + 
-          "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
-        ConceptName.find_by_name("Date Antiretrovirals Started").concept_id, 
-        "At 28+ of Pregnancy", 
-        @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id} rescue []
+		#local  = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
+      #:select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
+      #:conditions => ["concept_id = ? AND value_text = ? AND (encounter_datetime >= ? " + 
+       #   "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
+       # ConceptName.find_by_name("Date Antiretrovirals Started").concept_id, 
+        #"At 28+ of Pregnancy", 
+        #@startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id} rescue []
 
 		
 		remote =   Observation.find_by_sql("SELECT p.identifier, o.value_datetime, o.person_id FROM obs o 
@@ -447,19 +445,22 @@ class Reports
 				return ob.person_id if (@bart2_patients["#{ident}"].to_date - (ob.value_datetime.to_date + 7.days)).days > (27*7).days 
 			end
 		} rescue []
-		return (local.concat(remote)).uniq
+
+		return remote
 	end
 
 	def on_cpt__1   
-	@on_art_cpt  = @on_cpt
-    @enc = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
-      :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
-      :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (encounter_datetime >= ? " + 
-          "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
-        ConceptName.find_by_name("Is on CPT").concept_id, 
-        ConceptName.find_by_name("Yes").concept_id, "Yes", 
-        @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id} rescue []
-     return @on_art_cpt
+	 hash = Hash.new
+     hash["num"] = (@on_cpt.to_i > 0)? @on_cpt : 0
+    #@enc = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
+     # :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
+     # :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (encounter_datetime >= ? " + 
+      #    "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
+      #  ConceptName.find_by_name("Is on CPT").concept_id, 
+       # ConceptName.find_by_name("Yes").concept_id, "Yes", 
+       # @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id} rescue []
+	
+     hash 
 	end
 
 

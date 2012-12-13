@@ -657,7 +657,7 @@
                           </td>
                           <td style="border: 1px solid #999;">
                             <a href="javascript:document.getElementById('on_cpt__1').submit()">
-                              <%= ((@on_cpt__1 > 0)? ">= " + @on_cpt__1.to_s :  @on_cpt__1)%>
+                              <%= @on_cpt__1["num"]%>
                             </a>
                           </td>
                         </tr>
@@ -706,7 +706,7 @@
                           </td>
                           <td style="border: 1px solid #999;">
                             <a href="javascript:document.getElementById('not_on_art').submit()">
-                            <%= (@not_on_art)? @not_on_art : 0 %>
+                            <%= @not_on_art.length - @on_art_before.length %>
                             </a>
                           </td>
                         </tr>
@@ -723,7 +723,7 @@
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
                             <a href="javascript:document.getElementById('on_art_before').submit()">
-                              <%= (@on_art_before.length)? @on_art_before.length : 0 %>
+                              <%= @on_art_before.length rescue 0 %>
                             </a>
                           </td>
                         </tr>
