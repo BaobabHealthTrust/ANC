@@ -161,7 +161,6 @@ class Reports
 		end
 	end
 
-
 	def ttv__total_previous_doses_2
     patients = {}
     
@@ -377,15 +376,7 @@ class Reports
     
 	end
 
-	def not_on_art
-    
-    on_art = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
-      :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
-      :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (encounter_datetime >= ? " + 
-          "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
-        ConceptName.find_by_name("On ART").concept_id, 
-        ConceptName.find_by_name("Yes").concept_id, "Yes", 
-        @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id}
+	def not_on_art   
     
     hiv_pos = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
       :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
@@ -395,8 +386,7 @@ class Reports
         ConceptName.find_by_name("Positive").concept_id, "Positive", 
         @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id}
     
-    hiv_pos - on_art
-    
+        ((hiv_pos.length)? hiv_pos.length : 0) - ((@bart_patient_identifiers.length)? @bart_patient_identifiers.length : 0)    
 	end
 
 
@@ -410,7 +400,7 @@ class Reports
         "Before This Pregnancy", 
         @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id}  rescue []
         
-        return (patients.concat(@bart_patient_identifiers)).uniq
+        return ((patients.concat(@bart_patient_identifiers)).uniq rescue (@bart_patient_identifiers.length > 0) ? @bart_patient_identifiers : []) 
 	end
 
 	def on_art_zero_to_27
@@ -546,7 +536,7 @@ class Reports
   
   def on_art_in_bart
 	    national_id = PatientIdentifierType.find_by_name("National id").id
-		patient_ids = PatientIdentifier.find(:all, :select => ['identifier, identifier_type'], :conditions => ["identifier_type = ? AND patient_id IN (?)", 	national_id, @cohortpatients]).collect{|ident|
+		patient_ids = PatientIdentifier.find(:all, :select => ['identifier, identifier_type'], :conditions => ["identifier_type = ? AND patient_id IN (?)", 		national_id, @cohortpatients]).collect{|ident|
 			 ident.identifier}.join(",")
 		paramz = Hash.new
         
