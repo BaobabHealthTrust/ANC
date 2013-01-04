@@ -29,6 +29,7 @@ class Reports
 
    	@bart_patients = on_art_in_bart  
 	@on_cpt = @bart_patients['on_cpt']
+ 
 	@bart_patients.delete("on_cpt")
 	@bart_patient_identifiers = @bart_patients.keys	
   end
@@ -378,7 +379,7 @@ class Reports
 
 	def not_on_art   
     
-    	Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
+    	Encounter.find(:all, :joins => [:observations], :group => ["patient_id"],
       :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
       :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (encounter_datetime >= ? " + 
           "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
@@ -409,11 +410,12 @@ class Reports
 		   # ConceptName.find_by_name("Date Antiretrovirals Started").concept_id, 
 		   # "At 0-27 weeks of Pregnancy", 
 		    #@startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id} rescue []
-	   
+        
+	   @art_ids = "'" + @bart_patient_identifiers.join("','") + "'"  
 		remote =   Observation.find_by_sql("SELECT p.identifier, o.value_datetime, o.person_id FROM obs o 
 			JOIN patient_identifier p ON p.patient_id = o.person_id
 			WHERE o.concept_id = (SELECT concept_id FROM concept_name WHERE name = 'LAST MENSTRUAL PERIOD')
-			AND p.identifier IN (#{@bart_patient_identifiers})").collect{|ob| 
+			AND p.identifier IN (#{@art_ids})").collect{|ob|
   				ident = ob.identifier
 				 if (!ob.value_datetime.blank? && @bart2_patients["#{ident}"]) 	
 					check  (@bart2_patients["#{ident}"].to_date - (ob.value_datetime.to_date + 7.days)).days				
@@ -435,11 +437,11 @@ class Reports
         #"At 28+ of Pregnancy", 
         #@startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id} rescue []
 
-		
+        @art_ids = "'" + @bart_patient_identifiers.join("','") + "'"  
 		remote =   Observation.find_by_sql("SELECT p.identifier, o.value_datetime, o.person_id FROM obs o 
 			JOIN patient_identifier p ON p.patient_id = o.person_id
 			WHERE o.concept_id = (SELECT concept_id FROM concept_name WHERE name = 'LAST MENSTRUAL PERIOD')
-			AND p.identifier IN (#{@bart_patient_identifiers})").collect{|ob| 
+			AND p.identifier IN (#{@art_ids})").collect{|ob|
 			ident = ob.identifier
 			 if (!ob.value_datetime.blank? && @bart2_patients["#{ident}"]) 					
 				return ob.person_id if (@bart2_patients["#{ident}"].to_date - (ob.value_datetime.to_date + 7.days)).days > (27*7).days 
@@ -449,19 +451,9 @@ class Reports
 		return remote
 	end
 
-	def on_cpt__1   
-	 hash = Hash.new
-     hash["num"] = (@on_cpt.to_i > 0)? @on_cpt : 0
-    #@enc = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"], 
-     # :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"], 
-     # :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (encounter_datetime >= ? " + 
-      #    "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
-      #  ConceptName.find_by_name("Is on CPT").concept_id, 
-       # ConceptName.find_by_name("Yes").concept_id, "Yes", 
-       # @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id} rescue []
-	
-     hash 
-	end
+	def on_cpt__1
+   @on_cpt
+  end
 
 
 	def on_cpt__2
