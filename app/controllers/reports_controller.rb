@@ -142,16 +142,16 @@ class ReportsController < ApplicationController
 			@end_date = params[:end_date]
 		end
 
-    @start_date = params[:start_date] if !params[:start_date].blank?
-    @end_date = params[:end_date] if !params[:end_date].blank?
+    	@start_date = params[:start_date] if !params[:start_date].blank?
+   	 	@end_date = params[:end_date] if !params[:end_date].blank?
 
 		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type)
 
-    @new_women_registered = report.new_women_registered
+    	@new_women_registered = report.new_women_registered
     
     # raise @new_women_registered.to_yaml
     
-    @observations_total = report.observations_total
+   		 @observations_total = report.observations_total
     
 		@observations_1 = report.observations_1
 
@@ -177,7 +177,7 @@ class ReportsController < ApplicationController
 
 		@ttv__total_previous_doses_2 = report.ttv__total_previous_doses_2
 
-    @fansida__sp___number_of_tablets_given_0 = report.fansida__sp___number_of_tablets_given_0
+    	@fansida__sp___number_of_tablets_given_0 = report.fansida__sp___number_of_tablets_given_0
     
 		@fansida__sp___number_of_tablets_given_1 = report.fansida__sp___number_of_tablets_given_1
 
@@ -207,7 +207,7 @@ class ReportsController < ApplicationController
 
 		@hiv_test_result_unk = report.hiv_test_result_unk
 
-    @total_hiv_positive = @hiv_test_result_prev_pos + @hiv_test_result_pos
+    	@total_hiv_positive = @hiv_test_result_prev_pos + @hiv_test_result_pos
     
 		@not_on_art = report.not_on_art
 
@@ -215,7 +215,7 @@ class ReportsController < ApplicationController
 
 		@on_art_zero_to_27 = report.on_art_zero_to_27
     
-    @on_art_28_plus = report.on_art_28_plus
+    	@on_art_28_plus = report.on_art_28_plus
 
 		@on_cpt__1 = report.on_cpt__1
 

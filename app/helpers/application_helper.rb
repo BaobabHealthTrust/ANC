@@ -237,7 +237,7 @@ module ApplicationHelper
 				month = (duration.to_i)/30
 				month > 1? "#{month} months" : "1 month"
 			else
-				year = (duration.to_i)/365
+				year = current_program_location(duration.to_i)/365
 				year > 1? "#{year} years" : "1 year"
 			end
 		end

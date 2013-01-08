@@ -8,6 +8,12 @@ class PatientsController < ApplicationController
 
     @encounters = @patient.encounters.find(:all) # , :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
     # @current_range[0]["START"], @current_range[0]["END"]]) rescue []
+
+    if((CoreService.get_global_property_value("create.from.dde.server") == true) && !@patient.nil?)
+      dde_patient = DDEService::Patient.new(@patient)
+      identifier = dde_patient.get_full_identifier("National id").identifier rescue nil
+      dde_patient.check_old_national_id(identifier)
+    end
     
     @all_encounters = @patient.encounters.find(:all) rescue []
     

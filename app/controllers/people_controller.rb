@@ -76,8 +76,7 @@ class PeopleController < GenericPeopleController
 
 	def search
 		found_person = nil
-		if params[:identifier]
-      
+		if params[:identifier]    
 			local_results = ANCService.search_by_identifier(params[:identifier])
 
 			if local_results.length > 1
@@ -96,7 +95,7 @@ class PeopleController < GenericPeopleController
 					found_person_data = ANCService.search_by_identifier(params[:identifier]).first rescue nil
 
 					found_person = ANCService.create_from_form(found_person_data['person']) unless found_person_data.nil?
-				end
+				end 
 			end
       
       if (found_person.gender rescue "") == "M"
@@ -104,7 +103,7 @@ class PeopleController < GenericPeopleController
       end
       
 			if found_person
-
+                
         if create_from_dde_server
           patient = DDEService::Patient.new(found_person.patient)
 

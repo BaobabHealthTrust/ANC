@@ -12,7 +12,7 @@ class User < ActiveRecord::Base
 	before_save :set_password, :before_create
 	
 	attr :plain_password
-	#cattr_accessor :current_user
+	cattr_accessor :current
 	attr_accessor :plain_password
 	attr_accessor :password_salt
 	attr_accessor :encrypted_password
@@ -159,12 +159,5 @@ class User < ActiveRecord::Base
 		prop.user_id = self.id
 		prop.save
 	end
-
-	def self.current
-		Thread.current[:user]
-	end
-
-	def self.current=(user)
-		Thread.current[:user] = user
-	end
+	
 end

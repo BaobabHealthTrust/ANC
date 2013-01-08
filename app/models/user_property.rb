@@ -4,3 +4,4 @@ class UserProperty < ActiveRecord::Base
   include Openmrs
   belongs_to :user, :foreign_key => :user_id, :conditions => {:voided => 0}
 end
+

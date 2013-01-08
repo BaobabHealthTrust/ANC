@@ -2,16 +2,20 @@ class EncountersController < ApplicationController
   before_filter :find_patient, :except => [:void]
 
   def create
-
+    @patient = Patient.find(params[:encounter][:patient_id])
     # raise params.to_yaml
+
+    if((CoreService.get_global_property_value("create.from.dde.server") == true) && !@patient.nil?)
+      dde_patient = DDEService::Patient.new(@patient)
+      identifier = dde_patient.get_full_identifier("National id").identifier rescue nil
+      dde_patient.check_old_national_id(identifier)
+    end
     
     if params[:void_encounter_id]
       @encounter = Encounter.find(params[:void_encounter_id])
       @encounter.void
     end
     
-    @patient = Patient.find(params[:encounter][:patient_id])
-
     # Go to the dashboard if this is a non-encounter
     redirect_to "/patients/show/#{@patient.id}" unless params[:encounter]
 

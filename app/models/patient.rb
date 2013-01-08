@@ -27,4 +27,14 @@ class Patient < ActiveRecord::Base
     self.encounters.each {|row| row.void(reason) }
   end
 
+ def get_full_identifier(identifier)
+  PatientIdentifier.find(:first,:conditions =>["voided = 0 AND identifier_type = ? AND patient_id = ?",
+      PatientIdentifierType.find_by_name(identifier).id, self.patient.id]) rescue nil
+ end
+
+ def set_identifier(identifier, value)
+  PatientIdentifier.create(:patient_id => self.patient.patient_id, :identifier => value,
+    :identifier_type => (PatientIdentifierType.find_by_name(identifier).id))
+ end
+
 end
