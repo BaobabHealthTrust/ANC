@@ -3,16 +3,7 @@ class EncountersController < ApplicationController
 
   def create
     @patient = Patient.find(params[:encounter][:patient_id])
-    # raise params.to_yaml
-
-    if((CoreService.get_global_property_value("create.from.dde.server") == true) && !@patient.nil?)
-      dde_patient = DDEService::Patient.new(@patient)
-      identifier = dde_patient.get_full_identifier("National id").identifier rescue nil
-      national_id_replaced = dde_patient.check_old_national_id(identifier)
-      if national_id_replaced
-          print_and_redirect("/patients/national_id_label?patient_id=#{dde_patient.id}", next_task(dde_patient.patient)) and return
-        end
-    end
+    # raise params.to_yaml    
     
     if params[:void_encounter_id]
       @encounter = Encounter.find(params[:void_encounter_id])
@@ -100,6 +91,15 @@ class EncountersController < ApplicationController
         @patient_identifier.update_attributes(identifier)      
       else
         @patient_identifier = @patient.patient_identifiers.create(identifier)
+      end
+    end
+    
+    if((CoreService.get_global_property_value("create.from.dde.server") == true) && !@patient.nil?)
+      dde_patient = DDEService::Patient.new(@patient)
+      identifier = dde_patient.get_full_identifier("National id").identifier rescue nil
+      national_id_replaced = dde_patient.check_old_national_id(identifier)
+      if national_id_replaced
+        print_and_redirect("/patients/national_id_label?patient_id=#{@patient.id}&old_patient=true", next_task(dde_patient.patient)) and return
       end
     end
 

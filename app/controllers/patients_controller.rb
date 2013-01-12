@@ -4,17 +4,18 @@ class PatientsController < ApplicationController
   def show
     # session = {}
     # raise session.to_yaml
-    @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
+    
+    @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) rescue nil
 
     @encounters = @patient.encounters.find(:all) # , :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
     # @current_range[0]["START"], @current_range[0]["END"]]) rescue []
-
+ 
     if((CoreService.get_global_property_value("create.from.dde.server") == true) && !@patient.nil?)
       dde_patient = DDEService::Patient.new(@patient)
       identifier = dde_patient.get_full_identifier("National id").identifier rescue nil
       national_id_replaced = dde_patient.check_old_national_id(identifier)
-      if national_id_replaced
-          print_and_redirect("/patients/national_id_label?patient_id=#{dde_patient.id}", next_task(dde_patient.patient)) and return
+      if national_id_replaced      
+        print_and_redirect("/patients/national_id_label?patient_id=#{@patient.id}&old_patient=true", "/patients/show?patient_id=#{@patient.id}") and return
       end
     end
     
@@ -340,7 +341,13 @@ class PatientsController < ApplicationController
   end
 
   def national_id_label
-    print_string = @anc_patient.national_id_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a national id label for that patient")
+    if params[:old_patient]      
+      old_patient = Patient.find(params[:patient_id])
+      anc_patient = ANCService::ANC.new(old_patient) rescue nil
+      print_string = anc_patient.national_id_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a national id label for that patient")
+    else
+      print_string = @anc_patient.national_id_label rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a national id label for that patient")
+    end
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
@@ -1234,7 +1241,7 @@ class PatientsController < ApplicationController
 
           @external_user_id = Bart2Connection::User.find_by_username(current_user.username).id rescue nil
         else
-           @external_id = @patient.id
+          @external_id = @patient.id
 
           @external_user_id = current_user.id
         end
