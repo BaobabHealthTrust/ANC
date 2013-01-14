@@ -750,7 +750,7 @@
                           </td>
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
                             <form id="on_art_28_plus" method="post" action="decompose">
-                              <input type="hidden" value="<%= @on_art_28_plus.join(",") %>" name="patients" />
+                              <input type="hidden" value="<%= @on_art_28_plus.join(",") rescue  @on_art_28_plus %>" name="patients" />
                             Tot. started ART at 28+ weeks of preg.
                             </form>
                           </td>

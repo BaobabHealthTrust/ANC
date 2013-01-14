@@ -417,8 +417,8 @@ class Reports
 			WHERE o.concept_id = (SELECT concept_id FROM concept_name WHERE name = 'LAST MENSTRUAL PERIOD')
 			AND p.identifier IN (#{@art_ids})").collect{|ob|
   				ident = ob.identifier
-				 if (!ob.value_datetime.blank? && @bart2_patients["#{ident}"]) 	
-					check  (@bart2_patients["#{ident}"].to_date - (ob.value_datetime.to_date + 7.days)).days				
+				 if (!ob.value_datetime.blank? && @bart_patients["#{ident}"]) 	
+					check = (@bart_patients["#{ident}"].to_date - (ob.value_datetime.to_date + 7.days)).days
 					return ob.person_id if (check <= (27*7).days && check >= 0.days)
 				end
 			} rescue []
@@ -443,12 +443,11 @@ class Reports
 			WHERE o.concept_id = (SELECT concept_id FROM concept_name WHERE name = 'LAST MENSTRUAL PERIOD')
 			AND p.identifier IN (#{@art_ids})").collect{|ob|
 			ident = ob.identifier
-			 if (!ob.value_datetime.blank? && @bart2_patients["#{ident}"]) 					
-				return ob.person_id if (@bart2_patients["#{ident}"].to_date - (ob.value_datetime.to_date + 7.days)).days > (27*7).days 
+			 if (!ob.value_datetime.blank? && @bart_patients["#{ident}"]) 					
+				return ob.person_id if (@bart_patients["#{ident}"].to_date - (ob.value_datetime.to_date + 7.days)).days > (27*7).days 
 			end
 		} rescue []
-
-		return remote
+  return remote
 	end
 
 	def on_cpt__1
