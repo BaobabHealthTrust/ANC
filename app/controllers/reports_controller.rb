@@ -83,7 +83,7 @@ class ReportsController < ApplicationController
 
 		@hiv_test_result_5 = report.hiv_test_result_5
 
-		@on_art__1 = report.on_art__1
+		@on_art__1 = report.on_art__1 
 
 		@on_art__2 = report.on_art__2
 
@@ -213,7 +213,7 @@ class ReportsController < ApplicationController
 
 		@on_art_before = report.on_art_before
 
-		@on_art_zero_to_27 = report.on_art_zero_to_27
+		@on_art_zero_to_27 = report.on_art_zero_to_27 
     
     	@on_art_28_plus = report.on_art_28_plus
 

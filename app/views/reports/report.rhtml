@@ -255,7 +255,7 @@
                             &nbsp;
                           </td>
                           <td style="font-style:italic;">
-                            Total women in cohort
+                            Total women in <%if params[:selType] == "monthly report"%>report <%else%>cohort<%end%>
                           </td>
                           <td style="border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
@@ -652,12 +652,13 @@
                           <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
                               border-left: 1px solid #999; width: 60%;">
                             <form id="on_cpt__1" method="post" action="decompose">
+                               <input type="hidden" value="<%= @on_cpt__1.join(",") %>" name="patients" />
                                Women on CPT
                             </form>
                           </td>
                           <td style="border: 1px solid #999;">
                             <a href="javascript:document.getElementById('on_cpt__1').submit()">
-                              <%= @on_cpt__1.to_s.to_i - 0 %>
+                              <%= @on_cpt__1.length rescue 0%>
                             </a>
                           </td>
                         </tr>
@@ -700,15 +701,15 @@
                           </td>
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
                             <form id="not_on_art" method="post" action="decompose">
-                              <input type="hidden" value="<%= @not_on_art %>" name="patients" />
+                              <input type="hidden" value="<%= @not_on_art.join(",") %>" name="patients" />
                             Tot. not on ART
                             </form>
                           </td>
                           <td style="border: 1px solid #999;">
                             <a href="javascript:document.getElementById('not_on_art').submit()">
-                            <%= @not_on_art.length - @on_art_before.length %>
+                            <%= @not_on_art.length%>
                             </a>
-                          </td>
+                          </td> 
                         </tr>
                         <tr>
                           <td>
