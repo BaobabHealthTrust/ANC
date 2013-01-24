@@ -51,7 +51,7 @@ class Reports
       :select => ["patient_id, MAX(value_numeric) form_id"], 
       :conditions => ["concept_id = ? AND patient_id IN (?) AND encounter_datetime <= ? AND encounter_datetime >= ?",
         ConceptName.find_by_name("Reason for visit").concept_id, 
-        @cohortpatients, @enddate, @startdate]).collect{|e| [e.patient_id, e.form_id]}.uniq
+        @cohortpatients, @enddate, @startdate]).collect{|e| e.patient_id}.uniq
     
   end
   
