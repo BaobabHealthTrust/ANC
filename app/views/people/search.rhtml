@@ -241,7 +241,8 @@ end -%>
       li.setAttribute("tstvalue", <%=data.person_id%>);
       li.setAttribute("pos", i);
       li.innerHTML = people[pos]["Name"] + " (" + people[pos]["Gender"] + ") " + 
-        people[pos]["Birthdate"] + ", " + people[pos]["Home District"];
+        people[pos]["Birthdate"] + "," + people[pos]["Home District"];
+      li.innerHTML = li.innerHTML.trim();
       li.setAttribute("tag", ((i + 1)/2 > 0 ? "odd" : "even"));
       li.onmousedown = function(){
         changeNextButtonText('Select Patient', this.getAttribute("pos"), <%=data.person_id%>); 
