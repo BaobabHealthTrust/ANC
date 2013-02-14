@@ -15,7 +15,39 @@ class PeopleController < GenericPeopleController
     if current_program_location == "HIV program"
       hiv_session = true
     end
-    
+  
+	if !params[:identifier].empty?
+		if params[:identifier].length == 6 
+			person = PatientService.create_from_form(params[:person])
+			if !person.nil?	
+				patient_identifier = PatientIdentifier.new
+				patient_identifier.type = PatientIdentifierType.find_by_name("National id")
+				patient_identifier.identifier = params[:identifier]
+				patient_identifier.patient = person.patient
+				patient_identifier.save!
+			end
+		elsif params[:identifier].length == 13 && create_from_dde_server
+			person = ANCService.create_patient_from_dde(params) rescue nil
+			if !person.nil?
+				old_identifier = PatientIdentifier.new
+				old_identifier.type = PatientIdentifierType.find_by_name("Old Identification Number")
+				old_identifier.identifier = params[:identifier]
+				old_identifier.patient = person.patient
+				old_identifier.save!
+			end
+		else
+		 	redirect_to "/clinic" and return
+		end
+		if params[:encounter]
+			encounter = Encounter.new(params[:encounter])
+	   		encounter.patient_id = person.id
+			encounter.encounter_datetime = session[:datetime] unless session[:datetime].blank?
+			encounter.save
+		end
+		print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
+		redirect_to "/patients/show?patient_id=#{person.id}" and return if !person.nil? 
+	end
+
     person = PatientService.create_patient_from_dde(params) if create_from_dde_server
 
     unless person.blank?
@@ -80,13 +112,30 @@ class PeopleController < GenericPeopleController
 			local_results = ANCService.search_by_identifier(params[:identifier])
 
 			if local_results.length > 1
-				@people = PatientService.person_search(params)
+				redirect_to :action => 'duplicates' ,:search_params => params
+        		return	
+				#@people = PatientService.person_search(params)
 			elsif local_results.length == 1
+
+				if create_from_dde_server
+					   dde_server = CoreService.get_global_property_value("dde_server_ip") rescue ""
+					   dde_server_username = CoreService.get_global_property_value("dde_server_username") rescue ""
+					   dde_server_password = CoreService.get_global_property_value("dde_server_password") rescue ""
+					   uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+					   uri += "?value=#{params[:identifier]}"                                         
+					   output = RestClient.get(uri)                                          
+					   p = JSON.parse(output)                                                
+					   if p.count > 1 
+						redirect_to :action => 'duplicates' ,:search_params => params
+						return
+					  end
+				end
+
 				found_person = local_results.first
         
-        if (found_person.gender rescue "") == "M"
-          redirect_to "/clinic/no_males" and return
-        end
+        		if (found_person.gender rescue "") == "M"
+          			redirect_to "/clinic/no_males" and return
+        		end
       
 			else
 				# TODO - figure out how to write a test for this
@@ -174,6 +223,56 @@ class PeopleController < GenericPeopleController
       @patients << data
     end
 	end
+def duplicates
+    @duplicates = []
+    PatientService.search_by_identifier(params[:search_params][:identifier]).each do |person|
+      @duplicates << PatientService.get_patient(person)
+    end
+    @selected_identifier = params[:search_params][:identifier]
+    render :layout => 'menu'
+  end
+ 
+  def reassign_dde_national_id
+    person = DDEService.reassign_dde_identication(params[:dde_person_id],params[:local_person_id])
+    print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+  end
+
+  def remote_duplicates
+    @primary_patient = PatientService.get_patient(Person.find(params[:patient_id]))
+    @dde_duplicates = []
+    if create_from_dde_server
+      PatientService.search_from_dde_by_identifier(params[:identifier]).each do |person|
+        @dde_duplicates << PatientService.get_dde_person(person)
+      end
+    end
+    render :layout => 'menu'
+  end
+
+  def reassign_national_identifier
+    patient = Patient.find(params[:person_id])
+    if create_from_dde_server
+      passed_params = PatientService.demographics(patient.person)
+      new_npid = PatientService.create_from_dde_server_only(passed_params)
+      npid = PatientIdentifier.new()
+      npid.patient_id = patient.id
+      npid.identifier_type = PatientIdentifierType.find_by_name('National ID')
+      npid.identifier = new_npid
+      npid.save
+    else
+      PatientIdentifierType.find_by_name('National ID').next_identifier({:patient => patient})
+    end
+    npid = PatientIdentifier.find(:first,
+           :conditions => ["patient_id = ? AND identifier = ? 
+           AND voided = 0", patient.id,params[:identifier]])
+    npid.voided = 1
+    npid.void_reason = "Given another national ID"
+    npid.date_voided = Time.now()
+    npid.voided_by = current_user.id
+    npid.save
+    
+    print_and_redirect("/patients/national_id_label?patient_id=#{patient.id}", next_task(patient))
+  end
+
 
   protected
 	def cul_age(birthdate , birthdate_estimated , date_created = Date.today, today = Date.today)                                      
