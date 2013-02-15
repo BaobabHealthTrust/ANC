@@ -16,7 +16,7 @@ class PeopleController < GenericPeopleController
       hiv_session = true
     end
   
-	if !params[:identifier].empty?
+	if params[:identifier] && !params[:identifier].empty?
 		if params[:identifier].length == 6 
 			person = PatientService.create_from_form(params[:person])
 			if !person.nil?	
