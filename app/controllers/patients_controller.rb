@@ -10,17 +10,6 @@ class PatientsController < ApplicationController
     @encounters = @patient.encounters.find(:all) # , :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
     # @current_range[0]["START"], @current_range[0]["END"]]) rescue []
 
-    identifier = PatientIdentifier.find(:last, :conditions => ["patient_id = ? AND identifier_type = ? AND voided = 0", @patient.id, PatientIdentifierType.find_by_name("National id").id]).identifier rescue ""
-
-    if((CoreService.get_global_property_value("create.from.dde.server") == true) && !@patient.nil? && identifier.strip.length != 6)
-      dde_patient = DDEService::Patient.new(@patient)
-      identifier = dde_patient.get_full_identifier("National id").identifier rescue nil
-      national_id_replaced = dde_patient.check_old_national_id(identifier)
-      if national_id_replaced      
-        print_and_redirect("/patients/national_id_label?patient_id=#{@patient.id}&old_patient=true", "/patients/show?patient_id=#{@patient.id}") and return
-      end
-    end
-    
     @all_encounters = @patient.encounters.find(:all) rescue []
     
     @encounter_names = @patient.encounters.find(:all)   #, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 

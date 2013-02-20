@@ -169,7 +169,7 @@ module DDEService
         if (identifier.to_s.strip.length != 6 and identifier == self.national_id)
            replaced_national_id = replace_old_national_id(identifier)
            return replaced_national_id
-        elsif (identifier.to_s.strip.length >= 6 and identifier != self.national_id)
+        elsif (identifier.to_s.strip.length >= 6 and identifier != self.national_id and self.national_id.length != 6)
            replaced_national_id = replace_old_national_id(self.national_id)
            return replaced_national_id
         else
@@ -580,7 +580,7 @@ module DDEService
           },
           "patient"=>
             {"identifiers"=>
-              {"diabetes_number"=>""}},
+              {"old_identification_number" => params["person"]["patient"]["identifiers"]["old_identification_number"]}},
           "gender"=> person_params["gender"],
           "birthdate"=> birthdate,
           "birthdate_estimated"=> birthdate_estimated ,
@@ -600,9 +600,9 @@ module DDEService
       @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
 
       uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"
-      recieved_params = RestClient.post(uri,passed_params)
-
-      national_id = JSON.parse(recieved_params)["npid"]["value"]
+      received_params = RestClient.post(uri,passed_params)
+	
+      national_id = JSON.parse(received_params)["npid"]["value"]
 
     else
       national_id = params["person"]["patient"]["identifiers"]["National_id"]
@@ -648,4 +648,46 @@ module DDEService
     current_national_id.save!
     return current_national_id.patient.person
   end
+
+   def self.get_remote_person(dde_person_id)
+    dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/post_back_person.json"
+    uri += "?person_id=#{dde_person_id}"
+    p = JSON.parse(RestClient.get(uri)) rescue nil
+    return [] if p.blank?
+    birthdate_year = p["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
+    birthdate_month = p["person"]["data"]["birthdate"].to_date.month rescue nil
+    birthdate_day = p["person"]["data"]["birthdate"].to_date.day rescue nil
+    birthdate_estimated = p["person"]["data"]["birthdate_estimated"]
+    gender = p["person"]["data"]["gender"] == "F" ? "Female" : "Male"
+
+    passed = {
+     "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
+     "age_estimate"=> birthdate_estimated,
+     "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
+     "birth_month"=> birthdate_month ,
+     "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
+     "address2"=>p["person"]["data"]["addresses"]["address2"],
+     "city_village"=>p["person"]["data"]["addresses"]["city_village"],
+     "county_district"=>""},
+     "gender"=> gender ,
+     "patient"=>{"identifiers"=>{"National id" => p["npid"]["value"]}},
+     "birth_day"=>birthdate_day,
+     "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
+     "names"=>{"family_name"=>p["person"]["data"]["names"]["family_name"],
+     "given_name"=>p["person"]["data"]["names"]["given_name"],
+     "middle_name"=>""},
+     "birth_year"=>birthdate_year},
+     "filter_district"=>"",
+     "filter"=>{"region"=>"",
+     "t_a"=>""},
+     "relation"=>""
+    }
+
+    passed["person"].merge!("identifiers" => {"National id" => p["npid"]["value"]})    
+    return PatientService.create_from_form(passed["person"])
+  end
+
 end

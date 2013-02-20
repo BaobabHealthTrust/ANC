@@ -89,6 +89,7 @@ end -%>
     __$('nextButton').innerHTML = "<span>" + text + "</span>";
    
     if(pos ==0 ){
+
       document.forms[0].action = "create";
       __$('nextButton').onmousedown = function(){
         document.forms[0].submit();
@@ -135,7 +136,9 @@ end -%>
       <%end%>
     } else {
       document.forms[0].action = "select";
+
       __$('nextButton').onmousedown = function(){
+
         gotoNextPage();
       }
       
@@ -214,7 +217,7 @@ end -%>
     }
     
     var pos = 1
-    i = -1;
+    i = 0;
     <%(@patients).each do |data| %>
       i++
       people.push({});
@@ -239,16 +242,21 @@ end -%>
       li.id = i + 1;
       li.className = ((i + 1)/2 > 0 ? "odd" : "even");
       li.setAttribute("tstvalue", <%=data.person_id%>);
+	  npid = "<%=data.national_id%>"
+	  li.setAttribute("national_id", npid);
       li.setAttribute("pos", i);
       li.innerHTML = people[pos]["Name"] + " (" + people[pos]["Gender"] + ") " + 
         people[pos]["Birthdate"] + "," + people[pos]["Home District"];
       li.innerHTML = li.innerHTML.trim();
       li.setAttribute("tag", ((i + 1)/2 > 0 ? "odd" : "even"));
+	  npid = ""
       li.onmousedown = function(){
+
         changeNextButtonText('Select Patient', this.getAttribute("pos"), <%=data.person_id%>); 
         updateTouchscreenInputForSelect(this); 
         changeSummary(this.id);
-      }
+		$('identifier').value = li.getAttribute("national_id");
+	 }
       li.onclick = function(){
         changeNextButtonText('Select Patient', this.getAttribute("pos"), <%=data.person_id%>); 
         updateTouchscreenInputForSelect(this); 
@@ -279,6 +287,7 @@ end -%>
       Gender: <%= select_tag :gender, options_for_select({"" => "", "Male" => "M", "Female" => "F"}), {:helpText => "Gender"} %>
       <%= hidden_field_tag :create_patient, params[:create_patient] %>
       <%= hidden_field_tag :relation, params[:relation] %>
+
       <%= submit_tag "Find person" %>
     <% end -%>
   <% end -%>
@@ -302,31 +311,33 @@ end -%>
 
 			<% if @relation.blank? %>
 					<% if params[:identifier] %>
-						<option value="0" onmousedown="changeNextButtonText('New Patient')">Create a new person with the identifier <%=h params[:identifier] -%></option>
+						<option value="0" onmousedown="changeNextButtonText('New Patient'); $('identifier').value = ''">Create a new person with the identifier <%=h params[:identifier] -%></option>
 					<% else %>
-						<option value="0" onmousedown="changeNextButtonText('New Patient')">Create a new person with the name <%=h params[:given_name] -%> <%=h params[:family_name] -%></option>
+						<option value="0" onmousedown="changeNextButtonText('New Patient'); $('identifier').value = ''">Create a new person with the name <%=h params[:given_name] -%> <%=h params[:family_name] -%></option>
 					<% end %>
 			 <% else %>
 					<% if params[:identifier] %>
-						<option value="0" onmousedown="changeNextButtonText('New Guardian')">Create a new person with the identifier <%=h params[:identifier] -%></option>
+						<option value="0" onmousedown="changeNextButtonText('New Guardian'); $('identifier').value = ''">Create a new person with the identifier <%=h params[:identifier] -%></option>
 					<% else %>
-						<option value="0" onmousedown="changeNextButtonText('New Guardian')">Create a new person with the name <%=h params[:given_name] -%> <%=h params[:family_name] -%></option>
+						<option value="0" onmousedown="changeNextButtonText('New Guardian'); $('identifier').value = ''">Create a new person with the name <%=h params[:given_name] -%> <%=h params[:family_name] -%></option>
 					<% end %>
 			 <% end %>
-        <%posit = -1%>
+        <%pos = 0%>
         <% @patients.each do | patient |
           pos += 1
           next if patient.blank? 
           -%>
 				<% if @relation.blank? %>
-					<option value="<%= patient.person_id %>" onmousedown="changeNextButtonText('Select Patient', pos)">
+
+					<option value="<%= patient.person_id %>" onmousedown="changeNextButtonText('Select Patient', '<%= pos%>'); $('identifier').value = '<%= patient.national_id %>'">
 				<% else %>
-					<option value="<%= patient.person_id %>" onmousedown="changeNextButtonText('Select Guardian', pos)">
+					<option value="<%= patient.person_id %>" onmousedown="changeNextButtonText('Select Guardian', '<%= pos%>'); $('identifier').value = '<%= patient.national_id %>'">
 				<% end %>
             <%=h patient.name -%> (<%= patient.sex %>)
             <% unless patient.birth_date.blank? %> <%=h patient.birth_date -%><% end %>,
             <% unless patient.current_residence.blank? %> <%=h patient.current_residence -%> <% end %>,
             <% unless patient.guardian.blank? %> Guardian: <%=h patient.guardian -%> <% end %>
+
           </option>
         <% end -%> 
       </select>
