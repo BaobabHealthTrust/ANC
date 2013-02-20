@@ -199,6 +199,7 @@ class GenericPeopleController < ApplicationController
 	end
 
 	# This method is just to allow the select box to submit, we could probably do this better
+
 	def select
 
         if params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
@@ -221,6 +222,7 @@ class GenericPeopleController < ApplicationController
       			end
    			end
 			end
+
 			redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
 
 			redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
