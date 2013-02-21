@@ -50,7 +50,7 @@ class PeopleController < GenericPeopleController
 	end
 
     person = PatientService.create_patient_from_dde(params) if create_from_dde_server
-
+#raise person.patient.national_id.to_yaml
     unless person.blank?
       if use_filing_number and hiv_session and false
         PatientService.set_patient_filing_number(person.patient) 
@@ -93,7 +93,6 @@ class PeopleController < GenericPeopleController
     encounter.save   
     
     if params[:person][:patient] && success
-      PatientService.patient_national_id_label(person.patient)
       unless (params[:relation].blank?)
         redirect_to search_complete_url(person.id, params[:relation]) and return
       else
@@ -161,11 +160,10 @@ class PeopleController < GenericPeopleController
           patient = DDEService::Patient.new(found_person.patient)
 
           national_id_replaced = patient.check_old_national_id(params[:identifier])
-
-          if national_id_replaced
-            print_and_redirect("/patients/national_id_label?patient_id=#{found_person.id}", next_task(found_person.patient)) and return
+	      if national_id_replaced.to_s == "true" || params[:identifier] != found_person.patient.national_id
+             print_and_redirect("/patients/national_id_label?patient_id=#{found_person.id}", next_task(found_person.patient)) and return
+           end
           end
-        end
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
 				else
@@ -179,6 +177,7 @@ class PeopleController < GenericPeopleController
 		@people = PatientService.person_search(params)
     @search_results = {}
     @patients = []
+
 	  (PatientService.search_from_remote(params) || []).each do |data|
       national_id = data["npid"]["value"] rescue nil
       national_id = data["legacy_ids"] if national_id.blank?

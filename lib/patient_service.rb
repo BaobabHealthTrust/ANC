@@ -199,6 +199,7 @@ module PatientService
   #............................................................. new code
   
  def self.create_patient_from_dde(params)
+
     old_identifier = params["identifier"] rescue nil
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
