@@ -199,7 +199,6 @@ module PatientService
   #............................................................. new code
   
  def self.create_patient_from_dde(params)
-
     old_identifier = params["identifier"] rescue nil
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
@@ -1250,7 +1249,8 @@ EOF
     people = []
     people = search_by_identifier(params[:identifier]) if params[:identifier]
 
-    return people.first.id unless people.blank? || people.size > 1
+    #return people.first.id unless people.blank? || people.size > 1
+    return people unless people.blank? || people.size > 1
 
     gender = params[:gender]
     given_name = params[:given_name].squish unless params[:given_name].blank?
