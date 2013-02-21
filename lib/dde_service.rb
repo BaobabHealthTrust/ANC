@@ -595,7 +595,7 @@ end
       national_id = JSON.parse(received_params)["npid"]["value"]
 
     else
-      national_id = params["person"]["patient"]["identifiers"]["National_id"]
+      national_id = params["person"]["patient"]["identifiers"]["National id"]
     end
 
     if (dont_recreate_local == false)
