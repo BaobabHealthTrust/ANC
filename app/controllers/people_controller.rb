@@ -8,109 +8,85 @@ class PeopleController < GenericPeopleController
       redirect_to "/clinic" and return
     end
   end
-  
+
   def create
-   
-    hiv_session = false
-    if current_program_location == "HIV program"
-      hiv_session = true
-    end
-  
-	if params[:identifier] && !params[:identifier].empty?
-
-		if params[:identifier].length == 6 
-			person = PatientService.create_from_form(params[:person])
-			if !person.nil?	
-				patient_identifier = PatientIdentifier.new
-				patient_identifier.type = PatientIdentifierType.find_by_name("National id").id
-				patient_identifier.identifier = params[:identifier]
-				patient_identifier.patient = person.patient
-				patient_identifier.save!
-			end
-		elsif params[:identifier].length == 13 && create_from_dde_server
-			person = ANCService.create_patient_from_dde(params) rescue nil
-			if !person.nil?
-				old_identifier = PatientIdentifier.new
-				old_identifier.type = PatientIdentifierType.find_by_name("Old Identification Number").id
-				old_identifier.identifier = params[:identifier]
-				old_identifier.patient = person.patient
-				old_identifier.save!
-			end
-		else
-		 	redirect_to "/clinic" and return
-		end
-		if params[:encounter]
-			encounter = Encounter.new(params[:encounter])
-	   		encounter.patient_id = person.id
-			encounter.encounter_datetime = session[:datetime] unless session[:datetime].blank?
-			encounter.save
-		end
-		print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
-		redirect_to "/patients/show?patient_id=#{person.id}" and return if !person.nil? 
-	end
-
-    person = PatientService.create_patient_from_dde(params) if create_from_dde_server
-#raise person.patient.national_id.to_yaml
-    unless person.blank?
-      if use_filing_number and hiv_session and false
-        PatientService.set_patient_filing_number(person.patient) 
-        archived_patient = PatientService.patient_to_be_archived(person.patient)
-        message = PatientService.patient_printing_message(person.patient,archived_patient,creating_new_patient = true)
-        unless message.blank?
-          print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}" , next_task(person.patient),message,true,person.id)
-        else
-          print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}", next_task(person.patient)) 
-        end
-      else
-        print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
-      end
-      return
-    end
-
     success = false
     Person.session_datetime = session[:datetime].to_date rescue Date.today
+    identifier = params[:identifier] rescue nil
+    if identifier.blank?
+      identifier = params[:person][:patient][:identifiers]['National id']
+    end rescue nil
+
+    if create_from_dde_server
+      unless identifier.blank?
+        params[:person].merge!({"identifiers" => {"National id" => identifier}})
+        success = true
+        person = PatientService.create_from_form(params[:person])
+        if identifier.length != 6
+           patient = DDEService::Patient.new(person.patient)
+           national_id_replaced = patient.check_old_national_id(identifier)
+        end
+      else
+        person = PatientService.create_patient_from_dde(params)
+        success = true
+      end
 
     #for now BART2 will use BART1 for patient/person creation until we upgrade BART1 to 2
     #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
     #then we create person from remote machine
-    if create_from_remote
-      person_from_remote = ANCService.create_remote(params)
-      
-      person = ANCService.create_from_form(person_from_remote["person"]) unless person_from_remote.blank?
+    elsif create_from_remote
+      person_from_remote = PatientService.create_remote_person(params)
+      person = PatientService.create_from_form(person_from_remote["person"]) unless person_from_remote.blank?
 
       if !person.blank?
         success = true
-        # person.patient.remote_national_id
+        #person.patient.remote_national_id
+        PatientService.get_remote_national_id(person.patient)
       end
     else
       success = true
-      person = ANCService.create_from_form(params[:person])
+      params[:person].merge!({"identifiers" => {"National id" => identifier}}) unless identifier.blank?
+      person = PatientService.create_from_form(params[:person])
     end
 
-    encounter = Encounter.new(params[:encounter])
-    encounter.patient_id = person.id
-    encounter.encounter_datetime = session[:datetime] unless session[:datetime].blank?
-    encounter.save   
-    
     if params[:person][:patient] && success
+      PatientService.patient_national_id_label(person.patient)
       unless (params[:relation].blank?)
         redirect_to search_complete_url(person.id, params[:relation]) and return
       else
 
-        print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
-        
+       tb_session = false
+       if current_user.activities.include?('Manage Lab Orders') or current_user.activities.include?('Manage Lab Results') or
+        current_user.activities.include?('Manage Sputum Submissions') or current_user.activities.include?('Manage TB Clinic Visits') or
+         current_user.activities.include?('Manage TB Reception Visits') or current_user.activities.include?('Manage TB Registration Visits') or
+          current_user.activities.include?('Manage HIV Status Visits')
+         tb_session = true
+       end
+
+        #raise use_filing_number.to_yaml
+        if use_filing_number and not tb_session
+          PatientService.set_patient_filing_number(person.patient)
+          archived_patient = PatientService.patient_to_be_archived(person.patient)
+          message = PatientService.patient_printing_message(person.patient,archived_patient,creating_new_patient = true)
+          unless message.blank?
+            print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}" , next_task(person.patient),message,true,person.id)
+          else
+            print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}", next_task(person.patient))
+          end
+        else
+          print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+        end
       end
     else
       # Does this ever get hit?
       redirect_to :action => "index"
     end
   end
-
+  
 	def search
 		found_person = nil
 		if params[:identifier]    
 			local_results = PatientService.search_by_identifier(params[:identifier])
-		
 			if local_results.length > 1
 				redirect_to :action => 'duplicates' ,:search_params => params
         		return	
@@ -126,7 +102,6 @@ class PeopleController < GenericPeopleController
 					   uri += "?value=#{params[:identifier]}"                                         
 					   output = RestClient.get(uri)                                          
 					   p = JSON.parse(output) 
-                        
 					   if p.count > 1 
 						redirect_to :action => 'duplicates' ,:search_params => params
 						return
@@ -173,14 +148,17 @@ class PeopleController < GenericPeopleController
 				end
 			end
 		end
+    
 		@relation = params[:relation]
 		@people = PatientService.person_search(params)
     @search_results = {}
     @patients = []
 
 	  (PatientService.search_from_remote(params) || []).each do |data|
-      national_id = data["npid"]["value"] rescue nil
-      national_id = data["legacy_ids"] if national_id.blank?
+      national_id = data["person"]["data"]["patient"]["identifiers"]["National id"] rescue nil
+      national_id = data["person"]["value"] if national_id.blank? rescue nil
+      national_id = data["person"]["data"]["patient"]["identifiers"]["old_identification_number"] if national_id.blank? rescue nil
+      
       next if national_id.blank?
       results = PersonSearch.new(national_id)
       results.national_id = national_id

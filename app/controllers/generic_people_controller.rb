@@ -199,35 +199,25 @@ class GenericPeopleController < ApplicationController
 	end
 
 	# This method is just to allow the select box to submit, we could probably do this better
-
 	def select
+    if !params[:identifier].blank? && !params[:given_name].blank? && !params[:family_name].blank?
+      redirect_to :action => :search, :identifier => params[:identifier]
+    elsif params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
+      redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
+    else
+      if params[:person][:id] != '0'
+        person = Person.find(params[:person][:id])
+        patient = DDEService::Patient.new(person.patient)
+        patient_id = PatientService.get_patient_identifier(person.patient, "National id")
+        if patient_id.length != 6
+          patient.check_old_national_id(patient_id)
+          print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
+        end
+      end
+      redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
 
-        if params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
-      
-			redirect_to :controller => :patients, :action => :show, :id => params[:person] and return
-		else
-			#when this is a patient searched from dde proxy, how do we go about it
-			if params[:identifier] && !params[:identifier].blank? && params[:person][:id] == '0'
-				dde_patient = PatientService.search_by_identifier(params[:identifier]).first.patient rescue nil
-				redirect_to :controller => :patients, :action => :show, :id => dde_patient.patient_id
-			elsif params[:person][:id] != '0'
-				@patient = Person.find(params[:person][:id]).patient 
- 				identifier = PatientIdentifier.find(:last, :conditions => ["patient_id = ? AND identifier_type = ? AND voided = 0", @patient.id, 						PatientIdentifierType.find_by_name("National id").id]).identifier rescue ""
-			
-   		 	if((CoreService.get_global_property_value("create.from.dde.server") == true) && !@patient.nil? && identifier.strip.length != 6)
-      			dde_patient = DDEService::Patient.new(@patient)      			
-      			national_id_replaced = dde_patient.check_old_national_id(identifier)
-  				if national_id_replaced.to_s == "true"     
-       			   print_and_redirect("/patients/national_id_label?patient_id=#{@patient.id}&old_patient=true", "/patients/show?patient_id=#{@patient.id}") and return
-      			end
-   			end
-			end
-#raise params.to_yaml
-			redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless (params[:person][:id].blank? || params[:person][:id] == '0') && params[:relation]
-
-			redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
-
-		end
+      redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
+    end
 	end
  
   def create
