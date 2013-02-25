@@ -191,8 +191,9 @@ def replace_old_national_id(identifier)
   passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
   passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
   
-  if passed_national_id.blank?
-    return [DDEService.get_remote_person(p["person"]["id"])]
+  if passed_national_id.blank? and not p.blank?
+      DDEService.reassign_identication(p["person"]["id"], self.patient.patient_id)
+      return true
   end
 
   person = {"person" => {
@@ -621,9 +622,11 @@ end
     uri += "?person_id=#{dde_person_id}"
     new_npid = RestClient.get(uri)
 
+    identifier_type = PatientIdentifierType.find_by_name("National id")
+
     current_national_id = PatientIdentifier.find(:first,
                         :conditions => ["patient_id = ? AND voided = 0 AND
-                        identifier_type = ?",local_person_id , 3])
+                        identifier_type = ?",local_person_id , identifier_type.id])
 
     patient_identifier = PatientIdentifier.new
     patient_identifier.type = PatientIdentifierType.find_by_name("National id")
