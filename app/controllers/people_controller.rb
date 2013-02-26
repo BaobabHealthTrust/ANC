@@ -9,7 +9,8 @@ class PeopleController < GenericPeopleController
     end
   end
 
-  def create
+ def create
+
     success = false
     Person.session_datetime = session[:datetime].to_date rescue Date.today
     identifier = params[:identifier] rescue nil
@@ -225,7 +226,7 @@ class PeopleController < GenericPeopleController
   end
  
   def reassign_dde_national_id
-    person = DDEService.reassign_dde_identication(params[:dde_person_id],params[:local_person_id])
+    person = DDEService.reassign_dde_identification(params[:dde_person_id],params[:local_person_id])
     print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
   end
 

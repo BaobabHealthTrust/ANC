@@ -200,6 +200,7 @@ class GenericPeopleController < ApplicationController
 
 	# This method is just to allow the select box to submit, we could probably do this better
 	def select
+
     if !params[:person][:patient][:identifiers]['National id'].blank? &&
         !params[:person][:names][:given_name].blank? &&
           !params[:person][:names][:family_name].blank?

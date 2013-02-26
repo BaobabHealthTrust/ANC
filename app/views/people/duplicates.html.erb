@@ -97,6 +97,16 @@ div { -moz-user-select: none; }
   </tr>
  <%end%>
   <%
+		 
+    ( @duplicates || {} ).each do | patient |
+				@remote_duplicates.delete_if do |x|
+					x.national_id == patient.national_id and
+					x.name.soundex == patient.name.soundex and
+					x.sex == patient.sex and
+					x.age == patient.age
+				end	 rescue nil
+		end
+    
     row_number = 0
     ( @remote_duplicates || {} ).each do | patient |
       if color == 'white'
