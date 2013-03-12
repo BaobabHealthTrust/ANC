@@ -531,10 +531,9 @@ class Reports
   def bed_net
     
     Encounter.find(:all, :joins => [:observations], 
-      :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (encounter_datetime >= ? " + 
+      :conditions => ["concept_id = ? AND (value_text = ?) AND (encounter_datetime >= ? " + 
           "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", 
-        ConceptName.find_by_name("Mosquito Net").concept_id, 
-        ConceptName.find_by_name("Yes").concept_id, "Yes", 
+        ConceptName.find_by_name("Bed Net").concept_id, "Given Today",
         @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id}
     
   end
