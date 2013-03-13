@@ -957,7 +957,7 @@ class PatientsController < ApplicationController
   end
 
   def edit_demographics
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    @person = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     @field = params[:field]
     render :partial => "edit_demographics", :field =>@field, :layout => true and return
   end

@@ -1251,7 +1251,60 @@ module ANCService
 
     def address
       "#{self.person.addresses.first.city_village}" rescue nil
-    end 
+    end
+    def first_name
+      "#{self.person.names.first.given_name}".titleize rescue nil
+    end
+
+    def last_name
+      "#{self.person.names.first.family_name}".titleize rescue nil
+    end
+
+    def middle_name
+      "#{self.person.names.first.middle_name}".titleize rescue nil
+    end
+
+    def maiden_name
+      "#{self.person.names.first.family_name2}".titleize rescue nil
+    end
+
+    def current_address2
+      "#{self.person.addresses.last.city_village}" rescue nil
+    end
+
+    def current_address1
+      "#{self.person.addresses.last.address1}" rescue nil
+    end
+
+    def current_district
+      "#{self.person.addresses.last.state_province}" rescue nil
+    end
+
+    def current_address
+      "#{self.current_address1}, #{self.current_address2}, #{self.current_district}" rescue nil
+    end
+
+    def home_district
+      "#{self.person.addresses.last.address2}" rescue nil
+    end
+
+    def home_ta
+      "#{self.person.addresses.last.county_district}" rescue nil
+    end
+
+    def home_village
+      "#{self.person.addresses.last.neighborhood_cell}" rescue nil
+    end
+
+    def nationality
+      nationality = get_attribute("Citizenship")
+
+      if !nationality.nil? and nationality.downcase == "other"
+        nationality = get_attribute("Race")
+      end
+
+      nationality
+    end
 
     def age(today = Date.today)
       return nil if self.person.birthdate.nil?
@@ -1750,7 +1803,7 @@ module ANCService
     params_to_process = params.reject{|key,value| key.match(/addresses|patient|names|attributes/) }
     birthday_params = params_to_process.reject{|key,value| key.match(/gender/) }
 
-    person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate/) }
+    person_params = params_to_process.reject{|key,value| key.match(/birth_|race|action|controller|cat|age_estimate/) }
 
     if !birthday_params.empty?
 
@@ -1762,8 +1815,8 @@ module ANCService
 
       person.birthdate_estimated = 1 if params["birthdate_estimated"] == 'true'
       person.save
-    end
-
+    end rescue nil
+    
     person.update_attributes(person_params) if !person_params.empty?
     person.names.first.update_attributes(names_params) if names_params
     person.addresses.first.update_attributes(address_params) if address_params

@@ -166,7 +166,7 @@ class PeopleController < GenericPeopleController
       results.national_id = national_id
       results.current_residence =data["person"]["data"]["addresses"]["city_village"]
       results.person_id = 0
-      results.home_district = data["person"]["data"]["addresses"]["state_province"]
+      results.home_district = data["person"]["data"]["addresses"]["address2"]
       results.traditional_authority =  data["person"]["data"]["addresses"]["county_district"]
       results.name = data["person"]["data"]["names"]["given_name"] + " " + data["person"]["data"]["names"]["family_name"]
       gender = data["person"]["data"]["gender"]
@@ -189,6 +189,7 @@ class PeopleController < GenericPeopleController
       results.guardian = patient.guardian
       results.person_id = patient.person_id
       results.home_district = patient.home_district
+      results.current_district = patient.current_district
       results.traditional_authority = patient.traditional_authority
       results.mothers_surname = patient.mothers_surname
       results.dead = patient.dead
