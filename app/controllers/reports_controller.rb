@@ -147,11 +147,9 @@ class ReportsController < ApplicationController
 
 		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type)
 
-    	@new_women_registered = report.new_women_registered
-    
-    # raise @new_women_registered.to_yaml
-    
-   		 @observations_total = report.observations_total
+    @new_women_registered = report.new_women_registered
+       
+   	@observations_total = report.observations_total
     
 		@observations_1 = report.observations_1
 
@@ -177,7 +175,7 @@ class ReportsController < ApplicationController
 
 		@ttv__total_previous_doses_2 = report.ttv__total_previous_doses_2
 
-    	@fansida__sp___number_of_tablets_given_0 = report.fansida__sp___number_of_tablets_given_0
+    @fansida__sp___number_of_tablets_given_0 = report.fansida__sp___number_of_tablets_given_0
     
 		@fansida__sp___number_of_tablets_given_1 = report.fansida__sp___number_of_tablets_given_1
 
@@ -207,15 +205,20 @@ class ReportsController < ApplicationController
 
 		@hiv_test_result_unk = report.hiv_test_result_unk
 
-    	@total_hiv_positive = @hiv_test_result_prev_pos + @hiv_test_result_pos
+    @total_hiv_positive = @hiv_test_result_prev_pos + @hiv_test_result_pos
+    @total_hiv_positive.delete_if{|p| p.blank?}
     
 		@not_on_art = report.not_on_art
+    @not_on_art.delete_if{|p| p.blank?}
 
 		@on_art_before = report.on_art_before
+    @on_art_before.delete_if{|p| p.blank?}
 
-		@on_art_zero_to_27 = report.on_art_zero_to_27 
+		@on_art_zero_to_27 = report.on_art_zero_to_27
+    @on_art_zero_to_27.delete_if{|p| p.blank?}
     
-    	@on_art_28_plus = report.on_art_28_plus
+    @on_art_28_plus = report.on_art_28_plus
+    @on_art_28_plus.delete_if{|p| p.blank?}
 
 		@on_cpt__1 = report.on_cpt__1
 
