@@ -38,12 +38,14 @@ module PatientService
          "person"=>{"occupation"=>person["person"]["data"]["attributes"]["occupation"],
          "age_estimate"=> birthdate_estimated ,
          "birthdate" => person["person"]["data"]["birthdate"],
-         "cell_phone_number"=>person["person"]["data"]["attributes"]["cell_phone_number"],
+         "cell_phone_number"=> person["person"]["data"]["attributes"]["cell_phone_number"],
          "birth_month"=> birthdate_month ,
-         "addresses"=>{"address1"=>person["person"]["data"]["addresses"]["county_district"],
-         "address2"=>person["person"]["data"]["addresses"]["address2"],
-         "city_village"=>person["person"]["data"]["addresses"]["city_village"],
-         "county_district"=>""},
+         "addresses"=>{"address1"=> person["person"]["data"]["addresses"]["county_district"],
+                       "address2"=> person["person"]["data"]["addresses"]["address2"],
+                       "city_village"=> person["person"]["data"]["addresses"]["city_village"],
+                       "county_district"=> person["person"]["data"]["addresses"]["county_district"],
+                       "state_province" => person["person"]["data"]["addresses"]["state_province"],
+                       "neighborhood_cell" => person["person"]["data"]["addresses"]["neighborhood_cell"]},
          "gender"=> gender ,
          "patient"=>{"identifiers"=>{"National id" => national_id ,"Old national id" => old_national_id}},
          "birth_day"=>birthdate_day,
@@ -53,9 +55,6 @@ module PatientService
          "middle_name"=>""},
          "birth_year"=>birthdate_year,
          "id" => person["person"]["id"]},
-         "filter_district"=>"",
-         "filter"=>{"region"=>"",
-         "t_a"=>""},
          "relation"=>""
         }
         local_people << passed_person
@@ -171,7 +170,6 @@ module PatientService
     patient.national_id  = patient.old_identification_number if patient.national_id.blank?
     patient
   end
-
 
   def self.cul_age(birthdate , birthdate_estimated , date_created = Date.today, today = Date.today)
                                                                                 
