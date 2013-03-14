@@ -214,7 +214,7 @@ class ApplicationController < GenericApplicationController
 
           # Create a VITALS encounter and associated obs in ART
       
-          result = RestClient.post("http://#{art_link}/encounters/create_remote", vitals_params)
+          result = RestClient.post("http://#{art_link}/encounters/create_remote", vitals_params) rescue nil
 
           session["patient_vitals_map"]["#{(session[:datetime] || Time.now()).to_date.strftime("%Y-%m-%d")}"][@patient.id] = true
         end
