@@ -612,7 +612,7 @@ module PatientService
     label.draw_barcode(50,180,0,1,5,15,120,false,"#{patient_bean.national_id}")
     label.draw_multi_text("#{patient_bean.name.titleize}")
     label.draw_multi_text("#{patient_bean.national_id_with_dashes} #{patient_bean.birth_date}#{sex}")
-    label.draw_multi_text("#{address}")
+    label.draw_multi_text("#{address}") unless address.blank?
     label.print(1)
   end
 
@@ -1001,7 +1001,6 @@ EOF
   end
 
   def self.get_patient(person, current_date = Date.today)
-    
     patient = PatientBean.new('')
     patient.person_id = person.id
     patient.patient_id = person.patient.id
