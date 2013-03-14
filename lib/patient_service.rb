@@ -109,7 +109,6 @@ module PatientService
       birthdate_estimated = 0
     end
 
-
     passed_params = {"person"=>
         {"data" =>
           {"addresses"=>
@@ -1366,10 +1365,12 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
        "age_estimate"=> birthdate_estimated,
        "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
        "birth_month"=> birthdate_month ,
-       "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
-       "address2"=>p["person"]["data"]["addresses"]["address2"],
-       "city_village"=>p["person"]["data"]["addresses"]["city_village"],
-       "county_district"=>""},
+       "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["address1"],
+            "address2"=>p["person"]["data"]["addresses"]["address2"],
+            "city_village"=>p["person"]["data"]["addresses"]["city_village"],
+            "state_province"=>p["person"]["data"]["addresses"]["state_province"],
+            "neighborhood_cell"=>p["person"]["data"]["addresses"]["neighborhood_cell"],
+            "county_district"=>p["person"]["data"]["addresses"]["county_district"]},
        "gender"=> gender ,
        "patient"=>{"identifiers"=>{"National id" => p["person"]["value"]}},
        "birth_day"=>birthdate_day,
