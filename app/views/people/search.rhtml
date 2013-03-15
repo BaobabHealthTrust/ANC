@@ -89,7 +89,38 @@ end -%>
    
     __$('nextButton').innerHTML = "<span>" + text + "</span>";
 
-    if(pos && (person_id == 0)){
+    if (text.match(/New Patient/)){
+      //clearFields
+        var fields = [
+        "identifier",
+        "gender",
+        "given_name",
+        "family_name",
+        "family_name2",
+        "address2",
+        "relation",
+        "birthdate",
+        "birthdate_estimated",
+        "state_province",
+        "city_village",
+        "county_district",
+        "occupation",
+        "cell_phone_number",
+        "national_id"
+      ]
+      for (k = 0; k < fields.length; k ++){
+        try{
+          __$(field[k]).removeAttribute("name")
+      }catch(e){
+
+        }
+      }
+       createControlAndAssignValue("given_name", "person[names][given_name]", "<%= params[:given_name] %>");
+       createControlAndAssignValue("family_name", "person[names][family_name]", "<%= params[:family_name] %>");
+       createControlAndAssignValue("gender", "person[gender]", "<%=  params[:gender]%>");
+    }
+
+    if(pos && (person_id == 0) && !text.match(/New Patient/)){
       document.forms[0].action = "select";
       __$('nextButton').onmousedown = function(){
         document.forms[0].submit();
