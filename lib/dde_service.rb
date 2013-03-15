@@ -73,7 +73,7 @@ module DDEService
     end
 
     def current_district
-      "#{self.person.addresses.last.address2}" rescue nil
+      "#{self.person.addresses.last.state_province}" rescue nil
     end
 
     def current_address
@@ -81,7 +81,7 @@ module DDEService
     end
 
     def home_district
-      "#{self.person.addresses.last.subregion}" rescue nil
+      "#{self.person.addresses.last.address2}" rescue nil
     end
 
     def home_ta
@@ -219,12 +219,12 @@ def replace_old_national_id(identifier)
           "race" => (self.get_full_attribute("Race").value rescue nil)
         },
         "addresses" => {
-          "address1" => (self.current_address1 rescue nil),
-          "city_village" => (self.current_address2 rescue nil),
-          "address2" => (self.current_district rescue nil),
-          "subregion" => (self.home_district rescue nil),
-          "county_district" => (self.home_ta rescue nil),
-          "neighborhood_cell" => (self.home_village rescue nil)
+            "address1" => (self.current_address1 rescue nil),
+            "city_village" => (self.current_address2 rescue nil),
+            "address2" => (self.home_district rescue nil),
+            "state_province" => (self.current_district rescue nil),
+            "county_district" => (self.home_ta rescue nil),
+            "neighborhood_cell" => (self.home_village rescue nil)
         }
       }
     }
@@ -558,10 +558,12 @@ end
     passed_params = {"person"=>
         {"data" =>
           {"addresses"=>
-            {"state_province"=> (address_params["address2"] rescue ""),
-            "address2"=> (address_params["address1"] rescue ""),
-            "city_village"=> (address_params["city_village"] rescue ""),
-            "county_district"=> (address_params["county_district"] rescue "")
+             {"state_province"=> address_params["state_province"],
+            "address2"=> address_params["address2"],
+            "address1"=> address_params["address1"],
+            "neighborhood_cell"=> address_params["neighborhood_cell"],
+            "city_village"=> address_params["city_village"],
+            "county_district"=> address_params["county_district"]
           },
           "attributes"=>
             {"occupation"=> (params["person"]["occupation"] rescue ""),
