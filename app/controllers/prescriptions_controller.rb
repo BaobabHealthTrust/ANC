@@ -456,9 +456,9 @@ class PrescriptionsController < ApplicationController
     concept_id = params[:concept_id]
     drugs = Drug.find(:all,	:conditions => ["concept_id = ?", concept_id])
     drug_formulations = []
-			drugs.each { | drug |
-				drug_formulations << drug.name + ':' + drug.dose_strength.to_s + ':' + drug.units.to_s + ';'
-			}
+    drugs.each { | drug |
+      drug_formulations << drug.name + ':' + drug.dose_strength.to_s + ':' + drug.units.to_s + ';'
+    }
     render :text => drug_formulations
 	end
  
@@ -468,6 +468,13 @@ class PrescriptionsController < ApplicationController
     if !(params[:prescriptions].blank?)
 
       (params[:prescriptions] || []).each{ | prescription |
+
+        if !prescription[:dosage]
+          redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") ==
+            "TREATMENT"
+          redirect_to next_task(@patient) and return
+        end
+        
 				prescription[:encounter_id]  = encounter.encounter_id
 				prescription[:obs_datetime]  = encounter.encounter_datetime || (session[:datetime] ||  Time.now())
 				prescription[:person_id]     = encounter.patient_id
@@ -487,23 +494,22 @@ class PrescriptionsController < ApplicationController
         prn = "no"
 				auto_expire_date = start_date + prescription[:duration].to_i.days
 
-					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:strength],
-						prescription[:frequency], prn)
+        DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:strength],
+          prescription[:frequency], prn)
 
 			}
 
-    if(@patient)
-			redirect_to "/patients/show/#{@patient.id}" and return
-		else
-			redirect_to "/patients/show/#{params[:patient_id]}" and return
-		end
+      redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") ==
+        "TREATMENT"
+
+      redirect_to next_task(@patient)   
 
     end
 
     
 		if params[:prescription].blank?
 			#next if params[:formulation].blank?
-          	formulation = (params[:formulation] || '').upcase
+      formulation = (params[:formulation] || '').upcase
 			drug = Drug.find_by_name(formulation) rescue nil
 			unless drug
 				flash[:notice] = "No matching drugs found for formulation #{params[:formulation]}"
@@ -516,7 +522,7 @@ class PrescriptionsController < ApplicationController
 
 			if prescription[:type_of_prescription] == "variable"
 				DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
-					prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]], 
+            prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]],
 					prescription[:type_of_prescription], prn)
 			else
 				DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
@@ -549,7 +555,7 @@ class PrescriptionsController < ApplicationController
 
 				if prescription[:type_of_prescription] == "variable"
 					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
-						prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]], 
+              prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]],
 						prescription[:type_of_prescription], prn)
 				else
 					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 

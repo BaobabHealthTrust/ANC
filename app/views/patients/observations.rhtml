@@ -104,6 +104,7 @@
     options_for_select([["", ""], ["Heard", "Heard"], ["Not heard", "Not heard"], 
       ["Fetal Movement Felt (FMF)", "Fetal Movement Felt (FMF)"]]),
     {:id => "enter_fetal_heart",
+    :condition => "__$('presentation').value != 'Ball'",
     :helptext => "Fetal Heart Beat" }, session_date %>
 
 
