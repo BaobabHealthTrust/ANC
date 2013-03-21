@@ -436,7 +436,8 @@ class PrescriptionsController < ApplicationController
   def generic_advanced_prescription
 		
 		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
-		@generics = MedicationService.generic
+		@generics = generic
+    
 		@frequencies = MedicationService.fully_specified_frequencies
 		@formulations = {}
 		@generics.each { | generic |
