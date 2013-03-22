@@ -76,17 +76,17 @@
     :helptext => "Presentation",
     :tt_pageStyleClass => "NoKeyboard" }, session_date %>
 
-  <%# @cephalic = ["", "Right Occipito Anterior", "Left Occipito Anterior"] %>
+  <% @cephalic = ["", "Right Occipito Anterior", "Left Occipito Anterior", "Unknown"] %>
 
-  <%#= touch_select_tag "Cephalic", @patient, options_for_select(@cephalic),
+  <%= touch_select_tag "Cephalic", @patient, options_for_select(@cephalic),
     {:id => "cephalic",
     :helptext => "Cephalic Type",
     :tt_pageStyleClass => "NoKeyboard",
     :condition => "__$('presentation').value == 'Cephalic'" }, session_date %>
 
-  <%# @breech = ["", "Right Sacro Anterior", "Left Sacro Anterior"] %>
+  <% @breech = ["", "Right Sacro Anterior", "Left Sacro Anterior", "Unknown"] %>
 
-  <%#= touch_select_tag "Breech", @patient, options_for_select(@breech),
+  <%= touch_select_tag "Breech", @patient, options_for_select(@breech),
     {:id => "breech",
     :helptext => "Breech Type",
     :tt_pageStyleClass => "NoKeyboard",
@@ -98,26 +98,20 @@
     {:id => "position",
     :helptext => "Position",
     :tt_pageStyleClass => "NoKeyboard",
-    :condition => "__$('presentation').value != 'Ball'"}, session_date %>
-
-  <%= touch_select_tag "FETAL HEART BEAT", @patient, 
-    options_for_select([["", ""], ["Heard", "Heard"], ["Not heard", "Not heard"], 
-      ["Fetal Movement Felt (FMF)", "Fetal Movement Felt (FMF)"]]),
-    {:id => "enter_fetal_heart",
-    :condition => "__$('presentation').value != 'Ball'",
-    :helptext => "Fetal Heart Beat" }, session_date %>
+    :condition => "__$('presentation').value != 'Ball'"}, session_date %> 
 
 
   <%#--------------------------------------------------------%>
 
-  <%# @vertex = ["", "Left Occipito Anterior",
+  <% @vertex = ["", "Left Occipito Anterior",
   "Left Occipito Transverse",
   "Left Occipito Posterior",
   "Right Occipito Anterior",
   "Right Occipito Transverse",
-  "Right Occipito Posterior"] %>
+  "Right Occipito Posterior",
+  "Unknown"] %>
 
-  <%#= touch_select_tag "VERTEX", @patient, options_for_select(@vertex),
+  <%= touch_select_tag "VERTEX", @patient, options_for_select(@vertex),
   {:id => "vertex",
   :helptext => "Vertex Position Type",
   :field_type => "text",
@@ -125,14 +119,15 @@
   :tt_pageStyleClass => "NoKeyboard" } %>
 
 
-  <%# @breech = ["", "Left Sacro Anterior",
+  <% @breech = ["", "Left Sacro Anterior",
   "Left Sacro Transverse",
   "Left Sacro Posterior",
   "Right Sacro Anterior",
   "Right Sacro Transverse",
-  "Right Sacro Posterior"] %>
+  "Right Sacro Posterior",
+  "Unknown"] %>
 
-  <%#= touch_select_tag "BREECH", @patient, options_for_select(@breech),
+  <%= touch_select_tag "BREECH", @patient, options_for_select(@breech),
   {:id => "breech",
   :helptext => "Breech Position Type",
   :field_type => "text",
@@ -140,14 +135,15 @@
   :tt_pageStyleClass => "NoKeyboard" } %>
 
 
-  <%# @face = ["", "Left Mento Anterior",
+  <% @face = ["", "Left Mento Anterior",
   "Left Mento Transverse",
   "Left Mento Posterior",
   "Right Mento Anterior",
   "Right Mento Transverse",
-  "Right Mento Posterior"] %>
+  "Right Mento Posterior",
+   "Unknown"] %>
 
-  <%#= touch_select_tag "FACE", @patient, options_for_select(@face),
+  <%= touch_select_tag "FACE", @patient, options_for_select(@face),
   {:id => "face",
   :helptext => "Face Position Type",
   :field_type => "text",
@@ -155,17 +151,25 @@
   :tt_pageStyleClass => "NoKeyboard" } %>
 
 
-  <%# @shoulder = ["", "Left Acromion Dorsal Anterior",
+  <% @shoulder = ["", "Left Acromion Dorsal Anterior",
   "Left Acromion Dorsal Posterior",
   "Right Acromion Dorsal Anterior",
-  "Right Acromion Dorsal Posterior"] %>
+  "Right Acromion Dorsal Posterior",
+  "Unknown"] %>
 
-  <%#= touch_select_tag "SHOULDER", @patient, options_for_select(@face),
+  <%= touch_select_tag "SHOULDER", @patient, options_for_select(@face),
   {:id => "shoulder",
   :helptext => "Shoulder Position Type",
   :field_type => "text",
   :condition => "$('position').value.trim().toUpperCase() == 'SHOULDER';",
   :tt_pageStyleClass => "NoKeyboard" } %>
+
+  <%= touch_select_tag "FETAL HEART BEAT", @patient,
+    options_for_select([["", ""], ["Heard", "Heard"], ["Not heard", "Not heard"],
+      ["Fetal Movement Felt (FMF)", "Fetal Movement Felt (FMF)"]]),
+    {:id => "enter_fetal_heart",
+    :condition => "__$('presentation').value != 'Ball'",
+    :helptext => "Fetal Heart Beat" }, session_date %>
 
   <%#--------------------------------------------------------%>
 
