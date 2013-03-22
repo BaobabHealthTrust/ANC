@@ -362,6 +362,20 @@ class PrescriptionsController < ApplicationController
     # raise drugs(941).to_yaml
     
     @generics = generic
+
+     #bubble ANC frequently used drugs ontop
+    values = []
+    @generics.each { | gen |
+      if gen[0].downcase == "nvp" or gen[0].downcase == "nevirapine" or gen[0].match(/albendazole/i) or
+          gen[0].match(/fefol/i) or gen[0].downcase == "fansidar"  or gen[0].downcase == "sp"
+        @generics.delete(gen)
+        values << gen
+      end
+    }
+    values.each { |val|
+      @generics.insert(0, val)
+    }
+    
     @frequencies = drug_frequency
     @diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []    
   end
