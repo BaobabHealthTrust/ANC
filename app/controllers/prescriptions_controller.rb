@@ -438,6 +438,19 @@ class PrescriptionsController < ApplicationController
 		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
 		@generics = generic
     
+    #bubble ANC frequently used drugs ontop
+    values = []
+    @generics.each { | gen |
+      if gen[0].downcase == "nvp" or gen[0].downcase == "nevirapine" or gen[0].match(/albendazole/i) or
+          gen[0].match(/fefol/i) or gen[0].downcase == "fansidar"  or gen[0].downcase == "sp" 
+        @generics.delete(gen)
+        values << gen
+      end
+    }
+    values.each { |val|
+      @generics.insert(0, val)
+    }
+    
 		@frequencies = MedicationService.fully_specified_frequencies
 		@formulations = {}
 		@generics.each { | generic |
