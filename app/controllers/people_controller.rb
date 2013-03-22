@@ -10,7 +10,6 @@ class PeopleController < GenericPeopleController
   end
 
  def create
-
     success = false
     Person.session_datetime = session[:datetime].to_date rescue Date.today
     identifier = params[:identifier] rescue nil
@@ -51,6 +50,14 @@ class PeopleController < GenericPeopleController
     end
 
     if params[:person][:patient] && success
+
+      if params[:encounter]
+        encounter = Encounter.new(params[:encounter])
+	   		encounter.patient_id = person.id
+        encounter.encounter_datetime = session[:datetime] unless session[:datetime].blank?
+        encounter.save
+      end rescue nil
+      
       PatientService.patient_national_id_label(person.patient)
       unless (params[:relation].blank?)
         redirect_to search_complete_url(person.id, params[:relation]) and return
