@@ -4,8 +4,52 @@
   <!--
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+  var deliveries = 0;
+  
   
   //-->
+  function updateMultiplePregnancy(id){
+  
+    try{
+      if (__$("multiple_pregnancy").value.trim() == "No" || __$("multiple_pregnancy").value.trim() == ""){
+        if (__$(id).value.trim() == 2){
+          __$("multiple_pregnancy").value = "Twins"
+        }else if(__$(id).value == 3){
+          __$("multiple_pregnancy").value = "Triplets"
+        }else if(__$(id).value.trim() == 4){
+          __$("multiple_pregnancy").value = "Quadruplet"
+        }else if(__$(id).value.trim() == 1){
+          __$("multiple_pregnancy").value = "No"
+        }
+      }else if (__$("multiple_pregnancy").value == "Twins"){
+        if(__$(id).value.trim() == 3){
+          __$("multiple_pregnancy").value = "Triplets"
+        }else if(__$(id).value.trim() == 4){
+          __$("multiple_pregnancy").value = "Quadruplet"
+        }
+      }else if (__$("multiple_pregnancy").value.trim() == "Triplets"){
+        if(__$(id).value.trim() == 4){
+          __$("multiple_pregnancy").value = "Quadruplet"
+        }
+      }
+    }catch(ex){}
+ 
+  }
+
+  function updateParity(num){
+    parity = 0;
+    
+    for (i = 1; i <= num; i ++){
+      parity += parseInt(__$("gestation_type" + i).value);
+    }
+    if (parity != 0){
+      __$("enter_number_of_deliveries").value = parity;
+    }
+  }
+
+  function updateDeliveries(){
+    deliveries = __$('enter_number_of_deliveries').value;  
+  }
 </script>
 
 
@@ -22,7 +66,7 @@
     :absoluteMin => 0,
     :max => 20,
     :tt_onLoad => "document.forms[0].reset(); showCategory('Obstetric History');",
-    :tt_onUnLoad => "if(__$('category')){__$('content').removeChild(__$('category'))}; 
+    :tt_onUnLoad => "if(__$('category')){__$('content').removeChild(__$('category'))};
     if(__$('enter_gravida').value == 1){
     __$('enter_number_of_deliveries').value = 0;
     __$('multiple_pregnancy').value = 'No';
@@ -36,36 +80,26 @@
     }",
     :tt_pageStyleClass => "NumbersOnly"} %>
 
-  <%= touch_select_tag "MULTIPLE GESTATION", @patient,
-    options_for_select([["", ""],
-                        ["Yes", "Yes"],
-                        ["No", "No"],
-                        ["Triplets", "Triplets"],
-                        ["Quadruplet", "Quadruplet"]
-                      ]),
-    {:id => "multiple_pregnancy",
-    :helptext => "Have you ever had twins?",
-    :condition => "__$('enter_gravida').value > 1"
-  } %>
+
   <%= touch_numeric_tag "PARITY", @patient, nil,
     {:id => "enter_number_of_deliveries",
     :helptext => "Enter Number Of Deliveries",
     :tt_pageStyleClass => "NumbersWithUnknown",
     :condition => "__$('enter_gravida').value > 1",
-    :tt_onLoad => "if(__$('multiple_pregnancy').value == 'No'){__$('touchscreenInput' + " + 
-      "tstCurrentPage).setAttribute('absoluteMax', (__$('enter_gravida').value - 1))}",
+    :tt_onLoad => "__$('touchscreenInput' + " +
+      "tstCurrentPage).setAttribute('absoluteMax', (__$('enter_gravida').value - 1))",
     :tt_onUnLoad => "if(__$('enter_number_of_deliveries').value == 0){
     __$('ever_had_still_births').value = 'No';
     __$('ever_had_symphysiotomy').value = 'No';
     __$('ever_had_c_sections').value = 'No';
     __$('ever_had_a_vacuum_extraction').value = 'No';
-    }; if(__$('multiple_pregnancy').value.toLowerCase()=='no'){
-      __$('enter_number_of_abortions').setAttribute('validationRule', '[' + (parseInt(__$('enter_gravida').value) - 
-        parseInt(__$('enter_number_of_deliveries').value) - 1) + ']');
-      __$('enter_number_of_abortions').setAttribute('validationMessage', 'Expected value is ' + (parseInt(__$('enter_gravida').value) - 
-        parseInt(__$('enter_number_of_deliveries').value) - 1));
-    } else {__$('enter_number_of_abortions').removeAttribute('validationRule'); " +
-    "__$('enter_number_of_abortions').removeAttribute('validationMessage')}"
+    }; __$('enter_number_of_abortions').setAttribute('absoluteMax', (parseInt(__$('enter_gravida').value - parseInt(__$('enter_number_of_deliveries').value) -1 )));
+    __$('enter_number_of_abortions').setAttribute('validationRule', '[' + (parseInt(__$('enter_gravida').value) -
+    parseInt(__$('enter_number_of_deliveries').value) - 1) + ']');
+    __$('enter_number_of_abortions').setAttribute('validationMessage', 'Expected value is ' + (parseInt(__$('enter_gravida').value) -
+    parseInt(__$('enter_number_of_deliveries').value) - 1));
+    __$('enter_number_of_abortions').removeAttribute('validationRule'); " +
+      "__$('enter_number_of_abortions').removeAttribute('validationMessage')"
   } %>
 
   <%= touch_numeric_tag "NUMBER OF ABORTIONS", @patient, nil,
@@ -73,6 +107,7 @@
     :helptext => "Enter Number Of Abortions",
     :tt_pageStyleClass => "NumbersWithUnknown",
     :condition => "__$('enter_gravida').value > 1",
+    :tt_onLoad => "updateDeliveries()",
     # :min => 0,
     # :max => 5,
     :validationRule => "[0-5]",
@@ -97,88 +132,125 @@
     @delivery_modes = ["", "Spontaneous vaginal delivery", "Caesarean Section", "Vacuum Extraction Delivery", "Breech"]
   %>
 
-    <%= touch_numeric_tag "YEAR OF BIRTH", @patient, nil,
-    {:id => "year_of_birth#{e}",
-      :helptext => "Year of Birth #{e}#{indice} Child",
+    <%= touch_numeric_tag "NUMBER OF DELIVERED CHILDREN", @patient, nil,
+    {:id => "gestation_type#{e}",
+      :helptext => "#{e}#{indice} Delivery Number of Children",
       :tt_pageStyleClass => "NumbersWithUnknown",
-      :absoluteMin => (@anc_patient.birth_year + 10), 
-      :min => (@anc_patient.birth_year + 13), 
-      :max => ((@anc_patient.birth_year + 50) > ((session[:datetime] || Date.today).year) ? 
-          ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 50)), 
-      :absoluteMax => ((@anc_patient.birth_year + 55) > ((session[:datetime] || Date.today).year) ? 
-          ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 55)),
-      :condition => "__$('enter_number_of_deliveries').value >= #{e}" } %>
+      :tt_onUnLoad => "updateMultiplePregnancy('gestation_type#{e}'); updateParity(#{e});",
+      :absoluteMin => 1,
+      :min => 1,
+      :max => 4,
+      :absoluteMax => 10,
+      :condition => "deliveries >= #{e}" } %>
 
-    <%= touch_text_field_tag "Place of Birth", @patient, nil,
-    {:id => "delivery#{e}",
-      :helptext => "Place of Birth #{e}#{indice} Child",
-      :ajaxURL => "/encounters/static_locations?extras=1&search_string=",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e}",
-      :tt_onLoad => "addHereButton()",
-      :tt_onUnLoad => "removeHereButton()"
-    } %>
+    <%= touch_select_tag "MULTIPLE GESTATION", @patient, options_for_select([["", ""],
+        ["No", "No"],
+        ["Twins", "Twins"],
+        ["Triplets", "Triplets"],
+        ["Quadruplet", "Quadruplet"]]),
+       {
+      :id => "multiple_pregnancy",
+      :field_type => "text",
+      :helptext => "Ever Had Multiple Delivery",
+      :condition => "deliveries == #{e}"} %>
 
-    <%= touch_text_field_tag "Gestation", @patient, nil,
-    {:id => "gestation#{e}",
-      :helptext => "Gestation #{e}#{indice} Child (Months)",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e}",
-      :field_type => "number",
-      :tt_pageStyleClass => "NumbersWithUnknown",
-      :max => 9,
-      :min => 6
-    } %>
+    <% (1..8).each{|d| %>
 
-    <%= touch_text_field_tag "Labour Duration", @patient, nil,
-    {:id => "labour_duration#{e}",
-      :helptext => "Estimated Labour Duration #{e}#{indice} Child (Hours)",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e}",
-      :field_type => "number",
-      :tt_pageStyleClass => "NumbersWithUnknown" } %>
+      <%
+      indic = ""
+      case d
+      when 1
+        indic = "<sup>st</sup>"
+      when 2
+        indic = "<sup>nd</sup>"
+      when 3
+        indic = "<sup>rd</sup>"
+      else
+        indic = "<sup>th</sup>"
+      end %>
 
-    <%= touch_select_tag "Method of Delivery", @patient, options_for_select(@delivery_modes),
-    {:id => "method_of_delivery#{e}",
-      :helptext => "Method of Delivery #{e}#{indice} Child",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e}",
-      :tt_onUnLoad => "if(__$('method_of_delivery#{e}').value == 'Caesarean Section'){__$('ever_had_c_sections').value = 'Yes';} " + 
-        " else if(__$('method_of_delivery#{e}').value == 'Vacuum Extraction Delivery'){__$('ever_had_a_vacuum_extraction').value = 'Yes';}" } %>
+      <%= touch_numeric_tag "YEAR OF BIRTH", @patient, nil,
+      {:id => "year_of_birth#{e}#{d}",
+        :helptext => "Year of Birth #{d}#{indic} Child (#{e}#{indice} Delivery)",
+        :tt_pageStyleClass => "NumbersWithUnknown",
+        :absoluteMin => (@anc_patient.birth_year + 10),
+        :min => (@anc_patient.birth_year + 13),
+        :max => ((@anc_patient.birth_year + 50) > ((session[:datetime] || Date.today).year) ?
+            ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 50)),
+        :absoluteMax => ((@anc_patient.birth_year + 55) > ((session[:datetime] || Date.today).year) ?
+            ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 55)),
+        :condition => "__$('gestation_type#{e}').value >= #{d}" } %>
 
-    <%= touch_select_tag "Condition at Birth", @patient, 
-    options_for_select([["", ""], ["Alive", "Alive"], ["Still Birth","Still Birth"]]),
-    {:id => "condition_at_birth#{e}",
-      :helptext => "Condition at Birth #{e}#{indice} Child",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e}",
-      :tt_onUnLoad => "if(__$('condition_at_birth#{e}').value == 'Still Birth'){__$('ever_had_still_births').value = 'Yes';}"
-    } %>
+      <%= touch_text_field_tag "Place of Birth", @patient, nil,
+      {:id => "delivery#{e}#{d}",
+        :helptext => "Place of Birth #{d}#{indic} Child (#{e}#{indice} Delivery)",
+        :ajaxURL => "/encounters/static_locations?extras=1&search_string=",
+        :condition => "__$('gestation_type#{e}').value >= #{d}",
+        :tt_onLoad => "addHereButton()",
+        :tt_onUnLoad => "removeHereButton()"
+      } %>
 
-    <%= touch_select_tag "Birth Weight", @patient, 
-    options_for_select([["", ""], ["Big Baby (Above 4kg)", "Big Baby (Above 4kg)"], 
-        ["Average","Average"], ["Small Baby (Less than 2.5kg)", "Small Baby (Less than 2.5kg)"]]),
-    {:id => "birth_weight#{e}",
-      :helptext => "Estimated Birth Weight #{e}#{indice} Child",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e} && __$('condition_at_birth#{e}').value != 'Still Birth'" } %>
+      <%= touch_text_field_tag "Gestation", @patient, nil,
+      {:id => "gestation#{e}#{d}",
+        :helptext => "Gestation (Months) #{d}#{indic} Child (#{e}#{indice} Delivery)",
+        :condition => "__$('gestation_type#{e}').value >= #{d}",
+        :field_type => "number",
+        :tt_pageStyleClass => "NumbersWithUnknown",
+        :max => 9,
+        :min => 6
+      } %>
 
-    <%= touch_select_tag "Alive", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No","No"]]),
-    {:id => "alive#{e}",
-      :helptext => "#{e}#{indice} Child Alive Now",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e} && __$('condition_at_birth#{e}').value != 'Still Birth'" } %>
+      <%= touch_text_field_tag "Labour Duration", @patient, nil,
+      {:id => "labour_duration#{e}#{d}",
+        :helptext => "Estimated Labour Duration (Hours) #{d}#{indic} Child (#{e}#{indice} Delivery)",
+        :condition => "__$('gestation_type#{e}').value >= #{d}",
+        :field_type => "number",
+        :tt_pageStyleClass => "NumbersWithUnknown" } %>
 
-    <%= touch_select_tag "Units of age of child", @patient,  
-    options_for_select([["", ""], ["Years", "Years"], ["Months","Months"], ["Weeks", "Weeks"], ["Days", "Days"], 
-        ["Hours", "Hours"], ["Minutes", "Minutes"]]),
-    {:id => "age_units#{e}",
-      :helptext => "#{e}#{indice} Child's Units of age at death",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e} && __$('alive#{e}').value == 'No'" } %>
+      <%= touch_select_tag "Method of Delivery", @patient, options_for_select(@delivery_modes),
+      {:id => "method_of_delivery#{e}#{d}",
+        :helptext => "Method of Delivery #{d}#{indic} Child (#{e}#{indice} Delivery)",
+        :condition => "__$('gestation_type#{e}').value >= #{d}",
+        :tt_onUnLoad => "if(__$('method_of_delivery#{e}').value == 'Caesarean Section'){__$('ever_had_c_sections').value = 'Yes';} " +
+          " else if(__$('method_of_delivery#{e}#{d}').value == 'Vacuum Extraction Delivery'){__$('ever_had_a_vacuum_extraction').value = 'Yes';}" } %>
 
-    <%= touch_numeric_tag "Age at Death", @patient, nil,
-    {:id => "age_at_death#{e}",
-      :helptext => "#{e}#{indice} Child's Age at Death ",
-      :tt_pageStyleClass => "NumbersOnly",
-      :absoluteMin => 0,
-      :tt_onLoad => "__$('helpText' + tstCurrentPage).innerHTML += '(' + __$('age_units#{e}').value + ')'",
-      :condition => "__$('enter_number_of_deliveries').value >= #{e} && __$('alive#{e}').value == 'No'" } %>
+      <%= touch_select_tag "Condition at Birth", @patient,
+      options_for_select([["", ""], ["Alive", "Alive"], ["Still Birth","Still Birth"]]),
+      {:id => "condition_at_birth#{e}#{d}",
+        :helptext => "Condition at Birth #{d}#{indic} Child (#{e}#{indice} Delivery",
+        :condition => "__$('gestation_type#{e}').value >= #{d}",
+        :tt_onUnLoad => "if(__$('condition_at_birth#{e}#{d}').value == 'Still Birth'){__$('ever_had_still_births').value = 'Yes';}"
+      } %>
 
-  <% } %>
+      <%= touch_select_tag "Birth Weight", @patient,
+      options_for_select([["", ""], ["Big Baby (Above 4kg)", "Big Baby (Above 4kg)"],
+          ["Average","Average"], ["Small Baby (Less than 2.5kg)", "Small Baby (Less than 2.5kg)"]]),
+      {:id => "birth_weight#{e}#{d}",
+        :helptext => "Estimated Birth Weight #{d}#{indic} Child (#{e}#{indice} Delivery)",
+        :condition => "__$('gestation_type#{e}').value >= #{d} && __$('condition_at_birth#{e}#{d}').value != 'Still Birth'" } %>
 
+      <%= touch_select_tag "Alive", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No","No"]]),
+      {:id => "alive#{e}#{d}",
+        :helptext => "#{d}#{indic} Child Alive Now (#{e}#{indice} Delivery)",
+        :condition => "__$('gestation_type#{e}').value >= #{d} && __$('condition_at_birth#{e}#{d}').value != 'Still Birth'" } %>
+
+      <%= touch_select_tag "Units of age of child", @patient,
+      options_for_select([["", ""], ["Years", "Years"], ["Months","Months"], ["Weeks", "Weeks"], ["Days", "Days"],
+          ["Hours", "Hours"], ["Minutes", "Minutes"]]),
+      {:id => "age_units#{e}#{d}",
+        :helptext => "#{d}#{indic} Child's Units of age at death (#{e}#{indice} Delivery)",
+        :condition => "__$('gestation_type#{e}').value >= #{d} && __$('alive#{e}#{d}').value == 'No'" } %>
+
+      <%= touch_numeric_tag "Age at Death", @patient, nil,
+      {:id => "age_at_death#{e}#{d}",
+        :helptext => "#{d}#{indic} Child's Age at Death (#{e}#{indice} Delivery)",
+        :tt_pageStyleClass => "NumbersOnly",
+        :absoluteMin => 0,
+        :tt_onLoad => "__$('helpText' + tstCurrentPage).innerHTML += '(' + __$('age_units#{e}#{d}').value + ')'",
+        :condition => "__$('gestation_type#{e}').value >= #{d} && __$('alive#{e}#{d}').value == 'No'" } %>
+
+    <% } %>
+  <%}%>
 
   <% (1..20).each{|e| %>
 
@@ -203,11 +275,11 @@
     {:id => "year_of_birth#{e}",
       :helptext => "Year of #{e}#{indice} Abortion",
       :tt_pageStyleClass => "NumbersWithUnknown",
-      :absoluteMin => (@anc_patient.birth_year + 10), 
-      :min => (@anc_patient.birth_year + 13), 
-      :max => ((@anc_patient.birth_year + 50) > ((session[:datetime] || Date.today).year) ? 
-          ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 50)), 
-      :absoluteMax => ((@anc_patient.birth_year + 55) > ((session[:datetime] || Date.today).year) ? 
+      :absoluteMin => (@anc_patient.birth_year + 10),
+      :min => (@anc_patient.birth_year + 13),
+      :max => ((@anc_patient.birth_year + 50) > ((session[:datetime] || Date.today).year) ?
+          ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 50)),
+      :absoluteMax => ((@anc_patient.birth_year + 55) > ((session[:datetime] || Date.today).year) ?
           ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 55)),
       :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
 
@@ -245,16 +317,16 @@
 
   <% } %>
 
-  <% 
+  <%
   controls = ""
-  (1..8).each{|e| 
+  (1..8).each{|e|
     controls = controls + (controls.length > 0 ? "&& " : "") + "__$('condition_at_birth#{e}').value != 'Still Birth' "
   }
 %>
   <%= touch_hidden_tag "STILL BIRTH", @patient, "No",
     {:id => "ever_had_still_births",
     :helptext => "Ever Had Still Births?",
-    :condition => "__$('enter_gravida').value > 0 && __$('enter_number_of_deliveries').value > 0 " + 
+    :condition => "__$('enter_gravida').value > 0 && deliveries > 0 " +
       "&& (#{controls})"} %>
   <%= touch_hidden_tag "Caesarean section", @patient, "No",
     {:id => "ever_had_c_sections",
@@ -268,12 +340,12 @@
   <%= touch_select_tag "SYMPHYSIOTOMY", @patient, options_for_select([["", ""], ["No", "No"], ["Yes", "Yes"]]),
     {:id => "ever_had_symphysiotomy",
     :helptext => "Ever Had Symphysiotomy?",
-    :condition => "__$('enter_number_of_deliveries').value > 0"
+    :condition => "deliveries > 0"
   } %>
 
   <%= touch_select_tag "HEMORRHAGE", @patient, options_for_select([["", ""], ["No", "No"], ["APH", "APH"], ["PPH", "PPH"]]),
     {:id => "hemorrhage",
-    :helptext => "Hemorrhage", 
+    :helptext => "Hemorrhage",
     :condition => "__$('enter_gravida').value > 1"
   } %>
 
@@ -286,6 +358,7 @@
     {:id => "eclampsia",
     :helptext => "Eclampsia",
     :condition => "__$('enter_gravida').value > 1 && __$('pre_eclampsia').value == 'Yes'" } %>
+
 
   <%#= touch_numeric_tag "Height (cm)", @patient, nil,
   {:id => "Height_cm",

@@ -6,13 +6,13 @@ body{
 
 div.screen {
   height: 590px;
-  width: 790px;
+  width: 98%;
   padding: 25px;
 }
 
 div.right{
   float:right;
-  width: 360px;
+  width: 98%;
 }
 
 table.buttons{
