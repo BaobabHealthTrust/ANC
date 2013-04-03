@@ -72,32 +72,33 @@ class DrugOrder < ActiveRecord::Base
     units = drug.units || 'per dose'
     duration = (auto_expire_date.to_date - start_date.to_date).to_i rescue nil
     equivalent_daily_dose = nil
-    drug_order = nil       
-    # if (frequency == "VARIABLE")
-    
-    if instructions.blank?
-      instructions = "#{drug.name}:"
-      instructions += " IN THE MORNING (QAM):#{dose[0]} #{units}" unless dose[0].blank? || dose[0].to_f == 0
-      instructions += " ONCE A DAY AT NOON (QNOON):#{dose[1]} #{units}" unless dose[1].blank? || dose[1].to_f == 0
-      instructions += " IN THE EVENING (QPM):#{dose[2]} #{units}" unless dose[2].blank? || dose[2].to_f == 0
-      instructions += " ONCE A DAY AT NIGHT (QHS):#{dose[3]} #{units}" unless dose[3].blank? || dose[3].to_f == 0
-      instructions += " for #{duration} days"
-      instructions += " (prn)" if prn == 1
-    end
-    if dose.is_a?(Array)
-      total_dose = dose.sum{|amount| amount.to_f rescue 0 }
-      return nil if total_dose.blank?
-      dose = total_dose
-    end
-    equivalent_daily_dose ||= dose
+    drug_order = nil
 
-    #else
-    #  equivalent_daily_dose ||= dose.to_f * DrugOrder.doses_per_day(frequency)
-    #  if instructions.blank?
-    #    instructions = "#{drug.name}: #{dose} #{units} #{frequency} for #{duration||'some'} days"
-    #    instructions += " (prn)" if prn == 1
-    #  end
-    # end
+    if (frequency.upcase == "VARIABLE")
+    
+      if instructions.blank?
+        instructions = "#{drug.name}:"
+        instructions += " IN THE MORNING (QAM):#{dose[0]} #{units}" unless dose[0].blank? || dose[0].to_f == 0
+        instructions += " ONCE A DAY AT NOON (QNOON):#{dose[1]} #{units}" unless dose[1].blank? || dose[1].to_f == 0
+        instructions += " IN THE EVENING (QPM):#{dose[2]} #{units}" unless dose[2].blank? || dose[2].to_f == 0
+        instructions += " ONCE A DAY AT NIGHT (QHS):#{dose[3]} #{units}" unless dose[3].blank? || dose[3].to_f == 0
+        instructions += " for #{duration} days"
+        instructions += " (prn)" if prn == 1
+      end     
+      if dose.is_a?(Array)
+        total_dose = dose.sum{|amount| amount.to_f rescue 0 }
+        return nil if total_dose.blank?
+        dose = total_dose
+      end
+      equivalent_daily_dose ||= dose      
+
+    else      
+      equivalent_daily_dose ||= dose.to_f * DrugOrder.doses_per_day(frequency)
+      if instructions.blank?
+        instructions = "#{drug.name}: #{dose} #{units} #{frequency} for #{duration||'some'} days"
+        instructions += " (prn)" if prn == 1
+      end
+    end
     ActiveRecord::Base.transaction do
       order = encounter.orders.create(
         :order_type_id => 1, 
