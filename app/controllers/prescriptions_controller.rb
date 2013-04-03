@@ -153,17 +153,17 @@ class PrescriptionsController < ApplicationController
             start_date = session_date
             auto_expire_date = session_date.to_date + prescription[:duration].to_i.days
             prn = prescription[:prn].to_i
-            # if prescription[:type_of_prescription] == "variable"
+            if prescription[:type_of_prescription] == "variable"
 
-            DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug,
-              start_date, auto_expire_date, [prescription[:morning_dose],
-                prescription[:afternoon_dose], prescription[:evening_dose], 
-                prescription[:night_dose]], prescription[:type_of_prescription], prn)
+              DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug,
+                start_date, auto_expire_date, [prescription[:morning_dose],
+                  prescription[:afternoon_dose], prescription[:evening_dose],
+                  prescription[:night_dose]], prescription[:type_of_prescription], prn)
             
-            # else
-            #  DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug,
-            #    start_date, auto_expire_date, prescription[:dose_strength], prescription[:frequency], prn)
-            # end
+            else
+              DrugOrder.write_order(@encounter, @patient, @diagnosis, @drug,
+                start_date, auto_expire_date, prescription[:dose_strength], prescription[:frequency], prn)
+            end
           end
         end
       
@@ -363,7 +363,7 @@ class PrescriptionsController < ApplicationController
     
     @generics = generic
 
-     #bubble ANC frequently used drugs ontop
+    #bubble ANC frequently used drugs ontop
     values = []
     @generics.each { | gen |
       if gen[0].downcase == "nvp" or gen[0].downcase == "nevirapine" or gen[0].match(/albendazole/i) or
@@ -512,8 +512,7 @@ class PrescriptionsController < ApplicationController
 				drug = Drug.find_by_name(formulation) rescue nil
 
 				unless drug
-					flash[:notice] = "No matching drugs found for formulation #{prescription[:formulation]}"
-					render :new
+          redirect_to next_task(@patient) and return
 					return
 				end
 
@@ -540,8 +539,7 @@ class PrescriptionsController < ApplicationController
       formulation = (params[:formulation] || '').upcase
 			drug = Drug.find_by_name(formulation) rescue nil
 			unless drug
-				flash[:notice] = "No matching drugs found for formulation #{params[:formulation]}"
-				render :new
+        redirect_to next_task(@patient) and return
 				return
 			end
 			start_date = session[:datetime].to_date rescue Time.now
@@ -599,6 +597,6 @@ class PrescriptionsController < ApplicationController
 			redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
 		end
 
-	end
+	end rescue nil
     
 end
