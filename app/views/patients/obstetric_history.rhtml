@@ -5,35 +5,22 @@
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
   var deliveries = 0;
+  var max_delivered = 1;
   
   
   //-->
-  function updateMultiplePregnancy(id){
-  
-    try{
-      if (__$("multiple_pregnancy").value.trim() == "No" || __$("multiple_pregnancy").value.trim() == ""){
-        if (__$(id).value.trim() == 2){
-          __$("multiple_pregnancy").value = "Twins"
-        }else if(__$(id).value == 3){
-          __$("multiple_pregnancy").value = "Triplets"
-        }else if(__$(id).value.trim() == 4){
-          __$("multiple_pregnancy").value = "Quadruplet"
-        }else if(__$(id).value.trim() == 1){
-          __$("multiple_pregnancy").value = "No"
-        }
-      }else if (__$("multiple_pregnancy").value == "Twins"){
-        if(__$(id).value.trim() == 3){
-          __$("multiple_pregnancy").value = "Triplets"
-        }else if(__$(id).value.trim() == 4){
-          __$("multiple_pregnancy").value = "Quadruplet"
-        }
-      }else if (__$("multiple_pregnancy").value.trim() == "Triplets"){
-        if(__$(id).value.trim() == 4){
-          __$("multiple_pregnancy").value = "Quadruplet"
-        }
-      }
-    }catch(ex){}
- 
+  function updateMultiplePregnancy(){  
+    
+    if (max_delivered == 2){
+      __$("multiple_pregnancy").value = "Twins"
+    }else if(max_delivered == 3){
+      __$("multiple_pregnancy").value = "Triplets"
+    }else if(max_delivered == 4){
+      __$("multiple_pregnancy").value = "Quadruplet"
+    }else if(max_delivered == 1){
+      __$("multiple_pregnancy").value = "No"
+    }
+         
   }
 
   function updateParity(num){
@@ -49,6 +36,15 @@
 
   function updateDeliveries(){
     deliveries = __$('enter_number_of_deliveries').value;  
+  }
+
+  function updateVariables(num){
+    max_delivered = 1;
+    for (i = 1; i <= num; i ++){
+      if (__$("gestation_type" + i).value > max_delivered){
+        max_delivered = __$("gestation_type" + i).value;
+      }
+    }
   }
 </script>
 
@@ -136,7 +132,7 @@
     {:id => "gestation_type#{e}",
       :helptext => "#{e}#{indice} Delivery Number of Children",
       :tt_pageStyleClass => "NumbersWithUnknown",
-      :tt_onUnLoad => "updateMultiplePregnancy('gestation_type#{e}'); updateParity(#{e});",
+      :tt_BeforeUnload => "updateVariables(#{e}); try{ if(max_delivered < __$('touchscreenInput' + tstCurrentPage).value){max_delivered = __$('touchscreenInput' + tstCurrentPage).value}}catch(exx){}; updateMultiplePregnancy(); updateParity(#{e});",
       :absoluteMin => 1,
       :min => 1,
       :max => 4,
@@ -148,9 +144,10 @@
         ["Twins", "Twins"],
         ["Triplets", "Triplets"],
         ["Quadruplet", "Quadruplet"]]),
-       {
+    {
       :id => "multiple_pregnancy",
       :field_type => "text",
+      :tt_onLoad => "__$('touchscreenInput' + tstCurrentPage).value = __$('multiple_pregnancy').value",
       :helptext => "Ever Had Multiple Delivery",
       :condition => "deliveries == #{e}"} %>
 
