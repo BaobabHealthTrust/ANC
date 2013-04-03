@@ -118,8 +118,8 @@
   <%= hidden_field_tag :patient_id, @patient.id %>
 
   <% @options = [['NO DIAGNOSIS', 'NO DIAGNOSIS']]
-     @diagnoses = @patient.current_diagnoses
-     @diagnoses.each do |diag| 
+     @diagnoses = @patient.current_diagnoses rescue nil
+     (@diagnoses || []).each do |diag|
        @options << [diag.answer_string, "#{diag.obs_id}"]
      end
   %>
