@@ -491,6 +491,7 @@ class PrescriptionsController < ApplicationController
 	end
  
 	def create_advanced_prescription
+    print_check = 0
 		@patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
 		encounter  = MedicationService.current_treatment_encounter(@patient)
     if !(params[:prescriptions].blank?)
@@ -498,6 +499,7 @@ class PrescriptionsController < ApplicationController
       (params[:prescriptions] || []).each{ | prescription |
 
         if !prescription[:dosage]
+          print_check += 1
           redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") ==
             "TREATMENT"
           redirect_to next_task(@patient) and return
@@ -525,14 +527,18 @@ class PrescriptionsController < ApplicationController
           prescription[:frequency], prn)
 
 			}
-
+      print_check += 1
       redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") ==
         "TREATMENT"
 
       redirect_to next_task(@patient)   
 
     end
-
+    #if exam label has not yet printed
+    if print_check == 0
+      redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (encounter.type.name.upcase rescue "") ==
+        "TREATMENT"
+    end
     
 		if params[:prescription].blank?
 			#next if params[:formulation].blank?
@@ -597,6 +603,6 @@ class PrescriptionsController < ApplicationController
 			redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
 		end
 
-	end rescue nil
+	end
     
 end
