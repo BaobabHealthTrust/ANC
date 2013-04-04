@@ -204,7 +204,7 @@
   <% sup = ["", "st", "nd", "rd", "th", "th", "th"] %>
 
   <% 5.times do |counter| %>
-    <% options[:condition] = "tstFormElements[#{counter + 3}].value != '' && tstFormElements[#{counter + 3}].value != 'None'" if counter > 0 %>
+    <% options[:condition] = "tstFormElements[#{counter + 3}].value != '' && tstFormElements[#{counter + 3}].value.toLowerCase().trim() != 'none'" if counter > 0 %>
     <% options[:optional] = 'true' if counter > 0 %>
     <% counter += 1 %>
     <% options[:helpText] = (counter > 1 ? "#{counter}<sup>#{sup[counter]}</sup> " : "") + "Danger Sign/Symptom" %>
