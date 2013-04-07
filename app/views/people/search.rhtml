@@ -291,8 +291,8 @@ end -%>
       li.className = ((i + 1)/2 > 0 ? "odd" : "even");
       li.setAttribute("tstvalue", <%=data.person_id%>);
       li.setAttribute("pos", i);
-      if(people[pos]["Home District"]){
-        li.innerHTML = people[pos]["Name"] + " (" + people[pos]["Gender"] + ") " +people[pos]["Birthdate"] + ", " + people[pos]["Home District"];
+      if(people[pos]["Current Residence"]){
+        li.innerHTML = people[pos]["Name"] + " (" + people[pos]["Gender"] + ") " +people[pos]["Birthdate"] + ", " + people[pos]["Current Residence"];
       }else{
         li.innerHTML = people[pos]["Name"] + " (" + people[pos]["Gender"] + ") " + people[pos]["Birthdate"];
       }
