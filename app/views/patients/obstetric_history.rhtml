@@ -4,8 +4,33 @@
   <!--
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+  
+  twins_map = {
+    "Yes" : 1,
+    "Triplets" : 2,
+    "Quadruplet" : 3,
+    "No" : 0
+  }
 
   //-->
+  function validateParity(){
+    
+    max = parseInt(__$('enter_gravida').value) + parseInt(twins_map[__$('multiple_pregnancy').value])  - 1;
+    
+    __$('touchscreenInput' + tstCurrentPage).setAttribute('absoluteMax', max)
+
+  }
+
+  function validateAbortions(){
+
+    max = parseInt(__$('enter_gravida').value) - (parseInt(__$('enter_number_of_deliveries').value) - parseInt(twins_map[__$('multiple_pregnancy').value]))  - 1;
+  
+  __$('enter_number_of_abortions').setAttribute('validationRule', '[' + max + ']');
+  
+    __$('enter_number_of_abortions').setAttribute('validationMessage', 'Expected value is ' + max); 
+
+  }
+  
 </script>
 
 
@@ -38,11 +63,11 @@
 
   <%= touch_select_tag "MULTIPLE GESTATION", @patient,
     options_for_select([["", ""],
-                        ["Yes", "Yes"],
-                        ["No", "No"],
-                        ["Triplets", "Triplets"],
-                        ["Quadruplet", "Quadruplet"]
-                      ]),
+      ["Yes", "Yes"],
+      ["No", "No"],
+      ["Triplets", "Triplets"],
+      ["Quadruplet", "Quadruplet"]
+    ]),
     {:id => "multiple_pregnancy",
     :helptext => "Have you ever had twins?",
     :condition => "__$('enter_gravida').value > 1"
@@ -52,20 +77,18 @@
     :helptext => "Enter Number Of Deliveries",
     :tt_pageStyleClass => "NumbersWithUnknown",
     :condition => "__$('enter_gravida').value > 1",
-    :tt_onLoad => "if(__$('multiple_pregnancy').value == 'No'){__$('touchscreenInput' + " +
-      "tstCurrentPage).setAttribute('absoluteMax', (__$('enter_gravida').value - 1))}",
+    :tt_onLoad => "validateParity()",
     :tt_onUnLoad => "if(__$('enter_number_of_deliveries').value == 0){
     __$('ever_had_still_births').value = 'No';
     __$('ever_had_symphysiotomy').value = 'No';
     __$('ever_had_c_sections').value = 'No';
     __$('ever_had_a_vacuum_extraction').value = 'No';
     }; if(__$('multiple_pregnancy').value.toLowerCase()=='no'){
-      __$('enter_number_of_abortions').setAttribute('validationRule', '[' + (parseInt(__$('enter_gravida').value) -
-        parseInt(__$('enter_number_of_deliveries').value) - 1) + ']');
-      __$('enter_number_of_abortions').setAttribute('validationMessage', 'Expected value is ' + (parseInt(__$('enter_gravida').value) -
-        parseInt(__$('enter_number_of_deliveries').value) - 1));
-    } else {__$('enter_number_of_abortions').removeAttribute('validationRule'); " +
-    "__$('enter_number_of_abortions').removeAttribute('validationMessage')}"
+    __$('enter_number_of_abortions').setAttribute('validationRule', '[' + (parseInt(__$('enter_gravida').value) -
+    parseInt(__$('enter_number_of_deliveries').value) - 1) + ']');
+    __$('enter_number_of_abortions').setAttribute('validationMessage', 'Expected value is ' + (parseInt(__$('enter_gravida').value) -
+    parseInt(__$('enter_number_of_deliveries').value) - 1));
+    } else {validateAbortions()}"
   } %>
 
   <%= touch_numeric_tag "NUMBER OF ABORTIONS", @patient, nil,
