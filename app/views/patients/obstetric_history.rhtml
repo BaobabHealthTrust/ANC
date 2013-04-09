@@ -90,6 +90,7 @@
     __$('ever_had_c_sections').value = 'No';
     __$('ever_had_a_vacuum_extraction').value = 'No';
     }; __$('enter_number_of_abortions').setAttribute('absoluteMax', (parseInt(__$('enter_gravida').value - parseInt(__$('enter_number_of_deliveries').value) -1 )));
+      __$('enter_number_of_abortions').setAttribute('absoluteMin', (parseInt(__$('enter_gravida').value - parseInt(__$('enter_number_of_deliveries').value) -1 )));
     __$('enter_number_of_abortions').setAttribute('validationRule', '[' + (parseInt(__$('enter_gravida').value) -
     parseInt(__$('enter_number_of_deliveries').value) - 1) + ']');
     __$('enter_number_of_abortions').setAttribute('validationMessage', 'Expected value is ' + (parseInt(__$('enter_gravida').value) -
