@@ -133,7 +133,7 @@
     @delivery_modes = ["", "Spontaneous vaginal delivery", "Caesarean Section", "Vacuum Extraction Delivery", "Breech"]
   %>
 
-    <%= touch_numeric_tag "NUMBER OF DELIVERED CHILDREN", @patient, nil,
+    <%= touch_numeric_tag "NUMBER OF CHILDREN IN PREGNANCY", @patient, nil,
     {:id => "gestation_type#{e}",
       :helptext => "#{e}#{indice} Pregnancy Number of Children",
       :tt_pageStyleClass => "NumbersWithUnknown",
