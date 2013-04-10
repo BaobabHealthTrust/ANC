@@ -34,13 +34,15 @@ class Bart2Connection::PatientIdentifier < ActiveRecord::Base
 
       passed = {
         "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
-          "age_estimate"=>"",
+          "age_estimate"=> birthdate_estimated,
           "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
           "birth_month"=> birthdate_month ,
-          "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
+          "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["address1"],
             "address2"=>p["person"]["data"]["addresses"]["address2"],
             "city_village"=>p["person"]["data"]["addresses"]["city_village"],
-            "county_district"=>""},
+            "state_province"=>p["person"]["data"]["addresses"]["state_province"],
+            "neighborhood_cell"=>p["person"]["data"]["addresses"]["neighborhood_cell"],
+            "county_district"=>p["person"]["data"]["addresses"]["county_district"]},
           "gender"=> gender ,
           "patient"=>{"identifiers"=>{"National id" => p["person"]["value"]}},
           "birth_day"=>birthdate_day,
@@ -49,8 +51,8 @@ class Bart2Connection::PatientIdentifier < ActiveRecord::Base
             "given_name"=>p["person"]["given_name"],
             "middle_name"=>""},
           "birth_year"=>birthdate_year},
-        "filter_district"=>"Chitipa",
-        "filter"=>{"region"=>"Northern Region",
+        "filter_district"=>"",
+        "filter"=>{"region"=>"",
           "t_a"=>""},
         "relation"=>""
       }

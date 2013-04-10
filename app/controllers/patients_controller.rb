@@ -224,8 +224,8 @@ class PatientsController < ApplicationController
     }
 
     session_date = session[:datetime] || Date.today
-    
-    @next_task = main_next_task(Location.current_location.id, @patient, session_date.to_date) rescue nil        
+   
+    @next_task = main_next_task(Location.current_location.id, @patient, session_date.to_date)     
 
     # raise current_user.activities.collect{|u| u.downcase}.include?("update outcome").to_yaml
 
@@ -479,7 +479,9 @@ class PatientsController < ApplicationController
     @encounters = @patient.encounters.find(:all, 
       :conditions => ["DATE(encounter_datetime) = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]) rescue []
 
-    @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters rescue [] # .collect{|e| e.type.name}
+    @external_encounters = []
+
+    @external_encounters = Bart2Connection::PatientIdentifier.search_by_identifier(@anc_patient.national_id).patient.encounters rescue [] if @anc_patient.hiv_status.downcase == "positive" # .collect{|e| e.type.name}
 
     @encounters = @encounters + @external_encounters
 
