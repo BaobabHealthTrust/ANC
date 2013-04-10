@@ -66,7 +66,7 @@
       <div style="display: table-row">
         <div style="display: table-cell">
           <% if current_user.activities.include?("Lab Results") %>
-            <button class="blue" onclick="<%= (@all_encounters.include?("LAB RESULTS") ? 
+            <button class="blue" onclick="<%= (@all_encounters.include?("LAB RESULTS") ?
                 "window.location = '/encounters/new/lab_results?patient_id=#{@patient.id}&update=true'" :
                         "window.location = '/encounters/new/lab_results?patient_id=#{@patient.id}'") %> ">
               <span><%= (@all_encounters.include?("LAB RESULTS") ? "Update Lab Results" : "Lab Results") %></span>
@@ -138,7 +138,7 @@
       <button onclick="window.location = '/patients/print_exam_label/?patient_id=<%= @patient.id %>'"
               style="float: right; margin: 10px; margin-right: 0px;">
         <span>Print Lab Results</span>
-      </button>         
+      </button>
     <% end %>
 
     <% if current_user.activities.include?("ANC Examination") %>
@@ -147,10 +147,17 @@
         <span>Print Visit Summary</span>
       </button>
     <% end %>
+
+    <button onclick="window.location = '/patients/national_id_label?patient_id=<%= @patient.id %>'"
+            style="float: right; margin: 10px; margin-right: 0px;">
+      <span>Print Registration</span>
+    </button>
+
+
 <!--button class="green" onclick="window.location = '/encounters/diagnoses_index?patient_id=<%= @patient.id %>'"
-      style="float: right; margin: 10px;">
+style="float: right; margin: 10px;">
 <span>
-  Finish
+Finish
 </span>
 </button-->
   </div>
