@@ -40,6 +40,8 @@
     }
   }
 
+  var check = 0;
+
   //-->
 </script>
 
@@ -204,7 +206,7 @@
   <% sup = ["", "st", "nd", "rd", "th", "th", "th"] %>
 
   <% 5.times do |counter| %>
-    <% options[:condition] = "tstFormElements[#{counter + 3}].value != '' && tstFormElements[#{counter + 3}].value.toLowerCase().trim() != 'none'" if counter > 0 %>
+    <% options[:condition] = "check != 'none' && tstFormElements[#{counter + 3}].value != '' && tstFormElements[#{counter + 3}].value.toLowerCase().trim() != 'none'" if counter > 0 %>
     <% options[:optional] = 'true' if counter > 0 %>
     <% counter += 1 %>
     <% options[:helpText] = (counter > 1 ? "#{counter}<sup>#{sup[counter]}</sup> " : "") + "Danger Sign/Symptom" %>
@@ -215,7 +217,7 @@
 
     <% 
     if (counter) < 5
-      options[:tt_onUnLoad] = "selectedSigns += (selectedSigns.length > 0 ? '&' : '') + 'v#{counter}=' + __$('touchscreenInput' + " + 
+      options[:tt_onUnLoad] = "check = __$('touchscreenInput' + tstCurrentPage).value.toLowerCase(); selectedSigns += (selectedSigns.length > 0 ? '&' : '') + 'v#{counter}=' + __$('touchscreenInput' + " +
         "tstCurrentPage).value.replace(/\\s/g, '+'); if(__$('touchscreenInput' + tstCurrentPage).getAttribute('position')){" + 
         "var url = __$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).getAttribute('ajaxURL'); " + 
         "__$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).setAttribute('ajaxURL', " + 
