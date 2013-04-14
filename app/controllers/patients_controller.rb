@@ -954,7 +954,7 @@ class PatientsController < ApplicationController
     @secondary_phone = @anc_patient.phone_numbers["Home Phone Number"] rescue ''
 
     @occupation = @anc_patient.get_attribute("occupation") rescue ''
-    render :template => 'patients/demographics', :layout => 'menu'
+    render :template => 'patients/demographics'
 
   end
 

@@ -22,7 +22,7 @@
     border-style: solid;
     border-width: 0px 1px 0px 0px;
   }
- .data {
+  .data {
     font-size: 25px;
     text-align: left;
     border-style: solid;
@@ -75,92 +75,92 @@
 
     <div>
 
-     <table>
+      <table>
         <tr>
           <td class='title-top'>
-              First Name
+            First Name
           </td>
           <td class='data-top'><%= @first_name %></td>
-		  <td><a href="edit_demographics?patient_id=<%=@patient.id%>&field=first_name&person_id=<%=
-               @patient.id %>&cat=<%= (params["cat"] rescue "") %>&given_name=<%= @first_name %>">Edit</a></td>
+          <td><a href="edit_demographics?patient_id=<%=@patient.id%>&field=first_name&person_id=<%=
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&given_name=<%= @first_name %>">Edit</a></td>
         </tr>
         <tr>
           <td class='title'>Last Name</td>
           <td class='data'><%=@last_name%></td>
           <td><a href="edit_demographics?patient_id=<%=@patient.id%>&field=last_name&person_id=<%=
-                               @patient.id %>&cat=<%= (params["cat"] rescue "") %>&family_name=<%= @last_name %>">Edit</a></td>
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&family_name=<%= @last_name %>">Edit</a></td>
         </tr>
-       
+
         <tr>
           <td class='title'>Birthdate</td>
           <td class='data'><%=@birthdate%></td>
           <td><a href="edit_demographics?patient_id=<%=@patient.id%>&field=birthdate&person_id=<%=
-                               @patient.id %>&cat=<%= (params["cat"] rescue "") %>">Edit</a></td>
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>">Edit</a></td>
         </tr>
         <tr>
           <td class='title'>Gender</td>
           <td class='data'><%=@gender%></td>
           <td><a href="edit_demographics?patient_id=<%=@patient.id%>&field=gender&person_id=<%=
-                               @patient.id %>&cat=<%= (params["cat"] rescue "") %>&gender=<%= (@gender == "Male" ? "M" : "F") %>">Edit</a></td>
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&gender=<%= (@gender == "Male" ? "M" : "F") %>">Edit</a></td>
         </tr>
 
         <tr>
-            <td class='title'>Nationality</td>
-            <td class ='data'> <%= @anc_patient.nationality %></td>
-			<td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
-                                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=citizenship">Edit</a></td>
-          </tr>
-					<tr>
-            <td class='title'>Home District</td>
-            <td class='data'> <%= @anc_patient.home_district %></td>
-			<td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
-                                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=home_district">Edit</a></td>
-          </tr>
-					<tr>
-            <td class='title'>Home Traditional Authority</td>
-            <td class='data'><%= @anc_patient.home_ta %></td>
-			<td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
-                                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=home_district">Edit</a></td>
-          </tr>
-					<tr>
-            <td class='title'>Home Village</td>
-            <td class='data'> <%= @anc_patient.home_village %></td>
- 			<td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
-                                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=home_village">Edit</a></td>
-          </tr>
-					<tr>
-            <td class='title'>Current District</td>
-            <td class='data'> <%= @anc_patient.current_district %></td>
-			<td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
-                                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=current_district"> Edit</a></td>
-         <tr>
-            <td class='title'>Current Residence</td>
-            <td class='data'> <%= @anc_patient.current_address2 %></td>
-			<td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
-                                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=city_village"> Edit</a></td>
-          </tr>
+          <td class='title'>Nationality</td>
+          <td class ='data'> <%= @anc_patient.nationality %></td>
+          <td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=citizenship">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Home District</td>
+          <td class='data'> <%= @anc_patient.home_district %></td>
+          <td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=home_district">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Home Traditional Authority</td>
+          <td class='data'><%= @anc_patient.home_ta %></td>
+          <td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=home_district">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Home Village</td>
+          <td class='data'> <%= @anc_patient.home_village %></td>
+          <td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=home_village">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Current District</td>
+          <td class='data'> <%= @anc_patient.current_district %></td>
+          <td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=current_district"> Edit</a></td>
+        <tr>
+          <td class='title'>Current Residence</td>
+          <td class='data'> <%= @anc_patient.current_address2 %></td>
+          <td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=city_village"> Edit</a></td>
+        </tr>
 
-          <tr>
-            <td class='title'>Plot / Landmark</td>
-            <td class='data'> <%= @anc_patient.current_address1 %></td>
-			<td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
-                                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=landmark"> Edit</a></td>
-          </tr>
+        <tr>
+          <td class='title'>Plot / Landmark</td>
+          <td class='data'> <%= @anc_patient.current_address1 %></td>
+          <td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
+                 @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=landmark"> Edit</a></td>
+        </tr>
 
 
-          <!--tr>
-            <td class='title'> Primary Phone</td
-            <td class='data'><%=@primary_phone%></td>
+        <!--tr>
+          <td class='title'> Primary Phone</td
+          <td class='data'><%=@primary_phone%></td>
 			<td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
-          @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=primary_phone">Edit</a></td>
-          </tr>
-          <tr>
-            <td class='title'>Occupation</td>
-            <td class='data'><%=@occupation%><br/> </td>
+        @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=primary_phone">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Occupation</td>
+          <td class='data'><%=@occupation%><br/> </td>
 			<td><a href="edit_demographics?patient_id=<%=@patient.id%>&person_id=<%=
-          @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=occupation">Edit</a></td>
-          </tr-->
-        
+        @patient.id %>&cat=<%= (params["cat"] rescue "") %>&field=occupation">Edit</a></td>
+        </tr-->
+
       </table>
 
     </div>
@@ -173,7 +173,13 @@
     <button id="finishButton" class="button navButton green"
             onclick="if (tt_cancel_destination) window.location = tt_cancel_destination;">
       <span>Finish</span>
-    </button>    
+    </button>
+
+    <button onclick="window.location = '/patients/national_id_label?patient_id=<%= @patient.id %>'"
+            style="float: right;">
+      <span>Print Registration</span>
+    </button>
+
   </div>
   <div id="tt_extraButtons"/>
 </div>
