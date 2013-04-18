@@ -17,6 +17,12 @@
 var current_generic = null;
 var selectedGenerics = {};
 var current_diagnosis = null;
+var duration = false;
+var dosage = false;
+var drug = false;
+var frequency = false;
+var current_drug = "";
+var selectCheck = {};
 
 var search_path = (typeof(search_path) != "undefined" ? search_path : "/prescriptions/load_frequencies_and_dosages");
 
@@ -43,6 +49,68 @@ function generateGenerics(){
 
     $("clearButton").style.display = "none";
 
+    var onmousedown_event = $("nextButton").onmousedown;
+
+    $("nextButton").onmousedown = function(){
+
+        var onclick = $("nextButton").onmousedown
+
+        var keys_arr = [];
+        var messageString = "Missing Fields For Drug;</br>";
+        var drugs = $("ulDrugs").getElementsByTagName("li");
+        var tempHash = {};
+
+        for (var drg=0; drg < drugs.length; drg ++){
+            check = selectCheck["undefined"];
+            if(selectCheck[drugs[drg].innerHTML] != check){
+                var condition = (drugs[drg].style.backgroundColor == "lightblue") && (selectCheck[drugs[drg].innerHTML]["dosage"] || selectCheck[drugs[drg].innerHTML]["frequency"] || selectCheck[drugs[drg].innerHTML]["duration"]);
+            }else{
+                var condition = false;
+            }
+
+            if ((drugs[drg].style.backgroundColor == "yellowgreen") || (condition)){
+                tempHash[drugs[drg].innerHTML] = {};
+                tempHash[drugs[drg].innerHTML]["drug"] = selectCheck[drugs[drg].innerHTML]["drug"];                
+                tempHash[drugs[drg].innerHTML]["dosage"] = selectCheck[drugs[drg].innerHTML]["dosage"];
+                tempHash[drugs[drg].innerHTML]["frequency"] = selectCheck[drugs[drg].innerHTML]["frequency"];
+                tempHash[drugs[drg].innerHTML]["duration"] = selectCheck[drugs[drg].innerHTML]["duration"];
+            }
+        }
+
+        for (var key in tempHash){
+            keys_arr.push(key);
+            var missingOnThisKey = [];
+
+            if (!tempHash[key]["drug"]){
+                missingOnThisKey.push("drug");
+            }
+
+            if (!tempHash[key]["dosage"]){
+                missingOnThisKey.push("dosage");
+            }
+
+            if (!tempHash[key]["frequency"]){
+                missingOnThisKey.push("frequency");
+            }
+
+            if (!tempHash[key]["duration"]){
+                missingOnThisKey.push("duration");
+            }
+
+            if (missingOnThisKey.length > 0){
+                var missingOnKeyString = key + ":    " + missingOnThisKey.join(",") + "</br>";
+                messageString += missingOnKeyString;
+            }
+        }
+
+        if (messageString == "Missing Fields For Drug;</br>" ){
+            $("nextButton").onmousedown = onmousedown_event;
+            gotoNextPage();
+        }else{
+            showMessage(messageString, false, false);
+        }
+    }
+    
     var parent_container = document.createElement("div");
     parent_container.id = "parent_container";
     parent_container.style.position = "absolute";
@@ -79,7 +147,7 @@ function generateGenerics(){
 
     mainDiv.appendChild(topBannerDiv);
 
-    // Selection area for Diagnoses    
+    // Selection area for Diagnoses
     var diagnoses = document.createElement("select");
     diagnoses.id = "diagnoses";
     diagnoses.style.fontSize = "1em";
@@ -335,6 +403,7 @@ function generateGenerics(){
         td1.bgColor = "#DDDDDD";
 
         td1.onclick = function(){
+            
             var rdo = this.getElementsByTagName("input");
 
             if(rdo[0]){
@@ -348,6 +417,7 @@ function generateGenerics(){
         rdo1.name = "group1";
 
         rdo1.onclick = function(){
+          
             var tds = document.getElementsByName("group1");
 
             for(var k = 0; k < tds.length; k++){
@@ -402,9 +472,9 @@ function generateGenerics(){
 
         td2.onclick = function(){
             var rdo = this.getElementsByTagName("input");
-
             if(rdo[0]){
                 if(rdo[0].type=="radio") rdo[0].click();
+                selectCheck[current_drug]["duration"] = true;
             }
         }
 
@@ -417,7 +487,6 @@ function generateGenerics(){
 
             for(var k = 0; k < tds.length; k++){
                 var p = String(tds[k].value).match(/\d$/);
-
                 if(p){
                     $("group2_" + (p==0?10:p)).bgColor = "";
                 }
@@ -441,7 +510,7 @@ function generateGenerics(){
                     "frequency":null,
                     "duration":this.value
                 };
-            }            
+            }
             
             this.offsetParent.bgColor = "#add8e6";
         }
@@ -470,16 +539,33 @@ function generateGenerics(){
 
         li.setAttribute("concept_id", generics[d][1])
         li.onclick = function(){
+            
             loadDosageFrequency(this.getAttribute("concept_id"));
 
             current_generic = this.innerHTML.toUpperCase();
             
             if(this.style.backgroundColor == "lightblue"){
+                
                 if(selectedGenerics[current_diagnosis]){
                     delete selectedGenerics[current_diagnosis][current_generic];
                 }
-            } 
+            }
 
+            current_drug = this.innerHTML
+
+            var check = selectCheck["undefined"]
+                        
+            if (selectCheck[current_drug] == check){
+                selectCheck[current_drug] = {};
+                selectCheck[current_drug]["drug"] = true
+            }
+
+            // if (this.checked == true){
+            //   if (selectCheck.hasItem(this.innerHTML)){
+            //     delete selectCheck.items[this.innerHTML]
+            //}
+            //}
+            
             var tds = document.getElementsByName("group2");
 
             for(var k = 0; k < tds.length; k++){
@@ -499,7 +585,7 @@ function generateGenerics(){
                         
                         if(rdos2[0])
                             rdos2[0].checked = false;
-                    }                     
+                    }
                 }
 
             }
@@ -575,7 +661,10 @@ function generateGenerics(){
             }
         }
 
-        li.onclick = function(){            
+        li.onclick = function(){
+            
+            selectCheck[current_drug]["frequency"] = true;
+            
             for(var j = 0; j < $('ulFreqs').childNodes.length; j++){
                 $('ulFreqs').childNodes[j].style.backgroundColor = "";
                 if(j%2>0){
@@ -606,15 +695,16 @@ function generateGenerics(){
         }
 
         ulFreqs.appendChild(li);
+       
     }
 
 }
 
 /*
- * This method filters the search list to accomodate only those that are similar
- * to the typed text
- * 
- */
+* This method filters the search list to accomodate only those that are similar
+* to the typed text
+* 
+*/
 function searchDrug(){
     $('ulDrugs').innerHTML = "";
     current_generic = null;
@@ -644,6 +734,15 @@ function searchDrug(){
             li.onclick = function(){
                 loadDosageFrequency(this.getAttribute("concept_id"));
 
+                current_drug = this.innerHTML;
+
+                var check = selectCheck["undefined"]
+
+                if (selectCheck[current_drug] == check){
+                    selectCheck[current_drug] = {};
+                    selectCheck[current_drug]["drug"] = true
+                }
+            
                 current_generic = this.innerHTML.toUpperCase();
 
                 if(this.style.backgroundColor == "lightblue"){
@@ -733,19 +832,19 @@ function searchDrug(){
 }
 
 /*
- *This method calls the ajax method for loading dosages and frequencies
- */
+*This method calls the ajax method for loading dosages and frequencies
+*/
 function loadDosageFrequency(concept_id){
     $('ulDoses').innerHTML = "";
     ajaxDFRequest(search_path + "?concept_id=" + concept_id);
 }
 
 /*
- * This function exists in the TouchScreen toolkit. Reproduced here to customise
- * it for the specifics of the interface. It is used here to load Dosages and
- * Frequencies which are filled on demand
- * 
- */
+* This function exists in the TouchScreen toolkit. Reproduced here to customise
+* it for the specifics of the interface. It is used here to load Dosages and
+* Frequencies which are filled on demand
+* 
+*/
 function ajaxDFRequest(aUrl) {
     var httpRequest = new XMLHttpRequest();
     httpRequest.onreadystatechange = function() {
@@ -791,6 +890,9 @@ function handleDFResult(aXMLHttpRequest) {
             }
             
             li.onclick = function(){
+                
+                selectCheck[current_drug]["dosage"] = true;
+                
                 for(var j = 0; j < $('ulDoses').childNodes.length; j++){
                     $('ulDoses').childNodes[j].style.backgroundColor = "";
                     if(j%2>0){
@@ -914,8 +1016,8 @@ function removeGenerics(){
 }
 
 /*
- * We create a custom keyboard for the interface to fit on the available space
- */
+* We create a custom keyboard for the interface to fit on the available space
+*/
 function showFixedKeyboard(ctrl, global_control){
     var full_keyboard = "full";
     
@@ -952,6 +1054,7 @@ function showFixedKeyboard(ctrl, global_control){
         td5.className = "btn";
 
         td5.onclick = function(){
+            
             if(!this.innerHTML.match(/^$/)){
                 $(global_control).value += this.innerHTML.toProperCase();
                 $(global_control).value = $(global_control).value.toProperCase();
@@ -978,7 +1081,7 @@ function showFixedKeyboard(ctrl, global_control){
         td1.bgColor = "#EEEEEE"
         td1.width = "30px";
         td1.className = "btn";
-
+            
         td1.onclick = function(){
             if(!this.innerHTML.match(/^$/)){
                 $(global_control).value += this.innerHTML.toProperCase();
@@ -1045,9 +1148,9 @@ function showFixedKeyboard(ctrl, global_control){
                 searchDrug();
             }
             
-        } else if(row3[i].trim() == "stat<br />dose"){            
-            td3.style.fontSize = "0.9em";            
-            td3.style.padding = "0px";           
+        } else if(row3[i].trim() == "stat<br />dose"){
+            td3.style.fontSize = "0.9em";
+            td3.style.padding = "0px";
             td3.style.fontWeight = "bold";
             
             td3.onclick = function(){
@@ -1058,7 +1161,7 @@ function showFixedKeyboard(ctrl, global_control){
                 if ($("group2_1"))
                     $("group2_1").click();
             }
-        } else {            
+        } else {
 
             td3.onclick = function(){
                 if(!this.innerHTML.match(/^$/)){
@@ -1081,9 +1184,9 @@ function showFixedKeyboard(ctrl, global_control){
 }
 
 /*
- * Sometimes it may be necessary only to view the drugs that have been selected 
- * so far. This is where this function comes into play
- */
+* Sometimes it may be necessary only to view the drugs that have been selected 
+* so far. This is where this function comes into play
+*/
 function showSelectedDrugsOnly(){
     $('ulDrugs').innerHTML = "";
     current_generic = null;
@@ -1112,6 +1215,7 @@ function showSelectedDrugsOnly(){
 
                 li.setAttribute("concept_id", generics[d][1])
                 li.onclick = function(){
+                    
                     loadDosageFrequency(this.getAttribute("concept_id"));
 
                     current_generic = this.innerHTML.toUpperCase();
