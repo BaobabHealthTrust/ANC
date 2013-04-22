@@ -1250,8 +1250,15 @@ module ANCService
     end  
 
     def address
-      "#{self.person.addresses.first.city_village}" rescue nil
+      address = self.current_district rescue ""
+      if address.blank?
+        address = self.current_address2 rescue ""
+      else
+        address += ", " + self.current_address2 unless self.current_address2.blank?
+      end
+     address
     end
+    
     def first_name
       "#{self.person.names.first.given_name}".titleize rescue nil
     end
