@@ -356,7 +356,7 @@ class GenericPeopleController < ApplicationController
 
 	# Regions containing the string given in params[:value]
   def region_of_origin
-    region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
+    region_conditions = ["name LIKE (?)", "%#{params[:value]}%"]
 
     regions = Region.find(:all,:conditions => region_conditions, :order => 'region_id')
     regions = regions.map do |r|
@@ -366,7 +366,7 @@ class GenericPeopleController < ApplicationController
   end
   
   def region
-    region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
+    region_conditions = ["name LIKE (?)", "%#{params[:value]}%"]
 
     regions = Region.find(:all,:conditions => region_conditions, :order => 'region_id')
     regions = regions.map do |r|
@@ -380,7 +380,7 @@ class GenericPeopleController < ApplicationController
     # Districts containing the string given in params[:value]
   def district
     region_id = Region.find_by_name("#{params[:filter_value]}").id
-    region_conditions = ["name LIKE (?) AND region_id = ? ", "#{params[:search_string]}%", region_id]
+    region_conditions = ["name LIKE (?) AND region_id = ? ", "%#{params[:search_string]}%", region_id]
 
     districts = District.find(:all,:conditions => region_conditions, :order => 'name')
     districts = districts.map do |d|
