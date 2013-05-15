@@ -1,5 +1,5 @@
 class EncountersController < ApplicationController
-  before_filter :find_patient, :except => [:void]
+  before_filter :find_patient, :except => [:void, :probe_lmp]
 
   def create
     @patient = Patient.find(params[:encounter][:patient_id])
@@ -287,6 +287,19 @@ class EncountersController < ApplicationController
 
     render :text => "<li>" + @results.join("</li><li>") + "</li>"
     
+  end
+
+  def probe_lmp
+    #a quick probe of LMP for Maternity obstetric history
+    national_id = params[:national_id]
+    patient_id = PatientIdentifier.find_by_identifier(national_id).patient_id rescue nil
+    concept_id = ConceptName.find_by_name("Last Menstrual Period").concept_id rescue nil
+    result = Hash.new
+    lmp =  Observation.find(:last, :order => ["obs_datetime"], :conditions => ["person_id = ? AND concept_id = ? AND voided = 0 AND obs_datetime > ?",
+      patient_id, concept_id, 9.months.ago]).answer_string.to_date rescue nil if patient_id.present? and concept_id.present?
+
+    result["lmp"] = lmp if lmp
+    render :text => result.to_json
   end
 
 end
