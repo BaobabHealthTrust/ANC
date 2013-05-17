@@ -171,6 +171,7 @@
     :helpText => "Gestation (months)",
     :field_type => "number",
     :tt_pageStyleClass => "NumbersOnly",
+    :tt_onLoad => "showCategory('Current Pregnancy');",
     :tt_onUnload => "setDate(__$('touchscreenInput' + tstCurrentPage).value);",
     :max => 6,
     :absoluteMax => 10
@@ -183,6 +184,7 @@
                         ["Quadruplet", "Quadruplet"],
                         ["Unknown", "Unknown"]]),
     {:id => "multiple_gestation",
+    :tt_onLoad => "showCategory('Current Pregnancy');",
     :helptext => "Is This a Multiple Pregnancy?" } %>
 
   <%#= touch_select_tag "Week of First Visit", @patient,
@@ -195,7 +197,7 @@
     {:id => "planned_delivery_place",
     :helptext => "Planned delivery place",
     :ajaxURL => "/encounters/static_locations?search_string=",
-    :tt_onLoad => "addHereButton()",
+    :tt_onLoad => "addHereButton(); showCategory('Current Pregnancy');",
     :tt_onUnLoad => "removeHereButton()" } %>
 
   <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], 
@@ -204,6 +206,7 @@
       ["Not given today or during current pregnancy", "Not given today or during current pregnancy"]
     ]),
     {:id => "bed_net",
+    :tt_onLoad => "showCategory('Current Pregnancy');",
     :helptext => "Bed Net" } %>
 
   <%#= touch_date_tag "Date received", @patient, nil,
@@ -217,6 +220,7 @@
     :helptext => "Previous TTV Doses before this pregnancy",
     :field_type => "number",
     :absoluteMin => "0",
+    :tt_onLoad => "showCategory('Current Pregnancy');",
     :max => "5",
     # :flag => '{"condition":"^1$|^0$","message":"TT is inadequate"}',
     :tt_pageStyleClass => "NumbersOnly"

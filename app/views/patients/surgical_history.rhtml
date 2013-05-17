@@ -32,12 +32,15 @@
   <%= touch_text_field_tag "Procedure Done", @patient, nil,
     {:id => "surgical1",
     :helptext => "Surgical procedure done before",
+    :tt_onLoad => "showCategory('Surgical History');",
+    :ajaxURL => "/encounters/procedure_done?search_string=",
     :condition => "__$('surgicals_available').value.toUpperCase() == 'YES'"
   } %>
 
   <%= touch_date_tag "Date received", @patient, nil,
     {:id => "date_done1",
     :helptext => "Date Procedure Done",
+    :tt_onLoad => "showCategory('Surgical History');",
     :condition => "__$('surgicals_available').value.toUpperCase() == 'YES'" } %>
 
   <% (2..8).each do |e| %>
@@ -62,13 +65,15 @@
       {:id => "surgical#{e}",
       :helptext => "#{e}#{indice} Surgical procedure done before",
       :condition => "__$('surgical#{e - 1}').value != '' && __$('surgicals_available').value.toUpperCase() == 'YES'",
-      :tt_onLoad => "setTimeout(updateNextFinish, 20)",
+      :ajaxURL => "/encounters/procedure_done?search_string=",
+      :tt_onLoad => "showCategory('Surgical History'); setTimeout(updateNextFinish, 20)",
       :optional => "true"
     } %>
 
     <%= touch_date_tag "Date received", @patient, nil,
       {:id => "date_done#{e}",
       :helptext => "Date #{e}#{indice} Procedure Done",
+      :tt_onLoad => "showCategory('Surgical History');",
       :condition => "__$('surgical#{e}').value != '' && __$('surgicals_available').value.toUpperCase() == 'YES'"
     } %>
 

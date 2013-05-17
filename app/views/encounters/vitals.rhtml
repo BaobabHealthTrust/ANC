@@ -8,6 +8,9 @@
     padding:10px;
     font-size:1.8em;
   }
+  #charts {
+    position: absolute;
+  }
   .title {
     text-decoration:underline;
     margin-right:10px;
@@ -61,7 +64,8 @@
       showWeightForHeight();
     }
     document.getElementById('inputFrame'+tstCurrentPage).innerHTML = '<div id="summary">' + displayText + '</div><div id="charts" style="height:185px;margin:2px 6px 6px;padding:2px;width:380px;"></div>' ;
-    jQuery('#charts').empty().load('/patients/graph/<%= @patient.id -%>?data=weight');
+    jQuery('#charts').empty().load('/patients/graphs/<%= @patient.id -%>?data=weight&currentWeight=' + currentWeight);
+
   }
         
   function showWeightHeightForAge(){
@@ -115,7 +119,7 @@
 
     document.getElementById('bmi').value = currentBmi;
 
-    displayText = "<div style='padding: 50px;'><span class='title'>BMI:</span>";
+    displayText = "<div style='padding: 10px;'><span class='title'>BMI:</span>";
     if (currentBmi > 40.0) {
       displayText += "<span class=''>" + currentBmi + "</span>" +
         "<br/><br/><span>Obesity Class III</span>";
@@ -285,6 +289,7 @@ end
           :absoluteMax => 228,
           :condition => "if(#{options.length} > 2){getSelected().match(/Height/)}else{true}",
           :units => 'cm',
+          :tt_onLoad  => "showCategory('Vitals');",
           :validationRule => "^([0-9]+)|Unknown$",
           :validationMessage => "You must enter numbers only (for example 157)",
           :tt_pageStyleClass => "Numeric NumbersWithUnknown"} %>
@@ -306,7 +311,7 @@ end
           :helptext => "Systolic Blood Pressure (mm Hg)",
           :field_type => "number",
           :tt_pageStyleClass => "NumbersWithUnknown",
-          :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
+          :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100); showCategory('Vitals');",
           :tt_onUnLoad => "clearTimeout(timedEvent); __$('diastolic_blood_pressure').setAttribute('absoluteMax', __$('systolic_blood_pressure').value)",
           :absoluteMin => 1,
           :min => 110,
@@ -325,7 +330,7 @@ end
           :helptext => "Diastolic Blood Pressure (mm Hg)",
           :field_type => "number",
           :tt_pageStyleClass => "NumbersWithUnknown",
-          :tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100);",
+          :tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100); showCategory('Vitals');",
           :tt_onUnLoad => "clearTimeout(timedEvent);",
           :absoluteMin => 1,
           :min => 60,
@@ -376,8 +381,8 @@ end
   <% end %>
   <label for='showSummary'>Summary </label>
   <%= text_field_tag :showSummary, nil,
-  { 
-    :tt_onLoad => "growthIndicators()",
+    {
+    :tt_onLoad => "growthIndicators(); showCategory('Vitals');",
     :optional => "true",
     :tt_pageStyleClass => "NoControls",
     :condition => "if(__$('weight')){__$('weight').value.toLowerCase() != 'unknown'}"

@@ -307,10 +307,11 @@ class PatientsController < ApplicationController
     render :template => 'dashboards/programs', :layout => 'dashboard' 
   end
 
-  def graph
-    render :template => "graphs/#{params[:data]}", :layout => false 
+  def graphs
+    @currentWeight = params[:currentWeight]
+    render :template => "graphs/#{params[:data]}", :layout => false
   end
-
+  
   def void 
     @encounter = Encounter.find(params[:encounter_id])
     @patient = @encounter.patient

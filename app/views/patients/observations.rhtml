@@ -76,6 +76,7 @@
   <%= touch_select_tag "PRESENTATION", @patient, options_for_select(@presentation),
     {:id => "presentation",
     :helptext => "Presentation",
+    :tt_onLoad => "showCategory('ANC Examinations');",
     :tt_pageStyleClass => "NoKeyboard" }, session_date %>
 
   <% @cephalic = ["", "Right Occipito Anterior", "Left Occipito Anterior", "Unknown"] %>
@@ -83,6 +84,7 @@
   <%= touch_select_tag "Cephalic", @patient, options_for_select(@cephalic),
     {:id => "cephalic",
     :helptext => "Cephalic Type",
+    :tt_onLoad => "showCategory('ANC Examinations');",
     :tt_pageStyleClass => "NoKeyboard",
     :condition => "__$('presentation').value == 'Cephalic'" }, session_date %>
 
@@ -92,6 +94,7 @@
     {:id => "breech",
     :helptext => "Breech Type",
     :tt_pageStyleClass => "NoKeyboard",
+    :tt_onLoad => "showCategory('ANC Examinations');",
     :condition => "__$('presentation').value == 'Breech'" }, session_date %>
 
   <% @position = ["", "Vertex", "Oblique", "Transverse", "Breech"] %>
@@ -100,6 +103,7 @@
     {:id => "position",
     :helptext => "Position",
     :tt_pageStyleClass => "NoKeyboard",
+    :tt_onLoad => "showCategory('ANC Examinations');",
     :condition => "__$('presentation').value != 'Ball'"}, session_date %> 
 
 
@@ -117,6 +121,7 @@
   {:id => "vertex",
   :helptext => "Vertex Position Type",
   :field_type => "text",
+  :tt_onLoad => "showCategory('ANC Examinations');",
   :condition => "$('position').value.trim().toUpperCase() == 'VERTEX';",
   :tt_pageStyleClass => "NoKeyboard" } %>
 
@@ -133,6 +138,7 @@
   {:id => "breech",
   :helptext => "Breech Position Type",
   :field_type => "text",
+  :tt_onLoad => "showCategory('ANC Examinations');",
   :condition => "$('position').value.trim().toUpperCase() == 'BREECH';",
   :tt_pageStyleClass => "NoKeyboard" } %>
 
@@ -149,6 +155,7 @@
   {:id => "face",
   :helptext => "Face Position Type",
   :field_type => "text",
+  :tt_onLoad => "showCategory('ANC Examinations');",
   :condition => "$('position').value.trim().toUpperCase() == 'FACE';",
   :tt_pageStyleClass => "NoKeyboard" } %>
 
@@ -163,6 +170,7 @@
   {:id => "shoulder",
   :helptext => "Shoulder Position Type",
   :field_type => "text",
+  :tt_onLoad => "showCategory('ANC Examinations');",
   :condition => "$('position').value.trim().toUpperCase() == 'SHOULDER';",
   :tt_pageStyleClass => "NoKeyboard" } %>
 
@@ -171,6 +179,7 @@
       ["Fetal Movement Felt (FMF)", "Fetal Movement Felt (FMF)"]]),
     {:id => "enter_fetal_heart",
     :condition => "__$('presentation').value != 'Ball'",
+    :tt_onLoad => "showCategory('ANC Examinations');",
     :helptext => "Fetal Heart Beat" }, session_date %>
 
   <%#--------------------------------------------------------%>
@@ -181,7 +190,7 @@
     :allowFreeText => 'true',
     :ajaxURL => "/encounters/anc_diagnoses?search_string=",
     :textCase => "upper",
-    :tt_onLoad => "changeUnknownToNone();"
+    :tt_onLoad => "changeUnknownToNone(); showCategory('ANC Examinations');"
   } %>
 
   <label for='observations[][value_coded_or_text]'>Signs/Symptoms</label>
@@ -213,7 +222,7 @@
     <% options[:position] = "#{counter + 1}" %>
     <% options[:id] = "sign#{counter}" %>
 
-    <% options[:tt_onLoad] = (counter > 1 ? "__$('Unknown').style.display = 'none'; " : "") + "changeUnknownToNone();" %>
+    <% options[:tt_onLoad] = (counter > 1 ? "__$('Unknown').style.display = 'none'; " : "") + "changeUnknownToNone(); showCategory('ANC Examinations');" %>
 
     <% 
     if (counter) < 5
@@ -223,7 +232,7 @@
         "__$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).setAttribute('ajaxURL', " + 
         "url.replace('search_string=', '') + (selectedSigns.length > 0 ? selectedSigns + '&search_string=' : 'search_string='));}" 
     else
-      options[:tt_onUnLoad] = ""
+      options[:tt_onUnLoad] = "showCategory('ANC Examinations');"
     end
   %>
 

@@ -296,10 +296,16 @@ class EncountersController < ApplicationController
     concept_id = ConceptName.find_by_name("Last Menstrual Period").concept_id rescue nil
     result = Hash.new
     lmp =  Observation.find(:last, :order => ["obs_datetime"], :conditions => ["person_id = ? AND concept_id = ? AND voided = 0 AND obs_datetime > ?",
-      patient_id, concept_id, 9.months.ago]).answer_string.to_date rescue nil if patient_id.present? and concept_id.present?
+        patient_id, concept_id, 9.months.ago]).answer_string.to_date rescue nil if patient_id.present? and concept_id.present?
 
     result["lmp"] = lmp if lmp
     render :text => result.to_json
   end
 
+  def procedure_done
+    @procedure_done = [""] + Concept.find_by_name("PROCEDURE DONE").concept_answers.collect{|c| c.name}.sort
+    @procedure_done = @procedure_done.insert(0, @procedure_done.delete_at(@procedure_done.index("None")))
+    render :text => "<li>" + @procedure_done.join("</li><li>") + "</li>"
+  end
+  
 end

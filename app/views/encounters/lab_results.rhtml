@@ -99,6 +99,7 @@
   <%= touch_date_tag "HB Test Result Date", @patient, nil,
     {:id => "enter_date_hb1_result_given",
     :helptext => "Date HB Test Result Done",
+    :tt_onLoad => "showCategory('Lab Results');",
     :condition => "!__$('hb_result').value.match(/Not\\sDone/)#{ (params[:update] ? 
     " && getSelected().match(/HB\sTest\sResult/)" : "") }",
     :max => "#{session[:datetime].to_date rescue Date.today}" } %>
@@ -108,13 +109,14 @@
       ["Negative", "Negative"], ["Not Done", "Not Done"]]),
     {:id => "syphilis_result",
     :helptext => "Syphilis Test Result",
-    :tt_onLoad => "unknownToNotDone()",
+    :tt_onLoad => "unknownToNotDone(); showCategory('Lab Results');",
     :condition => "#{ (params[:update] ? "getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
 
   <%= touch_date_tag "Syphilis Test Result Date", @patient, nil,
     {:id => "enter_date_syphilis_result_given",
     :helptext => "Date Syphilis Test Result Done",
     :max => "#{session[:datetime].to_date rescue Date.today}",
+    :tt_onLoad => "showCategory('Lab Results');",
     :condition => "__$('syphilis_result').value != 'Not Done'#{ (params[:update] ? 
     " && getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
 
@@ -123,6 +125,7 @@
       ["+++", "+++"], ["++++", "++++"], ["Not Done", "Not Done"]]),
     {:id => "enter_urine_protein",
     :helptext => "Urine Protein",
+    :tt_onLoad => "showCategory('Lab Results');",
     :condition => "#{ (params[:update] ? "getSelected().match(/Urine\sProtein/)" : "") }" } %>
 
   <%= touch_select_tag "HIV status", @patient,
@@ -130,12 +133,13 @@
     {:id => "new_test_result_at_current_facility",
     :helptext => "HIV Test Result",
     :tt_BeforeUnload => "checkHIVTestUnknown()",
-    :tt_onLoad => "unknownToNotDone()",
+    :tt_onLoad => " showCategory('Lab Results'); unknownToNotDone();",
     :condition => "#{ (params[:update] ? "getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%= touch_date_tag "HIV test date", @patient, nil,
     {:id => "enter_date_result_given",
     :helptext => "Date Result Done",
+    :tt_onLoad => "showCategory('Lab Results');",
     :condition => "__$('new_test_result_at_current_facility').value != 'Not Done'#{ (params[:update] ? 
     " && getSelected().match(/HIV\sTest\sResult/)" : "") }",
     :tt_BeforeUnload => "checkHIVTestDate()",
