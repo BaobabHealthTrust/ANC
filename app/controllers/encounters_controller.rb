@@ -134,7 +134,7 @@ class EncountersController < ApplicationController
     
     @weeks = @anc_patient.fundus rescue 12
        
-    @pregnancystart = Date.today - (@weeks.week rescue 0)
+    @pregnancystart = (session[:datetime]? (session[:datetime].to_date rescue Date.today) : Date.today) - (@weeks.week rescue 0)
     
     @preg_encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
         @current_range[0]["START"], @current_range[0]["END"]]) rescue []

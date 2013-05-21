@@ -3,8 +3,10 @@
   <!--
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
-  
-  var anc_visits = <%= @anc_patient.anc_visits.to_json rescue [] %>;
+<%
+session_date = session[:datetime]? session[:datetime] : Date.today
+%>
+  var anc_visits = <%= @anc_patient.anc_visits(session_date).to_json rescue [] %>;
   
   anc_visits.push("zero");
   
@@ -22,11 +24,14 @@
 </script>
 
 <% form_tag :controller => "encounters", :action => "create" do %>
+
+ <%  session_date = session[:datetime] || Time.now() %>
+
   <%= hidden_field_tag "encounter[encounter_type_name]", "ANC VISIT TYPE" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", session[:datetime]? session[:datetime] : DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
-  <%session_date = session[:datetime] || Time.now() %>
+ 
 
   <%= hidden_field_tag("programs[][patient_program_id]", @program_id) %>
   <%= hidden_field_tag("programs[][program_id]", Program.find_by_name('ANC PROGRAM').id)%>
@@ -36,7 +41,7 @@
 
   <%= touch_numeric_tag "Type of visit", @patient, nil,
     {
-    :id => "visit",    
+    :id => "visit",
     :helptext => "ANC visit number",
     :field_type => 'number',
     :tt_pageStyleClass => "NumbersOnly",

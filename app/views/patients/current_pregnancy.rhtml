@@ -112,7 +112,16 @@
   }
 
   function setDate(period){
-    var d = new Date(); 
+    year = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).year rescue Date.today.year%>"
+    month = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).month rescue Date.today.month%>"
+    day = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).day rescue Date.today.day%>"
+
+    var d = new Date();
+
+    d.setDate(parseInt(day));
+    d.setYear(parseInt(year));
+    d.setMonth(parseInt(month));
+    
     d.setMonth(d.getMonth() - parseInt(period));
     
     __$("lmp").value = d.getFullYear() + "-" + padZeros((d.getMonth() + 1), 2) + "-" + padZeros(d.getDate(),2);
@@ -120,6 +129,43 @@
     
   }
 
+  function initializeDate(){
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    year = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).year rescue Date.today.year%>"
+    month = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).month rescue Date.today.month%>"
+    day = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).day rescue Date.today.day%>"
+
+    setTimeout(__$("today").onmousedown, 0);
+    setTimeout(function(){
+      __$("touchscreenInput" + tstCurrentPage).value = "";
+    }, 3);
+
+    var year_plus = __$("dateselector_nextYear").onmousedown
+    __$("dateselector_nextYear").onmousedown = function(){
+      if(parseInt(year) <= parseInt(__$("dateselector_year").value)){
+      }else{
+        setTimeout(year_plus, 0);
+      }
+    }
+
+    var month_plus = __$("dateselector_nextMonth").onmousedown
+    __$("dateselector_nextMonth").onmousedown = function(){
+      if((parseInt(year) <= parseInt(__$("dateselector_year").value)) && (parseInt(month) <= parseInt(months.indexOf(__$("dateselector_month").value) + 1))){
+      }else{
+        setTimeout(month_plus, 0);
+      }
+    }
+
+    var day_plus = __$("dateselector_nextDay").onmousedown
+    __$("dateselector_nextDay").onmousedown = function(){
+      if((parseInt(day) <= parseInt(__$("dateselector_day").value)) && (parseInt(year) <= parseInt(__$("dateselector_year").value)) && (parseInt(month) <= parseInt(months.indexOf(__$("dateselector_month").value) + 1))){
+      }else{
+        setTimeout(day_plus, 0);
+
+      }
+    }
+  }
+  
   //-->
 </script>
 
@@ -156,14 +202,14 @@
   <%= touch_date_tag "LAST MENSTRUAL PERIOD", @patient, nil,
     {:id => "lmp",
     :helptext => "Last Menstrual Period",
-    :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100); showCategory('Current Pregnancy');",
+    :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100); showCategory('Current Pregnancy'); initializeDate()",
     :tt_onUnLoad => 'clearTimeout(timedEvent);
     // if (__$("touchscreenInput" + tstCurrentPage).value == "Unknown" ) __$("lmp").value = tstEstimatedLMPDate;',
     :tt_pageStyleClass => "exclude",
     :min => ((session[:datetime] || Date.today).to_date - 42.week),
     :absoluteMin => ((session[:datetime] || Date.today).to_date - 45.week),
     :absoluteMax => ((session[:datetime] || Date.today).to_date - 1.week)
-  } %>
+  }%>
 
   <%= text_field_tag "Estimate LMP", nil,
     {:id => "estimate_lmp",
@@ -179,10 +225,10 @@
 %>
 
   <%= touch_select_tag "Multiple gestation", @patient, options_for_select([["", ""],
-                        ["No", "No"], ["Twins", "Twins"], 
-                        ["Triplets", "Triplets"],
-                        ["Quadruplet", "Quadruplet"],
-                        ["Unknown", "Unknown"]]),
+      ["No", "No"], ["Twins", "Twins"],
+      ["Triplets", "Triplets"],
+      ["Quadruplet", "Quadruplet"],
+      ["Unknown", "Unknown"]]),
     {:id => "multiple_gestation",
     :tt_onLoad => "showCategory('Current Pregnancy');",
     :helptext => "Is This a Multiple Pregnancy?" } %>
@@ -200,7 +246,7 @@
     :tt_onLoad => "addHereButton(); showCategory('Current Pregnancy');",
     :tt_onUnLoad => "removeHereButton()" } %>
 
-  <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""], 
+  <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""],
       ["Given Today", "Given Today"],
       ["Given during previous ANC visit for current pregnancy", "Given during previous ANC visit for current pregnancy"],
       ["Not given today or during current pregnancy", "Not given today or during current pregnancy"]
@@ -210,9 +256,9 @@
     :helptext => "Bed Net" } %>
 
   <%#= touch_date_tag "Date received", @patient, nil,
-    {:id => "bed_date",
-    :helptext => "Date Bet Net Given",
-    :condition => "__$('bed_net').value == 'Yes'"
+  {:id => "bed_date",
+  :helptext => "Date Bet Net Given",
+  :condition => "__$('bed_net').value == 'Yes'"
   } %>
 
   <% options = {

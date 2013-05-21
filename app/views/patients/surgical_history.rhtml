@@ -13,6 +13,43 @@
       $('nextButton').innerHTML = '<span>Next</span>';
     setTimeout(updateNextFinish, 500)
   }
+
+  function initializeDate(){
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    year = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).year rescue Date.today.year%>"
+    month = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).month rescue Date.today.month%>"
+    day = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).day rescue Date.today.day%>"
+
+    setTimeout(__$("today").onmousedown, 0);
+    setTimeout(function(){
+      __$("touchscreenInput" + tstCurrentPage).value = "";
+    }, 3);
+
+    var year_plus = __$("dateselector_nextYear").onmousedown
+    __$("dateselector_nextYear").onmousedown = function(){
+      if(parseInt(year) <= parseInt(__$("dateselector_year").value)){
+      }else{
+        setTimeout(year_plus, 0);
+      }
+    }
+
+    var month_plus = __$("dateselector_nextMonth").onmousedown
+    __$("dateselector_nextMonth").onmousedown = function(){
+      if((parseInt(year) <= parseInt(__$("dateselector_year").value)) && (parseInt(month) <= parseInt(months.indexOf(__$("dateselector_month").value) + 1))){
+      }else{
+        setTimeout(month_plus, 0);
+      }
+    }
+
+    var day_plus = __$("dateselector_nextDay").onmousedown
+    __$("dateselector_nextDay").onmousedown = function(){
+      if((parseInt(day) <= parseInt(__$("dateselector_day").value)) && (parseInt(year) <= parseInt(__$("dateselector_year").value)) && (parseInt(month) <= parseInt(months.indexOf(__$("dateselector_month").value) + 1))){
+      }else{
+        setTimeout(day_plus, 0);
+
+      }
+    }
+  }
 </script>
 
 <% form_tag :controller => "encounters", :action => "create" do %>
@@ -22,10 +59,10 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%session_date = session[:datetime] || Time.now() %>
 
-  <%= select_tag "Surgicals Available", options_for_select([["Yes", "Yes"], ["No", "NO"]]), 
+  <%= select_tag "Surgicals Available", options_for_select([["Yes", "Yes"], ["No", "NO"]]),
     {
     :id => "surgicals_available",
-    :helpText => "Ever had a surgical procedure?", 
+    :helpText => "Ever had a surgical procedure?",
     :tt_onLoad => "showCategory('Surgical History');"
   } %>
 
@@ -40,7 +77,7 @@
   <%= touch_date_tag "Date received", @patient, nil,
     {:id => "date_done1",
     :helptext => "Date Procedure Done",
-    :tt_onLoad => "showCategory('Surgical History');",
+    :tt_onLoad => "showCategory('Surgical History'); initializeDate();",
     :condition => "__$('surgicals_available').value.toUpperCase() == 'YES'" } %>
 
   <% (2..8).each do |e| %>
@@ -73,7 +110,7 @@
     <%= touch_date_tag "Date received", @patient, nil,
       {:id => "date_done#{e}",
       :helptext => "Date #{e}#{indice} Procedure Done",
-      :tt_onLoad => "showCategory('Surgical History');",
+      :tt_onLoad => "showCategory('Surgical History'); initializeDate();",
       :condition => "__$('surgical#{e}').value != '' && __$('surgicals_available').value.toUpperCase() == 'YES'"
     } %>
 
