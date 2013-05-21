@@ -277,6 +277,24 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
 
     setTimeout("setGestationWeekLabel()", 100);
   }
+
+  function readableMessage(){
+
+    conceptName = "Appointment Gestation Range";
+
+    try{
+      if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
+        __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName).replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName )
+      }
+    }catch(ex){}
+
+    setTimeout(function(){ readableMessage()}, 10);
+  }
+
+  function transformMessages(){
+    //buildConceptsHash();
+    setTimeout(function(){ readableMessage()}, 50);
+  }
 </script>
 
 <%= hidden_field_tag "lmp", "#{@pregnancystart}" %>
@@ -300,7 +318,7 @@ clinic_holidays = clinic_holidays.split(',').map{|day|day.to_date}.join(',')
 
   <%= select_tag("time_until_next_visit", options_for_select(actual),
     {:helpText => 'Gestation Weeks at Next Visit',
-      :tt_onLoad => "showCategory('Next Appointment'); calculateGivenRange('#{params[:start_date]}','#{params[:end_date]}')",
+      :tt_onLoad => "transformMessages(); showCategory('Next Appointment'); calculateGivenRange('#{params[:start_date]}','#{params[:end_date]}')",
       :tt_onUnLoad => "setAppointmentDate();"}) %>
 
   <%

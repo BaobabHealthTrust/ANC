@@ -3,6 +3,38 @@
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
 
+  function readableMessage(){
+
+    var conceptName = conceptHash[tstCurrentPage];
+    
+    conceptName = (conceptName.match(/referral clinic if referred/i)) ? "Referral Clinic" : conceptName;
+    
+    try{
+      conceptName = conceptName.charAt(0).toUpperCase() + conceptName.slice(1).toLowerCase();
+      if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
+        __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName + " Value").replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName + " value")
+      }
+    }catch(ex){}
+
+    setTimeout(function(){ readableMessage()}, 20);
+  }
+
+  function buildConceptsHash(){
+    var count = 0;
+    var inputArr = document.getElementsByTagName("input")
+    conceptHash = {};
+    for (var i = 0; i < inputArr.length; i ++){
+      if (inputArr[i].name && inputArr[i].name.match("concept_name") && inputArr[i].name.match("observations")){
+        conceptHash[count] = inputArr[i].value;
+        count ++;
+      }
+    }
+  }
+
+  function transformMessages(){
+    buildConceptsHash();
+    setTimeout(function(){ readableMessage()}, 50);
+  }
   //-->
 </script>
 
@@ -24,20 +56,21 @@
     <option value="YES">Yes</option>
     <option value="NO">No</option>
   </select-->
-  
+
   <%= touch_select_tag "OUTCOME", @patient,
     options_for_select([["", ""], ["Sent Home", "Sent Home"], ["Admitted", "Admitted"], ["Referred", "Referred"]]),
     {:id => "outcome",
     :helptext => "Outcome",
+    :tt_onLoad => "transformMessages();"
     # :condition => "__$('outcome_available').value.toUpperCase() == 'YES'"
   } %>
 
   <%#= touch_select_tag "Admission Section", @patient,
-    options_for_select([["", ""], ["Labour Ward", "Labour Ward"], ["AnteNatal Ward", "AnteNatal Ward"],
-      ["Gynaecology Ward", "Gynaecology Ward"], ["Theatre", "Theatre"]]),
-    {:id => "section",
-    :helptext => "Admission Section",
-    :condition => "__$('outcome').value == 'Admitted'" } %>
+  options_for_select([["", ""], ["Labour Ward", "Labour Ward"], ["AnteNatal Ward", "AnteNatal Ward"],
+  ["Gynaecology Ward", "Gynaecology Ward"], ["Theatre", "Theatre"]]),
+  {:id => "section",
+  :helptext => "Admission Section",
+  :condition => "__$('outcome').value == 'Admitted'" } %>
 
   <%= touch_select_tag "REFERRAL CLINIC IF REFERRED", @patient, nil,
     {:id => "referral",

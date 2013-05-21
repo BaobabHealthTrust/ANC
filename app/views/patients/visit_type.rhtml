@@ -9,6 +9,42 @@ session_date = session[:datetime]? session[:datetime] : Date.today
   var anc_visits = <%= @anc_patient.anc_visits(session_date).to_json rescue [] %>;
   
   anc_visits.push("zero");
+   var parsedConceptName = "Visit Number";
+
+  //-->
+
+  function readableMessage(){
+
+    var conceptName = conceptHash[tstCurrentPage]
+    conceptName = (parsedConceptName && parsedConceptName.length > 1) ? parsedConceptName : conceptName;
+    conceptName = (conceptName.toLowerCase() == "parity")? "Number of Pregnancies" : conceptName;
+
+    try{
+      conceptName = conceptName.charAt(0).toUpperCase() + conceptName.slice(1).toLowerCase();
+      if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
+        __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName + " Value").replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName + " value")
+      }
+    }catch(ex){}
+
+    setTimeout(function(){ readableMessage()}, 10);
+  }
+
+  function buildConceptsHash(){
+    var count = 0;
+    var inputArr = document.getElementsByTagName("input")
+    conceptHash = {};
+    for (var i = 0; i < inputArr.length; i ++){
+      if (inputArr[i].name && inputArr[i].name.match("concept_name") && inputArr[i].name.match("observations")){
+        conceptHash[count] = inputArr[i].value;
+        count ++;
+      }
+    }
+  }
+
+  function transformMessages(){
+    buildConceptsHash();
+    setTimeout(function(){ readableMessage()}, 50);
+  }
   
   function disablePastVisits(){
     for(var i = 0; i < anc_visits.length; i++){
@@ -44,6 +80,7 @@ session_date = session[:datetime]? session[:datetime] : Date.today
     :id => "visit",
     :helptext => "ANC visit number",
     :field_type => 'number',
+    :tt_onLoad => "transformMessages();",
     :tt_pageStyleClass => "NumbersOnly",
     :max => 7,
     :min => 1

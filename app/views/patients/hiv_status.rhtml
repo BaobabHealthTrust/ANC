@@ -5,6 +5,42 @@
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
   var timedEvent;
+  function initializeDate(){
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    year = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).year rescue Date.today.year%>"
+    month = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).month rescue Date.today.month%>"
+    day = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).day rescue Date.today.day%>"
+
+    setTimeout(__$("today").onmousedown, 0);
+    setTimeout(function(){
+      __$("touchscreenInput" + tstCurrentPage).value = "";
+    }, 3);
+
+    var year_plus = __$("dateselector_nextYear").onmousedown
+    __$("dateselector_nextYear").onmousedown = function(){
+      if(parseInt(year) <= parseInt(__$("dateselector_year").value)){
+      }else{
+        setTimeout(year_plus, 0);
+      }
+    }
+
+    var month_plus = __$("dateselector_nextMonth").onmousedown
+    __$("dateselector_nextMonth").onmousedown = function(){
+      if((parseInt(year) <= parseInt(__$("dateselector_year").value)) && (parseInt(month) <= parseInt(months.indexOf(__$("dateselector_month").value) + 1))){
+      }else{
+        setTimeout(month_plus, 0);
+      }
+    }
+
+    var day_plus = __$("dateselector_nextDay").onmousedown
+    __$("dateselector_nextDay").onmousedown = function(){
+      if((parseInt(day) <= parseInt(__$("dateselector_day").value)) && (parseInt(year) <= parseInt(__$("dateselector_year").value)) && (parseInt(month) <= parseInt(months.indexOf(__$("dateselector_month").value) + 1))){
+      }else{
+        setTimeout(day_plus, 0);
+
+      }
+    }
+  }
 
   function calculateEDOD(){
     var edod = "";
@@ -100,18 +136,18 @@
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%  session_date = session[:datetime] || Time.now() %>
 
-  <%= select_tag "Updates Available", options_for_select([["Yes", "Yes"], ["No", "NO"]]), 
+  <%= select_tag "Updates Available", options_for_select([["Yes", "Yes"], ["No", "NO"]]),
     {
     :id => "updates_available",
-    :helpText => "Update pregnancy information?", 
+    :helpText => "Update pregnancy information?",
     :tt_onLoad => "showCategory('Pregnancy Update');"
   } %>
 
-  <%= select_tag("choice", options_for_select(["", "Last Menstrual Period", 
-        "Planned delivery place", "Multiple Pregnancy", "Bed Net Given?", "Previous TT Doses"]), 
+  <%= select_tag("choice", options_for_select(["", "Last Menstrual Period",
+        "Planned delivery place", "Multiple Pregnancy", "Bed Net Given?", "Previous TT Doses"]),
     {
-      :helpText => 'Select Task(s)', 
-      :id => "choice", 
+      :helpText => 'Select Task(s)',
+      :id => "choice",
       :multiple => true,
       :condition => "__$('updates_available').value.toUpperCase()=='YES'"
     })%>
@@ -119,7 +155,7 @@
   <%= touch_date_tag "LAST MENSTRUAL PERIOD", @patient, @lmp,
     {:id => "lmp",
     :helptext => "Last Menstrual Period",
-    :tt_onLoad => "timedEvent = setTimeout('calculateEDOD()', 100);",
+    :tt_onLoad => "initializeDate(); timedEvent = setTimeout('calculateEDOD()', 100);",
     :tt_onUnLoad => "clearTimeout(timedEvent);",
     :condition => "getSelected().match(/Last\sMenstrual\sPeriod/)" } %>
 
@@ -157,6 +193,7 @@
 
   <%= touch_date_tag "Date", @patient, @bed_net_date,
     {:id => "bed_date",
+    :tt_onLoad => "initializeDate();",
     :helptext => "Date Bet Net Given",
     :condition => "__$('bed_net').value == 'Yes' && getSelected().match(/Bed\sNet\sGiven\?/)"
   } %>

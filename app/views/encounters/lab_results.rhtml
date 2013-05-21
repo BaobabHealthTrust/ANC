@@ -9,6 +9,43 @@
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
   var timedEvent;
 
+  var parsedConceptName;
+
+  //-->
+
+  function readableMessage(){
+
+    var conceptName = conceptHash[tstCurrentPage]
+    conceptName = (parsedConceptName && parsedConceptName.length > 1) ? parsedConceptName : conceptName;
+    conceptName = (conceptName.toLowerCase() == "parity")? "Number of Pregnancies" : conceptName;
+
+    try{
+     // conceptName = conceptName.charAt(0).toUpperCase() + conceptName.slice(1).toLowerCase();
+      if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
+        __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName + " Value").replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName + " value")
+      }
+    }catch(ex){}
+
+    setTimeout(function(){ readableMessage()}, 10);
+  }
+
+  function buildConceptsHash(){
+    var count = 0;
+    var inputArr = document.getElementsByTagName("input")
+    conceptHash = {};
+    for (var i = 0; i < inputArr.length; i ++){
+      if (inputArr[i].name && inputArr[i].name.match("concept_name") && inputArr[i].name.match("observations")){
+        conceptHash[count] = inputArr[i].value;
+        count ++;
+      }
+    }
+  }
+
+  function transformMessages(){
+    buildConceptsHash();
+    setTimeout(function(){ readableMessage()}, 50);
+  }
+
   function checkHIVTestUnknown(){
     // Asked to disable this
     return false;
@@ -116,7 +153,7 @@
           "HIV Test Result", "Syphilis Test Result", "Urine Protein"]), 
       {
         :helpText => 'Select Available Test Results', :id => "choice", :multiple => true,       
-        :tt_onLoad => "showCategory('Lab Results');",
+        :tt_onLoad => "showCategory('Lab Results'); transformMessages()",
         :optional => :true
       })%>
 
@@ -129,14 +166,16 @@
     :tt_pageStyleClass => "NumbersWithUnknownAndDecimal",
     :min => 2,
     :max => 16,
-    :tt_onLoad => "showCategory('Lab Results'); unknownToNotDone()",
+    :tt_onLoad => "showCategory('Lab Results'); unknownToNotDone(); parsedConceptName = 'HB Test Result';",
+    :tt_onUnLoad => "parsedConceptName = '';",
     :condition => "#{ (params[:update] ? "getSelected().match(/HB\sTest\sResult/)" : "") }"
   } %>
 
   <%= touch_date_tag "HB Test Result Date", @patient, nil,
     {:id => "enter_date_hb1_result_given",
     :helptext => "Date HB Test Result Done",
-    :tt_onLoad => "showCategory('Lab Results'); initializeDate();",
+    :tt_onLoad => "showCategory('Lab Results'); initializeDate(); parsedConceptName = 'HB Test Result Date'; ",
+    :tt_onUnLoad => "parsedConceptName = '';",
     :condition => "!__$('hb_result').value.match(/Not\\sDone/)#{ (params[:update] ? 
     " && getSelected().match(/HB\sTest\sResult/)" : "") }",
     :max => "#{session[:datetime].to_date rescue Date.today}" } %>
@@ -146,14 +185,16 @@
       ["Negative", "Negative"], ["Not Done", "Not Done"]]),
     {:id => "syphilis_result",
     :helptext => "Syphilis Test Result",
-    :tt_onLoad => "unknownToNotDone(); showCategory('Lab Results');",
+    :tt_onUnLoad => "parsedConceptName = '';",
+    :tt_onLoad => "parsedConceptName = 'Syphilis Test Result'; unknownToNotDone(); showCategory('Lab Results'); ",
     :condition => "#{ (params[:update] ? "getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
 
   <%= touch_date_tag "Syphilis Test Result Date", @patient, nil,
     {:id => "enter_date_syphilis_result_given",
     :helptext => "Date Syphilis Test Result Done",
     :max => "#{session[:datetime].to_date rescue Date.today}",
-    :tt_onLoad => "showCategory('Lab Results');initializeDate();",
+    :tt_onLoad => " parsedConceptName = 'Syphilis Test Result Date'; showCategory('Lab Results');initializeDate();",
+    :tt_onUnLoad => "parsedConceptName = '';",
     :condition => "__$('syphilis_result').value != 'Not Done'#{ (params[:update] ? 
     " && getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
 
@@ -162,7 +203,8 @@
       ["+++", "+++"], ["++++", "++++"], ["Not Done", "Not Done"]]),
     {:id => "enter_urine_protein",
     :helptext => "Urine Protein",
-    :tt_onLoad => "showCategory('Lab Results');",
+    :tt_onLoad => " parsedConceptName = 'Urine Protein'; showCategory('Lab Results');",
+    :tt_onUnLoad => "parsedConceptName = '';",
     :condition => "#{ (params[:update] ? "getSelected().match(/Urine\sProtein/)" : "") }" } %>
 
   <%= touch_select_tag "HIV status", @patient,
@@ -170,13 +212,15 @@
     {:id => "new_test_result_at_current_facility",
     :helptext => "HIV Test Result",
     :tt_BeforeUnload => "checkHIVTestUnknown()",
-    :tt_onLoad => " showCategory('Lab Results'); unknownToNotDone();",
+    :tt_onUnLoad => "parsedConceptName = '';",
+    :tt_onLoad => "parsedConceptName = 'HIV Status'; showCategory('Lab Results'); unknownToNotDone(); ",
     :condition => "#{ (params[:update] ? "getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%= touch_date_tag "HIV test date", @patient, nil,
     {:id => "enter_date_result_given",
     :helptext => "Date Result Done",
-    :tt_onLoad => "showCategory('Lab Results'); initializeDate();",
+    :tt_onUnLoad => "parsedConceptName = '';",
+    :tt_onLoad => " parsedConceptName = 'HIV Test date'; showCategory('Lab Results'); initializeDate();",
     :condition => "__$('new_test_result_at_current_facility').value != 'Not Done'#{ (params[:update] ? 
     " && getSelected().match(/HIV\sTest\sResult/)" : "") }",
     :tt_BeforeUnload => "checkHIVTestDate()",
