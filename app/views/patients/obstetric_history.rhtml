@@ -7,8 +7,43 @@
   var deliveries = 0;
   var max_delivered = 1;
   var parity;
+  var parsedConceptName;
   
   //-->
+
+  function readableMessage(){
+
+    var conceptName = conceptHash[tstCurrentPage]
+    conceptName = (parsedConceptName && parsedConceptName.length > 1) ? parsedConceptName : conceptName;
+    conceptName = (conceptName.toLowerCase() == "parity")? "Number of Pregnancies" : conceptName;
+    
+    try{
+      conceptName = conceptName.charAt(0).toUpperCase() + conceptName.slice(1).toLowerCase();
+      if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
+        __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName + " Value").replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName + " value")
+      }
+    }catch(ex){}
+
+    setTimeout(function(){ readableMessage()}, 10);
+  }
+
+  function buildConceptsHash(){
+    var count = 0;
+    var inputArr = document.getElementsByTagName("input")
+    conceptHash = {};
+    for (var i = 0; i < inputArr.length; i ++){
+      if (inputArr[i].name && inputArr[i].name.match("concept_name") && inputArr[i].name.match("observations")){
+        conceptHash[count] = inputArr[i].value;
+        count ++;
+      }
+    }
+  }
+
+  function transformMessages(){
+    buildConceptsHash();
+    setTimeout(function(){ readableMessage()}, 50);
+  }
+  
   function updateMultiplePregnancy(){  
     
     if (max_delivered == 2){
@@ -50,6 +85,8 @@
       }
     }
   }
+
+ 
 </script>
 
 
@@ -65,7 +102,7 @@
     :helptext => "Gravida",
     :absoluteMin => 0,
     :max => 20,
-    :tt_onLoad => "document.forms[0].reset(); showCategory('Obstetric History');",
+    :tt_onLoad => "document.forms[0].reset(); showCategory('Obstetric History'); transformMessages();",
     :tt_onUnLoad => "if(__$('category')){__$('content').removeChild(__$('category'))}
     if(__$('enter_gravida').value == 1){
     __$('enter_number_of_deliveries').value = 0;
@@ -347,44 +384,51 @@
   <%= touch_hidden_tag "STILL BIRTH", @patient, "No",
     {:id => "ever_had_still_births",
     :helptext => "Ever Had Still Births?",
-    :tt_onLoad => "showCategory('Obstetric History');",
+    :tt_onLoad => "showCategory('Obstetric History'); parsedConceptName = 'STILL BIRTH'",
+    :tt_onUnLoad => "parsedConceptName = ''",
     :condition => "__$('enter_gravida').value > 0 && deliveries > 0 " +
       "&& (#{controls})"} %>
   <%= touch_hidden_tag "Caesarean section", @patient, "No",
     {:id => "ever_had_c_sections",
     :helptext => "Ever Had C-sections?",
-    :tt_onLoad => "showCategory('Obstetric History');",
+    :tt_onLoad => "showCategory('Obstetric History'); parsedConceptName = 'Caesarean section'",
+    :tt_onUnLoad => "parsedConceptName = ''",
     :condition => "__$('enter_gravida').value > 0" } %>
   <%= touch_hidden_tag "Vacuum extraction delivery", @patient, "No",
     {:id => "ever_had_a_vacuum_extraction",
     :helptext => "Ever Had A Vacuum Extraction",
-    :tt_onLoad => "showCategory('Obstetric History');",
+    :tt_onLoad => "showCategory('Obstetric History'); parsedConceptName = 'Vacuum extraction delivery'",
+    :tt_onUnLoad => "parsedConceptName = ''",
     :condition => "__$('enter_gravida').value > 0" } %>
 
   <%= touch_select_tag "SYMPHYSIOTOMY", @patient, options_for_select([["", ""], ["No", "No"], ["Yes", "Yes"]]),
     {:id => "ever_had_symphysiotomy",
     :helptext => "Ever Had Symphysiotomy?",
-    :tt_onLoad => "showCategory('Obstetric History');",
+    :tt_onLoad => "showCategory('Obstetric History'); parsedConceptName = 'SYMPHYSIOTOMY'",
+    :tt_onUnLoad => "parsedConceptName = ''",
     :condition => "deliveries > 0"
   } %>
 
   <%= touch_select_tag "HEMORRHAGE", @patient, options_for_select([["", ""], ["No", "No"], ["APH", "APH"], ["PPH", "PPH"]]),
     {:id => "hemorrhage",
     :helptext => "Hemorrhage",
-    :tt_onLoad => "showCategory('Obstetric History');",
+    :tt_onLoad => "showCategory('Obstetric History'); parsedConceptName = 'HEMORRHAGE'",
+    :tt_onUnLoad => "parsedConceptName = ''",
     :condition => "__$('enter_gravida').value > 1"
   } %>
 
   <%= touch_select_tag "PRE-ECLAMPSIA", @patient, options_for_select([["", ""], ["No", "No"], ["Yes", "Yes"]]),
     {:id => "pre_eclampsia",
     :helptext => "Pre-Eclampsia",
-    :tt_onLoad => "showCategory('Obstetric History');",
+    :tt_onLoad => "showCategory('Obstetric History'); parsedConceptName = 'PRE-ECLAMPSIA'",
+    :tt_onUnLoad => "parsedConceptName = ''",
     :condition => "__$('enter_gravida').value > 1" } %>
 
   <%= touch_select_tag "ECLAMPSIA", @patient, options_for_select([["", ""], ["No", "No"], ["Yes", "Yes"]]),
     {:id => "eclampsia",
     :helptext => "Eclampsia",
-    :tt_onLoad => "showCategory('Obstetric History');",
+    :tt_onLoad => "showCategory('Obstetric History'); parsedConceptName = 'ECLAMPSIA'",
+    :tt_onUnLoad => "parsedConceptName = ''",
     :condition => "__$('enter_gravida').value > 1 && __$('pre_eclampsia').value == 'Yes'" } %>
 
 

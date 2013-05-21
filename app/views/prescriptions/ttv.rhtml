@@ -15,6 +15,24 @@
     }
   }
   
+  function readableMessage(){
+
+    conceptName = "TTV response";
+
+    try{
+      if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
+        __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName + " Value").replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName + " value")
+      }
+    }catch(ex){}
+
+    setTimeout(function(){ readableMessage()}, 10);
+  }
+
+  function transformMessages(){
+    //buildConceptsHash();
+    setTimeout(function(){ readableMessage()}, 50);
+  }
+  
   //-->
 </script>
 
@@ -25,7 +43,7 @@
   <%= hidden_field_tag "encounter[encounter_datetime]", session[:datetime] ||=  DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   
-  <select id="ttv" name="ttv" tt_onUnLoad="checkForm()" helpText="Has TTV been given today?">
+  <select id="ttv" name="ttv"  tt_onLoad = "transformMessages();" tt_onUnLoad="checkForm()" helpText="Has TTV been given today?">
     <option>Yes</option>
     <option>No</option>
   </select>

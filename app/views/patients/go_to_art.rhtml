@@ -2,6 +2,24 @@
   <!--
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
   tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+
+  function readableMessage(){
+
+    conceptName = "'Proceed to PMTCT' response";
+   
+    try{     
+      if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
+        __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName + " Value").replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName + " value")
+      }
+    }catch(ex){}
+
+    setTimeout(function(){ readableMessage()}, 10);
+  }
+
+  function transformMessages(){
+    //buildConceptsHash();
+    setTimeout(function(){ readableMessage()}, 50);
+  }
   //-->
 </script>
 
@@ -12,7 +30,8 @@
   <%= select_tag "to art",
     options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {
-    :helptext => "Do you want to proceed to PMTCT Care?"
+    :helptext => "Do you want to proceed to PMTCT Care?",
+    :tt_onLoad => "transformMessages();"
   } %>
 
 <% end %>

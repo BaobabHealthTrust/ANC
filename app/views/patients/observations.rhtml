@@ -39,9 +39,35 @@
       __$("touchscreenInput" + tstCurrentPage).value = "None";
     }
   }
+  
+  
+  function readableMessage(){      
+    
+    var conceptName = conceptHash[tstCurrentPage]
+    try{
+      conceptName = conceptName.charAt(0).toUpperCase() + conceptName.slice(1).toLowerCase();
+      if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
+        __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName + " Value").replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName + " value")
+      }
+    }catch(ex){}
+   
+    setTimeout(function(){ readableMessage()}, 10);
+  }
 
-  var check = 0;
+  function buildConceptsHash(){
+    var count = 0;
+    var inputArr = document.getElementsByTagName("input")
+     conceptHash = {};
+    for (var i = 0; i < inputArr.length; i ++){
+      if (inputArr[i].name && inputArr[i].name.match("concept_name") && inputArr[i].name.match("observations")){
+        conceptHash[count] = inputArr[i].value;
+        count ++;
+      }
+    }
+  }
 
+  var check = 0;  
+ 
   //-->
 </script>
 
@@ -68,7 +94,7 @@
     :min => "#{(!@anc_patient.fundus_by_lmp(session_date).nil? ? (@anc_patient.fundus_by_lmp(session_date).to_i - 2) : 42)}",
     :max => "#{(!@anc_patient.fundus_by_lmp(session_date).nil? ? (@anc_patient.fundus_by_lmp(session_date).to_i + 2) : 42)}",
     :absoluteMax => 45,
-    :tt_onLoad => "showCategory('ANC Examinations');"
+    :tt_onLoad => "showCategory('ANC Examinations'); buildConceptsHash(); setTimeout(function(){ readableMessage()}, 50)"
   }, session_date %>
 
   <% @presentation = ["", "Cephalic", "Breech", "Ball"] %>
@@ -104,75 +130,75 @@
     :helptext => "Position",
     :tt_pageStyleClass => "NoKeyboard",
     :tt_onLoad => "showCategory('ANC Examinations');",
-    :condition => "__$('presentation').value != 'Ball'"}, session_date %> 
+    :condition => "__$('presentation').value != 'Ball'"}, session_date %>
 
 
   <%#--------------------------------------------------------%>
 
   <% @vertex = ["", "Left Occipito Anterior",
-  "Left Occipito Transverse",
-  "Left Occipito Posterior",
-  "Right Occipito Anterior",
-  "Right Occipito Transverse",
-  "Right Occipito Posterior",
-  "Unknown"] %>
+    "Left Occipito Transverse",
+    "Left Occipito Posterior",
+    "Right Occipito Anterior",
+    "Right Occipito Transverse",
+    "Right Occipito Posterior",
+    "Unknown"] %>
 
   <%= touch_select_tag "VERTEX", @patient, options_for_select(@vertex),
-  {:id => "vertex",
-  :helptext => "Vertex Position Type",
-  :field_type => "text",
-  :tt_onLoad => "showCategory('ANC Examinations');",
-  :condition => "$('position').value.trim().toUpperCase() == 'VERTEX';",
-  :tt_pageStyleClass => "NoKeyboard" } %>
+    {:id => "vertex",
+    :helptext => "Vertex Position Type",
+    :field_type => "text",
+    :tt_onLoad => "showCategory('ANC Examinations');",
+    :condition => "$('position').value.trim().toUpperCase() == 'VERTEX';",
+    :tt_pageStyleClass => "NoKeyboard" } %>
 
 
   <% @breech = ["", "Left Sacro Anterior",
-  "Left Sacro Transverse",
-  "Left Sacro Posterior",
-  "Right Sacro Anterior",
-  "Right Sacro Transverse",
-  "Right Sacro Posterior",
-  "Unknown"] %>
+    "Left Sacro Transverse",
+    "Left Sacro Posterior",
+    "Right Sacro Anterior",
+    "Right Sacro Transverse",
+    "Right Sacro Posterior",
+    "Unknown"] %>
 
   <%= touch_select_tag "BREECH", @patient, options_for_select(@breech),
-  {:id => "breech",
-  :helptext => "Breech Position Type",
-  :field_type => "text",
-  :tt_onLoad => "showCategory('ANC Examinations');",
-  :condition => "$('position').value.trim().toUpperCase() == 'BREECH';",
-  :tt_pageStyleClass => "NoKeyboard" } %>
+    {:id => "breech",
+    :helptext => "Breech Position Type",
+    :field_type => "text",
+    :tt_onLoad => "showCategory('ANC Examinations');",
+    :condition => "$('position').value.trim().toUpperCase() == 'BREECH';",
+    :tt_pageStyleClass => "NoKeyboard" } %>
 
 
   <% @face = ["", "Left Mento Anterior",
-  "Left Mento Transverse",
-  "Left Mento Posterior",
-  "Right Mento Anterior",
-  "Right Mento Transverse",
-  "Right Mento Posterior",
-   "Unknown"] %>
+    "Left Mento Transverse",
+    "Left Mento Posterior",
+    "Right Mento Anterior",
+    "Right Mento Transverse",
+    "Right Mento Posterior",
+    "Unknown"] %>
 
   <%= touch_select_tag "FACE", @patient, options_for_select(@face),
-  {:id => "face",
-  :helptext => "Face Position Type",
-  :field_type => "text",
-  :tt_onLoad => "showCategory('ANC Examinations');",
-  :condition => "$('position').value.trim().toUpperCase() == 'FACE';",
-  :tt_pageStyleClass => "NoKeyboard" } %>
+    {:id => "face",
+    :helptext => "Face Position Type",
+    :field_type => "text",
+    :tt_onLoad => "showCategory('ANC Examinations');",
+    :condition => "$('position').value.trim().toUpperCase() == 'FACE';",
+    :tt_pageStyleClass => "NoKeyboard" } %>
 
 
   <% @shoulder = ["", "Left Acromion Dorsal Anterior",
-  "Left Acromion Dorsal Posterior",
-  "Right Acromion Dorsal Anterior",
-  "Right Acromion Dorsal Posterior",
-  "Unknown"] %>
+    "Left Acromion Dorsal Posterior",
+    "Right Acromion Dorsal Anterior",
+    "Right Acromion Dorsal Posterior",
+    "Unknown"] %>
 
   <%= touch_select_tag "SHOULDER", @patient, options_for_select(@face),
-  {:id => "shoulder",
-  :helptext => "Shoulder Position Type",
-  :field_type => "text",
-  :tt_onLoad => "showCategory('ANC Examinations');",
-  :condition => "$('position').value.trim().toUpperCase() == 'SHOULDER';",
-  :tt_pageStyleClass => "NoKeyboard" } %>
+    {:id => "shoulder",
+    :helptext => "Shoulder Position Type",
+    :field_type => "text",
+    :tt_onLoad => "showCategory('ANC Examinations');",
+    :condition => "$('position').value.trim().toUpperCase() == 'SHOULDER';",
+    :tt_pageStyleClass => "NoKeyboard" } %>
 
   <%= touch_select_tag "FETAL HEART BEAT", @patient,
     options_for_select([["", ""], ["Heard", "Heard"], ["Not heard", "Not heard"],
@@ -224,13 +250,13 @@
 
     <% options[:tt_onLoad] = (counter > 1 ? "__$('Unknown').style.display = 'none'; " : "") + "changeUnknownToNone(); showCategory('ANC Examinations');" %>
 
-    <% 
+    <%
     if (counter) < 5
       options[:tt_onUnLoad] = "check = __$('touchscreenInput' + tstCurrentPage).value.toLowerCase(); selectedSigns += (selectedSigns.length > 0 ? '&' : '') + 'v#{counter}=' + __$('touchscreenInput' + " +
-        "tstCurrentPage).value.replace(/\\s/g, '+'); if(__$('touchscreenInput' + tstCurrentPage).getAttribute('position')){" + 
-        "var url = __$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).getAttribute('ajaxURL'); " + 
-        "__$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).setAttribute('ajaxURL', " + 
-        "url.replace('search_string=', '') + (selectedSigns.length > 0 ? selectedSigns + '&search_string=' : 'search_string='));}" 
+        "tstCurrentPage).value.replace(/\\s/g, '+'); if(__$('touchscreenInput' + tstCurrentPage).getAttribute('position')){" +
+        "var url = __$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).getAttribute('ajaxURL'); " +
+        "__$('sign' + __$('touchscreenInput' + tstCurrentPage).getAttribute('position')).setAttribute('ajaxURL', " +
+        "url.replace('search_string=', '') + (selectedSigns.length > 0 ? selectedSigns + '&search_string=' : 'search_string='));}"
     else
       options[:tt_onUnLoad] = "showCategory('ANC Examinations');"
     end
