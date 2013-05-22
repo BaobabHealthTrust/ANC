@@ -41,6 +41,8 @@
   var currentWeightPercentile;
   var displayText;
   var medianWeightHeight;
+  var parsedConceptName;
+  var conceptHash;
 
   function $(e) {
     return document.getElementById(e);
@@ -187,6 +189,38 @@
     timedEvent = setTimeout('calculateBP(' + pos + ')', 500);
   }
 
+  function readableMessage(){
+
+    var conceptName = conceptHash[tstCurrentPage]
+    conceptName = (parsedConceptName && parsedConceptName.length > 1) ? parsedConceptName : conceptName;
+       
+    try{
+      conceptName = conceptName.charAt(0).toUpperCase() + conceptName.slice(1).toLowerCase();
+      if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
+        __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName + " Value").replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName + " value")
+      }
+    }catch(ex){}
+
+    setTimeout(function(){ readableMessage()}, 10);
+  }
+
+  function buildConceptsHash(){
+    var count = 0;
+    var inputArr = document.getElementsByTagName("input")
+    conceptHash = {};
+    for (var i = 0; i < inputArr.length; i ++){
+      if (inputArr[i].name && inputArr[i].name.match("concept_name") && inputArr[i].name.match("observations")){
+        conceptHash[count] = inputArr[i].value;
+        count ++;
+      }
+    }
+  }
+
+  function transformMessages(){
+    buildConceptsHash();
+    setTimeout(function(){ readableMessage()}, 50);
+  }
+
 </script>
 
 <form action="/encounters/create/vitals">
@@ -236,6 +270,7 @@ end
       :field_type => 'number',
       :helptext =>"Temperature",
       :allowFreeText => 'true',
+      :tt_onLoad => "parsedConceptName = 'Temperature'; if(conceptHash){}else{transformMessages()};",
       :min => 20,
       :max => 45,
       :condition => "if(#{options.length} > 2){getSelected().match(/Temperature/)}else{true}",
@@ -259,7 +294,8 @@ end
         :absoluteMin => 40,
         :absoluteMax => 200,
         :condition => "if(#{options.length} > 2){getSelected().match(/Weight/)}else{true}",
-        :tt_onLoad => "showCategory('Vitals');",
+        :tt_onLoad => "showCategory('Vitals'); parsedConceptName = 'Weight'; if(conceptHash){}else{transformMessages()};",
+        :tt_onUnLoad => "parsedConceptName = ''",
         :units => 'kg',
         :validationRule => "([0-9]+(\\.[0-9]))|Unknown$",
         :validationMessage => "You must enter a valid decimal number",
@@ -291,7 +327,8 @@ end
           :absoluteMax => 228,
           :condition => "if(#{options.length} > 2){getSelected().match(/Height/)}else{true}",
           :units => 'cm',
-          :tt_onLoad  => "showCategory('Vitals');",
+          :tt_onUnLoad => "parsedConceptName = ''",
+          :tt_onLoad  => "showCategory('Vitals');  parsedConceptName = 'Height'; if(conceptHash){}else{transformMessages()};",
           :validationRule => "^([0-9]+)|Unknown$",
           :validationMessage => "You must enter numbers only (for example 157)",
           :tt_pageStyleClass => "Numeric NumbersWithUnknown"} %>
@@ -313,8 +350,8 @@ end
           :helptext => "Systolic Blood Pressure (mm Hg)",
           :field_type => "number",
           :tt_pageStyleClass => "NumbersWithUnknown",
-          :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100); showCategory('Vitals');",
-          :tt_onUnLoad => "clearTimeout(timedEvent); __$('diastolic_blood_pressure').setAttribute('absoluteMax', __$('systolic_blood_pressure').value)",
+          :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100); showCategory('Vitals'); parsedConceptName = 'Systolic Blood Pressure'; if(conceptHash){}else{transformMessages()};",
+          :tt_onUnLoad => "parsedConceptName = ''; clearTimeout(timedEvent); __$('diastolic_blood_pressure').setAttribute('absoluteMax', __$('systolic_blood_pressure').value)",
           :absoluteMin => 1,
           :min => 110,
           :condition => "if(#{options.length} > 2){getSelected().match(/BP/)}else{true}",
@@ -332,8 +369,8 @@ end
           :helptext => "Diastolic Blood Pressure (mm Hg)",
           :field_type => "number",
           :tt_pageStyleClass => "NumbersWithUnknown",
-          :tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100); showCategory('Vitals');",
-          :tt_onUnLoad => "clearTimeout(timedEvent);",
+          :tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100); showCategory('Vitals'); parsedConceptName = 'Diastolic Blood Pressure'",
+          :tt_onUnLoad => "clearTimeout(timedEvent); parsedConceptName =''",
           :absoluteMin => 1,
           :min => 60,
           :max => 80,
