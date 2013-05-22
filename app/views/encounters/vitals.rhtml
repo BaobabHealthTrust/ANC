@@ -51,7 +51,9 @@
     try{
       currentHeight = document.getElementById('height').value;
     }catch(e){
-      currentHeight = <%= @anc_patient.current_height %>
+<%if !@anc_patient.current_height.blank?%>
+        currentHeight = <%= @anc_patient.current_height %>
+<%end%>
     }
     currentWeight = document.getElementById('weight').value;
     medianWeightHeight = [<%= WeightHeightForAge.median_weight_height(@anc_patient.age, @anc_patient.gender).join(',') rescue nil -%>];
