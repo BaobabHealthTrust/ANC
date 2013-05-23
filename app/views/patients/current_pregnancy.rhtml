@@ -112,16 +112,15 @@
   }
 
   function setDate(period){
-    year = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).year rescue Date.today.year%>"
-    month = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).month rescue Date.today.month%>"
-    day = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).day rescue Date.today.day%>"
-
+    var year = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).year rescue Date.today.year%>"
+    var month = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).month rescue Date.today.month%>"
+    var day = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).day rescue Date.today.day%>"
     var d = new Date();
 
     d.setDate(parseInt(day));
     d.setYear(parseInt(year));
-    d.setMonth(parseInt(month));
-    
+    d.setMonth(parseInt(month) - 1); 
+
     d.setMonth(d.getMonth() - parseInt(period));
     
     __$("lmp").value = d.getFullYear() + "-" + padZeros((d.getMonth() + 1), 2) + "-" + padZeros(d.getDate(),2);
