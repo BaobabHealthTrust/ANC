@@ -794,7 +794,7 @@ class PatientsController < ApplicationController
         else
           @other_drugs[e.encounter_datetime.strftime("%d/%b/%Y")][o.drug_order.drug.name[0, o.drug_order.drug.name.index(" ")]] = o.drug_order.amount_needed
         end
-      }      
+      } rescue nil
     }
 
     render :layout => false
