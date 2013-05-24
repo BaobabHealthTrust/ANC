@@ -494,6 +494,9 @@ class PrescriptionsController < ApplicationController
     print_check = 0
 		@patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
 		encounter  = MedicationService.current_treatment_encounter(@patient)
+    encounter.encounter_datetime = (session[:datetime]? session[:datetime] : Date.today).to_date
+    encounter.save
+    
     if !(params[:prescriptions].blank?)
 
       (params[:prescriptions] || []).each{ | prescription |
