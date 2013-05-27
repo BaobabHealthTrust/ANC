@@ -1,0 +1,14 @@
+To add a missing TA or village
+
+In public/data/missing_ta
+
+	1. Add a folder with a name corresponding to District name where TA is, if the folder already exists, do not add a duplicate one
+			(A wrong folder name will add a new district) 
+			
+	2. Within the folder, create a .txt file with a name that corresponds to the missing TA. If file exists, do not create a duplicate one, just use it
+	
+	3. Within the .txt file, add villages that are missing
+	
+	Navigate to the application folder and run the following command
+	
+		script/runner  script/missing_ta.rb
