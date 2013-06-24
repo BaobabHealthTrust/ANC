@@ -50,7 +50,14 @@
       }
     }
   }
-</script>
+
+  </script>
+
+<style type="text/css">
+  #Unknown{
+    display: none;
+  }
+</style>
 
 <% form_tag :controller => "encounters", :action => "create" do %>
   <%= hidden_field_tag "encounter[encounter_type_name]", "SURGICAL HISTORY" %>
@@ -78,7 +85,7 @@
     {:id => "date_done1",
     :helptext => "Date Procedure Done",
     :tt_onLoad => "showCategory('Surgical History'); initializeDate();",
-    :condition => "__$('surgicals_available').value.toUpperCase() == 'YES'" } %>
+    :condition => "__$('surgical1').value.toLowerCase().trim() != 'none' && __$('surgical1').value != '' && __$('surgicals_available').value.toUpperCase() == 'YES'" } %>
 
   <% (2..8).each do |e| %>
 
@@ -101,8 +108,8 @@
     <%= touch_text_field_tag "Procedure Done", @patient, nil,
       {:id => "surgical#{e}",
       :helptext => "#{e}#{indice} Surgical procedure done before",
-      :condition => "__$('surgical#{e - 1}').value != '' && __$('surgicals_available').value.toUpperCase() == 'YES'",
-      :ajaxURL => "/encounters/procedure_done?search_string=",
+      :condition => "__$('surgical#{e - 1}').value.toLowerCase().trim() != 'none' && __$('surgical#{e - 1}').value.toLowerCase().trim() != '' && __$('surgicals_available').value.toUpperCase() == 'YES'",
+      :ajaxURL => "/encounters/procedure_done?nonone=true&search_string=",
       :tt_onLoad => "showCategory('Surgical History'); setTimeout(updateNextFinish, 20)",
       :optional => "true"
     } %>
@@ -111,10 +118,11 @@
       {:id => "date_done#{e}",
       :helptext => "Date #{e}#{indice} Procedure Done",
       :tt_onLoad => "showCategory('Surgical History'); initializeDate();",
-      :condition => "__$('surgical#{e}').value != '' && __$('surgicals_available').value.toUpperCase() == 'YES'"
+      :condition => "__$('surgical#{e}').value.toLowerCase().trim() != 'none' && __$('surgical#{e}').value.toLowerCase().trim() != '' && __$('surgicals_available').value.toUpperCase() == 'YES'"
     } %>
 
   <% end %>
 
   <%= submit_tag 'Finish' %>
+
 <% end %>

@@ -304,7 +304,11 @@ class EncountersController < ApplicationController
 
   def procedure_done
     @procedure_done = [""] + Concept.find_by_name("PROCEDURE DONE").concept_answers.collect{|c| c.name}.sort
-    @procedure_done = @procedure_done.insert(0, @procedure_done.delete_at(@procedure_done.index("None")))
+
+    unless params[:nonone]
+      @procedure_done = @procedure_done.insert(0, @procedure_done.delete_at(@procedure_done.index("None")))
+    end
+
     render :text => "<li>" + @procedure_done.join("</li><li>") + "</li>"
   end
   

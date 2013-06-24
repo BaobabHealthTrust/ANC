@@ -118,7 +118,8 @@ class MissingTa
   puts "Started at #{start}"
 
   startImport
-
+  
+  puts "Done"
   puts "Started at: #{start} - Finished at:#{Time.now()}"
 
 end
