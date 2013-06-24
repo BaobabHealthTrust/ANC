@@ -20,7 +20,7 @@
     conceptName = (conceptName.toLowerCase() == "parity")? "Number of Pregnancies" : conceptName;
 
     try{
-     // conceptName = conceptName.charAt(0).toUpperCase() + conceptName.slice(1).toLowerCase();
+      // conceptName = conceptName.charAt(0).toUpperCase() + conceptName.slice(1).toLowerCase();
       if(__$("messageBar") && !__$("messageBar").innerHTML.match(conceptName)){
         __$("messageBar").innerHTML = __$("messageBar").innerHTML.replace("Value", conceptName + " Value").replace("value", conceptName + " value").replace("a " + conceptName + " value", conceptName + " value")
       }
@@ -99,7 +99,7 @@
     return choices;
   }
 
-    function initializeDate(){
+  function initializeDate(){
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     year = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).year rescue Date.today.year%>"
     month = "<%=  (session[:datetime] ? session[:datetime].to_date : Date.today).month rescue Date.today.month%>"
@@ -149,10 +149,10 @@
   <% params[:update] = true %>
   <% if params[:update] %>
 
-    <%= select_tag("choice", options_for_select(["", "HB Test Result", 
-          "HIV Test Result", "Syphilis Test Result", "Urine Protein"]), 
+    <%= select_tag("choice", options_for_select(["", "HB Test Result",
+          "HIV Test Result", "Syphilis Test Result", "Urine Protein", "Malaria Test Result"]),
       {
-        :helpText => 'Select Available Test Results', :id => "choice", :multiple => true,       
+        :helpText => 'Select Available Test Results', :id => "choice", :multiple => true,
         :tt_onLoad => "showCategory('Lab Results'); transformMessages()",
         :optional => :true
       })%>
@@ -176,12 +176,12 @@
     :helptext => "Date HB Test Result Done",
     :tt_onLoad => "showCategory('Lab Results'); initializeDate(); parsedConceptName = 'HB Test Result Date'; ",
     :tt_onUnLoad => "parsedConceptName = '';",
-    :condition => "!__$('hb_result').value.match(/Not\\sDone/)#{ (params[:update] ? 
+    :condition => "!__$('hb_result').value.match(/Not\\sDone/)#{ (params[:update] ?
     " && getSelected().match(/HB\sTest\sResult/)" : "") }",
     :max => "#{session[:datetime].to_date rescue Date.today}" } %>
 
   <%= touch_select_tag "Syphilis Test Result", @patient,
-    options_for_select([["", ""], ["Positive", "Positive"], 
+    options_for_select([["", ""], ["Positive", "Positive"],
       ["Negative", "Negative"], ["Not Done", "Not Done"]]),
     {:id => "syphilis_result",
     :helptext => "Syphilis Test Result",
@@ -195,11 +195,11 @@
     :max => "#{session[:datetime].to_date rescue Date.today}",
     :tt_onLoad => " parsedConceptName = 'Syphilis Test Result Date'; showCategory('Lab Results');initializeDate();",
     :tt_onUnLoad => "parsedConceptName = '';",
-    :condition => "__$('syphilis_result').value != 'Not Done'#{ (params[:update] ? 
+    :condition => "__$('syphilis_result').value != 'Not Done'#{ (params[:update] ?
     " && getSelected().match(/Syphilis\sTest\sResult/)" : "") }" } %>
 
-  <%= touch_select_tag "URINE PROTEIN", @patient, 
-    options_for_select([["", ""], ["Negative", "Negative"], ["Retrace", "Retrace"], ["+", "+"], ["++", "++"], 
+  <%= touch_select_tag "URINE PROTEIN", @patient,
+    options_for_select([["", ""], ["Negative", "Negative"], ["Retrace", "Retrace"], ["+", "+"], ["++", "++"],
       ["+++", "+++"], ["++++", "++++"], ["Not Done", "Not Done"]]),
     {:id => "enter_urine_protein",
     :helptext => "Urine Protein",
@@ -221,38 +221,59 @@
     :helptext => "Date Result Done",
     :tt_onUnLoad => "parsedConceptName = '';",
     :tt_onLoad => " parsedConceptName = 'HIV Test date'; showCategory('Lab Results'); initializeDate();",
-    :condition => "__$('new_test_result_at_current_facility').value != 'Not Done'#{ (params[:update] ? 
+    :condition => "__$('new_test_result_at_current_facility').value != 'Not Done'#{ (params[:update] ?
     " && getSelected().match(/HIV\sTest\sResult/)" : "") }",
     :tt_BeforeUnload => "checkHIVTestDate()",
     :max => "#{session[:datetime].to_date rescue Date.today}"
   } %>
 
-  <%#= touch_select_tag "WHO Stage", @patient, options_for_select([["", ""], ["1", "1"], 
+
+  <%= touch_select_tag "Malaria Test Result", @patient,
+    options_for_select([["", ""], ["Negative", "Negative"], ["Positive", "Positive"], ["Not Done", "Not Done"]]),
+    {:id => "malaria_test_result",
+    :helptext => "Malaria Test Result",
+    :tt_onUnLoad => "parsedConceptName = 'Malaria Test result';",
+    :tt_onLoad => "parsedConceptName = ' Status'; showCategory('Lab Results'); unknownToNotDone(); ",
+    :condition => "#{ (params[:update] ? "getSelected().match(/Malaria\sTest\sResult/)" : "") }" } %>
+
+
+  <%#= touch_date_tag "Result Date", @patient, nil,
+    {:id => "enter_date_malaria_result_done",
+    :helptext => "Date Malaria Result Done",
+    :tt_onUnLoad => "parsedConceptName = '';",
+    :tt_onLoad => " parsedConceptName = 'Malaria Test date'; showCategory('Lab Results'); initializeDate();",
+    :condition => "__$('')",
+    :tt_BeforeUnload => "checkHIVTestDate()",
+    :max => "#{session[:datetime].to_date rescue Date.today}",
+    :condition => "#{ (params[:update] ? "getSelected().match(/Malaria\sTest\sResult/)" : "") }"
+  } %>
+
+  <%#= touch_select_tag "WHO Stage", @patient, options_for_select([["", ""], ["1", "1"],
   ["2", "2"], ["3", "3"], ["4", "4"], ["Unknown", "Unknown"]]),
   {:id => "who_stage",
   :helptext => "WHO STAGE",
-  :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+  :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ?
   " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%#= touch_select_tag "Is on CPT", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
   {:id => "on_cpt?",
   :helptext => "On CPT?",
-  :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+  :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ?
   " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%#= touch_select_tag "ON ART", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
   {:id => "on_art",
   :helptext => "On Art?",
-  :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ? 
+  :condition => "__$('new_test_result_at_current_facility').value == 'Positive'#{ (params[:update] ?
   " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%#= touch_select_tag "ART start date", @patient, options_for_select([
-  ["", ""], ["Before this Pregnancy", "Before this Pregnancy"], 
+  ["", ""], ["Before this Pregnancy", "Before this Pregnancy"],
   ["At 0-27 weeks of Pregnancy", "At 0-27 weeks of Pregnancy"],
   ["At 28+ of Pregnancy", "At 28+ of Pregnancy"]]),
   {:id => "art_start",
   :helptext => "When did Client start ART?",
-  :condition => "__$('new_test_result_at_current_facility').value == 'Positive' && __$('on_art').value == 'Yes'#{ (params[:update] ? 
+  :condition => "__$('new_test_result_at_current_facility').value == 'Positive' && __$('on_art').value == 'Yes'#{ (params[:update] ?
   " && getSelected().match(/HIV\sTest\sResult/)" : "") }" } %>
 
   <%= submit_tag 'Finish' %>
