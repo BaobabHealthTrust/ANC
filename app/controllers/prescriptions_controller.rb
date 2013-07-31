@@ -232,14 +232,6 @@ class PrescriptionsController < ApplicationController
 
     end
     
-=begin    
-    unless params[:location]
-      redirect_to (params[:auto] == '1' ? "/prescriptions/auto?patient_id=#{@patient.id}" : "/patients/treatment_dashboard/#{@patient.id}")
-    else
-      render :text => 'import success' and return
-    end
-=end
-
     redirect_to "/patients/print_exam_label/?patient_id=#{@patient.id}" and return if (@encounter.type.name.upcase rescue "") ==
       "TREATMENT"
        
