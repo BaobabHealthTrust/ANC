@@ -182,7 +182,13 @@ class PeopleController < GenericPeopleController
       next if national_id.blank?
       results = PersonSearch.new(national_id)
       results.national_id = national_id
-      results.current_residence =data["person"]["data"]["addresses"]["city_village"]
+
+      unless data["person"]["data"]["addresses"]["city_village"].match(/hashwithindifferentaccess/i)
+        results.current_residence =data["person"]["data"]["addresses"]["city_village"]
+      else
+        results.current_residence = nil
+      end
+      
       results.person_id = 0
       results.home_district = data["person"]["data"]["addresses"]["address2"]
       results.traditional_authority =  data["person"]["data"]["addresses"]["county_district"]

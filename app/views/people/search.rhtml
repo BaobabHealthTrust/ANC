@@ -91,7 +91,7 @@ end -%>
 
     if (text.match(/New Patient/)){
       //clearFields
-        var fields = [
+      var fields = [
         "identifier",
         "gender",
         "given_name",
@@ -112,13 +112,13 @@ end -%>
         try{
           __$(fields[k]).value = "";
           __$(fields[k]).removeAttribute("name");
-      }catch(e){
+        }catch(e){
 
         }
       }
-       createControlAndAssignValue("given_name", "person[names][given_name]", "<%= params[:given_name] %>");
-       createControlAndAssignValue("family_name", "person[names][family_name]", "<%= params[:family_name] %>");
-       createControlAndAssignValue("gender", "person[gender]", "<%=  params[:gender]%>");
+      createControlAndAssignValue("given_name", "person[names][given_name]", "<%= params[:given_name] %>");
+      createControlAndAssignValue("family_name", "person[names][family_name]", "<%= params[:family_name] %>");
+      createControlAndAssignValue("gender", "person[gender]", "<%=  params[:gender]%>");
     }
 
     if(pos && (person_id == 0) && !text.match(/New Patient/)){
@@ -281,9 +281,9 @@ end -%>
       people[pos]["Home District"] = "<%=data.home_district.squish rescue nil-%>"
 
       people[pos]["Ancestral Traditional Authority(T/A)"] = "<%=data.traditional_authority.squish rescue nil%>"
-
-      people[pos]["Current Residence"] = "<%=data.current_residence.squish rescue nil%>";
-
+      try{
+        people[pos]["Current Residence"] = "<%=data.current_residence.squish.to_s rescue nil%>";
+      }catch(x){}
       people[pos]["Patient National ID"] = "<%=data.national_id.squish rescue nil%>";
 
       var li = document.createElement("li");
