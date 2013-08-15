@@ -6,7 +6,7 @@ class Concept < ActiveRecord::Base
   belongs_to :concept_class, :conditions => {:retired => 0}
   belongs_to :concept_datatype, :conditions => {:retired => 0}
   has_one :concept_numeric, :foreign_key => :concept_id, :dependent => :destroy
-  #has_one :name, :class_name => 'ConceptName'
+  has_one :name, :class_name => 'ConceptName'
   has_many :answer_concept_names, :class_name => 'ConceptName', :conditions => {:voided => 0}
   has_many :concept_names, :conditions => {:voided => 0}
   has_many :concept_maps # no default scope

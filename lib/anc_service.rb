@@ -165,11 +165,13 @@ module ANCService
 
       if (abortion_check_encounter.present? && aborted && date_aborted.present? && current_range["START"].to_date < date_aborted.to_date rescue false)
     
-    		current_range["START"] = date_aborted.to_date + 1.month
-    		current_range["END"] = date_aborted.to_date + 1.month + 7.day + 45.week # 9.month
+    		current_range["START"] = date_aborted.to_date + 10.days
+    		current_range["END"] = current_range["START"] + 9.months
     	end
-    
-    	return [current_range, pregnancies]
+      
+      current_range["END"] = current_range["START"] + 7.day + 45.week unless ((current_range["START"]).to_date.blank? rescue false)
+
+      return [current_range, pregnancies]
     end
   
     def detailed_obstetric_history_label(date = Date.today)

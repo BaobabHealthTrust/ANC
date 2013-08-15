@@ -207,7 +207,7 @@
     :tt_pageStyleClass => "exclude",
     :min => ((session[:datetime] || Date.today).to_date - 42.week),
     :absoluteMin => ((session[:datetime] || Date.today).to_date - 45.week),
-    :absoluteMax => ((session[:datetime] || Date.today).to_date - 1.week)
+    :absoluteMax => ((session[:datetime] || Date.today).to_date - 1.day)
   }%>
 
   <%= text_field_tag "Estimate LMP", nil,
