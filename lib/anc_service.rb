@@ -168,8 +168,8 @@ module ANCService
     		current_range["START"] = date_aborted.to_date + 10.days
     		current_range["END"] = current_range["START"] + 9.months
     	end
-      
-      current_range["END"] = current_range["START"] + 7.day + 45.week unless ((current_range["START"]).to_date.blank? rescue false)
+     
+      current_range["END"] = current_range["START"] + 7.day + 45.week unless ((current_range["START"]).to_date.blank? rescue true)
 
       return [current_range, pregnancies]
     end
