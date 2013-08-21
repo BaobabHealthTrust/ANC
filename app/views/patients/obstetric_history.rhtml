@@ -1,4 +1,4 @@
-# obstetric_history.rhtml
+
 <html>
   <head>
   <script type="text/javascript" language="javascript">
@@ -218,13 +218,13 @@
         {:id => "year_of_birth#{e}#{d}",
           :helptext => "Year of Birth #{d}#{indic} Child (#{e}#{indice} Pregnancy)",
           :tt_pageStyleClass => "NumbersWithUnknown",
-          :absoluteMin => (@anc_patient.birth_year + 10),
-          :min => (@anc_patient.birth_year + 13),
+          :absoluteMin => (@birth_year + 10),
+          :min => (@birth_year + 13),
           :tt_onLoad => "showCategory('Obstetric History');",
-          :max => ((@anc_patient.birth_year + 50) > ((session[:datetime] || Date.today).year) ?
-              ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 50)),
-          :absoluteMax => ((@anc_patient.birth_year + 55) > ((session[:datetime] || Date.today).year) ?
-              ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 55)),
+          :max => ((@birth_year + 50) > ((session[:datetime] || Date.today).year) ?
+              ((session[:datetime] || Date.today).year) : (@birth_year + 50)),
+          :absoluteMax => ((@birth_year + 55) > ((session[:datetime] || Date.today).year) ?
+              ((session[:datetime] || Date.today).year) : (@birth_year + 55)),
           :condition => "__$('gestation_type#{e}').value >= #{d}" } %>
 
         <%= touch_text_field_tag "Place of Birth", @patient, nil,
@@ -329,12 +329,12 @@
         :tt_onLoad => "showCategory('Obstetric History');",
         :helptext => "Year of #{e}#{indice} Abortion",
         :tt_pageStyleClass => "NumbersWithUnknown",
-        :absoluteMin => (@anc_patient.birth_year + 10),
-        :min => (@anc_patient.birth_year + 13),
-        :max => ((@anc_patient.birth_year + 50) > ((session[:datetime] || Date.today).year) ?
-            ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 50)),
-        :absoluteMax => ((@anc_patient.birth_year + 55) > ((session[:datetime] || Date.today).year) ?
-            ((session[:datetime] || Date.today).year) : (@anc_patient.birth_year + 55)),
+        :absoluteMin => (@birth_year + 10),
+        :min => (@birth_year + 13),
+        :max => ((@birth_year + 50) > ((session[:datetime] || Date.today).year) ?
+            ((session[:datetime] || Date.today).year) : (@birth_year + 50)),
+        :absoluteMax => ((@birth_year + 55) > ((session[:datetime] || Date.today).year) ?
+            ((session[:datetime] || Date.today).year) : (@birth_year + 55)),
         :condition => "__$('enter_number_of_abortions').value >= #{e}" } %>
 
       <%= touch_select_tag "Place of Birth", @patient, options_for_select(@place),

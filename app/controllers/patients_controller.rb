@@ -858,6 +858,8 @@ class PatientsController < ApplicationController
 
   def obstetric_history
     @patient = Patient.find(params[:patient_id]) rescue nil
+    @birth_year = @anc_patient.birth_year
+  
   end
 
   def medical_history
