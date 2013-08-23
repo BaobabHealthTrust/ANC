@@ -24,8 +24,8 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
       var nextTask = document.createElement("nextTask");
       nextTask.id = "nextTask";
       nextTask.style.position = "absolute";
-      nextTask.style.left = (pos[3] + 730) + "px";
-      nextTask.style.top = (pos[2] + pos[1] + 25) + "px";
+      nextTask.style.left = "48%";
+      nextTask.style.top = (pos[2] + pos[1] - 30) + "px";
         
       document.body.appendChild(nextTask);
     }
@@ -45,13 +45,13 @@ next_task = task.encounter_type.gsub('_',' ') rescue nil
     if(__$("timeCtrl")){
       var pos = checkCtrl(__$("details"));
       var timeCtrl = __$("timeCtrl");
-      timeCtrl.style.left = (pos[3] + 770) + "px";
-      timeCtrl.style.top = (pos[2] + pos[1] - 38) + "px";
+      timeCtrl.style.right = 15 + "px";
+      timeCtrl.style.top = (pos[2] + pos[1] - 25) + "px";
       
       if(__$("nextTask")){
         var nextTask = __$("nextTask");
-        nextTask.style.left = (pos[3] + 730) + "px";
-        nextTask.style.top = (pos[2] + pos[1] + 25) + "px";
+        nextTask.style.left = "48%"
+        nextTask.style.top = (pos[2] + pos[1] - 30) + "px";
       }
 
       var current_time = new Date();

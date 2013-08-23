@@ -1,7 +1,7 @@
-var generics = [];
-var dosages = {};
-var frequencies = [];
-var drugslist = {};
+//var generics = [];
+//var dosages = {};
+//var frequencies = [];
+//var drugslist = {};
 var previous_clicked = null;
 
 var current_concept_id = null;
@@ -20,10 +20,10 @@ function __$(id){
     
 function init(){
     generics = generic_drugs;
-    dosages = drug_dosages;
-    drugslist = drugs;
+    //dosages = drug_dosages;
+    //drugslist = drugs;
    
-    frequencies = {
+    /*frequencies = {
         "OD":"Once a day (OD)",
         "BD":"Twice a day (BD)",
         "TDS":"Three a day (TDS)",  
@@ -38,7 +38,7 @@ function init(){
         "QOD":"Every other day (QOD)", 
         "QPM":"In the evening (QPM)", 
         "QWK":"Once a week (QWK)"
-    }
+    };*/
     
     generateGenerics();
 }
@@ -48,10 +48,10 @@ function generateGenerics(patient_id){
     current_patient_id = patient_id;
     
     generics = generic_drugs;
-    dosages = drug_dosages;
-    drugslist = drugs;
+    //dosages = drug_dosages;
+    //drugslist = drugs;
    
-    frequencies = {
+  /*  frequencies = {
         "OD":"Once a day (OD)",
         "BD":"Twice a day (BD)",
         "TDS":"Three a day (TDS)",  
@@ -66,7 +66,7 @@ function generateGenerics(patient_id){
         "QOD":"Every other day (QOD)", 
         "QPM":"In the evening (QPM)", 
         "QWK":"Once a week (QWK)"
-    }
+    }; */
     
     if(__$("parent_container")){
         __$("content").removeChild(__$("parent_container"));
@@ -79,23 +79,22 @@ function generateGenerics(patient_id){
     var parent_container = document.createElement("div");
     parent_container.id = "parent_container";
     parent_container.style.position = "absolute";
-    parent_container.style.marginLeft = "0.5%";
-    parent_container.style.marginRight = "0.5%";
-    parent_container.style.marginTop = "-370px";
+    parent_container.style.marginLeft = "-500px";
+    parent_container.style.marginTop = "-358px";
     parent_container.style.top = "50%";
-    // parent_container.style.left = "50%";
-    parent_container.style.height = "660px";
-    parent_container.style.width = "99%";
+    parent_container.style.left = "50%";
+    parent_container.style.height = "630px";
+    parent_container.style.width = "1000px";
     parent_container.style.overflow = "hidden";
     parent_container.style.zIndex = "20";
-    parent_container.style.backgroundColor = "#ffffff";
+    parent_container.style.backgroundColor = "#FFFFFF";
 
     __$("content").appendChild(parent_container);
 
     var mainDiv = document.createElement("div");
     mainDiv.id = "mainDiv";
-    mainDiv.style.width = "97%";
-    mainDiv.style.height = "610px";
+    mainDiv.style.width = "960px";
+    mainDiv.style.height = "590px";
     mainDiv.style.margin = "10px";
 
     parent_container.appendChild(mainDiv);
@@ -1443,10 +1442,10 @@ function askFrequency(){
         qtblrow3.appendChild(qtblcell3_1);
     
         var f = 0;
-        for(var freq in frequencies){
+		for(var i = 0; i < frequencies.length; i++){
             var li = document.createElement("li");
-            li.innerHTML = frequencies[freq];
-            li.setAttribute("frequency", freq);
+            li.innerHTML = frequencies[i][1];
+            li.setAttribute("frequency", frequencies[i][0]);
         
             if(f % 2 > 0){
                 li.className = "oddf";
@@ -2071,16 +2070,7 @@ function removeGenerics(){
             document.forms[0].appendChild(field);
         }
     }
-
-    if(__$("parent_container")){
-        __$("content").removeChild(__$("parent_container"));
-    }
-
-    if(__$("clearButton")){
-        __$("clearButton").onmousedown = function(){
-            clearInput();
-        }
-    }
+    
 }
 
 /*
