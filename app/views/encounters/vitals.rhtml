@@ -450,7 +450,7 @@ end
   <label for='showSummary'>Summary </label>
   <%= text_field_tag :showSummary, nil,
     {
-    :tt_onLoad => "growthIndicators(); showCategory('Vitals');",
+    :tt_onLoad => "growthIndicators(); showCategory('Vitals'); __$('keyboard').style.display = 'none'",
     :optional => "true",
     :tt_pageStyleClass => "NoControls",
     :condition => "if(__$('weight')){__$('weight').value.toLowerCase() != 'unknown'}"
