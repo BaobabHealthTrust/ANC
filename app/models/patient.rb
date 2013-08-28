@@ -52,4 +52,13 @@ class Patient < ActiveRecord::Base
     }.uniq.delete_if{|x| x == []}.flatten.max
   end
 
+  def hiv_positive?
+    
+    self.encounters.find(:all, :select => ["obs.value_coded, obs.value_text"], :joins => [:observations],
+      :conditions => ["encounter.encounter_type = ? AND obs.concept_id = ?",
+        EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("HIV STATUS").concept_id]).collect{|ob|
+      (Concept.find(ob.value_coded).name.name.downcase.strip rescue nil) || ob.value_text.downcase.strip}.include?("positive") rescue false
+   
+  end
+
 end
