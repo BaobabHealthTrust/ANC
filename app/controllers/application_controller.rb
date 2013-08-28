@@ -25,7 +25,7 @@ class ApplicationController < GenericApplicationController
           ConceptName.find_by_name('LAST MENSTRUAL PERIOD').concept_id,]).present? rescue false    
 
       return "/patients/check_abortion?patient_id=#{patient.patient_id}" if lmp_capture_date_check && !abortion_checked &&
-        (@current_range[0]["START"].to_time >=  (session_date - 7.months) rescue false)
+        (@current_range[0]["START"].to_time >=  (session_date - 9.months) rescue false)
     end
     
    
