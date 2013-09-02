@@ -3,7 +3,12 @@
 <script type="text/javascript" language="javascript">
   <!--
   tt_cancel_show = "/patients/show/<%= @patient.id %>";
-  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+<% if params["from_confirmation"]%>
+    tt_cancel_destination = "<%= request.referrer%>";
+<%else%>
+    tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+<%end%>
+  
   var timedEvent;
 
   var d = new Date("<%= (session[:datetime] ? session[:datetime].to_date.strftime("%Y-%m-%d") : 
@@ -12,7 +17,7 @@
   d.setDate(d.getDate() - 7);
 
   var tstEstimatedLMPDate = d.getFullYear() + "-" + padZeros((d.getMonth() + 1),2) + "-" + padZeros(d.getDate(),2);
-   
+
   function padZeros(number, positions){
     var zeros = parseInt(positions) - String(number).length;
     var padded = "";

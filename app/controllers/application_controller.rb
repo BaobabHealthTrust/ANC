@@ -9,33 +9,10 @@ class ApplicationController < GenericApplicationController
     #1. should have checked abortion status atleast a month ago
     session_date = (session[:datetime].to_date rescue Date.today)
     @current_range = @anc_patient.active_range(session_date)
-
-    unless @current_range[0].blank?
-
-      abortion_checked = patient.encounters.find(:first, :order => ["date_created DESC"],
-        :conditions => ["DATE(encounter_datetime) >= ? AND encounter_type = ? AND voided = 0",
-          ((session[:datetime].to_date rescue Date.today) - 10.days),
-          EncounterType.find_by_name("PREGNANCY STATUS").encounter_type_id]).present? rescue false
-
-      #2. should have captured LMP atleast a month ago
-      lmp_capture_date_check = patient.encounters.find(:first, :order => ["encounter.encounter_datetime DESC"], :joins => [:observations],
-        :conditions => ["DATE(encounter.encounter_datetime) <= ? AND encounter.encounter_type = ? AND encounter.voided = 0 AND obs.concept_id = ?",
-          ((session[:datetime].to_date rescue Date.today) - 10.days),
-          EncounterType.find_by_name("CURRENT PREGNANCY").encounter_type_id,
-          ConceptName.find_by_name('LAST MENSTRUAL PERIOD').concept_id,]).present? rescue false    
-
-      return "/patients/check_abortion?patient_id=#{patient.patient_id}" if lmp_capture_date_check && !abortion_checked &&
-        (@current_range[0]["START"].to_time >=  (session_date - 9.months) rescue false)
-    end
     
-   
-      
-    abortion_check_encounter =  patient.encounters.find(:first, :order => ["encounter_datetime DESC"], :conditions => ["encounter_type = ? AND encounter_datetime > ? AND DATE(encounter_datetime) <= ?", EncounterType.find_by_name("PREGNANCY STATUS").encounter_type_id, session_date.to_date - 7.months, session_date.to_date]) rescue nil
-
-    date_aborted = abortion_check_encounter.observations.find_by_concept_id(ConceptName.find_by_name("DATE OF SURGERY").concept_id).answer_string rescue nil
-
-    if ((patient.lmp.to_date < date_aborted.to_date) rescue false)
-      return "/patients/current_pregnancy/?patient_id=#{patient.id}"
+    if request.referrer.match(/people\/search\?/i)
+      @current_pregnancy_url =  "/patients/current_pregnancy/?patient_id=#{patient.id}"
+      return "/patients/confirm/?patient_id=#{patient.id}&url=#{@current_pregnancy_url}"
     end
     
     begin

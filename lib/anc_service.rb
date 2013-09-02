@@ -1489,7 +1489,7 @@ module ANCService
         e.observations.collect{|o|
           (((today.to_date - o.answer_string.to_date).to_i/7) rescue nil) if o.concept.concept_names.map(& :name).include?("Date of last menstrual period")
         }.compact
-      }.uniq.delete_if{|x| x == []}.flatten.max
+      }.uniq.delete_if{|x| x == []}.flatten.min
     end
 
     def lmp(today = Date.today)
@@ -1544,7 +1544,7 @@ module ANCService
       
       start_date = @current_range[0]["START"].to_date rescue (session_date - 8.month)
       end_date = @current_range[0]["END"].to_date rescue (session_date + 6.month)
-      return [] if start_date.to_date < (session_date.to_date - 9.months).to_date
+      return [] if start_date.to_date < (session_date.to_date - 10.months).to_date
       
       self.patient.encounters.all(:conditions => 
           ["DATE(encounter_datetime) >= ? AND DATE(encounter_datetime) <= ? AND encounter_type = ?", 

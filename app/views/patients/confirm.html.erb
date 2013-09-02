@@ -1,0 +1,117 @@
+<style>
+  body {
+    -moz-user-select:none;
+  }
+
+  .charts {
+    padding-left:20px;
+    -moz-user-select:none;
+  }
+
+  #header {
+    padding-left:60px;
+    -moz-user-select:none;
+  }
+
+  th {
+    text-align:left;
+    -moz-user-select:none;
+  }
+
+  #cancelhButton {
+    float:left;
+    -moz-user-select:none;
+  }
+
+  .messageBar {
+    background-color: tomato;
+    font-size: 2em;
+    left: 270px;
+    position: absolute;
+    text-align: center;
+    top: 10px;
+    width: 450px;
+    z-index: 999;
+    display:none;
+    height:210px;
+    -moz-user-select:none;
+  }
+
+  a {
+    background-color: grey;
+    border-bottom: 1px outset black;
+    border-style: outset;
+    border-top: 1px outset black;
+    color: white;
+    display: block;
+    padding: 0px 0px 0px 0px;
+    text-align: center;
+    text-decoration: none;
+    width: 300px;
+    -moz-user-select:none;
+  }
+</style>
+
+
+<%= javascript_include_tag "prototype" %>
+
+<body onLoad="showCategory('Confirm Pregnancy')">
+
+  <div id ='header'>
+
+    <h1><%= @patient.person.name.titleize %>&nbsp;(<%= @patient.person.gender%>)</h1>
+    <table>
+      <tr>
+        <th>Age:</th><td>   <%= @patient.person.age %> yrs</td>
+      </tr>
+      <tr>
+        <th>National ID:</th><td>   <%= @patient.national_id %></td>
+      </tr>
+
+    </table>
+
+  </div>
+
+  <hr />
+  <div>
+
+    <% if @data.blank?%>
+      <div style="padding-top: 10%; text-align: center; font-size: 25px; font-weight: bold;">
+        <div>No Pregnancy Found Within Current Range!</div>
+      </div>
+    <%else%>
+
+      <table  cellspacing= "20" style="padding-top: 5%; font-size: 18px; padding-left: 30%;">
+        <tr>
+          <th> DATE OF LAST MENSTRUAL PERIOD  </th><td>  &nbsp&nbsp : &nbsp&nbsp&nbsp&nbsp<%= @data["LMP"] %></td>
+        </tr>
+        <tr>
+          <th>FUNDUS</th><td>  &nbsp&nbsp :   &nbsp&nbsp&nbsp&nbsp <%= (@data["FUNDUS"] || "?") rescue "?" %> Weeks</td>
+        </tr>
+        <tr>
+          <th>ANC VISITS IN PREGNANCY </th><td> &nbsp&nbsp :    &nbsp&nbsp&nbsp&nbsp <%= @data["ANC VISITS"].length rescue "?" %></td>
+        </tr>
+
+      </table>
+    <%end%>
+
+    <div id = "nav" style="z-index:11;bottom:0px; height: 82px; width: 100%; left: 0px;
+         right: -66px; position: absolute; background-color: #333333; padding: 0px;">
+
+      <button onclick="window.location = '/clinic';" class="button navButton red"
+              id="cancelButton" style="position: absolute; z-index: 100; margin-top: 10px; width: 130px;"><span>Cancel</span>
+      </button>
+
+      <button onclick="window.parent.location = '<%= next_task(@patient) %>';" class="button navButton green"
+              id="nextButton" style="margin-top: 10px; width:  150px; margin-right: 20px;" ><span>Continue</span>
+      </button>
+
+      <%if @data.present?%>
+        <button onclick="window.location = '<%= params[:url] %>';" class="button navButton blue"
+                id="backButton" style="margin-top: 10px;" ><span>New pregnancy</span>
+        </button>
+      <%end%>
+
+    </div>
+
+</body>

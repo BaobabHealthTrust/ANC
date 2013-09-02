@@ -1296,6 +1296,33 @@ class PatientsController < ApplicationController
     @patient = Patient.find(params[:patient_id])
   end
 
+  def confirm
+
+    @latest_lmp = @patient.lmp
+    session_date = (session[:datetime].to_date rescue Date.today)
+    params[:url] += "&from_confirmation=true"
+    
+    @current_pregnancy = @patient.encounters.find(:last,
+      :conditions => ["encounter_type = ? AND voided = 0 AND DATE(encounter_datetime) >= ?",
+        EncounterType.find_by_name("CURRENT PREGNANCY"), session_date.to_date - 10.months])
+
+    @data = {}
+       
+    if @current_pregnancy.present?
+      @anc_patient = ANCService::ANC.new(@patient) rescue nil
+      @data["LMP"] =  @anc_patient.lmp(session_date).strftime("%d/%b/%Y") rescue nil
+      @data["FUNDUS"] = @anc_patient.fundus_by_lmp(session_date) rescue nil
+      @data["ANC VISITS"] = @anc_patient.anc_visits.blank? ? nil : @anc_patient.anc_visits.uniq
+
+      #disregard irrelevant pregnancies
+      if ((@data["LMP"].present? and @data["LMP"].to_date + 10.months < session_date) rescue true)
+        @data = {}
+      end
+    
+    end    
+    
+  end
+
   private
 
 end
