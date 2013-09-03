@@ -1485,7 +1485,8 @@ module ANCService
     end
 
     def fundus_by_lmp(today = Date.today)
-      self.patient.encounters.collect{|e|
+      self.patient.encounters.find(:all, :conditions => ["DATE(encounter_datetime) BETWEEN ? AND ?",
+          today.to_date - 10.months, today.to_date]).collect{|e|
         e.observations.collect{|o|
           (((today.to_date - o.answer_string.to_date).to_i/7) rescue nil) if o.concept.concept_names.map(& :name).include?("Date of last menstrual period")
         }.compact
@@ -1493,7 +1494,8 @@ module ANCService
     end
 
     def lmp(today = Date.today)
-      self.patient.encounters.collect{|e|
+      self.patient.encounters(:all, :conditions => ["DATE(encounter_datetime) BETWEEN ? AND ?",
+          today.to_date - 10.months, today.to_date]).collect{|e|
         e.observations.collect{|o|
           (o.answer_string.to_date rescue nil) if o.concept.concept_names.map(& :name).include?("Date of last menstrual period") && o.answer_string.to_date <= today.to_date
         }.compact

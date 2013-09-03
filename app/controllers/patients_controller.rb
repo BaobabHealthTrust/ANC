@@ -1303,8 +1303,8 @@ class PatientsController < ApplicationController
     params[:url] += "&from_confirmation=true"
     
     @current_pregnancy = @patient.encounters.find(:last,
-      :conditions => ["encounter_type = ? AND voided = 0 AND DATE(encounter_datetime) >= ?",
-        EncounterType.find_by_name("CURRENT PREGNANCY"), session_date.to_date - 10.months])
+      :conditions => ["encounter_type = ? AND voided = 0 AND DATE(encounter_datetime) BETWEEN ? AND ?",
+        EncounterType.find_by_name("CURRENT PREGNANCY"), session_date.to_date - 10.months, session_date.to_date])
 
     @data = {}
        
