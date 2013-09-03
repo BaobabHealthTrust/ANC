@@ -102,7 +102,7 @@
               id="cancelButton" style="position: absolute; z-index: 100; margin-top: 10px; width: 130px;"><span>Cancel</span>
       </button>
 
-      <button onclick="window.parent.location = '<%= next_task(@patient) %>';" class="button navButton green"
+      <button onclick="window.location = '/patients/verify_route?patient_id=<%= @patient.id %>'" class="button navButton green"
               id="nextButton" style="margin-top: 10px; width:  150px; margin-right: 20px;" ><span>Continue</span>
       </button>
 

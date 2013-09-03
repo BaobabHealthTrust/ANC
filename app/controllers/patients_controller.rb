@@ -1323,6 +1323,10 @@ class PatientsController < ApplicationController
     
   end
 
+  def verify_route
+    redirect_to next_task(@patient) and return
+  end
+
   private
 
 end

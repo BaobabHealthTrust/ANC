@@ -21,6 +21,7 @@ class ApplicationController < GenericApplicationController
     rescue
       return "/patients/show/#{patient.id}" 
     end
+    
   end
 
   def next_form(location , patient , session_date = Date.today)
