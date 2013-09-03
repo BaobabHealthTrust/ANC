@@ -9,8 +9,8 @@ class ApplicationController < GenericApplicationController
     #1. should have checked abortion status atleast a month ago
     session_date = (session[:datetime].to_date rescue Date.today)
     @current_range = @anc_patient.active_range(session_date)
-    
-    if request.referrer.match(/people\/search\?/i)
+  
+    if request.referrer.match(/people\/search\?|\/clinic/i)
       @current_pregnancy_url =  "/patients/current_pregnancy/?patient_id=#{patient.id}"
       return "/patients/confirm/?patient_id=#{patient.id}&url=#{@current_pregnancy_url}"
     end
