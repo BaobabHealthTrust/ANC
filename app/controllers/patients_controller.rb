@@ -2,8 +2,7 @@ class PatientsController < ApplicationController
   before_filter :find_patient, :except => [:void]
   
   def show
-    # session = {}
-    # raise session.to_yaml
+   
     next_destination = next_task(@patient) rescue nil
 
     if (next_destination.match("check_abortion") rescue false)
@@ -403,9 +402,7 @@ class PatientsController < ApplicationController
   end
   
   def visit
-    @patient_id = params[:patient_id] 
     @date = params[:date].to_date
-    @patient = Patient.find(@patient_id)
     @visits = Mastercard.visits(@patient,@date)
     render :layout => "summary"
   end
@@ -485,8 +482,7 @@ class PatientsController < ApplicationController
   end
    
   def tab_visit_summary
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    
+      
     @encounters = @patient.encounters.find(:all, 
       :conditions => ["DATE(encounter_datetime) = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]) rescue []
 
@@ -540,8 +536,7 @@ class PatientsController < ApplicationController
   end
 
   def tab_obstetric_history
-    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-     
+      
     @pregnancies = @anc_patient.active_range
     
     @range = []
@@ -616,8 +611,7 @@ class PatientsController < ApplicationController
   end
 
   def tab_medical_history
-    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    
+     
     @asthma = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
         ConceptName.find_by_name('ASTHMA').concept_id]).answer_string.upcase.squish rescue nil
@@ -660,8 +654,7 @@ class PatientsController < ApplicationController
   end    
 
   def tab_examinations_management
-    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-
+   
     @height = @patient.current_height.to_i
 
     @multiple = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
@@ -676,7 +669,6 @@ class PatientsController < ApplicationController
   end
 
   def tab_lab_results
-    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 
     syphil = {}
     @patient.encounters.find(:all, :conditions => ["encounter_type IN (?)", 
@@ -731,9 +723,7 @@ class PatientsController < ApplicationController
   end
 
   def tab_visit_history
-    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-  
-    @current_range = @anc_patient.active_range((params[:target_date] ? 
+    @current_range = @anc_patient.active_range((params[:target_date] ?
           params[:target_date].to_date : (session[:datetime] ? session[:datetime].to_date : Date.today)))
     
     @encounters = {}
@@ -799,16 +789,15 @@ class PatientsController < ApplicationController
   end
 
   def observations
-    @patient = Patient.find(params[:patient_id]) rescue nil
+  
   end
 
   def preventative_medications
-    @patient = Patient.find(params[:patient_id]) rescue nil
+   
   end
 
   def hiv_status
-    @patient = Patient.find(params[:patient_id]) rescue nil
-    
+      
     @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
 
     @encounters = @patient.encounters.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
@@ -853,30 +842,47 @@ class PatientsController < ApplicationController
   end
 
   def pmtct_management
-    @patient = Patient.find(params[:patient_id]) rescue nil
+ 
   end
 
   def obstetric_history
-    @patient = Patient.find(params[:patient_id]) rescue nil
-    @birth_year = @anc_patient.birth_year
+    
+  end
+
+  def obstetric_counts
   
+    @gravida = params[:observations].collect{|obs|  obs[:value_numeric] if obs[:concept_name].match(/gravida/i)}.compact[0]   rescue 1
+    @parity = params[:observations].collect{|obs| obs[:value_numeric] if  obs[:concept_name].match(/parity/i)}.compact[0] rescue 0
+    @abortions = params[:observations].collect{|obs| obs[:value_numeric] if  obs[:concept_name].match(/number of abortions/i)}.compact[0] rescue 0
+   
+    @birth_year = @anc_patient.birth_year
+      
+    @min_birth_year = @birth_year + 13
+    @max_birth_year = ((@birth_year + 50) > ((session[:datetime] || Date.today).year) ?
+        ((session[:datetime] || Date.today).year) : (@birth_year + 50))
+
+    @abs_max_birth_year = ((@birth_year + 55) > ((session[:datetime] || Date.today).year) ?
+        ((session[:datetime] || Date.today).year) : (@birth_year + 55))
+            
+    @procedures = ["", "Manual Vacuum Aspiration (MVA)", "Evacuation"]
+    @place = ["", "Health Facility", "Home", "TBA", "Other"]
+    @delivery_modes = ["", "Spontaneous vaginal delivery", "Caesarean Section", "Vacuum Extraction Delivery", "Breech"]
+
   end
 
   def medical_history
-    @patient = Patient.find(params[:patient_id]) rescue nil
+   
   end
 
   def examinations_management
-    @patient = Patient.find(params[:patient_id]) rescue nil
+  
   end
 
   def new
-    @patient = Patient.find(params[:patient_id] || session[:patient_id])
+   
   end
 
   def pregnancy_history
-    @patient = Patient.find(params[:patient_id]) rescue nil
-    
     @pregnancies = @anc_patient.active_range
     
     @range = []
@@ -900,18 +906,15 @@ class PatientsController < ApplicationController
   end
 
   def current_pregnancy
-    @patient = Patient.find(params[:patient_id]) rescue nil
+  
   end
 
   def outcome
-    @patient = Patient.find(params[:patient_id]) rescue nil   
-    @program_id = PatientProgram.find_by_patient_id(@patient.id, :conditions => ["program_id = ?", 
+    @program_id = PatientProgram.find_by_patient_id(@patient.id, :conditions => ["program_id = ?",
         Program.find_by_name("ANC PROGRAM").id]).patient_program_id rescue nil
   end
 
   def current_visit
-    @patient = Patient.find(params[:patient_id] || session[:patient_id])
-
     @nc_types =  EncounterType.find(:all, :conditions => ["name in ('PREGNANCY STATUS', 'OBSERVATIONS', 'VITALS', 'TREATMENT', 'LAB RESULTS', " +
           "'DIAGNOSIS', 'APPOINTMENT', 'UPDATE OUTCOME')"]).collect{|t| t.id}
         
@@ -938,7 +941,7 @@ class PatientsController < ApplicationController
   end
 
   def demographics
-    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+ 
     @national_id = @anc_patient.national_id_with_dashes rescue nil
 
     @first_name = @patient.person.names.first.given_name rescue nil
@@ -971,13 +974,10 @@ class PatientsController < ApplicationController
   end
 
   def patient_history
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    
     @encounters = @patient.encounters.collect{|e| e.name}
   end
 
   def tab_detailed_obstetric_history
-    # @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     
     @obstetrics = {}
     search_set = ["YEAR OF BIRTH", "PLACE OF BIRTH", "BIRTHPLACE", "PREGNANCY", "GESTATION", "LABOUR DURATION",
@@ -1057,9 +1057,7 @@ class PatientsController < ApplicationController
     @alcohol = nil
     @smoke = nil
     @nutrition = nil
-    
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    
+       
     @alcohol = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
         @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
         ConceptName.find_by_name('Patient currently consumes alcohol').concept_id]).answer_string rescue nil
@@ -1160,19 +1158,17 @@ class PatientsController < ApplicationController
   end
 
   def print_labels
-    @patient = Patient.find(params[:patient_id] || session[:patient_id])
+
   end
   
   def visit_type
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil    
-    @program_id = PatientProgram.find_by_patient_id(@patient.id, :conditions => ["program_id = ?", 
+    @program_id = PatientProgram.find_by_patient_id(@patient.id, :conditions => ["program_id = ?",
         Program.find_by_name("ANC PROGRAM").id]).patient_program_id rescue nil
     #raise @anc_patient.anc_visits.to_json.to_yaml
   end
   
   def social_history
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil 
-    
+
     religions = ["Jehovahs Witness",  
       "Roman Catholic", 
       "Presbyterian (C.C.A.P.)",
@@ -1195,27 +1191,25 @@ class PatientsController < ApplicationController
   end
 
   def graph
-		@person = Person.find(params[:patient_id]) rescue nil
+		@person = @patient.person
     render :layout => false
   end
 
   def weight_fundus_graph
-		@person = Person.find(params[:patient_id]) rescue nil
+		@person = @patient.person 
     render :layout => false
   end
 
   def next_url
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil 
-    
     redirect_to next_task(@patient) and return
   end
   
   def go_to_art
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil
+    @patient = Patient.find(session[:patient_id]) if @patient.blank?
   end
 
   def proceed_to_pmtct
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) # rescue nil
+    @patient = Patient.find(session[:patient_id]) if @patient.blank?
     @anc_patient = ANCService::ANC.new(@patient) rescue nil      
 
     if (params["to art"].downcase == "yes" rescue false) || (params["to_art"].downcase == "yes" rescue false)
@@ -1293,7 +1287,6 @@ class PatientsController < ApplicationController
   end
 
   def check_abortion
-    @patient = Patient.find(params[:patient_id])
   end
 
   def confirm
