@@ -127,6 +127,7 @@
         :value => "#{@gravida}",
         :condition => false,
         :max => 20,
+        :min => 1,
         :tt_onLoad => "document.forms[0].reset(); showCategory('Obstetric History'); transformMessages(); gotoNextPage()",
         :tt_onUnLoad => "if(__$('category')){__$('content').removeChild(__$('category'))}
     if(__$('enter_gravida').value == 1){
