@@ -88,7 +88,7 @@ class GenericPeopleController < ApplicationController
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
 				else
-          DDEService.create_footprint(found_person.patient.national_id, Location.find(session[:location_id]).name) rescue nil
+          DDEService.create_footprint(found_person.patient.national_id, "ANC") rescue nil
 					redirect_to :action => 'confirm', :found_person_id => found_person.id, :relation => params[:relation] and return
 				end
 			end
@@ -213,7 +213,7 @@ class GenericPeopleController < ApplicationController
       redirect_to :action => :search, :identifier => params[:identifier]
     elsif params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
       redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
-       DDEService.create_footprint(found_person.patient.national_id, Location.find(session[:location_id]).name) rescue nil
+      DDEService.create_footprint(Patient.find(params[:person][:id]).national_id, "ANC") rescue nil
     else
       if params[:person][:id] != '0'
         person = Person.find(params[:person][:id])
@@ -221,16 +221,16 @@ class GenericPeopleController < ApplicationController
         patient_id = PatientService.get_patient_identifier(person.patient, "National id")
         if patient_id.length != 6 and create_from_dde_server
           replaced = patient.check_old_national_id(patient_id)
-					if replaced.to_s == "true"
-					 	print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
-					end
+          if replaced.to_s == "true"
+            print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
+          end
         end
       end
       redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
 
       redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
     end
-	end
+  end
  
   def create
   
@@ -243,13 +243,13 @@ class GenericPeopleController < ApplicationController
 
     unless person.blank?
       if use_filing_number and hiv_session
-        PatientService.set_patient_filing_number(person.patient) 
+        PatientService.set_patient_filing_number(person.patient)
         archived_patient = PatientService.patient_to_be_archived(person.patient)
         message = PatientService.patient_printing_message(person.patient,archived_patient,creating_new_patient = true)
         unless message.blank?
           print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}" , next_task(person.patient),message,true,person.id)
         else
-          print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}", next_task(person.patient)) 
+          print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}", next_task(person.patient))
         end
       else
         print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
@@ -292,13 +292,13 @@ class GenericPeopleController < ApplicationController
 
 
         if use_filing_number and hiv_session
-          PatientService.set_patient_filing_number(person.patient) 
+          PatientService.set_patient_filing_number(person.patient)
           archived_patient = PatientService.patient_to_be_archived(person.patient)
           message = PatientService.patient_printing_message(person.patient,archived_patient,creating_new_patient = true)
           unless message.blank?
             print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}" , next_task(person.patient),message,true,person.id)
           else
-            print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}", next_task(person.patient)) 
+            print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}", next_task(person.patient))
           end
         else
           print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
@@ -320,7 +320,7 @@ class GenericPeopleController < ApplicationController
         session[:datetime] = date_of_encounter #if date_of_encounter.to_date != Date.today
       end
       unless params[:id].blank?
-        redirect_to next_task(Patient.find(params[:id])) 
+        redirect_to next_task(Patient.find(params[:id]))
       else
         redirect_to :action => "index"
       end
@@ -356,7 +356,7 @@ class GenericPeopleController < ApplicationController
     render :text => traditional_authorities.join('') + "<li value='Other'>Other</li>" and return
   end
 
-	# Regions containing the string given in params[:value]
+  # Regions containing the string given in params[:value]
   def region_of_origin
     region_conditions = ["name LIKE (?)", "%#{params[:value]}%"]
 
@@ -501,11 +501,11 @@ class GenericPeopleController < ApplicationController
     if PatientService.art_patient?(patient)
       clinic_encounters = ["APPOINTMENT","HIV CLINIC CONSULTATION","VITALS","HIV STAGING",'ART ADHERENCE','DISPENSING','HIV CLINIC REGISTRATION']
       clinic_encounter_ids = EncounterType.find(:all,:conditions => ["name IN (?)",clinic_encounters]).collect{| e | e.id }
-      first_encounter_date = patient.encounters.find(:first, 
+      first_encounter_date = patient.encounters.find(:first,
         :order => 'encounter_datetime',
         :conditions => ['encounter_type IN (?)',clinic_encounter_ids]).encounter_datetime.strftime("%d-%b-%Y") rescue 'Uknown'
 
-      last_encounter_date = patient.encounters.find(:first, 
+      last_encounter_date = patient.encounters.find(:first,
         :order => 'encounter_datetime DESC',
         :conditions => ['encounter_type IN (?)',clinic_encounter_ids]).encounter_datetime.strftime("%d-%b-%Y") rescue 'Uknown'
       
@@ -590,8 +590,8 @@ class GenericPeopleController < ApplicationController
     
     @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
     
-    url = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}" + 
-      "/people/find.json?given_name=#{params[:given_name]}" + 
+    url = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}" +
+      "/people/find.json?given_name=#{params[:given_name]}" +
       "&family_name=#{params[:family_name]}&gender=#{params[:gender]}"
     
     result = RestClient.get(url)
@@ -601,31 +601,31 @@ class GenericPeopleController < ApplicationController
 
   def demographics
     @person = Person.find(params[:id])
-		@patient_bean = PatientService.get_patient(@person)
-		render :layout => 'menu'
+    @patient_bean = PatientService.get_patient(@person)
+    render :layout => 'menu'
   end
   
   private
   
-	def search_complete_url(found_person_id, primary_person_id)
-		unless (primary_person_id.blank?)
-			# Notice this swaps them!
-			new_relationship_url(:patient_id => primary_person_id, :relation => found_person_id)
-		else
-			#
-			# Hack reversed to continue testing overnight
-			#
-			# TODO: This needs to be redesigned!!!!!!!!!!!
-			#
-			#url_for(:controller => :encounters, :action => :new, :patient_id => found_person_id)
-			patient = Person.find(found_person_id).patient
-			show_confirmation = CoreService.get_global_property_value('show.patient.confirmation').to_s == "true" rescue false
-			if show_confirmation
-				url_for(:controller => :people, :action => :confirm , :found_person_id =>found_person_id)
-			else
-				next_task(patient)
-			end
-		end
-	end
+  def search_complete_url(found_person_id, primary_person_id)
+    unless (primary_person_id.blank?)
+      # Notice this swaps them!
+      new_relationship_url(:patient_id => primary_person_id, :relation => found_person_id)
+    else
+      #
+      # Hack reversed to continue testing overnight
+      #
+      # TODO: This needs to be redesigned!!!!!!!!!!!
+      #
+      #url_for(:controller => :encounters, :action => :new, :patient_id => found_person_id)
+      patient = Person.find(found_person_id).patient
+      show_confirmation = CoreService.get_global_property_value('show.patient.confirmation').to_s == "true" rescue false
+      if show_confirmation
+        url_for(:controller => :people, :action => :confirm , :found_person_id =>found_person_id)
+      else
+        next_task(patient)
+      end
+    end
+  end
 end
  

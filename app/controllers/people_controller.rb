@@ -33,7 +33,7 @@ class PeopleController < GenericPeopleController
 
       #If we are creating from DDE then we must create a footprint of the just created patient to
       #enable future
-      DDEService.create_footprint(PatientService.get_patient(person).national_id, Location.find(session[:location_id]).name) rescue nil
+      DDEService.create_footprint(PatientService.get_patient(person).national_id, "ANC") rescue nil
 
 
 
@@ -149,7 +149,7 @@ class PeopleController < GenericPeopleController
 
           patient = DDEService::Patient.new(found_person.patient)
           
-          DDEService.create_footprint(found_person.patient.national_id, Location.find(session[:location_id]).name) rescue nil
+          DDEService.create_footprint(found_person.patient.national_id, "ANC") rescue nil
 
           national_id_replaced = patient.check_old_national_id(params[:identifier])
 
