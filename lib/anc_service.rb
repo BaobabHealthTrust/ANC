@@ -1476,9 +1476,11 @@ module ANCService
       "#{self.person.addresses.first.city_village}" rescue nil
     end
 
-    def fundus
-      self.patient.encounters.collect{|e| 
-        e.observations.collect{|o| 
+    def fundus(today = Date.today)
+
+      self.patient.encounters.find(:conditions => ["DATE(encounter_datetime) > ?",
+          (today.to_date - 9.months)]).collect{|e|
+        e.observations.collect{|o|
           o.answer_string.to_i if o.concept.concept_names.map(& :name).include?("Fundus")
         }.compact
       }.uniq.delete_if{|x| x == []}.flatten.max
@@ -1511,13 +1513,13 @@ module ANCService
     end
 
     def hiv_status
-      stat = self.patient.encounters.last(:joins => [:observations], :conditions => 
-          ["encounter_type = ? AND obs.concept_id = ? AND ((obs.value_coded IN (?)" + 
-            " OR obs.value_text = 'POSITIVE') OR (obs.value_coded IN (?) OR obs.value_text = 'NEGATIVE'))", 
-          EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("HIV status").concept_id, 
-          ConceptName.find(:all, :conditions => ["name = 'POSITIVE'"]).collect{|c| c.concept_id}, 
-          ConceptName.find(:all, :conditions => ["name = 'NEGATIVE'"]).collect{|c| 
-            c.concept_id}]).observations.collect{|o| o.answer_string.strip if o.answer_string.titleize.squish == "Positive" || 
+      stat = self.patient.encounters.last(:joins => [:observations], :conditions =>
+          ["encounter_type = ? AND obs.concept_id = ? AND ((obs.value_coded IN (?)" +
+            " OR obs.value_text = 'POSITIVE') OR (obs.value_coded IN (?) OR obs.value_text = 'NEGATIVE'))",
+          EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("HIV status").concept_id,
+          ConceptName.find(:all, :conditions => ["name = 'POSITIVE'"]).collect{|c| c.concept_id},
+          ConceptName.find(:all, :conditions => ["name = 'NEGATIVE'"]).collect{|c|
+            c.concept_id}]).observations.collect{|o| o.answer_string.strip if o.answer_string.titleize.squish == "Positive" ||
           o.answer_string.titleize.squish == "Negative"}.compact.last rescue nil
 
       stat = "Unknown" if stat.nil?
@@ -1526,13 +1528,13 @@ module ANCService
     end
     
     def hiv_status_duration(session_date = Date.today)
-      stat = (session_date.to_date - self.patient.encounters.last(:joins => [:observations], :conditions => 
-            ["encounter_type = ? AND obs.concept_id = ? AND ((obs.value_coded IN (?)" + 
-              " OR obs.value_text = 'POSITIVE') OR (obs.value_coded IN (?) OR obs.value_text = 'NEGATIVE'))", 
-            EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("HIV status").concept_id, 
-            ConceptName.find(:all, :conditions => ["name = 'POSITIVE'"]).collect{|c| c.concept_id}, 
-            ConceptName.find(:all, :conditions => ["name = 'NEGATIVE'"]).collect{|c| 
-              c.concept_id}]).observations.collect{|o| 
+      stat = (session_date.to_date - self.patient.encounters.last(:joins => [:observations], :conditions =>
+            ["encounter_type = ? AND obs.concept_id = ? AND ((obs.value_coded IN (?)" +
+              " OR obs.value_text = 'POSITIVE') OR (obs.value_coded IN (?) OR obs.value_text = 'NEGATIVE'))",
+            EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("HIV status").concept_id,
+            ConceptName.find(:all, :conditions => ["name = 'POSITIVE'"]).collect{|c| c.concept_id},
+            ConceptName.find(:all, :conditions => ["name = 'NEGATIVE'"]).collect{|c|
+              c.concept_id}]).observations.collect{|o|
           o.answer_string if o.concept.id == ConceptName.find_by_name("HIV test date").concept_id
         }.compact.last.squish.to_date).to_i / 30.0 rescue 0
     end
@@ -1548,11 +1550,11 @@ module ANCService
       end_date = @current_range[0]["END"].to_date rescue (session_date + 6.month)
       return [] if start_date.to_date < (session_date.to_date - 10.months).to_date
       
-      self.patient.encounters.all(:conditions => 
-          ["DATE(encounter_datetime) >= ? AND DATE(encounter_datetime) <= ? AND encounter_type = ?", 
+      self.patient.encounters.all(:conditions =>
+          ["DATE(encounter_datetime) >= ? AND DATE(encounter_datetime) <= ? AND encounter_type = ?",
           start_date, end_date,
-          EncounterType.find_by_name("ANC VISIT TYPE")]).collect{|e| 
-        e.observations.collect{|o| 
+          EncounterType.find_by_name("ANC VISIT TYPE")]).collect{|e|
+        e.observations.collect{|o|
           o.answer_string.to_i if o.concept.concept_names.first.name.downcase == "reason for visit"
         }.compact
       }.flatten rescue []
@@ -1602,7 +1604,7 @@ module ANCService
       "current_ta"=>{
         "identifier"=>"#{new_params["addresses"]["county_district"]}"}
     }
-    link = CoreService.get_global_property_value("art_link") 
+    link = CoreService.get_global_property_value("art_link")
     begin
       
       output = RestClient.post("http://#{link}/people/create_remote", known_demographics)
@@ -1727,67 +1729,67 @@ module ANCService
     return people
   end
 
-	def self.create_from_form(params)
-		address_params = params["addresses"]
-		names_params = params["names"]
-		patient_params = params["patient"]
-		params_to_process = params.reject{|key,value| key.match(/addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) }
-		birthday_params = params_to_process.reject{|key,value| key.match(/gender/) }
-		person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate|occupation|identifiers|attributes/) }
+  def self.create_from_form(params)
+    address_params = params["addresses"]
+    names_params = params["names"]
+    patient_params = params["patient"]
+    params_to_process = params.reject{|key,value| key.match(/addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) }
+    birthday_params = params_to_process.reject{|key,value| key.match(/gender/) }
+    person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate|occupation|identifiers|attributes/) }
 
-		if person_params["gender"].to_s == "Female"
+    if person_params["gender"].to_s == "Female"
       person_params["gender"] = 'F'
-		elsif person_params["gender"].to_s == "Male"
+    elsif person_params["gender"].to_s == "Male"
       person_params["gender"] = 'M'
-		end
+    end
 
-		person = Person.create(person_params)
+    person = Person.create(person_params)
 
-		unless birthday_params.empty?
-		  if birthday_params["birth_year"] == "Unknown"
+    unless birthday_params.empty?
+      if birthday_params["birth_year"] == "Unknown"
         self.set_birthdate_by_age(person, birthday_params["age_estimate"], person.session_datetime || Date.today)
-		  else
+      else
         self.set_birthdate(person, birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"])
-		  end
-		end
-		person.save
+      end
+    end
+    person.save
 
-		person.names.create(names_params)
-		person.addresses.create(address_params) unless address_params.empty? rescue nil
+    person.names.create(names_params)
+    person.addresses.create(address_params) unless address_params.empty? rescue nil
 
-		person.person_attributes.create(
-		  :person_attribute_type_id => PersonAttributeType.find_by_name("Occupation").person_attribute_type_id,
-		  :value => params["occupation"]) unless params["occupation"].blank? rescue nil
+    person.person_attributes.create(
+      :person_attribute_type_id => PersonAttributeType.find_by_name("Occupation").person_attribute_type_id,
+      :value => params["occupation"]) unless params["occupation"].blank? rescue nil
 
-		person.person_attributes.create(
-		  :person_attribute_type_id => PersonAttributeType.find_by_name("Cell Phone Number").person_attribute_type_id,
-		  :value => params["cell_phone_number"]) unless params["cell_phone_number"].blank? rescue nil
+    person.person_attributes.create(
+      :person_attribute_type_id => PersonAttributeType.find_by_name("Cell Phone Number").person_attribute_type_id,
+      :value => params["cell_phone_number"]) unless params["cell_phone_number"].blank? rescue nil
 
-		person.person_attributes.create(
-		  :person_attribute_type_id => PersonAttributeType.find_by_name("Office Phone Number").person_attribute_type_id,
-		  :value => params["office_phone_number"]) unless params["office_phone_number"].blank? rescue nil
+    person.person_attributes.create(
+      :person_attribute_type_id => PersonAttributeType.find_by_name("Office Phone Number").person_attribute_type_id,
+      :value => params["office_phone_number"]) unless params["office_phone_number"].blank? rescue nil
 
-		person.person_attributes.create(
-		  :person_attribute_type_id => PersonAttributeType.find_by_name("Home Phone Number").person_attribute_type_id,
-		  :value => params["home_phone_number"]) unless params["home_phone_number"].blank? rescue nil
+    person.person_attributes.create(
+      :person_attribute_type_id => PersonAttributeType.find_by_name("Home Phone Number").person_attribute_type_id,
+      :value => params["home_phone_number"]) unless params["home_phone_number"].blank? rescue nil
 
     # TODO handle the birthplace attribute
 
-		if (!patient_params.nil?)
-		  patient = person.create_patient
+    if (!patient_params.nil?)
+      patient = person.create_patient
 
-		  patient_params["identifiers"].each{|identifier_type_name, identifier|
+      patient_params["identifiers"].each{|identifier_type_name, identifier|
         next if identifier.blank?
         identifier_type = PatientIdentifierType.find_by_name(identifier_type_name) || PatientIdentifierType.find_by_name("Unknown id")
         patient.patient_identifiers.create("identifier" => identifier, "identifier_type" => identifier_type.patient_identifier_type_id)
-		  } if patient_params["identifiers"]
+      } if patient_params["identifiers"]
 
-		  # This might actually be a national id, but currently we wouldn't know
-		  #patient.patient_identifiers.create("identifier" => patient_params["identifier"], "identifier_type" => PatientIdentifierType.find_by_name("Unknown id")) unless params["identifier"].blank?
-		end
+      # This might actually be a national id, but currently we wouldn't know
+      #patient.patient_identifiers.create("identifier" => patient_params["identifier"], "identifier_type" => PatientIdentifierType.find_by_name("Unknown id")) unless params["identifier"].blank?
+    end
 
-		return person
-	end
+    return person
+  end
 
   def self.set_birthdate_by_age(person, age, today = Date.today)
     person.birthdate = Date.new(today.year - age.to_i, 7, 1)

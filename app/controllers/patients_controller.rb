@@ -1290,9 +1290,9 @@ class PatientsController < ApplicationController
   end
 
   def confirm
-
-    @latest_lmp = @patient.lmp
     session_date = (session[:datetime].to_date rescue Date.today)
+    @latest_lmp = @patient.lmp(session_date)
+   
     params[:url] += "&from_confirmation=true"
     
     @current_pregnancy = @patient.encounters.find(:last,
@@ -1305,7 +1305,7 @@ class PatientsController < ApplicationController
       @anc_patient = ANCService::ANC.new(@patient) rescue nil
       @data["LMP"] =  @anc_patient.lmp(session_date).strftime("%d/%b/%Y") rescue nil
       @data["FUNDUS"] = @anc_patient.fundus_by_lmp(session_date) rescue nil
-      @data["ANC VISITS"] = @anc_patient.anc_visits.blank? ? nil : @anc_patient.anc_visits.uniq
+      @data["ANC VISITS"] = @anc_patient.anc_visits(session_date).blank? ? nil : @anc_patient.anc_visits(session_date).uniq
 
       #disregard irrelevant pregnancies
       if ((@data["LMP"].present? and @data["LMP"].to_date + 10.months < session_date) rescue true)

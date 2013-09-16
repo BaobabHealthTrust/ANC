@@ -89,7 +89,7 @@
           <th>FUNDUS</th><td>  &nbsp&nbsp :   &nbsp&nbsp&nbsp&nbsp <%= (@data["FUNDUS"] || "?") rescue "?" %> Weeks</td>
         </tr>
         <tr>
-          <th>ANC VISITS IN PREGNANCY </th><td> &nbsp&nbsp :    &nbsp&nbsp&nbsp&nbsp <%= @data["ANC VISITS"].length rescue "?" %></td>
+          <th>ANC VISITS IN PREGNANCY </th><td> &nbsp&nbsp :    &nbsp&nbsp&nbsp&nbsp <%= @data["ANC VISITS"].max rescue "?" %></td>
         </tr>
 
       </table>
