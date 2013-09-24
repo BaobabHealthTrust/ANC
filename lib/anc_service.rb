@@ -700,7 +700,7 @@ module ANCService
       label.draw_line(659,250,130,1,0)
       label.draw_line(659,280,130,1,0)
       label.draw_text("#{@gravida}",280,80,0,2,1,1,false)
-      label.draw_text("#{@deliveries}",280,110,0,2,1,1,(@deliveries > 4 ? true : false))
+      label.draw_text("#{@deliveries}",280,110,0,2,1,1,(((@deliveries > 4) rescue false) ? true : false))
       label.draw_text("#{@abortions}",280,140,0,2,1,1,(@abortions > 1 ? true : false))
       label.draw_text("#{(!@stillbirths.nil? ? (@stillbirths.upcase == "NO" ? "NO" : "YES") : "")}",280,170,0,2,1,1,
         (!@stillbirths.nil? ? (@stillbirths.upcase == "NO" ? false : true) : false))
@@ -710,8 +710,8 @@ module ANCService
       #   (!@symphosio.nil? ? (@symphosio.upcase == "NO" ? false : true) : false))
       label.draw_text("#{(!@csections.nil? ? (@csections <= 0 ? "NO" : "YES") : "")}",280,230,0,2,1,1,
         (!@csections.nil? ? (@csections <= 0 ? false : true) : false))
-      label.draw_text("#{@haemorrhage}",280,260,0,2,1,1,(@haemorrhage.upcase == "PPH" ? true : false))
-      label.draw_text("#{(!@preeclampsia.nil? ? (@preeclampsia.upcase == "NO" ? "NO" : "YES") : "")}",280,285,0,2,1,1,
+      label.draw_text("#{@haemorrhage}",280,260,0,2,1,1,(((@haemorrhage.upcase == "PPH") rescue false) ? true : false))
+      label.draw_text("#{(!@preeclampsia.nil? ? (((@preeclampsia.upcase == "NO") rescue false) ? "NO" : "YES") : "")}",280,285,0,2,1,1,
         (!@preeclampsia.nil? ? (@preeclampsia.upcase == "NO" ? false : true) : false))
     
       label.draw_text("#{(!@asthma.nil? ? (@asthma.upcase == "NO" ? "NO" : "YES") : "")}",690,80,0,2,1,1,
