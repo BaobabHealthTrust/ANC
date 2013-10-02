@@ -1478,7 +1478,7 @@ module ANCService
 
     def fundus(today = Date.today)
 
-      self.patient.encounters.find(:conditions => ["DATE(encounter_datetime) > ?",
+      self.patient.encounters.find(:all, :conditions => ["DATE(encounter_datetime) > ?",
           (today.to_date - 9.months)]).collect{|e|
         e.observations.collect{|o|
           o.answer_string.to_i if o.concept.concept_names.map(& :name).include?("Fundus")
