@@ -3,6 +3,28 @@ class ApplicationController < GenericApplicationController
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
     task = main_next_task(Location.current_location, patient,session_date)
+
+    #We need to know if user terminated previous pregnancy by means of abortion or otherwise just terminated ....
+    #
+    #1. should have checked abortion status atleast a month ago
+   
+    @current_range = @anc_patient.active_range(session_date)
+
+    unless @current_range[0].blank?
+
+      abortion_checked = patient.encounters.find(:first, :order => ["date_created DESC"],
+        :conditions => ["DATE(encounter_datetime) >= ? AND encounter_type = ? AND voided = 0",
+          ((session[:datetime].to_date rescue Date.today) - 1.month),
+          EncounterType.find_by_name("PREGNANCY STATUS").encounter_type_id]).present? rescue false
+ 
+      #2. should have captured LMP atleast a month ago
+      lmp_capture_date_check = (Observation.find(:first, :order => ["date_created DESC"], :conditions => ["concept_id = ? AND person_id = ?",
+            ConceptName.find_by_name('LAST MENSTRUAL PERIOD').concept_id, patient.id]).obs_datetime.to_date +  1.month <= Date.today) rescue false
+  
+      return "/patients/check_abortion?patient_id=#{patient.patient_id}" if lmp_capture_date_check && !abortion_checked && (@current_range[0]["START"].to_time >= 7.months.ago rescue false)
+    
+    end
+
     
     begin
       return task.url if task.present? && task.url.present?

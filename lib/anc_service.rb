@@ -112,43 +112,46 @@ module ANCService
       return patient.address
     end
 
-    def active_range(date = Date.today)
-      patient = self.patient rescue nil
+    def active_range(date = Date.today)     
     
       current_range = {}
     
       active_date = date
       
-      pregnancies = {}; 
+      pregnancies = {};
     
       # active_years = {}
     
-      patient.encounters.find(:all, :order => ["encounter_datetime DESC"]).each{|e| 
-        if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]       
-          pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}        
+      abortion_check_encounter = self.patient.encounters.find(:first, :order => ["encounter_datetime DESC"], :conditions => ["encounter_type = ? AND encounter_datetime > ? AND DATE(encounter_datetime) <= ?", EncounterType.find_by_name("PREGNANCY STATUS").encounter_type_id, date.to_date - 7.months, date.to_date]) rescue nil
+    
+      aborted = abortion_check_encounter.observations.collect{|ob| ob.answer_string.downcase.strip if ob.concept_id == ConceptName.find_by_name("PREGNANCY ABORTED").concept_id}.compact.include?("yes")  rescue false
+  	
+      date_aborted = abortion_check_encounter.observations.find_by_concept_id(ConceptName.find_by_name("DATE OF SURGERY").concept_id).answer_string rescue nil
+ 
+      self.patient.encounters.find(:all, :order => ["encounter_datetime DESC"]).each{|e|
+        if e.name == "CURRENT PREGNANCY" && !pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]
+          pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")] = {}
         
-          e.observations.each{|o| 
-            concept = o.concept.concept_names.map(& :name).last rescue nil
+          e.observations.each{|o|
+            concept = o.concept.name rescue nil
             if concept
-              # if !active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")]                            
+              # if !active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")]
               if o.concept_id == (ConceptName.find_by_name("DATE OF LAST MENSTRUAL PERIOD").concept_id rescue nil)
                 pregnancies[e.encounter_datetime.strftime("%Y-%m-%d")]["DATE OF LAST MENSTRUAL PERIOD"] = o.answer_string.squish          
-                # active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")] = true 
-              end              
+                # active_years[e.encounter_datetime.beginning_of_quarter.strftime("%Y-%m-%d")] = true
+              end
               # end
-            end   
-          } 
-        end   
-      }    
+            end
+          }
+        end
+      }
     
       # pregnancies = pregnancies.delete_if{|x, v| v == {}}
     
-      # raise pregnancies.to_yaml
-      
       pregnancies.each{|preg|
         if preg[1]["DATE OF LAST MENSTRUAL PERIOD"]
           preg[1]["START"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date
-          preg[1]["END"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 7.day + 45.week # 9.month        
+          preg[1]["END"] = preg[1]["DATE OF LAST MENSTRUAL PERIOD"].to_date + 7.day + 45.week # 9.month
         else
           preg[1]["START"] = preg[0].to_date
           preg[1]["END"] = preg[0].to_date + 7.day + 45.week # 9.month
@@ -159,8 +162,14 @@ module ANCService
           current_range["END"] = preg[1]["END"]
         end
       }
+
+      if (abortion_check_encounter.present? && aborted && date_aborted.present? && current_range["START"].to_date < date_aborted.to_date rescue false)
     
-      return [current_range, pregnancies]
+    		current_range["START"] = date_aborted.to_date + 1.month
+    		current_range["END"] = date_aborted.to_date + 1.month + 7.day + 45.week # 9.month
+    	end
+    
+    	return [current_range, pregnancies]
     end
   
     def detailed_obstetric_history_label(date = Date.today)
@@ -1256,7 +1265,7 @@ module ANCService
       else
         address += ", " + self.current_address2 unless self.current_address2.blank?
       end
-     address
+      address
     end
     
     def first_name
@@ -1529,9 +1538,14 @@ module ANCService
     end
     
     def anc_visits(session_date = Date.today)
+      @current_range = self.active_range(session_date)
+
+      start_date = @current_range[0]["START"].to_date rescue (session_date - 8.month)
+      end_date = @current_range[0]["END"].to_date rescue (session_date + 6.month)
+      
       self.patient.encounters.all(:conditions => 
           ["DATE(encounter_datetime) >= ? AND DATE(encounter_datetime) <= ? AND encounter_type = ?", 
-          (session_date - 8.month), (session_date + 6.month),
+          start_date, end_date,
           EncounterType.find_by_name("ANC VISIT TYPE")]).collect{|e| 
         e.observations.collect{|o| 
           o.answer_string.to_i if o.concept.concept_names.first.name.downcase == "reason for visit"

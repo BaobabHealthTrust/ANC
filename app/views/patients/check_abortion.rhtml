@@ -1,0 +1,31 @@
+# hiv_status.rhtml
+
+<script type="text/javascript" language="javascript">
+  <!--
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+  var timedEvent;  
+  //-->
+</script>
+
+<% form_tag :controller => "encounters", :action => "create" do |f| %>
+
+ 	<%= hidden_field_tag "encounter[encounter_type_name]", "PREGNANCY STATUS"%>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%  session_date = session[:datetime] || Time.now() %>
+
+  <%= touch_select_tag "Pregnancy Aborted", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "aborted",
+     :helptext => "Recent Pregnancy Terminated?" } %>
+
+	<%= touch_date_tag "Date of surgery", @patient, nil,
+    {:id => "date",
+    :helptext => "Date Aborted",
+    :condition => "__$('aborted').value.trim().toLowerCase() == 'yes'"
+  } %>
+  
+  <%= submit_tag 'Finish' %>
+
+<% end %>

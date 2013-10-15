@@ -6,7 +6,7 @@
 <%
 session_date = session[:datetime]? session[:datetime] : Date.today
 %>
-  var anc_visits = <%= @anc_patient.anc_visits(session_date).to_json rescue [] %>;
+  var anc_visits = <%= @anc_patient.anc_visits(session_date).to_json%>;
   
   anc_visits.push("zero");
    var parsedConceptName = "Visit Number";
