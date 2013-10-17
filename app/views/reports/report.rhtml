@@ -48,17 +48,17 @@
         <table style="width: 100%; border: 1px solid #999; -moz-user-select: none;">
           <tr>
             <%if params[:selType] != "monthly report"%>
-            <th style="font-size: 1.8em; color: #eee; background-color: #999; padding: 10px;">
-              ANC C<span style="font-size: 0.8em">LINIC</span> - 
-              F<span style="font-size: 0.8em">ACILITY</span> M<span style="font-size: 0.8em">ONTHLY</span>
-              R<span style="font-size: 0.8em">EPORT</span>
-            </th>
+              <th style="font-size: 1.8em; color: #eee; background-color: #999; padding: 10px;">
+                ANC C<span style="font-size: 0.8em">LINIC</span> -
+                F<span style="font-size: 0.8em">ACILITY</span> M<span style="font-size: 0.8em">ONTHLY</span>
+                R<span style="font-size: 0.8em">EPORT</span>
+              </th>
             <%else%>
-            <th style="font-size: 1.8em; color: #eee; background-color: #999; padding: 10px;">
-              ANC C<span style="font-size: 0.8em">LINIC</span> -
-              F<span style="font-size: 0.8em">ACILITY</span> C<span style="font-size: 0.8em">USTOM</span>
-              R<span style="font-size: 0.8em">EPORT</span>
-            </th>
+              <th style="font-size: 1.8em; color: #eee; background-color: #999; padding: 10px;">
+                ANC C<span style="font-size: 0.8em">LINIC</span> -
+                F<span style="font-size: 0.8em">ACILITY</span> C<span style="font-size: 0.8em">USTOM</span>
+                R<span style="font-size: 0.8em">EPORT</span>
+              </th>
             <%end%>
           </tr>
           <tr>
@@ -121,7 +121,7 @@
                             &nbsp;
                           </td>
                           <td style="background-color: #999; color: #fff; font-weight: bold;" colspan="3">
-                         <%if params[:selType] != "monthly report"%>   Reporting Month <%else%>   Reporting Period<%end%>
+                            <%if params[:selType] != "monthly report"%>   Reporting Month <%else%>   Reporting Period<%end%>
                           </td>
                         </tr>
                         <tr>
@@ -132,7 +132,7 @@
                           </td>
                           <td style="width: 60%; border-left: 1px solid #999;
                               border-bottom: 1px solid #999; border-right: 1px solid #999;">
-                            New women registered
+                            Total ANC Women Who Delivered
                           </td>
                           <td style="border-right: 1px solid #999; border-bottom: 1px solid #999; 
                               font-style: italic; padding-bottom: 0px;">
@@ -154,7 +154,7 @@
                             <%if ((params[:selType])? params[:selType] : "").downcase == "monthly report"%>
                               Custom Report
                             <%else%>
-                               Booking Cohort
+                              Booking Cohort
                             <%end%>
                           </td>
                         </tr>
@@ -448,6 +448,7 @@
                             </a>
                           </td>
                         </tr>
+                          
                         <tr>
                           <td style="width: 10px;">
                             &nbsp;
@@ -456,6 +457,7 @@
                             ITN (bed nets)
                           </td>
                         </tr>
+
                         <tr>
                           <td>
                             14
@@ -652,8 +654,8 @@
                           <td style="border-bottom: 1px solid #999; border-top: 1px solid #999; 
                               border-left: 1px solid #999; width: 60%;">
                             <form id="on_cpt__1" method="post" action="decompose">
-                               <input type="hidden" value="<%= @on_cpt__1.join(",") %>" name="patients" />
-                               Women on CPT
+                              <input type="hidden" value="<%= @on_cpt__1.join(",") %>" name="patients" />
+                              Women on CPT
                             </form>
                           </td>
                           <td style="border: 1px solid #999;">
@@ -702,12 +704,12 @@
                           <td style="border-top: 1px solid #999; border-left: 1px solid #999; width: 60%;">
                             <form id="not_on_art" method="post" action="decompose">
                               <input type="hidden" value="<%= @not_on_art.join(",") %>" name="patients" />
-                            Tot. not on ART
+                              Tot. not on ART
                             </form>
                           </td>
                           <td style="border: 1px solid #999;">
                             <a href="javascript:document.getElementById('not_on_art').submit()">
-                            <%= @not_on_art.length%>
+                              <%= @not_on_art.length%>
                             </a>
                           </td> 
                         </tr>
@@ -718,7 +720,7 @@
                           <td style="border-left: 1px solid #999;">
                             <form id="on_art_before" method="post" action="decompose">
                               <input type="hidden" value="<%= @on_art_before.join(",") %>" name="patients" />
-                            Tot. already on ART
+                              Tot. already on ART
                             </form>
                           </td>
                           <td style="border-left: 1px solid #999;
@@ -735,7 +737,7 @@
                           <td style="border-left: 1px solid #999;">
                             <form id="on_art_zero_to_27" method="post" action="decompose">
                               <input type="hidden" value="<%= @on_art_zero_to_27.join(",") %>" name="patients" />
-                            Tot. started ART at 0-27 weeks of preg.
+                              Tot. started ART at 0-27 weeks of preg.
                             </form>
                           </td>
                           <td style="border-left: 1px solid #999;
@@ -752,7 +754,7 @@
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
                             <form id="on_art_28_plus" method="post" action="decompose">
                               <input type="hidden" value="<%= @on_art_28_plus.join(",") rescue  @on_art_28_plus %>" name="patients" />
-                            Tot. started ART at 28+ weeks of preg.
+                              Tot. started ART at 28+ weeks of preg.
                             </form>
                           </td>
                           <td style="border-left: 1px solid #999;
