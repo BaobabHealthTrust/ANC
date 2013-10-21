@@ -50,7 +50,7 @@
             <%if params[:selType] != "monthly report"%>
               <th style="font-size: 1.8em; color: #eee; background-color: #999; padding: 10px;">
                 ANC C<span style="font-size: 0.8em">LINIC</span> -
-                F<span style="font-size: 0.8em">ACILITY</span> M<span style="font-size: 0.8em">ONTHLY</span>
+                F<span style="font-size: 0.8em">ACILITY</span> C<span style="font-size: 0.8em">OHORT</span>
                 R<span style="font-size: 0.8em">EPORT</span>
               </th>
             <%else%>
@@ -448,7 +448,7 @@
                             </a>
                           </td>
                         </tr>
-                          
+
                         <tr>
                           <td style="width: 10px;">
                             &nbsp;
@@ -615,7 +615,7 @@
                           <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;">
                             <form id="hiv_test_result_unk" method="post" action="decompose">
                               <input type="hidden" value="<%= @hiv_test_result_unk.join(",") %>" name="patients" />
-                              Not Done
+                              Unknown
                             </form>
                           </td>
                           <td style="border-left: 1px solid #999;

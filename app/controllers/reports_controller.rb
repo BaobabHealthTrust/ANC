@@ -142,8 +142,8 @@ class ReportsController < ApplicationController
 			@end_date = params[:end_date]
 		end
 
-    	@start_date = params[:start_date] if !params[:start_date].blank?
-   	 	@end_date = params[:end_date] if !params[:end_date].blank?
+    @start_date = params[:start_date] if !params[:start_date].blank?
+    @end_date = params[:end_date] if !params[:end_date].blank?
 
 		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type)
 
@@ -191,19 +191,23 @@ class ReportsController < ApplicationController
 
 		@syphilis_result_neg = report.syphilis_result_neg
 
-		@syphilis_result_unk = report.syphilis_result_unk
+		@syphilis_result_unk = (@new_women_registered - (@syphilis_result_pos + @syphilis_result_neg).uniq).uniq
 
-		@hiv_test_result_prev_neg = report.hiv_test_result_prev_neg
-
-    # raise @hiv_test_result_prev_neg.to_yaml
+		@hiv_test_result_prev_neg = report.hiv_test_result_prev_neg.uniq
     
-		@hiv_test_result_prev_pos = report.hiv_test_result_prev_pos
+		@hiv_test_result_prev_pos = report.hiv_test_result_prev_pos.uniq
 
-		@hiv_test_result_neg = report.hiv_test_result_neg
+		@hiv_test_result_neg = report.hiv_test_result_neg.uniq
 
-		@hiv_test_result_pos = report.hiv_test_result_pos
+		@hiv_test_result_pos = report.hiv_test_result_pos.uniq
 
-		@hiv_test_result_unk = report.hiv_test_result_unk
+    #getting rid of overlaps
+    @hiv_test_result_prev_neg -= (@hiv_test_result_pos + @hiv_test_result_neg + @hiv_test_result_pos)
+    @hiv_test_result_neg -= (@hiv_test_result_prev_pos + @hiv_test_result_pos)
+    @hiv_test_result_prev_pos -= (@hiv_test_result_pos)
+    
+    @hiv_test_result_unk = (@new_women_registered - (@hiv_test_result_prev_neg + @hiv_test_result_prev_pos +
+          @hiv_test_result_neg + @hiv_test_result_pos).uniq).uniq
 
     @total_hiv_positive = @hiv_test_result_prev_pos + @hiv_test_result_pos
     @total_hiv_positive.delete_if{|p| p.blank?}
@@ -222,19 +226,7 @@ class ReportsController < ApplicationController
 
 		@on_cpt__1 = report.on_cpt__1
 
-		@on_cpt__2 = report.on_cpt__2
-
-		@pmtct_management_1 = report.pmtct_management_1
-
-		@pmtct_management_2 = report.pmtct_management_2
-
-		@pmtct_management_3 = report.pmtct_management_3
-
-		@pmtct_management_4 = report.pmtct_management_4
-
-		@nvp_baby__1 = report.nvp_baby__1
-
-		@nvp_baby__2 = report.nvp_baby__2
+    @nvp_baby__1 = report.nvp_baby__1
 
     render :layout => false
 	end
@@ -244,7 +236,7 @@ class ReportsController < ApplicationController
 	end
 
   def decompose  
-    # raise params.to_yaml
+    
     @facility = Location.current_health_center.name rescue ''
     
     @patients = []
@@ -253,9 +245,7 @@ class ReportsController < ApplicationController
       new_women = params[:patients].split(",")
       @patients = Patient.find(:all, :conditions => ["patient_id IN (?)", new_women])
     end
-    
-    # raise @patients.length.to_yaml
-    
+ 
     render :layout => false
   end
   
