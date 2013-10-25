@@ -309,6 +309,8 @@ class EncountersController < ApplicationController
       @procedure_done = @procedure_done.insert(0, @procedure_done.delete_at(@procedure_done.index("None")))
     end
 
+    @procedure_done.delete_if{|procedure| !procedure.match(/#{params[:search_string]}/i)}
+    
     render :text => "<li>" + @procedure_done.join("</li><li>") + "</li>"
   end
   
