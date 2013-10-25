@@ -14,6 +14,10 @@
     padding-bottom: 5px;
   }
 
+  #tbl2{
+    width: 100%;
+  }
+
   #tbl2 th {
     font-weight: bold;
     font-size: 0.9em;
@@ -82,8 +86,8 @@
               <%= pos %>
             </td>
             <td>
-              <%= (@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ? 
-                    (@obstetrics[pos]["YEAR OF BIRTH"].to_i > 0 ? @obstetrics[pos]["YEAR OF BIRTH"].to_i : 
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["YEAR OF BIRTH"] ?
+                    (@obstetrics[pos]["YEAR OF BIRTH"].to_i > 0 ? @obstetrics[pos]["YEAR OF BIRTH"].to_i :
                       "Unknown") : "&nbsp;") : "&nbsp;") %>
             </td>
             <td>
@@ -97,7 +101,7 @@
               <%= (@obstetrics[pos] ? (@obstetrics[pos]["LABOUR DURATION"] ? @obstetrics[pos]["LABOUR DURATION"] : "&nbsp;") : "&nbsp;") %>
             </td>
             <td>
-              <%= (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? @obstetrics[pos]["METHOD OF DELIVERY"].titleize : 
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["METHOD OF DELIVERY"] ? @obstetrics[pos]["METHOD OF DELIVERY"].titleize :
                     (@obstetrics[pos]["PROCEDURE DONE"] ? @obstetrics[pos]["PROCEDURE DONE"] : "&nbsp;")) : "&nbsp;") %>
             </td>
             <td>
@@ -110,10 +114,10 @@
               <%= (@obstetrics[pos] ? (@obstetrics[pos]["ALIVE"] ? @obstetrics[pos]["ALIVE"] : "&nbsp;") : "&nbsp;") %>
             </td>
             <td>
-              <%= (@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ? 
-                    (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] : 
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["AGE AT DEATH"] ?
+                    (@obstetrics[pos]["AGE AT DEATH"].to_s.match(/\.[1-9]/) ? @obstetrics[pos]["AGE AT DEATH"] :
                       @obstetrics[pos]["AGE AT DEATH"].to_i) : "&nbsp;") : "&nbsp;") %>
-              <%= (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ? 
+              <%= (@obstetrics[pos] ? (@obstetrics[pos]["UNITS OF AGE OF CHILD"] ?
                     @obstetrics[pos]["UNITS OF AGE OF CHILD"] : "&nbsp;") : "&nbsp;") %>
             </td>
           </tr>

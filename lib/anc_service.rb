@@ -1116,26 +1116,16 @@ module ANCService
       label.draw_line(20,130,800,2,0)
       label.draw_line(20,190,800,2,0)
     
-      label.draw_line(72,130,2,175,0)
-      label.draw_line(116,130,2,175,0)
-      label.draw_line(156,130,2,175,0)
-      label.draw_line(192,130,2,175,0)
+      label.draw_line(160,130,2,175,0)
       label.draw_line(364,130,2,175,0)
       label.draw_line(594,130,2,175,0)
       label.draw_line(706,130,2,175,0)
       label.draw_text("Planned Delivery Place: #{@current_range[0]["PLANNED DELIVERY PLACE"] rescue ""}",28,66,0,2,1,1,false)
       label.draw_text("Bed Net Given: #{@current_range[0]["MOSQUITO NET"] rescue ""}",28,99,0,2,1,1,false)
       label.draw_text("",28,138,0,2,1,1,false)
-      label.draw_text("TTV",28,156,0,2,1,1,false)
-      label.draw_text("",28,174,0,2,1,1,false)
-      label.draw_text("NVP",78,140,0,2,1,1,false)
-      label.draw_text("Baby",77,158,0,1,1,1,false)
-      label.draw_text("(ml)",77,176,0,1,1,1,false)
-      label.draw_text("On",122,140,0,2,1,1,false)
-      label.draw_text("CPT",120,158,0,1,1,1,false)
-      label.draw_text("On",162,140,0,2,1,1,false)
-      label.draw_text("ART",160,158,0,1,1,1,false)
-      label.draw_text("Signs/Symptoms",198,140,0,2,1,1,false)
+      label.draw_text("TTV",75,156,0,2,1,1,false)
+      
+      label.draw_text("Signs/Symptoms",170,140,0,2,1,1,false)
       label.draw_text("Medication/Outcome",370,140,0,2,1,1,false)
       label.draw_text("Next Vis.",600,140,0,2,1,1,false)
       label.draw_text("Date",622,158,0,2,1,1,false)
@@ -1162,25 +1152,13 @@ module ANCService
           ttv = (@drugs[element]["TTV"] > 0 ? 1 : "") rescue ""
           
           label.draw_text(ttv,28,200,0,2,1,1,false)
-        
-          nvp = (@drugs[element]["NVP"].to_i > 0 ? @drugs[element]["NVP"].to_i : "") rescue ""
-          
-          label.draw_text(nvp,77,200,0,2,1,1,false)
-      
-          cpt = (encounters[element]["LAB RESULTS"]["TAKING CO-TRIMOXAZOLE PREVENTIVE THERAPY"].upcase == "YES" ? "Y" : "N") rescue ""
-        
-          label.draw_text(cpt,124,200,0,2,1,1,false)
-        
-          art = (encounters[element]["LAB RESULTS"]["ON ART"].upcase == "YES" ? "Y" : "N") rescue ""
-        
-          label.draw_text(art,164,200,0,2,1,1,false)
-        
+                
           sign = encounters[element]["OBSERVATIONS"]["DIAGNOSIS"].humanize rescue ""
         
           sign = paragraphate(sign.to_s, 13, 5)
         
           (0..(sign.length)).each{|m|
-            label.draw_text(sign[m],198,(200 + (18 * m)),0,2,1,1,false)
+            label.draw_text(sign[m],175,(200 + (25 * m)),0,2,1,1,false)
           }
         
           med = encounters[element]["UPDATE OUTCOME"]["OUTCOME"].humanize + "; " rescue ""
