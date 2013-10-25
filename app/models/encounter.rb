@@ -65,9 +65,11 @@ EOF
       height = observations.select {|obs| obs.concept.concept_names.map(&:name).collect{|n| n.upcase}.include?("HEIGHT (CM)") && "#{obs.answer_string}".upcase != '0.0' }
       systo = observations.select {|obs| obs.concept.concept_names.map(&:name).collect{|n| n.upcase}.include?("SYSTOLIC BLOOD PRESSURE") && "#{obs.answer_string}".upcase != '0.0' }
       diasto = observations.select {|obs| obs.concept.concept_names.map(&:name).collect{|n| n.upcase}.include?("DIASTOLIC BLOOD PRESSURE") && "#{obs.answer_string}".upcase != '0.0' }
-      vitals = [weight_str = weight.first.answer_string + 'KG' rescue 'UNKNOWN WEIGHT',
-        height_str = height.first.answer_string + 'CM' rescue 'UNKNOWN HEIGHT', bp_str = "BP: " + 
-          (systo.first.answer_string.to_i.to_s rescue "?") + "/" + (diasto.first.answer_string.to_i.to_s rescue "?")]
+      vitals = [weight_str = weight.first.answer_string + 'KG' rescue nil,
+        height_str = height.first.answer_string + 'CM' rescue nil,
+        bp_str = !((systo.first.present? || diasto.first.present?) rescue false) ? nil :  ("BP: " +
+            ((systo.first.answer_string.to_i == 0 ? "?" : systo.first.answer_string.to_i.to_s) rescue "?") +
+            "/" + ((diasto.first.answer_string.to_i == 0 ? "?" : diasto.first.answer_string.to_i.to_s) rescue "?"))].compact
       temp_str = temp.first.answer_string + '°C' rescue nil
       vitals << temp_str if temp_str                          
       vitals.join(', ')
@@ -102,9 +104,9 @@ EOF
     encounter_types_hash = encounter_types.inject({}) {|result, row| result[row.encounter_type_id] = row.name; result }
     with_scope(:find => opts) do
       rows = self.all(
-         :select => 'count(*) as number, encounter_type', 
-         :group => 'encounter.encounter_type',
-         :conditions => ['encounter_type IN (?)', encounter_types.map(&:encounter_type_id)]) 
+        :select => 'count(*) as number, encounter_type',
+        :group => 'encounter.encounter_type',
+        :conditions => ['encounter_type IN (?)', encounter_types.map(&:encounter_type_id)])
       return rows.inject({}) {|result, row| result[encounter_types_hash[row['encounter_type']]] = row['number']; result }
     end     
   end
