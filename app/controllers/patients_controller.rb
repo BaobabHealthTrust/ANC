@@ -232,14 +232,14 @@ class PatientsController < ApplicationController
       end
     }
 
-    session_date = session[:datetime] || Date.today
+    session_date = session[:datetime].to_date rescue Date.today
    
     @next_task = main_next_task(Location.current_location.id, @patient, session_date.to_date)     
 
     # raise current_user.activities.collect{|u| u.downcase}.include?("update outcome").to_yaml
 
     @time = @patient.encounters.first(:conditions => ["DATE(encounter_datetime) = ?", 
-        Date.today.strftime("%Y-%m-%d")]).encounter_datetime rescue Time.now
+        session_date.strftime("%Y-%m-%d")]).encounter_datetime rescue DateTime.now
 
     @art_link = CoreService.get_global_property_value("art_link") rescue nil
     @anc_link = CoreService.get_global_property_value("anc_link") rescue nil
