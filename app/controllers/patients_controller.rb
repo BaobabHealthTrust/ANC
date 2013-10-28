@@ -677,7 +677,11 @@ class PatientsController < ApplicationController
         syphil[o.concept.concept_names.map(& :name).last.upcase] = o.answer_string.squish.upcase
       }      
     }
-    
+
+    @malaria = syphil["MALARIA TEST RESULT"].titleize rescue ""
+
+    @malaria_date = syphil["MALARIA TEST RESULT"].match(/not done/i)? "" : syphil["DATE OF LABORATORY TEST"] rescue nil
+      
     @syphilis = syphil["SYPHILIS TEST RESULT"].titleize rescue nil
 
     @syphilis_date = syphil["SYPHILIS TEST RESULT DATE"] rescue nil

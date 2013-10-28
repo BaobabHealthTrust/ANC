@@ -9,154 +9,154 @@
   <tr>
     <th style="height: 30px; font-size: 1.4em;" align="left">
       Labs
-  <div style="float: right; color: #f00;
-       font-weight: normal; padding-right: 30px;">
-    Refer*
-  </div>
-</th>
-</tr>
-<tr>
-  <td valign="top" align="center">
-    <table width="90%" cellspacing="0">
-      <tr>
-        <td>
-          &nbsp;
-        </td>
-        <th>
-          Date
-        </th>
-        <th>
-          Result
-        </th>
-      </tr>
-      <tr>
-        <td style="padding-left: 30px;">
-          Syphilis
-        </td>
-        <td style="border-top: 1px solid #000;
-            border-left: 1px solid #000;
-            border-bottom: 1px solid #000;"
-            align="center">
-          &nbsp;<%= @syphilis_date %>&nbsp;
-        </td>
-        <td style="border-top: 1px solid #000;
-            border-left: 1px solid #000;
-            border-bottom: 1px solid #000;
-            border-right: 1px solid #000;"
-            align="center" <%= (!@syphilis.nil? ? (@syphilis.upcase == "POSITIVE" ? "class='selected'" : "") : "") %>>
-          &nbsp;<%= @syphilis %>&nbsp;
-        </td>
-      </tr>
-      <tr>
-        <td style="padding-left: 30px;">
-          HIV Test
-        </td>
-        <td style="border-left: 1px solid #000;
-            border-bottom: 1px solid #000;"
-            align="center">
-          &nbsp;<%= @hiv_test_date %>&nbsp;
-        </td>
-        <td style="border-left: 1px solid #000;
-            border-bottom: 1px solid #000;
-            border-right: 1px solid #000; font-size: 1.5em;"
-            align="center" <%= (!@hiv_test.nil? ? (@hiv_test.upcase == "POSITIVE" ? "class='selected'" : "") : "") %>>
-          <%= (!@hiv_test.nil? ? (@hiv_test.upcase == "POSITIVE" ? "=" : "-") : "") %>&nbsp;
-        </td>
-      </tr>
-      <tr>
-        <td style="padding-left: 30px;">
-          Hb1
-        </td>
-        <td style="border-left: 1px solid #000;
-            border-bottom: 1px solid #000;"
-            align="center">
-          &nbsp;<%= @hb1_date %>&nbsp;
-        </td>
-        <td style="border-left: 1px solid #000;
-            border-bottom: 1px solid #000;
-            border-right: 1px solid #000;"
-            align="center" <%= (!@hb1.nil? ? (@hb1.to_i <= 11 && @hb1.to_s.upcase != "NOT DONE" ? "class='selected'" : "") : "") %> >
-          &nbsp;<%= @hb1 %>&nbsp;
-        </td>
-      </tr>
-      <tr>
-        <td style="padding-left: 30px;">
-          Hb2
-        </td>
-        <td style="border-left: 1px solid #000;
-            border-bottom: 1px solid #000;"
-            align="center">
-          &nbsp;<%= @hb2_date %>&nbsp;
-        </td>
-        <td style="border-left: 1px solid #000;
-            border-bottom: 1px solid #000;
-            border-right: 1px solid #000;"
-            align="center" <%= (!@hb2.nil? ? (@hb2.to_i <= 11 && @hb2.to_s.upcase != "NOT DONE" ? "class='selected'" : "") : "") %>>
-          &nbsp;<%= @hb2 %>&nbsp;
-        </td>
-      </tr>
-      <!--tr>
+      <div style="float: right; color: #f00;
+           font-weight: normal; padding-right: 30px;">
+        Refer*
+      </div>
+    </th>
+  </tr>
+  <tr>
+    <td valign="top" align="center">
+      <table width="90%" cellspacing="0">
+        <tr>
+          <td>
+            &nbsp;
+          </td>
+          <th>
+            Date
+          </th>
+          <th>
+            Result
+          </th>
+        </tr>
+        <tr>
           <td style="padding-left: 30px;">
-              CD4
+            Syphilis
+          </td>
+          <td style="border-top: 1px solid #000;
+              border-left: 1px solid #000;
+              border-bottom: 1px solid #000;"
+              align="center">
+            &nbsp;<%= @syphilis_date %>&nbsp;
+          </td>
+          <td style="border-top: 1px solid #000;
+              border-left: 1px solid #000;
+              border-bottom: 1px solid #000;
+              border-right: 1px solid #000;"
+              align="center" <%= (!@syphilis.nil? ? (@syphilis.upcase == "POSITIVE" ? "class='selected'" : "") : "") %>>
+            &nbsp;<%= @syphilis %>&nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-left: 30px;">
+            HIV Test
           </td>
           <td style="border-left: 1px solid #000;
               border-bottom: 1px solid #000;"
               align="center">
-              &nbsp;<%= @cd4_date %>&nbsp;
+            &nbsp;<%= @hiv_test_date %>&nbsp;
           </td>
-          <td style="color: #000; border-left: 1px solid #000;
+          <td style="border-left: 1px solid #000;
+              border-bottom: 1px solid #000;
+              border-right: 1px solid #000; font-size: 1.5em;"
+              align="center" <%= (!@hiv_test.nil? ? (@hiv_test.upcase == "POSITIVE" ? "class='selected'" : "") : "") %>>
+            <%= (!@hiv_test.nil? ? (@hiv_test.upcase == "POSITIVE" ? "=" : "-") : "") %>&nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-left: 30px;">
+            Hb1
+          </td>
+          <td style="border-left: 1px solid #000;
+              border-bottom: 1px solid #000;"
+              align="center">
+            &nbsp;<%= @hb1_date %>&nbsp;
+          </td>
+          <td style="border-left: 1px solid #000;
               border-bottom: 1px solid #000;
               border-right: 1px solid #000;"
-              align="center">
-              &nbsp;<%= @cd4.to_i %>&nbsp;
+              align="center" <%= (!@hb1.nil? ? (@hb1.to_i <= 11 && @hb1.to_s.upcase != "NOT DONE" ? "class='selected'" : "") : "") %> >
+            &nbsp;<%= @hb1 %>&nbsp;
           </td>
-      </tr-->
-    </table>
-  </td>
-</tr>
+        </tr>
+        <tr>
+          <td style="padding-left: 30px;">
+            Hb2
+          </td>
+          <td style="border-left: 1px solid #000;
+              border-bottom: 1px solid #000;"
+              align="center">
+            &nbsp;<%= @hb2_date %>&nbsp;
+          </td>
+          <td style="border-left: 1px solid #000;
+              border-bottom: 1px solid #000;
+              border-right: 1px solid #000;"
+              align="center" <%= (!@hb2.nil? ? (@hb2.to_i <= 11 && @hb2.to_s.upcase != "NOT DONE" ? "class='selected'" : "") : "") %>>
+            &nbsp;<%= @hb2 %>&nbsp;
+          </td>
+        </tr>
+
+        <td style="padding-left: 30px;">
+          Malaria
+        </td>
+        <td style="border-left: 1px solid #000;
+            border-bottom: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @malaria_date %>&nbsp;
+        </td>
+        <td style="color: #000; border-left: 1px solid #000;
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;"
+            align="center">
+          &nbsp;<%= @malaria%>&nbsp;
+        </td>
+
+      </table>
+    </td>
+  </tr>
 </table>
 
 <table width="100%" border="0" cellpadding="5">
   <tr>
     <th style="height: 30px; font-size: 1.4em;" align="left">
       Examination
-  <!--div style="float: right; color: #f00;
-       font-weight: normal; padding-right: 30px;">
-    Refer*
-  </div-->
-</th>
-</tr>
-<tr>
-  <td valign="top" align="center">
-    <table width="90%" cellspacing="2">
-      <tr>
-        <td style="padding-left: 30px;">
-          Height
-        </td>
-        <td style="border: 1px solid #000;"
-            align="center" <%= (@height < 150 ? "class='selected'" : "") %>>
-          &nbsp;<%= (@height > 0 ? @height : "") %>&nbsp;
-        </td>
-      </tr>
-      <tr>
-        <td style="padding-left: 30px;">
-          Multiple pregnancy
-        </td>
-        <td style="border: 1px solid #000;"
-            align="center" <%= (!@multiple.nil? ? (@multiple.upcase == "YES" ? "class='selected'" : "") : "") %>>
-          &nbsp;<%= (!@multiple.nil? ? (@multiple.upcase == "NO" ? "NO" : (@multiple.upcase == "YES" ? "YES" : @multiple)) : "") %>&nbsp;
-        </td>
-      </tr>
-      <!--tr>
-        <td style="padding-left: 30px;">
-          WHO clinical stage
-        </td>
-        <td style="border: 1px solid #000;"
-            align="center" >
-          &nbsp;<%= (@who == 0 ? "?" : @who) %>&nbsp;
-        </td>
-      </tr-->
-    </table>
-  </td>
-</tr>
+      <!--div style="float: right; color: #f00;
+           font-weight: normal; padding-right: 30px;">
+        Refer*
+      </div-->
+    </th>
+  </tr>
+  <tr>
+    <td valign="top" align="center">
+      <table width="90%" cellspacing="2">
+        <tr>
+          <td style="padding-left: 30px;">
+            Height
+          </td>
+          <td style="border: 1px solid #000;"
+              align="center" <%= (@height < 150 ? "class='selected'" : "") %>>
+            &nbsp;<%= (@height > 0 ? @height : "") %>&nbsp;
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-left: 30px;">
+            Multiple pregnancy
+          </td>
+          <td style="border: 1px solid #000;"
+              align="center" <%= (!@multiple.nil? ? (@multiple.upcase == "YES" ? "class='selected'" : "") : "") %>>
+            &nbsp;<%= (!@multiple.nil? ? (@multiple.upcase == "NO" ? "NO" : (@multiple.upcase == "YES" ? "YES" : @multiple)) : "") %>&nbsp;
+          </td>
+        </tr>
+        <!--tr>
+          <td style="padding-left: 30px;">
+            WHO clinical stage
+          </td>
+          <td style="border: 1px solid #000;"
+              align="center" >
+            &nbsp;<%= (@who == 0 ? "?" : @who) %>&nbsp;
+          </td>
+        </tr-->
+      </table>
+    </td>
+  </tr>
 </table>
