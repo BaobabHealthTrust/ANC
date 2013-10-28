@@ -255,16 +255,24 @@
     :tt_onLoad => "parsedConceptName = ' Status'; showCategory('Lab Results'); unknownToNotDone(); ",
     :condition => "#{ (params[:update] ? "getSelected().match(/Malaria\sTest\sResult/)" : "") }" } %>
 
-
-  <%#= touch_date_tag "Result Date", @patient, nil,
-  {:id => "enter_date_malaria_result_done",
+  <%#= touch_date_tag "Date of laboratory test", @patient, nil,
+  {:id => "enter_date_result_given_malaria",
   :helptext => "Date Malaria Result Done",
   :tt_onUnLoad => "parsedConceptName = '';",
-  :tt_onLoad => " parsedConceptName = 'Malaria Test date'; showCategory('Lab Results'); initializeDate();",
-  :condition => "__$('')",
-  :tt_BeforeUnload => "checkHIVTestDate()",
-  :max => "#{session[:datetime].to_date rescue Date.today}",
-  :condition => "#{ (params[:update] ? "getSelected().match(/Malaria\sTest\sResult/)" : "") }"
+  :tt_onLoad => " parsedConceptName = 'Malaria Test Date'; showCategory('Lab Results');",
+  :condition => "#{ (params[:update] ? "getSelected().match(/Malaria\sTest\sResult/)" : "")}",
+  :max => "#{session[:datetime].to_date rescue Date.today}"
+  } %>
+
+
+
+  <%= touch_date_tag "Date of laboratory test", @patient, nil,
+    {:id => "enter_date_malaria_result_done",
+    :helptext => "Date Malaria Result Done",
+    :tt_onUnLoad => "parsedConceptName = '';",
+    :tt_onLoad => " parsedConceptName = 'Malaria Test date'; showCategory('Lab Results');",
+    :max => "#{session[:datetime].to_date rescue Date.today}",
+    :condition => "__$('malaria_test_result').value.toLowerCase().trim().match(/tive/i)"
   } %>
 
   <%#= touch_select_tag "WHO Stage", @patient, options_for_select([["", ""], ["1", "1"],

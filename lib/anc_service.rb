@@ -745,14 +745,18 @@ module ANCService
         }      
       }
     
-      @syphilis = syphil["SYPHILIS TEST RESULT"].titleize rescue nil
+      @syphilis = syphil["SYPHILIS TEST RESULT"].titleize rescue ""
 
-      @syphilis_date = syphil["SYPHILIS TEST RESULT DATE"] rescue nil
+      @syphilis_date = syphil["SYPHILIS TEST RESULT"].match(/not done/i) ? "" : syphil["SYPHILIS TEST RESULT DATE"] rescue nil
+
+      @malaria = syphil["MALARIA TEST RESULT"].titleize rescue ""
+
+      @malaria_date = syphil["MALARIA TEST RESULT"].match(/not done/i)? "" : syphil["DATE OF LABORATORY TEST"] rescue nil
 
       @hiv_test = (syphil["HIV STATUS"].downcase == "positive" ? "=" :
-          (syphil["HIV STATUS"].downcase == "negative" ? "-" : "")) rescue nil
+          (syphil["HIV STATUS"].downcase == "negative" ? "-" : "")) rescue ""
 
-      @hiv_test_date = syphil["HIV TEST DATE"] rescue nil
+      @hiv_test_date = syphil["HIV STATUS"].match(/not done/i) ? "" : syphil["HIV TEST DATE"] rescue nil
 
       hb = {}; pos = 1; 
     
@@ -790,25 +794,27 @@ module ANCService
     
       label.draw_text("Examination",28,29,0,1,1,2,false)
       label.draw_line(25,55,115,1,0)
-      label.draw_line(25,190,115,1,0)
+      label.draw_line(180,160,250,1,0)
+
       label.draw_text("Height",28,76,0,2,1,1,false)
       label.draw_text("Multiple Pregnancy",28,106,0,2,1,1,false)
-      label.draw_text("",28,136,0,2,1,1,false)
-      label.draw_text("Lab Results",28,161,0,1,1,2,false)
-      label.draw_text("Date",190,170,0,2,1,1,false)
-      label.draw_text("Result",325,170,0,2,1,1,false)
-      label.draw_text("HIV",28,196,0,2,1,1,false)
-      label.draw_text("Syphilis",28,226,0,2,1,1,false)
-      label.draw_text("Hb1",28,256,0,2,1,1,false)
-      label.draw_text("Hb2",28,286,0,2,1,1,false)
+     
+      label.draw_text("Lab Results",28,131,0,1,1,2,false)
+      label.draw_text("Date",190,140,0,2,1,1,false)
+      label.draw_text("Result",325,140,0,2,1,1,false)
+      label.draw_text("HIV",28,166,0,2,1,1,false)
+      label.draw_text("Syphilis",28,196,0,2,1,1,false)
+      label.draw_text("Hb1",28,226,0,2,1,1,false)
+      label.draw_text("Hb2",28,256,0,2,1,1,false)
+      label.draw_text("Malaria",28,286,0,2,1,1,false)
       label.draw_line(260,70,170,1,0)
-      label.draw_line(260,70,1,90,0)
+      label.draw_line(260,70,1,60,0)
       label.draw_line(180,306,250,1,0)
-      label.draw_line(430,70,1,90,0)
+      label.draw_line(430,70,1,60,0)
     
-      label.draw_line(180,190,1,115,0)
-      label.draw_line(320,190,1,115,0)
-      label.draw_line(430,190,1,115,0)
+      label.draw_line(180,160,1,145,0)
+      label.draw_line(320,160,1,145,0)
+      label.draw_line(430,160,1,145,0)
     
       label.draw_line(260,100,170,1,0)    
       label.draw_line(260,130,170,1,0)
@@ -823,17 +829,20 @@ module ANCService
       label.draw_text(@multiple,270,106,0,2,1,1,false)
       # label.draw_text(@who,270,136,0,2,1,1,false)
         
-      label.draw_text(@hiv_test_date,188,196,0,2,1,1,false)
-      label.draw_text(@syphilis_date,188,226,0,2,1,1,false)
-      label.draw_text(@hb1_date,188,256,0,2,1,1,false)
-      label.draw_text(@hb2_date,188,286,0,2,1,1,false)
+      label.draw_text(@hiv_test_date,188,166,0,2,1,1,false)
+      label.draw_text(@syphilis_date,188,196,0,2,1,1,false)
+      label.draw_text(@hb1_date,188,226,0,2,1,1,false)
+      label.draw_text(@hb2_date,188,256,0,2,1,1,false)
+      label.draw_text(@malaria_date,188,286,0,2,1,1,false)
         
-      label.draw_text(@hiv_test,345,196,0,2,1,1,false)
-      label.draw_text(@syphilis,325,226,0,2,1,1,false)
-      label.draw_text(@hb1,325,256,0,2,1,1,false)
-      label.draw_text(@hb2,325,286,0,2,1,1,false)
+      label.draw_text(@hiv_test,345,166,0,2,1,1,false)
+      label.draw_text(@syphilis,345,196,0,2,1,1,false)
+      label.draw_text(@hb1,325,226,0,2,1,1,false)
+      label.draw_text(@hb2,325,256,0,2,1,1,false)
+      label.draw_text(@malaria,325,286,0,2,1,1,false)
     
       label.print(1)
+      
     end
   
     def visit_summary_label(target_date = Date.today)
@@ -1025,9 +1034,18 @@ module ANCService
           sp = (@drugs[element]["SP"].to_i > 0 ? @drugs[element]["SP"].to_i : "") rescue ""
         
           label.draw_text(sp,595,200,0,2,1,1,false)
-        
+          
+          @ferrous_fefol =  @other_drugs.keys.collect{|date|
+            @other_drugs[date].keys.collect{|key|
+              @other_drugs[date][key] if ((@other_drugs[date][key].to_i > 0 and key.downcase.strip == "ferrous") rescue false)
+            }
+          }.compact.first.to_s rescue ""
+      
           fefo = (@drugs[element]["Fefol"].to_i > 0 ? @drugs[element]["Fefol"].to_i : "") rescue ""
-        
+         
+          fefo = (fefo.to_i + @ferrous_fefol.to_i) rescue fefo
+          fefo = "" if (fefo.to_i == 0 rescue false)
+          
           label.draw_text(fefo,664,200,0,2,1,1,false)
         
           albe = (@drugs[element]["Albendazole"].to_i > 0 ? @drugs[element]["Albendazole"].to_i : "") rescue ""
@@ -1105,7 +1123,7 @@ module ANCService
           end
         }
       }
-
+      
       label = ZebraPrinter::StandardLabel.new
 
       label.draw_line(20,25,800,2,0)
@@ -1213,30 +1231,30 @@ module ANCService
     def paragraphate(string, collen = 8, rows = 2)
       arr = []
     
-      if string.nil? 
+      if string.nil?
         return arr
       end
     
       string = string.strip
     
-      (0..rows).each{|p| 
+      (0..rows).each{|p|
         if !(string[p*collen,collen]).nil?
           if p == rows
             arr << (string[p*collen,collen] + ".") if !(string[p*collen,collen]).nil?
-          elsif string[((p*collen) + collen),1] != " " && !string.strip[((p+1)*collen),collen].nil? && 
+          elsif string[((p*collen) + collen),1] != " " && !string.strip[((p+1)*collen),collen].nil? &&
               string[(((p+1)*collen) + collen),1] != " "
             arr << (string[p*collen,collen] + "-") if !(string[p*collen,collen]).nil?
-          else 
+          else
             arr << string[p*collen,collen] if !(string[p*collen,collen]).nil?
           end
         end
       }
       arr
-    end  
+    end
         
     def name
       "#{self.person.names.first.given_name} #{self.person.names.first.family_name}".titleize rescue nil
-    end  
+    end
 
     def address
       address = self.current_district rescue ""
@@ -1312,7 +1330,7 @@ module ANCService
       # it is March and the patient says they are 25, they stay 25 (not become 24)
       birth_date=self.person.birthdate
       estimate=self.person.birthdate_estimated==1
-      patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  && 
+      patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
           today.month < birth_date.month && self.person.date_created.year == today.year) ? 1 : 0
     end
 
@@ -1326,7 +1344,7 @@ module ANCService
       if self.person.birthdate_estimated==1
         if self.person.birthdate.day == 1 and self.person.birthdate.month == 7
           self.person.birthdate.strftime("??/???/%Y")
-        elsif self.person.birthdate.day == 15 
+        elsif self.person.birthdate.day == 15
           self.person.birthdate.strftime("??/%b/%Y")
         end
       else
@@ -1334,13 +1352,13 @@ module ANCService
       end
     end
 
-    def self.set_birthdate(person_id, year = nil, month = nil, day = nil)   
+    def self.set_birthdate(person_id, year = nil, month = nil, day = nil)
       raise "No year passed for estimated birthdate" if year.nil?
 
       person = Person.find(person_id) rescue nil
       raise "Person not found" if person.nil?
       
-      # Handle months by name or number (split this out to a date method)    
+      # Handle months by name or number (split this out to a date method)
       month_i = (month || 0).to_i
       month_i = Date::MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
       month_i = Date::ABBR_MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
@@ -1400,7 +1418,7 @@ module ANCService
           },
           "occupation" => self.person.get_attribute('Occupation')}}
  
-      if not self.person.patient.patient_identifiers.blank? 
+      if not self.person.patient.patient_identifiers.blank?
         demographics["person"]["patient"] = {"identifiers" => {}}
         self.person.patient.patient_identifiers.each{|identifier|
           demographics["person"]["patient"]["identifiers"][identifier.type.name] = identifier.identifier

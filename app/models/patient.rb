@@ -75,7 +75,7 @@ class Patient < ActiveRecord::Base
         checked_date.to_date]).encounter_datetime  rescue nil
 
     status = nil
-    status = "negative" if (last_preg_visit.to_date >= (today - 3.months) rescue false)
+    status = "negative" if (last_preg_visit.to_date >= (today - 1.days) rescue false)
     status = "unknown" if status.blank?
     status
   end
