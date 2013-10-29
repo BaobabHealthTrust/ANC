@@ -92,7 +92,7 @@ EOF
     elsif name == 'SURGICAL HISTORY'
       observations.collect{|observation| observation.to_s.titleize.gsub("Tuberculosis Test Date Received", "Date")}.join(", ")
     elsif name == "ANC VISIT TYPE"
-      observations.collect{|o| "Visit No.: " + o.value_numeric.to_i.to_s}.join(", ")
+      observations.collect{|o| (o.value_numeric.blank? ? nil : "Visit No.: " +  (o.value_numeric.to_i.to_s))}.compact.join(", ")
     else  
       observations.collect{|observation| observation.to_s.titleize}.join(", ")
     end  
