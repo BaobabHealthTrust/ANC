@@ -24,6 +24,7 @@ production:
  portal_url: 192.100.100.200:80
  same_database: false
  use.column.interface: true
+ maternity.links: localhost:3000
  
 development:
  create_from_remote: no
@@ -52,6 +53,7 @@ development:
  portal_url: 192.100.100.200:80
  same_database: false
  use.column.interface: true
+ maternity.links: localhost:3000
  
 test: &TEST
  create_from_remote: no
