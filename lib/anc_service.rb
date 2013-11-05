@@ -608,6 +608,10 @@ module ANCService
         :conditions => ["person_id = ? AND (concept_id = ? AND value_coded = ?)", @patient.id,
           ConceptName.find_by_name('Caesarean section').concept_id, ConceptName.find_by_name('Yes').concept_id]).length rescue nil
 
+      @csections = Observation.find(:all,
+        :conditions => ["person_id = ? AND (concept_id = ? AND (value_coded = ? OR value_text = ?) )", @patient.id,
+          ConceptName.find_by_name('Procedure Done').concept_id, ConceptName.find_by_name('Caesarean Section').concept_id, 'Caesarean Section']).length rescue nil if @csections.blank? || @csections.to_i == 0
+
       @vacuum = Observation.find(:all,
         :conditions => ["person_id = ? AND value_coded = ?", @patient.id,
           ConceptName.find_by_name('Vacuum extraction delivery').concept_id]).length rescue nil
