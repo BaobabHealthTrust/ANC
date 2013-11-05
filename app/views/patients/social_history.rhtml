@@ -16,22 +16,22 @@
 
   <%= touch_select_tag "Patient currently smokes", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "smoker", :tt_requireNextClick => false,
-    :helptext => "Does patient smoke?", 
+    :helptext => "Does patient smoke?",
     :tt_onLoad => "__$('nextButton').style.display='none'; showCategory('Social History');" } %>
   <%= touch_select_tag "Patient currently consumes alcohol", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
-    {:id => "alcohol", 
+    {:id => "alcohol",
     :tt_requireNextClick => false,
     :tt_onLoad => "__$('nextButton').style.display='none'; showCategory('Social History');",
     :helptext => "Does patient take alcohol?" } %>
   <%#= touch_select_tag "Nutrition status", @patient, options_for_select([["", ""], ["Good", "Good"], ["Malnourished", "Malnourished"], ["Obese", "Obese"]]),
-    {:id => "nutrition",
-    :helptext => "Nutrition status" } %>
+  {:id => "nutrition",
+  :helptext => "Nutrition status" } %>
 
   <%= touch_select_tag "Civil status", @patient,
     options_for_select([["", ""], ["Single", "Single"], ["Engaged", "Engaged"],
       ["Married", "Married"], ["Separated", "Separated"], ["Divorced", "Divorced"],
       ["Widowed", "Widowed"], ["Other", "Other"]]),
-    {:id => "civil_status", 
+    {:id => "civil_status",
     :tt_requireNextClick => false,
     :tt_onLoad => "__$('nextButton').style.display='none'; showCategory('Social History');",
     :helptext => "Marital status" } %>
@@ -57,16 +57,17 @@
   :helptext => "Religion" } %>
 
   <%= touch_select_tag "Religion", @patient, options_for_select(@religions),
-    {:id => "religion", 
+    {:id => "religion",
     :tt_onLoad => "__$('nextButton').style.display='block'; showCategory('Social History');",
     :tt_pageStyleClass => "Keyboard",
     :helptext => "Religion" } %>
 
-  <%= touch_text_field_tag "Other", @patient, nil,
+  <%= touch_text_field_tag "Religion", @patient, nil,
     {
     :id => "other",
     :helpText => "Specify other religion",
     :tt_onLoad => "__$('nextButton').style.display='block'; showCategory('Social History');",
+    :tt_BeforeUnLoad => "(__$('religion').value = __$('other').value); __$('religion').value = ''",
     :condition => "__$('religion').value == 'Other'"
   } %>
 
