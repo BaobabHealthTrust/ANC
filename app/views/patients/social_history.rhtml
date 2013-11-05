@@ -59,6 +59,7 @@
   <%= touch_select_tag "Religion", @patient, options_for_select(@religions),
     {:id => "religion", 
     :tt_onLoad => "__$('nextButton').style.display='block'; showCategory('Social History');",
+    :tt_pageStyleClass => "Keyboard",
     :helptext => "Religion" } %>
 
   <%= touch_text_field_tag "Other", @patient, nil,

@@ -1173,25 +1173,29 @@ class PatientsController < ApplicationController
   
   def social_history
 
-    religions = ["Jehovahs Witness",  
-      "Roman Catholic", 
+    @religions = ["Other",
+      "Assemblies of God",
+      "Jehovahs Witness",
+      "Roman Catholic",
+      "Church of Christ",
+      "Deeper Life",
+      "Bible Believer",
+      "Anglican Church",
+      "Calvary Family",
+      "Evangelical",
+      "Living Waters",
+      "Moslem",
       "Presbyterian (C.C.A.P.)",
       "Seventh Day Adventist", 
-      "Baptist", 
+      "Baptist",
+      "Hindu",
+      "Atheist",
       "Moslem"]
     
-    @religions = Observation.find(:all, :joins => [:concept, :encounter], 
-      :conditions => ["obs.concept_id = ? AND NOT value_text IN (?) AND " + 
-          "encounter_type = ?", 
-        ConceptName.find_by_name("Other").concept_id, religions, 
-        EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|o| o.value_text}
-    
-    @religions = religions + @religions
-    
-    @religions = @religions.sort
-    
-    @religions << "Other"
-    # raise @religions.to_yaml
+   # @religions = Observation.find_most_common(ConceptName.find_by_name("Religion").concept_id, "", 15)
+ 
+   # @religions = (religions + @religions).uniq
+           
   end
 
   def graph
