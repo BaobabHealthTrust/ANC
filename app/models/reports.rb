@@ -14,14 +14,14 @@ class Reports
      
     @enddate = @end_date
     @startdate = @start_date
-    @preg_range = @type == "cohort" ? 10.months : 0.months
+    @preg_range = (@type == "cohort") ? 10.months : 0.months
     
     server = CoreService.get_global_property_value("maternity.links") + "/report/delivered_patients"
        
     @maternity_data = JSON.parse(RestClient.post(server, {"start_date" => @startdate, "end_date" => @enddate})) rescue {}
     @delivered_patients = @maternity_data["ids"]
 
-    if @type = "cohort"
+    if @type == "cohort"
       
       @cohortpatients = PatientIdentifier.find_by_sql(["SELECT pid.patient_id FROM patient_identifier pid WHERE pid.identifier IN (?) AND
         (SELECT (COUNT(*)) FROM encounter enc WHERE enc.patient_id =  pid.patient_id AND encounter_type = ? AND enc.encounter_datetime > ?) > 0",
@@ -51,7 +51,7 @@ class Reports
 
   def new_women_registered
 
-    if @type = "cohort"
+    if @type == "cohort"
       @cohortpatients
     else
       Encounter.find(:all, :joins => [:observations], :select => ["patient_id"],
