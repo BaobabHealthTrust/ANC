@@ -109,6 +109,8 @@ class ReportsController < ApplicationController
   end
   
 	def report
+
+    session_date = (session[:datetime].to_date rescue Date.today)
     @facility = Location.current_health_center.name rescue ''
     
 		@start_date = nil
@@ -116,6 +118,7 @@ class ReportsController < ApplicationController
 		@start_age = params[:startAge]
 		@end_age = params[:endAge]
 		@type = params[:selType]
+    params[:selSelect] = "month" if params[:selSelect].blank?
 
 		case params[:selSelect]
 		when "day"
@@ -126,7 +129,7 @@ class ReportsController < ApplicationController
         ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
       @end_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) +
         6 - ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
-		when "month"
+		when "month"      
 			@start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
 			@end_date = ("#{params[:selYear]}-#{params[:selMonth]}-#{ (params[:selMonth].to_i != 12 ?
         ("#{params[:selYear]}-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : "31") }").to_date.strftime("%Y-%m-%d")
@@ -145,7 +148,7 @@ class ReportsController < ApplicationController
     @start_date = params[:start_date] if !params[:start_date].blank?
     @end_date = params[:end_date] if !params[:end_date].blank?
 
-		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type)
+		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type, session_date)
 
     @new_women_registered = report.new_women_registered
        

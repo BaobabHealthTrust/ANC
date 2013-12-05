@@ -65,7 +65,7 @@
     %>
 
     <form id="frmReport" action="/reports/report" method="post">
-      <select id="selSelect" name="selSelect" helpText="Report By:">
+      <select id="selSelect" name="selSelect" helpText="Report By:" condition="false">
         <option></option>
         <option value="week">Week</option>
         <option value="month">Month</option>
@@ -81,15 +81,15 @@
         <input type="hidden" name="type" value= <%= params[:type] %>"/>
       <%end%>
 
-             <select id="selYear" name="selYear" helpText="Select Year:"
-             condition="$('selSelect').value == 'month' || $('selSelect').value == 'year' || $('selSelect').value == 'week';">
+             <select id="selYear" name="selYear" helpText="Select Year:">
+             
              <option></option>
              <% array.reverse.each do |y| %>
         <option><%= y %></option>
       <% end %>
     </select>
 
-    <select id="selMonth" name="selMonth" helpText="Select Month:" condition="$('selSelect').value == 'month';">
+    <select id="selMonth" name="selMonth" helpText="Select Month:">
       <option></option>
       <option value="1">January</option>
       <option value="2">February</option>
