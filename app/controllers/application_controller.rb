@@ -26,7 +26,8 @@ class ApplicationController < GenericApplicationController
 
   def next_form(location , patient , session_date = Date.today)
     #for ANC Clinic
-    task = Task.first rescue Task.new()    
+    task = Task.first
+    task = Task.new if task.blank?
 
     current_user_activities = current_user.activities.collect{|u| u.downcase}
     
