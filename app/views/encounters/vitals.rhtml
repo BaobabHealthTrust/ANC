@@ -102,7 +102,7 @@
  
   function showWeightForHeight() {
     var currentHeightRounded = (currentHeight % Math.floor(currentHeight) < 0.5 ? 0 : 0.5) + Math.floor(currentHeight);
-    var weightForHeights = null<%#= WeightForHeight.patient_weight_for_height_values.to_json -%>;
+    var weightForHeights = <%= WeightForHeight.patient_weight_for_height_values.to_json -%>;
     var medianWeightHeight = weightForHeights[currentHeightRounded.toFixed(1)];
     var weightForHeightPercentile = (currentWeight/(medianWeightHeight)*100).toFixed(0);
 
@@ -452,7 +452,7 @@ end
     {
     :tt_onLoad => "growthIndicators(); showCategory('Vitals'); __$('keyboard').style.display = 'none'",
     :optional => "true",
-    :tt_pageStyleClass => "NoControls",
+    :tt_pageStyleClass => "NoControls NoKeyboard",
     :condition => "if(__$('weight')){__$('weight').value.toLowerCase() != 'unknown'}"
   } %>
 

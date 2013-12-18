@@ -82,6 +82,7 @@
 
     <%= select_tag "person[birth_month]", month_name_options,
       {:helpText => 'Month of Birth',
+      :tt_pageStyleClass => "NoKeyboard",
       :condition => '$("person_birth_year").value.toLowerCase() != "unknown"'}%>
 
     <%= text_field_tag "person[age_estimate]", nil,
