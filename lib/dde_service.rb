@@ -400,53 +400,47 @@ module DDEService
     end
   end
 
-  def self.update_demographics(params)
-    person = Person.find(params['person_id'])
+  def self.update_demographics(patient_bean)
 
-    if params.has_key?('person')
-      params = params['person']
-    end
+    person_params = {"person"=>
+        {"data" =>
+          {"addresses"=>
+            {"state_province"=> patient_bean.current_district,
+            "address2"=> patient_bean.home_district,
+            "address1"=> patient_bean.landmark,
+            "neighborhood_cell"=> patient_bean.home_village,
+            "city_village"=> patient_bean.current_residence,
+            "county_district"=> patient_bean.traditional_authority
+          },
+          "attributes"=>
+            {"occupation"=> (patient_bean.occupation rescue ""),
+            "cell_phone_number" => (patient_bean.cell_phone_number rescue ""),
+            "citizenship" => (patient_bean.citizenship rescue ""),
+            "race" => (patient_bean.race rescue "")
+          },
+          "patient"=>
+            {"identifiers"=>
+              {"national_id" => patient_bean.national_id}},
+          "gender"=> patient_bean.sex == "Female" ? "F" : "M",
+          "birthdate"=> patient_bean.birth_date,
+          "birthdate_estimated"=> patient_bean.birthdate_estimated ,
+          "names"=>{"family_name"=> patient_bean.last_name,
+            "given_name"=> patient_bean.first_name
+          }
+        }
+      }
+    }
 
-    address_params = params["addresses"]
-    names_params = params["names"]
-    patient_params = params["patient"]
-    person_attribute_params = params["attributes"]
+    @dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    
+    @dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
 
-    params_to_process = params.reject{|key,value| key.match(/addresses|patient|names|attributes|cat|action|controller/) }
-    birthday_params = params_to_process.reject{|key,value| key.match(/gender|person_id|cat|action|controller/) }
+    @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
 
-    person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate|cat|action|controller/) }
-
-    if !birthday_params.empty?
-
-      if birthday_params["birth_year"] == "Unknown"
-        set_birthdate_by_age(person, birthday_params["age_estimate"])
-      else
-        set_birthdate(person, birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"])
-      end
-
-      person.birthdate_estimated = 1 if params["birthdate_estimated"] == 'true'
-      person.save
-    end
-
-    person.update_attributes(person_params) if !person_params.empty?
-    person.names.first.update_attributes(names_params) if names_params
-    person.addresses.first.update_attributes(address_params) if address_params
-
-    #update or add new person attribute
-    person_attribute_params.each{|attribute_type_name, attribute|
-      attribute_type = PersonAttributeType.find_by_name(attribute_type_name.humanize.titleize) || PersonAttributeType.find_by_name("Unknown id")
-      #find if attribute already exists
-      exists_person_attribute = PersonAttribute.find(:first, :conditions => ["person_id = ? AND person_attribute_type_id = ?", person.id, attribute_type.person_attribute_type_id]) rescue nil
-      if exists_person_attribute
-        exists_person_attribute.update_attributes({'value' => attribute})
-      else
-        person.person_attributes.create("value" => attribute, "person_attribute_type_id" => attribute_type.person_attribute_type_id)
-      end
-    } if person_attribute_params
-
+    uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people/update_demographics"
+    received_params = RestClient.post(uri,person_params)
   end
-
+  
   def self.create_patient_from_dde(params, dont_recreate_local=false)
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
