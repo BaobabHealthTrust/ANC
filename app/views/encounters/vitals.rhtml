@@ -320,7 +320,7 @@ end
         :field_type => 'number',
         :min => 40, # number_with_precision(@patient.min_weight, :precision => 1),
         :max => 200, # number_with_precision(@patient.max_weight, :precision => 1),
-        :absoluteMin => 40,
+        :absoluteMin => 20,
         :absoluteMax => 200,
         :condition => "if(#{options.length} > 2){getSelected().match(/Weight/)}else{true}",
         :tt_onLoad => "showCategory('Vitals'); parsedConceptName = 'Weight'; if(conceptHash){}else{transformMessages()};",
