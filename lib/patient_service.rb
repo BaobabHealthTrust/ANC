@@ -37,6 +37,8 @@ module PatientService
       passed_person = {
         "person"=>{"occupation"=>person["person"]["data"]["attributes"]["occupation"],
           "age_estimate"=> birthdate_estimated ,
+          "race"=>person["person"]["data"]["attributes"]["race"],
+          "citizenship"=>person["person"]["data"]["attributes"]["citizenship"],
           "birthdate" => person["person"]["data"]["birthdate"],
           "cell_phone_number"=> person["person"]["data"]["attributes"]["cell_phone_number"],
           "birth_month"=> birthdate_month ,
@@ -1367,6 +1369,8 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
         "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
           "age_estimate"=> birthdate_estimated,
           "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
+          "race"=>p["person"]["data"]["attributes"]["race"],
+          "citizenship"=>p["person"]["data"]["attributes"]["citizenship"],
           "birth_month"=> birthdate_month ,
           "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["address1"],
             "address2"=>p["person"]["data"]["addresses"]["address2"],
