@@ -47,7 +47,7 @@ function generateGenerics(){
         $("content").removeChild($("parent_container"));
     }
 
-    $("clearButton").style.display = "none";
+    // $("clearButton").style.display = "none";
 
     var onmousedown_event = $("nextButton").onmousedown;
 
@@ -1024,6 +1024,12 @@ function removeGenerics(){
 * We create a custom keyboard for the interface to fit on the available space
 */
 function showFixedKeyboard(ctrl, global_control){
+
+    $("clearButton").onclick = function(){
+        $(global_control).value = "";
+        searchDrug();
+    }
+    
     var full_keyboard = "full";
     
     var div = document.createElement("div");
@@ -1035,7 +1041,7 @@ function showFixedKeyboard(ctrl, global_control){
 
     var row1 = ["Q","W","E","R","T","Y","U","I","O","P"];
     var row2 = ["", "A","S","D","F","G","H","J","K","L"];
-    var row3 = ["clear", "Z","X","C","V","B","N","M","stat<br />dose"];
+    var row3 = ["del", "Z","X","C","V","B","N","M","stat<br />dose"];
     var row5 = ["1","2","3","4","5","6","7","8","9","0"];
 
     var tbl = document.createElement("table");
@@ -1145,7 +1151,7 @@ function showFixedKeyboard(ctrl, global_control){
             td3.className = "btn";
         }
 
-        if(row3[i] == "clear"){
+        if(row3[i] == "del"){
             td3.colSpan = 2;
 
             td3.onclick = function(){
