@@ -80,7 +80,9 @@ class Reports
       :select => ["patient_id, MAX(value_numeric) form_id"],
       :conditions => ["concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
         ConceptName.find_by_name("Reason for visit").concept_id,
-        @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.uniq
+        @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| 
+      [e.patient_id, e.form_id]
+    }.collect{|x, y| x if y.present?}.uniq
     
   end
   

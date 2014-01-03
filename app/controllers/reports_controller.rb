@@ -118,7 +118,7 @@ class ReportsController < ApplicationController
 		@start_age = params[:startAge]
 		@end_age = params[:endAge]
 		@type = params[:selType]
-    params[:selSelect] = "month" if params[:selSelect].blank?
+    params[:selSelect] = "range" if params[:selSelect].blank?
 
 		case params[:selSelect]
 		when "day"
@@ -194,7 +194,7 @@ class ReportsController < ApplicationController
 
 		@syphilis_result_neg = report.syphilis_result_neg
 
-		@syphilis_result_unk = (@new_women_registered - (@syphilis_result_pos + @syphilis_result_neg).uniq).uniq
+		@syphilis_result_unk = (@observations_total - (@syphilis_result_pos + @syphilis_result_neg).uniq).uniq
 
 		@hiv_test_result_prev_neg = report.hiv_test_result_prev_neg.uniq
     
@@ -209,10 +209,11 @@ class ReportsController < ApplicationController
     @hiv_test_result_neg -= (@hiv_test_result_prev_pos + @hiv_test_result_pos)
     @hiv_test_result_prev_pos -= (@hiv_test_result_pos)
     
-    @hiv_test_result_unk = (@new_women_registered - (@hiv_test_result_prev_neg + @hiv_test_result_prev_pos +
+    @hiv_test_result_unk = (@observations_total - (@hiv_test_result_prev_neg + @hiv_test_result_prev_pos +
           @hiv_test_result_neg + @hiv_test_result_pos).uniq).uniq
 
     @total_hiv_positive = @hiv_test_result_prev_pos + @hiv_test_result_pos
+  
     @total_hiv_positive.delete_if{|p| p.blank?}
     
 		@not_on_art = report.not_on_art
