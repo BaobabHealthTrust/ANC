@@ -117,9 +117,15 @@ class ReportsController < ApplicationController
     @end_date = nil
 		@start_age = params[:startAge]
 		@end_age = params[:endAge]
-		@type = params[:selType]
-    
-    params[:selSelect] = "month" if params[:selSelect].blank?  && params[:selMonth]
+		
+    if params[:selSelect].blank?  && params[:selMonth]
+      params[:selSelect] = "month"
+      params[:selType] = "cohort"
+    else
+      params[:selType] = "monthly"     
+    end
+
+    @type = params[:selType]
 
 		case params[:selSelect]
 		when "day"
