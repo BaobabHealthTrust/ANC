@@ -118,7 +118,8 @@ class ReportsController < ApplicationController
 		@start_age = params[:startAge]
 		@end_age = params[:endAge]
 		@type = params[:selType]
-    params[:selSelect] = "range" if params[:selSelect].blank?
+    
+    params[:selSelect] = "month" if params[:selSelect].blank?  && params[:selMonth]
 
 		case params[:selSelect]
 		when "day"
