@@ -380,17 +380,26 @@ class PrescriptionsController < ApplicationController
     
   # This method gets all generic drugs in the database
   def generic
-    generics = []
-    # preferred = ConceptName.find_by_name("Maternity Prescriptions").concept.concept_members.collect{|c| c.id} rescue []
+   
+    medication_tag = CoreService.get_global_property_value("application_generic_medication")
 
-    Drug.all.each{|drug|
-      #Concept.find(drug.concept_id, :conditions => ["retired = 0 AND concept_id IN (?)", preferred]).concept_names.each{|conceptname|
-      Concept.find(drug.concept_id, :conditions => ["retired = 0"]).concept_names.each{|conceptname|
-        generics << [(conceptname.name.titleize == "Tetanus Toxoid Vaccine" ? "TTV" : conceptname.name), drug.concept_id] rescue nil
-      }.compact.uniq rescue []
-    }
+    if !medication_tag.blank?
 
-    generics.uniq
+      application_drugs = concept_set(medication_tag)
+
+    else
+
+      application_drugs = ActiveRecord::Base.connection.select_all(
+        "SELECT concept_name.name name, drug.concept_id concept_id FROM drug
+        INNER JOIN concept_name ON drug.concept_id = concept_name.concept_id AND concept_name.voided = 0 AND drug.retired = 0"
+      ).map{|drg|
+        drug_name = (drg["name"] == "Tetanus Toxoid Vaccine") ? "TTV" : drg["name"]
+        [drug_name, drg["concept_id"]]}.compact.uniq
+
+    end
+
+    application_drugs.uniq
+    
   end
 
   # For a selected generic drug, this method gets all corresponding drug

@@ -1,5 +1,6 @@
 class ClinicController < GenericClinicController
-  def index    
+  def index
+    
     @facility = Location.current_health_center.name rescue ''
 
     @location = Location.find(session[:location_id]).name rescue ""
