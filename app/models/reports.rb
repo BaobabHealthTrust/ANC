@@ -17,27 +17,21 @@ class Reports
     @startdate = @start_date
     @preg_range = (@type == "cohort") ? 6.months : ((end_date.to_time - start_date.to_time).round/(3600*24)).days
 
-=begin    
-    server = CoreService.get_global_property_value("maternity.links") + "/report/delivered_patients"
-
-
-    @maternity_data = JSON.parse(RestClient.post(server, {"start_date" => @startdate, "end_date" => @enddate})) rescue {}
-    @delivered_patients = @maternity_data["ids"]
-
-    @cohortpatients = PatientIdentifier.find_by_sql(["SELECT pid.patient_id FROM patient_identifier pid WHERE pid.identifier IN (?) AND
-     (SELECT (COUNT(*)) FROM encounter enc WHERE enc.patient_id =  pid.patient_id AND encounter_type = ? AND enc.encounter_datetime > ?) > 0",
-     @delivered_patients, EncounterType.find_by_name("ANC VISIT TYPE").id, (@start_date.to_date - @preg_range)]).collect{|patient| patient.patient_id}
-
-    Encounter.find(:all, :joins => [:observations], :select => ["patient_id"],
-        :conditions => ["patient_id IN (?) AND encounter_type = ? AND concept_id = ? AND (DATE(encounter_datetime) >= ? " +
-            "AND DATE(encounter_datetime) <= ?) AND value_numeric = 1 AND encounter.voided = 0",
-          @cohortpatients,
+    if @type == "cohort"
+      
+      @cohortpatients = registrations(@startdate, @enddate)
+      
+    else
+      
+      @cohortpatients = Encounter.find(:all, :joins => [:observations], :group => [:patient_id],
+        :select => ["patient_id"],
+        :conditions => ["encounter_type = ? AND concept_id = ? AND encounter_datetime >= ? " +
+            "AND encounter_datetime <= ? AND encounter.voided = 0",
           EncounterType.find_by_name("ANC VISIT TYPE").id,
-          ConceptName.find_by_name("Reason For Visit").concept_id,
+          ConceptName.find_by_name("TYPE OF VISIT").concept_id,
           @startdate, @enddate]).collect{|e| e.patient_id}.uniq
-=end
-    
-    @cohortpatients = registrations(@startdate, @enddate)
+           
+    end
     
     @bart_patients = on_art_in_bart
     
@@ -69,9 +63,10 @@ class Reports
       
     else
 
-      @cohortpatients
+      registrations(@startdate, @enddate)
       
     end
+    
   end
   
   def observations_total
@@ -80,7 +75,7 @@ class Reports
       :select => ["patient_id, MAX(value_numeric) form_id"],
       :conditions => ["concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
         ConceptName.find_by_name("Reason for visit").concept_id,
-        @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| 
+        @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e|
       [e.patient_id, e.form_id]
     }.collect{|x, y| x if y.present?}.uniq
     
@@ -546,7 +541,7 @@ class Reports
       next if id.nil?
       patient_id = PatientIdentifier.find_by_identifier(id).patient_id
       if patient_id
-        date = Observation.find_by_sql("SELECT * FROM obs where person_id = #{patient_id} 
+        date = Observation.find_by_sql("SELECT * FROM obs where person_id = #{patient_id}
                 AND concept_id = (SELECT concept_id FROM concept_name where name = 'TYPE OF VISIT'
                  AND value_numeric = 1 order by date_created LIMIT 1)").first.date_created.strftime("%Y-%m-%d") rescue nil
             
@@ -558,7 +553,7 @@ class Reports
     
     paramz = Hash.new
     paramz["ids"] = patient_ids
-    paramz["start_date"] = @startdate.to_date 
+    paramz["start_date"] = @startdate.to_date
     paramz["end_date"] = @startdate.to_date + @preg_range
     paramz["id_visit_map"] = id_visit_map.join(",")
 
