@@ -410,16 +410,20 @@ class Reports
     
   end
 
-  def not_on_art
+  def not_on_art(hiv_patients = [])
+
+    if hiv_patients.blank?
+      local =  Encounter.find(:all, :joins => [:observations], :group => ["patient_id"],
+        :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"],
+        :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (encounter_datetime >= ? " +
+            "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)",
+          ConceptName.find_by_name("HIV status").concept_id,
+          ConceptName.find_by_name("Positive").concept_id, "Positive",
+          @startdate, (@startdate.to_date + @preg_range), @cohortpatients]).collect{|e| e.patient_id}.uniq
+    else
+      local = hiv_patients
+    end
     
-    local =  Encounter.find(:all, :joins => [:observations], :group => ["patient_id"],
-      :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"],
-      :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (encounter_datetime >= ? " +
-          "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)",
-        ConceptName.find_by_name("HIV status").concept_id,
-        ConceptName.find_by_name("Positive").concept_id, "Positive",
-        @startdate, (@startdate.to_date + @preg_range), @cohortpatients]).collect{|e| e.patient_id}
-  
     no_art = local - on_art_before
     no_art = no_art.uniq
     no_art = [] if no_art.to_s.blank?
