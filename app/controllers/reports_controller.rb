@@ -259,5 +259,40 @@ class ReportsController < ApplicationController
  
     render :layout => false
   end
+
+  def print_report
+
+    parameters =  params.delete_if{|k, v| k.match(/action|controller/)}.collect{|k, v| k + "=" + v}.join("&")
+       
+    t1 = Thread.new{
+      Kernel.system "wkhtmltopdf --zoom 0.9 -T 1mm -s A4 http://" +
+        request.env["HTTP_HOST"] + "\"/reports/report" +
+        "?#{parameters}&from_print=true" + "\" /tmp/report" + ".pdf \n"
+    }
+
+    file = "/tmp/report" + ".pdf"
+    t2 = Thread.new{
+      print(file, "", Time.now)
+    }
+
+    redirect_to "/reports/report?#{parameters}"
+
+  end
+
+  def print(file_name, current_printer, start_time = Time.now)
+    sleep(3)
+    if (File.exists?(file_name))
+
+      Kernel.system "lp -o sides=two-sided-long-edge -o fitplot #{(!current_printer.blank? ? '-d ' + current_printer.to_s : "")} #{file_name}"
+
+      t3 = Thread.new{
+        sleep(10)
+        Kernel.system "rm #{file_name}"
+      }
+
+    else
+      print(file_name, current_printer, start_time) unless start_time < 5.minutes.ago
+    end
+  end
   
 end

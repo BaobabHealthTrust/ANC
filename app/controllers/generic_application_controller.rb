@@ -25,13 +25,13 @@ class GenericApplicationController < ActionController::Base
 	helper_method :next_task
 	filter_parameter_logging :password
 	before_filter :authenticate_user!, :except => ['login', 'logout','remote_demographics',
-		                                      'create_remote', 'mastercard_printable', 'probe_lmp', 'get_token', 'test_enc']
+		                                      'create_remote', 'mastercard_printable', 'report', 'probe_lmp', 'get_token', 'test_enc']
 
     before_filter :set_current_user, :except => ['login', 'logout','remote_demographics',
-		                                      'create_remote', 'mastercard_printable', 'probe_lmp', 'get_token', 'test_enc']
+		                                      'create_remote', 'mastercard_printable',  'report', 'probe_lmp', 'get_token', 'test_enc']
 
 	before_filter :location_required, :except => ['login', 'logout', 'location',
-		                                        'demographics','create_remote', 'probe_lmp',
+		                                        'demographics','create_remote',  'report', 'probe_lmp',
 		                                         'mastercard_printable',
 		                                        'remote_demographics', 'get_token', 'single_sign_in', 'test_enc']
   
