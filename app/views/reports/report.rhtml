@@ -278,23 +278,61 @@
                                 Week of first ANC visit
                               </td>
                             </tr>
+
+                            <tr>
+                              <td style="border-bottom: 0px;">
+
+                              </td>
+                              <td style="border-top: 1px solid #999; border-left: 1px solid #999;
+                                  border-bottom: 0px solid #999;">
+                                <form id="week_of_first_visit_2" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @week_of_first_visit_2.join(",") %>" name="patients" />
+                                  <span  style="color:gray">Tot. started in wk. 13+</span>
+                                </form>
+                              </td>
+                              <td style="border: 1px solid #999; border-bottom: 0px;">
+                                <a href="javascript:document.getElementById('week_of_first_visit_2').submit()">
+                                  <span  style="color:gray"><%= @week_of_first_visit_2.length %></span>
+                                </a>
+                              </td>
+                            </tr>
+
                             <tr>
                               <td>
                                 6
                               </td>
                               <td style="border-top: 1px solid #999; border-left: 1px solid #999;
-                                  border-bottom: 1px solid #999;">
+                                  border-bottom: 0px solid #999;">
                                 <form id="week_of_first_visit_1" method="post" action="decompose">
                                   <input type="hidden" value="<%= @week_of_first_visit_1.join(",") %>" name="patients" />
                                   Tot. started in wk. 0-12
                                 </form>
                               </td>
-                              <td style="border: 1px solid #999;">
+                              <td style="border: 1px solid #999; border-bottom: 0px;">
                                 <a href="javascript:document.getElementById('week_of_first_visit_1').submit()">
                                   <%= @week_of_first_visit_1.length %>
                                 </a>
                               </td>
                             </tr>
+
+                            <tr>
+                              <td>
+
+                              </td>
+                              <td style="border-top: 1px solid #999; border-left: 1px solid #999;
+                                  border-bottom: 1px solid #999;">
+                                <form id="week_of_first_visit_unknown" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @week_of_first_visit_unknown.join(",") %>" name="patients" />
+                                  <span  style="color:black">Unknown</span>
+                                </form>
+                              </td>
+                              <td style="border: 1px solid #999;">
+                                <a href="javascript:document.getElementById('week_of_first_visit_unknown').submit()">
+                                  <span  style="color:black"><%= @week_of_first_visit_unknown.length %></span>
+                                </a>
+                              </td>
+                            </tr>
+
                             <tr>
                               <td>
                                 &nbsp;
@@ -304,13 +342,30 @@
                               </td>
                             </tr>
                             <tr>
+                              <td style="border-bottom: 0px;">
+
+                              </td>
+                              <td style="border-left: 1px solid #999; border-bottom: 0px solid #999; border-top: 1px solid #999; ">
+                                <form id="pre_eclampsia_no" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @pre_eclampsia_no.join(",") %>" name="patients" />
+                                  <span style="color: gray">No</span>
+                                </form>
+                              </td>
+                              <td style="border-left: 1px solid #999; border-top: 1px solid #999;
+                                  border-bottom: 0px solid #999; border-right: 1px solid #999;">
+                                <a href="javascript:document.getElementById('pre_eclampsia_no').submit()">
+                                  <span style="color: gray"><%= @pre_eclampsia_no.length %></span>
+                                </a>
+                              </td>
+                            </tr>
+                            <tr>
                               <td>
                                 7
                               </td>
                               <td style="border-left: 1px solid #999; border-bottom: 1px solid #999; border-top: 1px solid #999; ">
                                 <form id="pre_eclampsia_1" method="post" action="decompose">
                                   <input type="hidden" value="<%= @pre_eclampsia_1.join(",") %>" name="patients" />
-                                  Tot. with pre-eclampsia
+                                  Yes
                                 </form>
                               </td>
                               <td style="border-left: 1px solid #999; border-top: 1px solid #999;
@@ -326,6 +381,22 @@
                               </td>
                               <td colspan="2" style="font-weight: bold;">
                                 TTV doses
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="border-bottom: 0px;">
+
+                              </td>
+                              <td style="border-top: 1px solid #999; border-left: 1px solid #999;border-bottom: 0px;">
+                                <form id="ttv__total_previous_doses_1" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @ttv__total_previous_doses_1.join(",") %>" name="patients" />
+                                  <span style="color:gray;">Tot. received < 2 doses</span>
+                                </form>
+                              </td>
+                              <td style="border: 1px solid #999;border-bottom: 0px;">
+                                <a href="javascript:document.getElementById('ttv__total_previous_doses_1').submit()">
+                                  <span style="color:gray;"><%= @ttv__total_previous_doses_1.length %></span>
+                                </a>
                               </td>
                             </tr>
                             <tr>
@@ -410,6 +481,25 @@
                                 FeFo tablets <!--sup style="font-weight: normal;">1</sup-->
                               </td>
                             </tr>
+
+                            <tr>
+                              <td>
+
+                              </td>
+                              <td style="border-top: 1px solid #999; border-left: 1px solid #999;
+                                  border-bottom: 1px solid #999;">
+                                <form id="fefo__number_of_tablets_given_2" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @fefo__number_of_tablets_given_2.join(",") %>" name="patients" />
+                                  <span style="color: gray">Tot. received < 120 tabs</span>
+                                </form>
+                              </td>
+                              <td style="border: 1px solid #999;">
+                                <a href="javascript:document.getElementById('fefo__number_of_tablets_given_2').submit()">
+                                  <span style="color: gray"><%= @fefo__number_of_tablets_given_2.length %></span>
+                                </a>
+                              </td>
+                            </tr>
+
                             <tr>
                               <td>
                                 12
@@ -447,12 +537,48 @@
                                   border-left: 1px solid #999; width: 60%;">
                                 <form id="albendazole" method="post" action="decompose">
                                   <input type="hidden" value="<%= @albendazole.join(",") %>" name="patients" />
-                                  Tot. received 1 dose
+                                  1 dose
                                 </form>
                               </td>
                               <td style="border: 1px solid #999;">
                                 <a href="javascript:document.getElementById('albendazole').submit()">
                                   <%= @albendazole.length %>
+                                </a>
+                              </td>
+                            </tr>
+
+                            <tr>
+                              <td style="border-top: 0px">
+
+                              </td>
+                              <td style="border-bottom: 1px solid #999; border-top: 0px solid #999;
+                                  border-left: 1px solid #999; width: 60%;">
+                                <form id="albendazole_more_than_1" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @albendazole_more_than_1.join(",") %>" name="patients" />
+                                  <span style="color: gray"> > 1 dose</span>
+                                </form>
+                              </td>
+                              <td style="border: 1px solid #999; border-top: 0px">
+                                <a href="javascript:document.getElementById('albendazole_more_than_1').submit()">
+                                  <span style="color: gray"><%= @albendazole_more_than_1.length %></span>
+                                </a>
+                              </td>
+                            </tr>
+
+                            <tr>
+                              <td style="border-top: 0px">
+
+                              </td>
+                              <td style="border-bottom: 1px solid #999; border-top: 0px solid #999;
+                                  border-left: 1px solid #999; width: 60%;">
+                                <form id="albendazole_none" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @albendazole_none.join(",") %>" name="patients" />
+                                  <span style="color: gray">None</span>
+                                </form>
+                              </td>
+                              <td style="border: 1px solid #999; border-top: 0px">
+                                <a href="javascript:document.getElementById('albendazole_more_than_1').submit()">
+                                  <span style="color: gray"><%= @albendazole_none.length %></span>
                                 </a>
                               </td>
                             </tr>
@@ -474,7 +600,7 @@
                                   border-left: 1px solid #999; width: 60%;">
                                 <form id="bed_net" method="post" action="decompose">
                                   <input type="hidden" value="<%= @bed_net.join(",") %>" name="patients" />
-                                  Tot. received ITN
+                                  Received ITN
                                 </form>
                               </td>
                               <td style="border: 1px solid #999;">
@@ -483,6 +609,25 @@
                                 </a>
                               </td>
                             </tr>
+
+                            <tr>
+                              <td style="border-top: 0px">
+
+                              </td>
+                              <td style="border-bottom: 1px solid #999; border-top: 0px solid #999;
+                                  border-left: 1px solid #999; width: 60%;">
+                                <form id="no_bed_net" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @no_bed_net.join(",") %>" name="patients" />
+                                  <span style="color: gray">None</span>
+                                </form>
+                              </td>
+                              <td style="border: 1px solid #999; border-top: 0px;">
+                                <a href="javascript:document.getElementById('no_bed_net').submit()">
+                                  <span style="color: gray"><%= @no_bed_net.length %></span>
+                                </a>
+                              </td>
+                            </tr>
+
                             <tr>
                               <td style="width: 10px;">
                                 &nbsp;
@@ -673,6 +818,24 @@
                               </td>
                             </tr>
                             <tr>
+                              <td style="border-top: 0px">
+
+                              </td>
+                              <td style="border-bottom: 1px solid #999; border-top: 0px solid #999;
+                                  border-left: 1px solid #999; width: 60%;">
+                                <form id="no_cpt__1" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @no_cpt__1.join(",") %>" name="patients" />
+                                  <span style="color: gray">Not On CPT</span>
+                                </form>
+                              </td>
+                              <td style="border: 1px solid #999; border-top: 0px">
+                                <a href="javascript:document.getElementById('no_cpt__1').submit()">
+                                  <%= @no_cpt__1.length rescue 0%>
+                                </a>
+                              </td>
+                            </tr>
+
+                            <tr>
                               <td>
                                 &nbsp;
                               </td>
@@ -688,7 +851,7 @@
                                   border-left: 1px solid #999; width: 60%;">
                                 <form id="nvp_baby__1" method="post" action="decompose">
                                   <input type="hidden" value="<%= @nvp_baby__1.join(",") %>" name="patients" />
-                                  Tot. received NVP
+                                  Received NVP
                                 </form>
                               </td>
                               <td style="border: 1px solid #999;">
@@ -697,6 +860,26 @@
                                 </a>
                               </td>
                             </tr>
+
+                            <tr>
+                              <td style="border-top: 0px">
+
+                              </td>
+                              <td style="border-bottom: 1px solid #999; border-top: 0px solid #999;
+                                  border-left: 1px solid #999; width: 60%;">
+                                <form id="no_nvp_baby__1" method="post" action="decompose">
+                                  <input type="hidden" value="<%= @no_nvp_baby__1.join(",") %>" name="patients" />
+                                  None
+                                </form>
+                              </td>
+                              <td style="border: 1px solid #999; border-top: 0px">
+                                <a href="javascript:document.getElementById('no_nvp_baby__1').submit()">
+                                  <%= @no_nvp_baby__1.length %>
+                                </a>
+                              </td>
+                            </tr>
+
+
                             <tr>
                               <td>
                                 &nbsp;

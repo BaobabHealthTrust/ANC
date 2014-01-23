@@ -55,7 +55,7 @@ class ReportsController < ApplicationController
 
 		@pre_eclampsia_2 = report.pre_eclampsia_2
 
-		@ttv__total_previous_doses_1 = report.ttv__total_previous_doses_1
+		@ttv__total_previous_doses_1 = report.ttv__total_previous_doses_2(1)
 
 		@ttv__total_previous_doses_2 = report.ttv__total_previous_doses_2
 
@@ -173,15 +173,17 @@ class ReportsController < ApplicationController
 
 		@week_of_first_visit_1 = report.week_of_first_visit_1
     
-    # raise @week_of_first_visit_1.to_yaml
-
 		@week_of_first_visit_2 = report.week_of_first_visit_2
 
-		@pre_eclampsia_1 = report.pre_eclampsia_1
+    @week_of_first_visit_unknown = @observations_total - (@week_of_first_visit_1 + @week_of_first_visit_2)
 
-		@pre_eclampsia_2 = report.pre_eclampsia_2
+    @pre_eclampsia_1 = report.pre_eclampsia_1
 
-		@ttv__total_previous_doses_1 = report.ttv__total_previous_doses_1
+    @pre_eclampsia_no = @observations_total - @pre_eclampsia_1
+    
+		#@pre_eclampsia_2 = report.pre_eclampsia_2
+
+		@ttv__total_previous_doses_1 = report.ttv__total_previous_doses_2(1)
 
 		@ttv__total_previous_doses_2 = report.ttv__total_previous_doses_2
 
@@ -193,9 +195,15 @@ class ReportsController < ApplicationController
 
 		@fefo__number_of_tablets_given_1 = report.fefo__number_of_tablets_given_1
 
-		@albendazole = report.albendazole
+    @fefo__number_of_tablets_given_2 = report.fefo__number_of_tablets_given_2
 
+		@albendazole = report.albendazole(1)
+    
+    @albendazole_more_than_1 = report.albendazole(">1")
+    @albendazole_none = @observations_total - (@albendazole + @albendazole_more_than_1)
+    
 		@bed_net = report.bed_net
+    @no_bed_net = @observations_total - report.bed_net
 
 		@syphilis_result_pos = report.syphilis_result_pos
 
@@ -219,11 +227,9 @@ class ReportsController < ApplicationController
     @hiv_test_result_unk = (@observations_total - (@hiv_test_result_prev_neg + @hiv_test_result_prev_pos +
           @hiv_test_result_neg + @hiv_test_result_pos).uniq).uniq
 
-    @total_hiv_positive = @hiv_test_result_prev_pos + @hiv_test_result_pos
+    @total_hiv_positive = (@hiv_test_result_prev_pos + @hiv_test_result_pos).delete_if{|p| p.blank?}
   
-    @total_hiv_positive.delete_if{|p| p.blank?}
-    
-		@not_on_art = report.not_on_art
+    @not_on_art = report.not_on_art
     @not_on_art.delete_if{|p| p.blank?}
 
 		@on_art_before = report.on_art_before
@@ -236,8 +242,10 @@ class ReportsController < ApplicationController
     @on_art_28_plus.delete_if{|p| p.blank?}
 
 		@on_cpt__1 = report.on_cpt__1
+    @no_cpt__1 = (@total_hiv_positive - @on_cpt__1)
 
     @nvp_baby__1 = report.nvp_baby__1
+    @no_nvp_baby__1 = (@total_hiv_positive - @nvp_baby__1)
 
     render :layout => false
 	end
@@ -265,7 +273,7 @@ class ReportsController < ApplicationController
     parameters =  params.delete_if{|k, v| k.match(/action|controller/)}.collect{|k, v| k + "=" + v}.join("&")
        
     t1 = Thread.new{
-      Kernel.system "wkhtmltopdf --zoom 0.9 -T 1mm -s A4 http://" +
+      Kernel.system "wkhtmltopdf --zoom 0.8 -T 1mm -s A4 http://" +
         request.env["HTTP_HOST"] + "\"/reports/report" +
         "?#{parameters}&from_print=true" + "\" /tmp/report" + ".pdf \n"
     }
@@ -283,11 +291,11 @@ class ReportsController < ApplicationController
     sleep(3)
     if (File.exists?(file_name))
 
-      Kernel.system "lp -o sides=two-sided-long-edge -o fitplot #{(!current_printer.blank? ? '-d ' + current_printer.to_s : "")} #{file_name}"
+      #Kernel.system "lp -o sides=two-sided-long-edge -o fitplot #{(!current_printer.blank? ? '-d ' + current_printer.to_s : "")} #{file_name}"
 
       t3 = Thread.new{
         sleep(10)
-        Kernel.system "rm #{file_name}"
+       # Kernel.system "rm #{file_name}"
       }
 
     else

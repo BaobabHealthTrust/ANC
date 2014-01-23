@@ -137,7 +137,7 @@ class Reports
   def week_of_first_visit_1
    
     @cases = Encounter.find(:all, :joins => [:observations],
-      :conditions => ["concept_id = ? AND value_numeric <= 12 AND encounter_datetime BETWEEN (?) AND (?)" +
+      :conditions => ["concept_id = ? AND value_numeric < 13 AND encounter_datetime BETWEEN (?) AND (?)" +
           " AND patient_id IN (?)",
         ConceptName.find_by_name("WEEK OF FIRST VISIT").concept_id,
         @start_date, (@startdate.to_date + @preg_range), @cohortpatients]).collect{|e| e.patient_id}.uniq
@@ -149,7 +149,7 @@ class Reports
   def week_of_first_visit_2
    
     @cases = Encounter.find(:all, :joins => [:observations],
-      :conditions => ["concept_id = ? AND value_numeric >= 12 AND encounter_datetime BETWEEN (?) AND (?)" +
+      :conditions => ["concept_id = ? AND value_numeric >= 13 AND encounter_datetime BETWEEN (?) AND (?)" +
           " AND patient_id IN (?)",
         ConceptName.find_by_name("WEEK OF FIRST VISIT").concept_id,
         @startdate, (@startdate.to_date + @preg_range), @cohortpatients]).collect{|e| e.patient_id}.uniq
@@ -197,8 +197,12 @@ class Reports
    
   end
 
-  def ttv__total_previous_doses_2
+  def ttv__total_previous_doses_2(tag = 2)
     patients = {}
+
+    if tag == 1
+      return (@cohortpatients - ttv__total_previous_doses_2(2)).uniq
+    end
     
     Encounter.find(:all, :joins => [:observations],
       :select => ["patient_id, (COALESCE(value_numeric,0)+COALESCE(value_text,0)) form_id"],
@@ -275,12 +279,13 @@ class Reports
 
   def fefo__number_of_tablets_given_2
     
-    @cases = Patient.find_by_sql(["SELECT * FROM patient
-              WHERE patient_id IN (SELECT person_id FROM obs LEFT OUTER JOIN encounter ON encounter.encounter_id = obs.encounter_id
-                      WHERE concept_id = (SELECT concept_id FROM concept_name WHERE name = 'FEFO: NUMBER OF TABLETS GIVEN')
-                      AND (value_coded IN (SELECT concept_id FROM concept_name WHERE name = '>120') OR value_numeric = '>120'
-                      OR value_boolean = '>120' OR value_datetime = '>120' OR value_text = '>120')
-                      AND encounter_datetime >= ? AND encounter_datetime <= ?)", @startdate, (@startdate + @preg_range)])
+    Order.find(:all, :joins => [[:drug_order => :drug], :encounter],
+      :select => ["encounter.patient_id, count(*) encounter_id, drug.name instructions, " +
+          "COALESCE(SUM(DATEDIFF(auto_expire_date, start_date)), 0) orderer"], :group => [:patient_id],
+      :conditions => ["drug.name = ? AND (encounter_datetime >= ? " +
+          "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", "Fefol (1 tablet)",
+        @startdate, (@startdate.to_date + @preg_range), @cohortpatients]).collect{|o|
+      [o.patient_id, o.orderer]}.delete_if{|x,y| y >= 120}.collect{|p, c| p}
     
   end
 
@@ -507,23 +512,31 @@ class Reports
     Order.find(:all, :joins => [[:drug_order => :drug], :encounter],
       :select => ["encounter.patient_id, count(*) encounter_id, drug.name instructions, " +
           "SUM(DATEDIFF(auto_expire_date, start_date)) orderer"], :group => [:patient_id],
-      :conditions => ["drug.name LIKE ? AND (encounter_datetime >= ? " +
-          "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", "NVP%ml%",
+      :conditions => ["(drug.name REGEXP ? OR drug.name REGEXP ?)  AND drug.name REGEXP ? AND (encounter_datetime >= ? " +
+          "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", "NVP", "Neverapine", "ml",
         @startdate, (@startdate.to_date + @preg_range), @cohortpatients]).collect{|o| o.patient_id}
     
   end
 
-  def albendazole
-    
-    Order.find(:all, :joins => [[:drug_order => :drug], :encounter],
+  def albendazole(qty = 1)
+    result = []
+    data =  Order.find(:all, :joins => [[:drug_order => :drug], :encounter],
       :select => ["encounter.patient_id, count(*) encounter_id, drug.name instructions, " +
           "SUM(DATEDIFF(auto_expire_date, start_date)) orderer"], :group => [:patient_id],
       :conditions => ["drug.name REGEXP ? AND (encounter_datetime >= ? " +
           "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)", "Albendazole",
         @startdate, (@startdate.to_date + @preg_range), @cohortpatients]).collect{|o|
       [o.patient_id, o.orderer]
-    }.delete_if{|x,y| y != 1}.collect{|p, c| p}
-    
+    }
+
+    if qty == 1
+      result = data.delete_if{|x,y| y != 1}.collect{|p, c| p}
+    elsif qty == ">1"
+      result = data.delete_if{|x,y| y <= 1}.collect{|p, c| p}
+    elsif qty == "<1"
+      result = data.delete_if{|x,y| y >= 1}.collect{|p, c| p}
+    end
+    result
   end
   
   def bed_net
