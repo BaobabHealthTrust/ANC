@@ -291,11 +291,11 @@ class ReportsController < ApplicationController
     sleep(3)
     if (File.exists?(file_name))
 
-      #Kernel.system "lp -o sides=two-sided-long-edge -o fitplot #{(!current_printer.blank? ? '-d ' + current_printer.to_s : "")} #{file_name}"
+      Kernel.system "lp -o sides=two-sided-long-edge -o fitplot #{(!current_printer.blank? ? '-d ' + current_printer.to_s : "")} #{file_name}"
 
       t3 = Thread.new{
         sleep(10)
-       # Kernel.system "rm #{file_name}"
+        Kernel.system "rm #{file_name}"
       }
 
     else
