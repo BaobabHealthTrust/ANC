@@ -273,7 +273,7 @@ class ReportsController < ApplicationController
     parameters =  params.delete_if{|k, v| k.match(/action|controller/)}.collect{|k, v| k + "=" + v}.join("&")
        
     t1 = Thread.new{
-      Kernel.system "wkhtmltopdf --zoom 0.8 -T 1mm -s A4 http://" +
+      Kernel.system "wkhtmltopdf --zoom 0.85 -T 1mm  -B 0mm -s A4 http://" +
         request.env["HTTP_HOST"] + "\"/reports/report" +
         "?#{parameters}&from_print=true" + "\" /tmp/report" + ".pdf \n"
     }
