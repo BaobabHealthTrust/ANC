@@ -504,17 +504,17 @@
                             </tr>
 
                             <tr>
-                              <td>
+                              <td style="border-top: 0px">
                                 12
                               </td>
-                              <td style="border-top: 1px solid #999; border-left: 1px solid #999;
+                              <td style="border-top: 0px solid #999; border-left: 1px solid #999;
                                   border-bottom: 1px solid #999;">
                                 <form id="fefo__number_of_tablets_given_1" method="post" action="decompose">
                                   <input type="hidden" value="<%= @fefo__number_of_tablets_given_1.join(",") %>" name="patients" />
                                   Tot. received 120+ tabs
                                 </form>
                               </td>
-                              <td style="border: 1px solid #999;">
+                              <td style="border: 1px solid #999; border-top: 0px">
                                 <a href="javascript:document.getElementById('fefo__number_of_tablets_given_1').submit()">
                                   <%= @fefo__number_of_tablets_given_1.length %>
                                 </a>
