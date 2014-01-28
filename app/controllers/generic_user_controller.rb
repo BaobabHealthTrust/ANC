@@ -35,8 +35,8 @@ class GenericUserController < ApplicationController
     valid_roles = CoreService.get_global_property_value("valid_roles") rescue nil
     role_conditions = ["role LIKE (?)", "%#{params[:value]}%"]
     role_conditions = ["role LIKE (?) AND role IN (?)",
-                       "%#{params[:value]}%",
-                       valid_roles.split(',')] if valid_roles
+      "%#{params[:value]}%",
+      valid_roles.split(',')] if valid_roles
     roles = Role.find(:all,:conditions => role_conditions)
     roles = roles.map do |r|
       "<li value='#{r.role}'>#{r.role.gsub('_',' ').capitalize}</li>"
@@ -61,18 +61,18 @@ class GenericUserController < ApplicationController
     render :text => users.join('') and return
   end
 
- def health_centres
-     redirect_to(:controller => "patient", :action => "menu")
-     @health_centres = Location.find(:all,  :order => "name").map{|r|[r.name, r.location_id]}
- end
+  def health_centres
+    redirect_to(:controller => "patient", :action => "menu")
+    @health_centres = Location.find(:all,  :order => "name").map{|r|[r.name, r.location_id]}
+  end
 
- def list_clinicians
- 	@clinician_role = Role.find_by_role("clinician").id
- 	@clinicians = UserRole.find_all_by_role_id(@clinician_role)
- end
+  def list_clinicians
+    @clinician_role = Role.find_by_role("clinician").id
+    @clinicians = UserRole.find_all_by_role_id(@clinician_role)
+  end
 
   def logout
-   #if time is 4 o'oclock then send report on logout.
+    #if time is 4 o'oclock then send report on logout.
     reset_session
     redirect_to(:action => "login")
   end
@@ -94,27 +94,26 @@ class GenericUserController < ApplicationController
   end
 
   # GETs should be safe (see http://www.w3.org/2001/tag/doc/whenToUseGet.html)
-#  verify :method => :post, :only => [ :destroy, :create, :update ],
-        # :redirect_to => { :action => :list }
+  #  verify :method => :post, :only => [ :destroy, :create, :update ],
+  # :redirect_to => { :action => :list }
 
   def voided_list
-      session[:voided_list] = false
+    session[:voided_list] = false
     @user_pages, @users = paginate(:users, :per_page => 50,:conditions =>["voided=1"])
-      render :view => 'list'
+    render :view => 'list'
   end
 
   def list
     session[:voided_list] = true
     @user_pages, @users = paginate(:users, :per_page => 50,:conditions =>["voided=0"])
- end
+  end
 
   def show
     unless params[:id].blank?
-     @user = User.find(params[:id])
+      @user = User.find(params[:id])
     else
-     @user = User.find(:first, :order => 'date_created DESC')
+      @user = User.find(:first, :order => 'date_created DESC')
     end
-    render :layout => 'menu'
   end
 
   def new
@@ -134,39 +133,39 @@ class GenericUserController < ApplicationController
       flash[:notice] = 'Password Mismatch'
       redirect_to :action => 'new'
       return
-    #  flash[:notice] = nil
+      #  flash[:notice] = nil
       @user_first_name = params[:person_name][:given_name]
-#      @user_middle_name = params[:user][:middle_name]
+      #      @user_middle_name = params[:user][:middle_name]
       @user_last_name = params[:person_name][:family_name]
       @user_role = params[:user_role][:role_id]
       @user_admin_role = params[:user_role_admin][:role]
       @user_name = params[:user][:username]
     end
 
-	params[:user][:password] = params[:user][:plain_password]
-	params[:user][:plain_password] = nil
+    params[:user][:password] = params[:user][:plain_password]
+    params[:user][:plain_password] = nil
     person = Person.create()
     person.names.create(params[:person_name])
     params[:user][:user_id] = nil
     @user = RawUser.new(params[:user])
     @user.person_id = person.id
     if @user.save
-     # if params[:user_role_admin][:role] == "Yes"
+      # if params[:user_role_admin][:role] == "Yes"
       #  @roles = Array.new.push params[:user_role][:role_id]
-       # @roles << "superuser"
-       # @roles.each{|role|
-       # user_role=UserRole.new
-       # user_role.role_id = Role.find_by_role(role).role_id
-       # user_role.user_id=@user.user_id
-       # user_role.save
+      # @roles << "superuser"
+      # @roles.each{|role|
+      # user_role=UserRole.new
+      # user_role.role_id = Role.find_by_role(role).role_id
+      # user_role.user_id=@user.user_id
+      # user_role.save
       #}
       #else
-		@user.update_attributes(params[:user])
-        user_role = UserRole.new
-        user_role.role = Role.find_by_role(params[:user_role][:role_id])
-        user_role.user_id = @user.user_id
-        user_role.save
-     # end
+      @user.update_attributes(params[:user])
+      user_role = UserRole.new
+      user_role.role = Role.find_by_role(params[:user_role][:role_id])
+      user_role.user_id = @user.user_id
+      user_role.save
+      # end
       flash[:notice] = 'User was successfully created.'
       redirect_to :action => 'show'
     else
@@ -212,33 +211,33 @@ class GenericUserController < ApplicationController
   end
 
   def destroy
-   unless request.get?
-   @user = RawUser.find(params[:id])
-    if @user.update_attributes(:voided => 1, :void_reason => params[:user][:void_reason],:voided_by => current_user.user_id,:date_voided => Time.now.to_s)
-      flash[:notice]='User has successfully been removed.'
-      redirect_to :action => 'voided_list'
-    else
-      flash[:notice]='User was not successfully removed'
-      redirect_to :action => 'destroy'
+    unless request.get?
+      @user = RawUser.find(params[:id])
+      if @user.update_attributes(:voided => 1, :void_reason => params[:user][:void_reason],:voided_by => current_user.user_id,:date_voided => Time.now.to_s)
+        flash[:notice]='User has successfully been removed.'
+        redirect_to :action => 'voided_list'
+      else
+        flash[:notice]='User was not successfully removed'
+        redirect_to :action => 'destroy'
+      end
     end
-   end
   end
 
   def add_role
-     @user = User.find(params[:id])
-     unless request.get?
-        user_role=UserRole.new
-        user_role.role = Role.find_by_role(params[:user_role][:role_id])
-        user_role.user_id=@user.user_id
-        user_role.save
-        flash[:notice] = "You have successfuly added the role of #{params[:user_role][:role_id]}"
-        redirect_to :action => "show"
-      else
+    @user = User.find(params[:id])
+    unless request.get?
+      user_role=UserRole.new
+      user_role.role = Role.find_by_role(params[:user_role][:role_id])
+      user_role.user_id=@user.user_id
+      user_role.save
+      flash[:notice] = "You have successfuly added the role of #{params[:user_role][:role_id]}"
+      redirect_to :action => "show"
+    else
       user_roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role}
       all_roles = Role.find(:all).collect{|r|r.role}
       @roles = (all_roles - user_roles)
       @show_super_user = true if UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role != "superuser" }
-   end
+    end
   end
 
   def delete_role
@@ -259,10 +258,10 @@ class GenericUserController < ApplicationController
   end
 
   def search_user
-   unless request.get?
-     @user = User.find_by_username(params[:user][:username])
-     redirect_to :action =>"show", :id => @user.id
-   end
+    unless request.get?
+      @user = User.find_by_username(params[:user][:username])
+      redirect_to :action =>"show", :id => @user.id
+    end
   end
 
   def change_password
@@ -274,8 +273,8 @@ class GenericUserController < ApplicationController
         redirect_to :action => 'new'
         return
       else
-		params[:user][:password] = params[:user][:plain_password]
-		params[:user][:plain_password] = nil
+        params[:user][:password] = params[:user][:plain_password]
+        params[:user][:plain_password] = nil
         if @user.update_attributes(params[:user])
           flash[:notice] = "Password successfully changed"
           redirect_to :action => "show",:id => @user.id
@@ -304,14 +303,14 @@ class GenericUserController < ApplicationController
     encounter_privilege_hash = generate_encounter_privilege_map
     @privileges = @privileges.collect do |privilege|
       if !encounter_privilege_hash[privilege.privilege.squish].nil?
-          encounter_privilege_hash[privilege.privilege.squish].humanize
+        encounter_privilege_hash[privilege.privilege.squish].humanize
       else
-          privilege.privilege
+        privilege.privilege
       end
     end
 
-   #.gsub('Hiv','HIV') .gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
-   #.gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
+    #.gsub('Hiv','HIV') .gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
+    #.gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
 
     @encounter_types = EncounterType.find(:all).map{|enc|enc.name.gsub(/.*\//,"").gsub(/\..*/,"").humanize}
     @available_encounter_types = Dir.glob(RAILS_ROOT+"/app/views/encounters/*.rhtml").map{|file|file.gsub(/.*\//,"").gsub(/\..*/,"").humanize}
@@ -327,14 +326,14 @@ class GenericUserController < ApplicationController
 
     @activities = @activities.collect do |activity|
       if !encounter_privilege_hash[activity].nil?
-          encounter_privilege_hash[activity.squish].gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
+        encounter_privilege_hash[activity.squish].gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
       else
-          activity.gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
+        activity.gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
       end
     end
 
     @privileges = @privileges.collect do |privilege|
-        privilege.gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
+      privilege.gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')
     end
     #@privileges += ['Manage prescriptions','Manage appointments', 'Dispensation']
     @privileges.sort!
@@ -346,9 +345,9 @@ class GenericUserController < ApplicationController
 
     params[:user][:activities] = params[:user][:activities].collect do |activity|
       if !privilege_encounter_hash[activity.squish].nil?
-          privilege_encounter_hash[activity.squish]
+        privilege_encounter_hash[activity.squish]
       else
-          activity
+        activity
       end
     end
 
@@ -363,30 +362,30 @@ class GenericUserController < ApplicationController
   end
 
   def generate_encounter_privilege_map
-      encounter_privilege_map = CoreService.get_global_property_value("encounter_privilege_map").to_s rescue ''
-      encounter_privilege_map = encounter_privilege_map.split(",")
-      encounter_privilege_hash = {}
-      encounter_privilege_map.each do |encounter_privilege|
-          encounter_privilege_hash[encounter_privilege.split(":").last.squish] = encounter_privilege.split(":").first.squish
-      end
-      encounter_privilege_hash
+    encounter_privilege_map = CoreService.get_global_property_value("encounter_privilege_map").to_s rescue ''
+    encounter_privilege_map = encounter_privilege_map.split(",")
+    encounter_privilege_hash = {}
+    encounter_privilege_map.each do |encounter_privilege|
+      encounter_privilege_hash[encounter_privilege.split(":").last.squish] = encounter_privilege.split(":").first.squish
+    end
+    encounter_privilege_hash
   end
 
   def generate_privilege_encounter_map
-      encounter_privilege_map = CoreService.get_global_property_value("encounter_privilege_map").to_s rescue ''
-      encounter_privilege_map = encounter_privilege_map.split(",")
-      encounter_privilege_hash = {}
-      encounter_privilege_map.each do |encounter_privilege|
-          encounter_privilege_hash[encounter_privilege.split(":").first.squish.gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')] = encounter_privilege.split(":").last.squish
-      end
-      encounter_privilege_hash
+    encounter_privilege_map = CoreService.get_global_property_value("encounter_privilege_map").to_s rescue ''
+    encounter_privilege_map = encounter_privilege_map.split(",")
+    encounter_privilege_hash = {}
+    encounter_privilege_map.each do |encounter_privilege|
+      encounter_privilege_hash[encounter_privilege.split(":").first.squish.gsub('Hiv','HIV').gsub('Tb','TB').gsub('Art','ART').gsub('hiv','HIV')] = encounter_privilege.split(":").last.squish
+    end
+    encounter_privilege_hash
   end
 
   def properties
     if request.post?
       property = UserProperty.find(:first,
-            :conditions =>["property = ? AND user_id = ?",'preferred.keyboard',
-            current_user.id])
+        :conditions =>["property = ? AND user_id = ?",'preferred.keyboard',
+          current_user.id])
       if property.blank?
         property = UserProperty.new()
         property.user_id = current_user.id
@@ -468,6 +467,6 @@ class GenericUserController < ApplicationController
   end
 
   def users
-  		@users = User.find(:all)
+    @users = User.find(:all)
   end
 end
