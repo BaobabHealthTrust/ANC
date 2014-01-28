@@ -231,7 +231,7 @@ class GenericUserController < ApplicationController
       user_role.user_id=@user.user_id
       user_role.save
       flash[:notice] = "You have successfuly added the role of #{params[:user_role][:role_id]}"
-      redirect_to :action => "show"
+      redirect_to :action => "show", :id => params[:id]
     else
       user_roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role}
       all_roles = Role.find(:all).collect{|r|r.role}
@@ -249,7 +249,7 @@ class GenericUserController < ApplicationController
       user_role =  UserRole.find_by_role_and_user_id(role,@user.user_id)
       user_role.destroy
       flash[:notice] = "You have successfuly removed the role of #{params[:user_role][:role_id]}"
-      redirect_to :action =>"show"
+      redirect_to :action =>"show", :id => params[:id]
     end
   end
 
