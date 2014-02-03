@@ -221,11 +221,14 @@
     :tt_onLoad => 'seen(tstCurrentPage);') %>
 
   <%= text_field_tag "person[race]",  nil, :field_type => 'text',
-    :helpText => "Other Nationality",
+    :helptext => "Specify nationality",
+    :allowFreeText => true,
+    :ajaxURL => "/people/static_nationalities?&search_string=",
+    :tt_onLoad => "$('nextButton').style.display = 'block';",
     :condition => '($("person_citizenship").value != "Malawian")'%>
   <p><label for="region_region_name">Region of Origin</label></br>
 
-    <%= text_field "region" , 'region_name', :xhelpText => 'Region',:tt_requireNextClick => false,
+    <%= text_field "region" , 'region_name', :helpText => 'Region',:tt_requireNextClick => false,
       :condition => '($("person_citizenship").value == "Malawian")',
       :ajaxURL => '/people/region/Region?field=role&value=', :tt_onLoad => "$('nextButton').style.display = 'none';" if ask_home_village %></p>
 

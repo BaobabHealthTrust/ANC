@@ -446,7 +446,7 @@ module DDEService
     @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
 
     uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people/update_demographics"
-    received_params = RestClient.post(uri,person_params)
+    received_params = RestClient.post(uri,person_params) rescue {}
   end
   
   def self.create_patient_from_dde(params, dont_recreate_local=false)

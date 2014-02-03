@@ -212,9 +212,12 @@
       :helpText =>"Nationality",
       :field_type => 'text') %>
 
-    <%= text_field_tag "person[attributes][race]",  nil, :field_type => 'text',
-      :helpText => "Other Nationality",
-      :condition => '($("person_attributes_citizenship").value != "Malawian")'%>
+    <%= text_field_tag "person[attributes][race]", nil,
+      {:id => "race",
+      :helptext => "Specify nationality",
+      :allowFreeText => true,
+      :ajaxURL => "/people/static_nationalities?&search_string=",
+      :condition => '($("person_attributes_citizenship").value != "Malawian")' } %>
 
   <%when 'occupation'%>
     <%= select_tag "person[attributes][occupation]", options_for_select([" ", "Housewife", "Farmer", "Police", "Soldier", "Business", "Teacher", "Student", "Healthcare Worker"].sort.concat(["Other"]), params[:occupation]), {:helpText => 'Occupation'}%>

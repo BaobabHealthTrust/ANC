@@ -307,6 +307,20 @@ class PeopleController < GenericPeopleController
   end
 
 
+  def static_nationalities
+    search_string = (params[:search_string] || "").upcase
+
+    nationalities = []
+
+    File.open(RAILS_ROOT + "/public/data/nationalities.txt", "r").each{ |nat|
+      nationalities << nat if nat.upcase.strip.match(search_string)
+    }
+
+    render :text => "<li></li><li " + nationalities.map{|nationality| "value=\"#{nationality}\">#{nationality}" }.join("</li><li ") + "</li>"
+
+  end
+
+
   protected
 	def cul_age(birthdate , birthdate_estimated , date_created = Date.today, today = Date.today)                                      
                                                                                   
