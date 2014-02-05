@@ -1,117 +1,306 @@
 <style>
-  body {
-    -moz-user-select:none;
+  div {
+    -moz-user-select: none;
   }
 
-  .charts {
-    padding-left:20px;
-    -moz-user-select:none;
+  .main-container {
+    border-style: solid;
+    border-width: 0px 0px 0px 0px;
+    border-width-color: black;
+    height: 626px;
+    margin: 5px;
   }
 
-  #header {
-    padding-left:60px;
-    -moz-user-select:none;
+
+  .left-container {
+    width: 20%;
+    padding: 5px 0px 5px 0px;
+    float: left;
+    overflow: auto;
+    height: 626px;
   }
 
-  th {
-    text-align:left;
-    -moz-user-select:none;
-  }
-
-  #cancelhButton {
-    float:left;
-    -moz-user-select:none;
-  }
-
-  .messageBar {
-    background-color: tomato;
-    font-size: 2em;
-    left: 270px;
-    position: absolute;
+  .links {
+    padding: 0px 0px 5px 0px;
     text-align: center;
-    top: 10px;
-    width: 450px;
-    z-index: 999;
-    display:none;
-    height:210px;
-    -moz-user-select:none;
+    border-style: solid;
+    border-width: 1px;
+    height: 70px;
   }
 
-  a {
-    background-color: grey;
+  .links-heading {
+    text-align: left;
+    font-size: 15px;
+    color: white;
+    background-color: teal;
+    padding-left: 5px;
+  }
+
+  .links-btn-img {
+    float: right;
+    position: relative;
+    top: -48px;
+    width: 20%;
+    padding-right: 5px;
+  }
+
+  .links-btn-date {
+    width: 60%;
+    position: relative;
+    top: 8px;
+    padding-left: 5px;
+  }
+
+  .right-container {
+    width: 78%;
+    padding: 5px;
+    float: right;
+    background-color: lightgrey;
+    height: 625px;
+  }
+
+  .demographics {
+  }
+
+  .data {
+    -moz-border-radius: 15px;
+    border-radius: 5px;
+    width: 98%;
+    border-style: solid;
+    border-width: 1px;
+    padding-left: 5px;
+    background-color: white;
+  }
+
+  .data-main {
+    height: 460px;
+    overflow: auto;
+    padding: 5px 0px 5px 0px;
+    border-style: solid;
+    border-width: 1px 0px 1px 0px;
+  }
+
+  .main-caption {
+    text-align: center;
+    background-color: black;
+    color: white;
+  }
+
+  .links-btn a {
+    color: blue;
+    text-decoration: none;
+  }
+
+  .time {
+    float: right;
+    padding-right: 15px;
+  }
+
+  .gender {
+    position: relative;
+    top: 4px;
+  }
+
+  .btn-date {
+    background-color: #669999;
     border-bottom: 1px outset black;
+    border-radius: 7px 7px 7px 7px;
     border-style: outset;
     border-top: 1px outset black;
     color: white;
     display: block;
-    padding: 0px 0px 0px 0px;
+    padding: 10px 16px 10px 10px;
     text-align: center;
     text-decoration: none;
-    width: 300px;
-    -moz-user-select:none;
+    height: 15px;
+    width: 93px;
+  }
+  .buttonDiv {
+    position: absolute;
+    background-color: #333333;
+    display: block;
+    height: 82px;
+    margin: 0px;
+    width: 100%;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+  }
+
+  #finishButton{
+    width: 170px;
+  }
+  #cancelButton{
+    width: 170px;
+    float: left;
   }
 </style>
 
+<script>
+  tt_cancel_destination = "/clinic";
 
-<%= javascript_include_tag "prototype" %>
+  function changeAttributes(){
+    finishButton = document.getElementById("finishButton");
+    finishButton.innerHTML = "<span>Continue</span>";
+    tt_cancel_destination="<%= @next_destination %>"
 
-<body onLoad="showCategory('Confirm Pregnancy')">
+    btnDIV = document.getElementById('buttons');
+   
+  }
 
-  <div id ='header'>
+</script>
 
-    <h1><%= @patient.person.name.titleize %>&nbsp;(<%= @patient.person.gender%>)</h1>
-    <table>
-      <tr>
-        <th>Age:</th><td>   <%= @patient.person.age %> yrs</td>
-      </tr>
-      <tr>
-        <th>National ID:</th><td>   <%= @patient.national_id %></td>
-      </tr>
+<body onload = "setTimeout('changeAttributes()',500);">
 
-    </table>
-
+  <div class="main-caption" id = "caption">
+    <%=@encounter_dates.first.strftime('%A %d %B %Y') rescue nil%>
   </div>
 
-  <hr />
-  <div>
+  <div class="main-container">
 
-    <% if @data.blank?%>
-      <div style="padding-top: 10%; text-align: center; font-size: 25px; font-weight: bold;">
-        <div>Patient has no previous ANC visits</div>
-      </div>
-    <%else%>
-
-      <table  cellspacing= "20" style="padding-top: 5%; font-size: 18px; padding-left: 30%;">
-        <tr>
-          <th> DATE OF LAST MENSTRUAL PERIOD  </th><td>  &nbsp&nbsp : &nbsp&nbsp&nbsp&nbsp<%= @data["LMP"] %></td>
-        </tr>
-        <tr>
-          <th>FUNDUS</th><td>  &nbsp&nbsp :   &nbsp&nbsp&nbsp&nbsp <%= (@data["FUNDUS"] || "?") rescue "?" %> Weeks</td>
-        </tr>
-        <tr>
-          <th>ANC VISITS IN PREGNANCY </th><td> &nbsp&nbsp :    &nbsp&nbsp&nbsp&nbsp <%= @data["ANC VISITS"].max rescue "?" %></td>
-        </tr>
-
-      </table>
-    <%end%>
-
-    <div id = "nav" style="z-index:11;bottom:0px; height: 82px; width: 100%; left: 0px;
-         right: -66px; position: absolute; background-color: #333333; padding: 0px;">
-
-      <button onclick="window.location = '/clinic';" class="button navButton red"
-              id="cancelButton" style="position: absolute; z-index: 100; margin-top: 10px; width: 130px;"><span>Cancel</span>
-      </button>
-
-      <button onclick="window.location = '/patients/verify_route?patient_id=<%= @patient.id %>'" class="button navButton green"
-              id="nextButton" style="margin-top: 10px; width:  150px; margin-right: 20px;" ><span>Continue</span>
-      </button>
-
-      <%if @data.present?%>
-        <button onclick="window.location = '<%= params[:url] %>';" class="button navButton blue"
-                id="backButton" style="margin-top: 10px;" ><span>New pregnancy</span>
-        </button>
+    <div class="left-container">
+      <%(@encounter_dates || []).each do |date|%>
+        <div class='links'>
+          <div class='links-heading'>
+            <%=date.strftime('%A')%>
+          </div>
+          <div class='links-btn'>
+            <div class='links-btn-date'>
+              <a href="javascript:showHistory('<%=date%>','<%=date.strftime('%A %d %B %Y')%>')"><span class='btn-date'><%=date.strftime('%d  %b %Y')%></span></a>&nbsp;
+            </div>
+            <div class='links-btn-img'>
+              <a href="javascript:showHistory('<%=date%>','<%=date.strftime('%A %d %B %Y')%>')"><%= image_tag("forward.png", :class => "arrows") %></a>
+            </div></a>
+          </div>
+        </div><br />
       <%end%>
+
+
+      <%if @encounter_dates.blank?%>
+        <div class="data" style="width: 189px;">
+          <%unless @show_history %>
+            <b>Maternity<br /><%=Location.current_location.name%> ....</b>
+          <%else%>
+            <b>Sorry</b><br />
+            There are no encounters yet for this patient ....
+          <%end%>
+        </div><br />
+      <%end%>
+
 
     </div>
 
+    <div class="right-container">
+      <table style="width: 100%">
+        <tr>
+          <td>
+            <div class="demographics data">
+              <b>Name:&nbsp;</b><%=@person.name%>&nbsp;
+              <%= image_tag("#{@person.gender.match(/f/i)? 'female' : 'male'}.gif", :class => 'gender') %><br />
+              <b>Birthdate:</b>&nbsp;<%=@person.birthdate.to_date.strftime("%d %b, %Y")%>&nbsp;
+              <b>Age:</b>&nbsp;<%=@person.age(@session_date)%><br />
+              <b>National ID:</b>&nbsp;<%=@person.patient.national_id%><br />
+              <b>Address</b>&nbsp;<%=@person.address%><br /><hr />
+
+            </div><p />
+          </td>
+          <td>
+            <div class="demographics data" style="min-width: 25%">
+              <span style="padding-left: 100px; text-decoration: underline; color: #669999; font-weight: bold; font-size: 20px">Current Pregnancy Details</span><br />
+              <b>Date of Last Menstrual period:&nbsp;</b><%= (@data["LMP"] || "?") %>&nbsp; <br />
+              <b>Fundus by LMP:</b>&nbsp;<%= (@data["FUNDUS"] || "?")%>&nbsp;<br />
+              <b>ANC Visits:</b>&nbsp;<%= (@data["ANC VISITS"].max rescue "?") %><br />
+              <hr />
+            </div><p />
+
+          </td>
+        </tr>
+      </table>
+
+      <div class="data-main" id="records">
+
+        <%@encounters.each do |name,values|%>
+
+          <div class="data">
+            <b><%=name%><span class='time'><%=values[:time]%></span></b><br />
+            <%values[:data].each do |value|%>
+
+              <%=  value%><br />
+
+            <%end%>
+          </div><br />
+
+        <%end%>
+
+        <%if @encounters.blank?%>
+          <div class="data">
+            <b>Demographics ....</b><br />
+            <b>Age in months:</b>&nbsp;<%=@patient_bean.age_in_months(@session_date)%><br />
+            <b>Home district:&nbsp;</b><%=@patient_bean.home_district%><br />
+            <b>Traditional authority:</b>&nbsp;<%=@patient_bean.traditional_authority%><br />
+            <b>Cell phone number:&nbsp;</b><%=@patient_bean.cell_phone_number%><br />
+            <b>Home phone number:&nbsp;</b><%=@patient_bean.home_phone_number%><br />
+            <b>Office phone number:&nbsp;</b><%=@patient_bean.office_phone_number%><br />
+            <b>Occupation:&nbsp;</b><%=@patient_bean.occupation%><br />
+          </div>
+        <%end%>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div id="footer" class="buttonDiv">
+    <!--div id="buttons" class="buttonDiv"-->
+    <button onclick="window.location = '/clinic';" class="button navButton red"
+            id="cancelButton" style="position: absolute; z-index: 100; margin-top: 10px; width: 130px;"><span>Cancel</span>
+    </button>
+
+    <button onclick="window.location = '/patients/verify_route?patient_id=<%= @person.patient.id %>'" class="button navButton green"
+            id="nextButton" style="margin-top: 10px; width:  150px; margin-right: 20px;" ><span>Continue</span>
+    </button>
+
+    <%if @data.present?%>
+      <button onclick="window.location = '<%= params[:url] %>';" class="button navButton blue"
+              id="backButton" style="margin-top: 10px;" ><span>New pregnancy</span>
+      </button>
+    <%end%>
+  </div>
+
 </body>
+
+<script>
+
+  var patientID = <%=@person.patient.patient_id%>;
+  var html = '';
+
+  function showHistory(encounterDate,displayDate) {
+    if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+      xmlhttp=new XMLHttpRequest();
+    }else{// code for IE6, IE5
+      xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+
+    xmlhttp.onreadystatechange=function() {
+      if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+        var results = xmlhttp.responseText;
+        if(results) {
+          document.getElementById('records').innerHTML = results;
+          document.getElementById('caption').innerHTML = displayDate;
+        }
+      }
+    }
+
+    params = patientID + "&date=" + encounterDate;
+    xmlhttp.open("GET","/patients/pdash_summary?patient_id=" + params  , true);
+    xmlhttp.send();
+  }
+
+
+</script>
+
+
+
+
+
