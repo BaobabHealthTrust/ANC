@@ -232,16 +232,13 @@
 
         <%end%>
 
-        <%if @encounters.blank?%>
+        <%if !@encounters.blank?%>
           <div class="data">
             <b>Demographics ....</b><br />
-            <b>Age in months:</b>&nbsp;<%=@patient_bean.age_in_months(@session_date)%><br />
-            <b>Home district:&nbsp;</b><%=@patient_bean.home_district%><br />
-            <b>Traditional authority:</b>&nbsp;<%=@patient_bean.traditional_authority%><br />
-            <b>Cell phone number:&nbsp;</b><%=@patient_bean.cell_phone_number%><br />
-            <b>Home phone number:&nbsp;</b><%=@patient_bean.home_phone_number%><br />
-            <b>Office phone number:&nbsp;</b><%=@patient_bean.office_phone_number%><br />
-            <b>Occupation:&nbsp;</b><%=@patient_bean.occupation%><br />
+            <b>Age in months:</b>&nbsp;<%=@anc_patient.age_in_months(@session_date)%><br />
+            <b>Home district:&nbsp;</b><%=@anc_patient.home_district%><br />
+            <b>Traditional authority:</b>&nbsp;<%=@anc_patient.home_ta%><br />           
+            <b>Occupation:&nbsp;</b><%=@anc_patient.get_attribute("Occupation")%><br />
           </div>
         <%end%>
 
