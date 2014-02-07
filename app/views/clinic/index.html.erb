@@ -20,7 +20,7 @@
       </option>
     <% end %>
 
-      <option value="/clinic/user_activities/?user_id=<%= current_user.user_id %>" >My Preferences</option>
+    <option value="/clinic/user_activities/?user_id=<%= current_user.user_id %>" >My Preferences</option>
   </select>
 
   <div id="facility"><%= @facility rescue "" %></div>
@@ -31,11 +31,11 @@
 
   <select id="links">
     <option value='/logout' link='/logout'>Logout</option>
-    <option value='/people/search' link='/people/search' ttSize="290px">Find / Register Patient</option>
+    <option value='/people/search?gender=Female' link='/people/search' ttSize="290px">Find / Register Patient</option>
     <option value='<%= ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d") != 
           Date.today.strftime("%Y-%m-%d")) ?
                 "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="100px">
-              <%= ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d") != 
+              <%= ((session[:datetime].to_date.strftime("%Y-%m-%d") rescue Date.today.strftime("%Y-%m-%d") !=
             Date.today.strftime("%Y-%m-%d")) ? "Reset Date" : "Set Date") %></option>
   </select>
 

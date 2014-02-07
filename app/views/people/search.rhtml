@@ -202,7 +202,7 @@ end -%>
   }
 
   function newSearch() {
-    document.location = "/people/search?relation=<%=h params[:relation] -%>"
+    document.location = "/people/search?gender=<%= params[:gender] %>&relation=<%=h params[:relation] -%>"
   }
 
   function setAttributes() {
@@ -322,6 +322,33 @@ end -%>
     //tstDualViewOptions = people;
   }
 
+  function selectGender(){
+    if ("<%=  params[:gender]%>"){
+      var gender = "<%=  params[:gender]%>"
+      var list = document.getElementsByTagName("li")
+      var clickNode = null;
+
+      for (var i = 0; i < list.length; i ++){
+        if (list[i].innerHTML.toUpperCase().trim().charAt(0) == gender.toUpperCase().trim().charAt(0) && gender.length > 0){
+          clickNode = list[i]
+        }
+      }
+
+      try{
+
+        if (gender.match(/F/i)){
+          $("touchscreenInput" + tstCurrentPage).value = "Female";
+          clickNode.onclick.apply(clickNode);
+        }else if (gender.match(/M/i)){
+          $("touchscreenInput" + tstCurrentPage).value = "Male";
+          clickNode.onclick.apply(clickNode);
+        }
+        $("nextButton").onmousedown.apply($("nextButton"));
+      }catch(ex){}
+    }
+
+  }
+
 </script>
 <body onload = "setTimeout('setAttributes();', 300);">
   <% if (params[:gender].blank? || params[:given_name].blank? || params[:family_name].blank?) && (params[:identifier].blank?) %>
@@ -329,7 +356,7 @@ end -%>
     <% form_tag "search", :method => :get do %>
       <%= text_field_tag :given_name, params[:given_name], {:field_type => 'alpha', :helpText => 'First name', :ajaxURL => '/person_names/given_names?search_string=', :allowFreeText => true }%>
       <%= text_field_tag :family_name, params[:family_name], {:field_type => 'alpha', :helpText => 'Last name', :ajaxURL => '/person_names/family_names?search_string=', :allowFreeText => true }%>
-      Gender: <%= select_tag :gender, options_for_select({"" => "", "Male" => "M", "Female" => "F"}), {:helpText => "Gender"} %>
+      Gender: <%= select_tag :gender, options_for_select({"" => "", "Male" => "M", "Female" => "F"}), {:helpText => "Gender", :value => "#{params[:gender]}", :tt_onLoad => "selectGender()"} %>
       <%= hidden_field_tag :create_patient, params[:create_patient] %>
       <%= hidden_field_tag :relation, params[:relation] %>
       <%= submit_tag "Find person" %>
