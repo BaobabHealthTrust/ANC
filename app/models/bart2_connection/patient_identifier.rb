@@ -8,6 +8,7 @@ class Bart2Connection::PatientIdentifier < ActiveRecord::Base
   belongs_to :patient, :class_name => "Bart2Connection::Patient", :foreign_key => :patient_id, :conditions => {:voided => 0}
 
   def self.search_by_identifier(identifier)
+    
     people = self.find_all_by_identifier(identifier).map{|id|
       id.patient.person
     } unless identifier.blank? rescue nil
@@ -23,7 +24,39 @@ class Bart2Connection::PatientIdentifier < ActiveRecord::Base
       uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
       uri += "?value=#{identifier}"
       p = JSON.parse(RestClient.get(uri)).first rescue nil
+      
+      national_id = p['person']["value"] rescue nil
+      old_national_id = (p["person"]["data"]["patient"]["identifiers"]["old_identification_number"] || p["person"]["old_identification_number"]) rescue nil
 
+      if !old_national_id.blank? and (old_national_id != national_id)
+        art_npid = self.find_all_by_identifier_and_identifier_type(old_national_id,
+          PatientIdentifierType.find_by_name("National id").id)
+
+        if !art_npid.blank?
+          patient = art_npid.first.patient
+          
+          patient.patient_identifiers.create(
+            :identifier_type => PatientIdentifierType.find_by_name("National id").id,
+            :identifier => national_id
+          )
+
+          patient.patient_identifiers.create(
+            :identifier_type => PatientIdentifierType.find_by_name("Old Identification Number").id,
+            :identifier => old_national_id
+          )
+          
+          art_npid.each do |npid|
+            npid.voided = true
+            npid.voided_by = 1
+            npid.void_reason = "Given new national ID: #{national_id}"
+            npid.date_voided =  Time.now()
+            npid.save
+          end
+
+          return art_npid.first.patient.person
+        end        
+      end
+      
       return [] if p.blank?
 
       birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
@@ -147,6 +180,11 @@ class Bart2Connection::PatientIdentifier < ActiveRecord::Base
       person.birthdate = Date.new(year.to_i,month_i,day.to_i)
       person.birthdate_estimated = 0
     end
+  end
+
+  def self.set_identifier(patient, identifier, value)
+    self.create(:patient_id => patient.id, :identifier => value,
+      :identifier_type => (Bart2Connection::PatientIdentifierType.find_by_name(identifier).id))
   end
 
 end
