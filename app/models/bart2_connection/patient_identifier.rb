@@ -27,22 +27,24 @@ class Bart2Connection::PatientIdentifier < ActiveRecord::Base
       
       national_id = p['person']["value"] rescue nil
       old_national_id = (p["person"]["data"]["patient"]["identifiers"]["old_identification_number"] || p["person"]["old_identification_number"]) rescue nil
-
+      
       if !old_national_id.blank? and (old_national_id != national_id)
         art_npid = self.find_all_by_identifier_and_identifier_type(old_national_id,
           PatientIdentifierType.find_by_name("National id").id)
-
+ 
         if !art_npid.blank?
           patient = art_npid.first.patient
-          
+                    
           patient.patient_identifiers.create(
-            :identifier_type => PatientIdentifierType.find_by_name("National id").id,
-            :identifier => national_id
+            :identifier_type => PatientIdentifierType.find_by_name("Old Identification Number").id,
+            :identifier => old_national_id,
+            :uuid => self.connection.select_one("SELECT UUID() as uuid")["uuid"]
           )
 
           patient.patient_identifiers.create(
-            :identifier_type => PatientIdentifierType.find_by_name("Old Identification Number").id,
-            :identifier => old_national_id
+            :identifier_type => PatientIdentifierType.find_by_name("National id").id,
+            :identifier => national_id,
+            :uuid => self.connection.select_one("SELECT UUID() as uuid")["uuid"]
           )
           
           art_npid.each do |npid|

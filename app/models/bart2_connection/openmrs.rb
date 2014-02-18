@@ -67,7 +67,7 @@ module Bart2Connection::Openmrs
       self.date_created = Time.now if self.attributes.has_key?("date_created")
     end
 
-    self.uuid = ActiveRecord::Base.connection.select_one("SELECT UUID() as uuid")['uuid'] if self.attributes.has_key?("uuid")
+    self.uuid = ActiveRecord::Base.connection.select_one("SELECT UUID() as uuid")['uuid'] if self.attributes.has_key?("uuid") and self.uuid.blank?
   end
   
   # Override this
