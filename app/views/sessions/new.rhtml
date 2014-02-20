@@ -21,12 +21,12 @@
 
     <label for="login">Username</label>
     <%= text_field_tag(:login, nil, :helpText => "Enter user name", 
-        :textCase => "lower", :field_type => "password", 
+        :textCase => "lower", :field_type => "normal", 
         :tt_onLoad => "inform(); barcodeId = 'touchscreenInput0';") %><br>
 
     <label for="password">Password</label>
     <%= password_field_tag(:password, nil, :helpText => "Enter password", 
-        :textCase => "lower", :field_type => "password",
+        :textCase => "lower", :field_type => "normal",
         :tt_onLoad => "inform(); barcodeId = 'touchscreenInput1';") %><br>
 
     <%= submit_tag value="Submit"%>
