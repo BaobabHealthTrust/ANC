@@ -4,17 +4,20 @@ class Reports
 
 	# Initialize class
   def initialize(start_date, end_date, start_age, end_age, type, today=Date.today)
-   
+
+    @today = end_date
+    @type = type
+    @type = "cohort" if @type.blank?
+    start_date = (@type == 'cohort') ? (start_date.to_date - 6.months) : start_date
+    end_date = (@type == 'cohort') ? (end_date.to_date - 6.months) : end_date
     @start_date = "#{start_date} 00:00:00"
     @end_date = "#{end_date} 23:59:59"
     @start_age = start_age
-    @end_age = end_age
-    @type = type
-    @today = today
-    @type = "cohort" if @type.blank?
-     
+    @end_age = end_age    
+      
     @enddate = @end_date
     @startdate = @start_date
+    
     @preg_range = (@type == "cohort") ? 6.months : ((end_date.to_time - start_date.to_time).round/(3600*24)).days
 
     if @type == "cohort"
