@@ -5,7 +5,7 @@ class Reports
 	# Initialize class
   def initialize(start_date, end_date, start_age, end_age, type, today=Date.today)
 
-    @today = end_date
+    @today = end_date.to_date
     @type = type
     @type = "cohort" if @type.blank?
     start_date = (@type == 'cohort') ? (start_date.to_date - 6.months) : start_date
