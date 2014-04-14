@@ -65,22 +65,29 @@ class ClinicController < GenericClinicController
     
     Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
       :select => ["encounter.creator, encounter_datetime AS date, MAX(value_numeric) form_id"],
-      :conditions => ["encounter_type = ? AND concept_id = ? AND encounter_datetime BETWEEN (?) AND (?) AND encounter.voided = 0",
+      :conditions => ["encounter_type = ? AND concept_id = ? AND (DATE(encounter_datetime) BETWEEN (?) AND (?))",
         EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
-        "#{Date.today.strftime('%Y-01-01')} 00:00:00", "#{Date.today.strftime('%Y-12-31')} 23:59:59"]).each do |data|
- 
+        Date.today, Date.today]).each do |data|
+
       cat = data.form_id.to_i
       cat = cat > 4 ? ">5" : cat.to_s
       
-      if data.date.to_date == Date.today
-        
-        if data.creator.to_i == current_user.user_id.to_i
-          @me["#{cat}"] += 1
-        end
-        @today["#{cat}"] += 1
+      if data.creator.to_i == current_user.user_id.to_i
+        @me["#{cat}"] += 1
       end
-      
+      @today["#{cat}"] += 1      
+    end
+
+    Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
+      :select => ["encounter.creator, encounter_datetime AS date, MAX(value_numeric) form_id"],
+      :conditions => ["encounter_type = ? AND concept_id = ? AND (DATE(encounter_datetime) BETWEEN (?) AND (?))",
+        EncounterType.find_by_name("ANC VISIT TYPE").id,
+        ConceptName.find_by_name("Reason for visit").concept_id,
+        Date.today.beginning_of_year, Date.today.end_of_year]).each do |data|
+
+      cat = data.form_id.to_i
+      cat = cat > 4 ? ">5" : cat.to_s
       @year["#{cat}"] += 1
     end
   

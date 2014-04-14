@@ -36,6 +36,13 @@ class Reports
            
     end
     
+    @anc_visits = Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
+      :select => ["patient_id, MAX(value_numeric) form_id"],
+      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND DATE(encounter_datetime) BETWEEN (?) AND (?)",
+        EncounterType.find_by_name("ANC VISIT TYPE").id,
+        ConceptName.find_by_name("Reason for visit").concept_id,
+        @cohortpatients, @startdate.to_date, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}
+    
     @bart_patients = on_art_in_bart
     
     @on_cpt = @bart_patients['on_cpt']
@@ -73,10 +80,10 @@ class Reports
   end
   
   def observations_total
-    
+   
     Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
       :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
+      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND DATE(encounter_datetime) BETWEEN (?) AND (?)",
         EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
         @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e|
@@ -87,59 +94,29 @@ class Reports
   
   def observations_1
     
-    Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
-      :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
-        EncounterType.find_by_name("ANC VISIT TYPE").id,
-        ConceptName.find_by_name("Reason for visit").concept_id,
-        @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y != 1}.collect{|x, y| x}.uniq
-    
+    @anc_visits.reject{|x, y| y != 1}.collect{|x, y| x}.uniq
   end
 
   def observations_2
     
-    Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
-      :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
-        EncounterType.find_by_name("ANC VISIT TYPE").id,
-        ConceptName.find_by_name("Reason for visit").concept_id,
-        @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y != 2}.collect{|x, y| x}.uniq
-    
+    @anc_visits.reject{|x, y| y != 2}.collect{|x, y| x}.uniq
   end
 
   def observations_3
     
-    Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
-      :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
-        EncounterType.find_by_name("ANC VISIT TYPE").id,
-        ConceptName.find_by_name("Reason for visit").concept_id,
-        @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y != 3}.collect{|x, y| x}.uniq
-    
+    @anc_visits.reject{|x, y| y != 3}.collect{|x, y| x}.uniq
   end
 
 
   def observations_4
     
-    Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
-      :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)" ,
-        EncounterType.find_by_name("ANC VISIT TYPE").id,
-        ConceptName.find_by_name("Reason for visit").concept_id,
-        @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y != 4}.collect{|x, y| x}.uniq
-    
+    @anc_visits.reject{|x, y| y != 4}.collect{|x, y| x}.uniq
   end
 
 
   def observations_5
     
-    Encounter.find(:all, :group => ["person_id"], :joins => [:observations],
-      :select => ["patient_id, MAX(value_numeric) form_id"],
-      :conditions => ["encounter_type = ? AND concept_id = ? AND patient_id IN (?) AND encounter_datetime BETWEEN (?) AND (?)",
-        EncounterType.find_by_name("ANC VISIT TYPE").id,
-        ConceptName.find_by_name("Reason for visit").concept_id,
-        @cohortpatients, @startdate, (@startdate.to_date + @preg_range)]).collect{|e| [e.patient_id, e.form_id]}.delete_if{|x, y| y < 5}.collect{|x, y| x}.uniq
-    
+    @anc_visits.reject{|x, y| y < 5}.collect{|x, y| x}.uniq
   end
 
 
