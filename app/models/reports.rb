@@ -489,7 +489,7 @@ class Reports
   end
 
   def on_cpt__1
-    ids = @on_cpt.split(",").collect{|id| PatientIdentifier.find_by_identifier(id).patient_id}.uniq rescue []
+    ids = @on_cpt.split(",").collect{|id| PatientIdentifier.find_by_identifier(id.gsub(/\-|\s+/, "")).patient_id}.uniq rescue []
     return ids
   end
 
