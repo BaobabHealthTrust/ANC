@@ -85,7 +85,7 @@ class ClinicController < GenericClinicController
       :conditions => ["encounter_type = ? AND concept_id = ? AND (DATE(encounter_datetime) BETWEEN (?) AND (?))",
         EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
-        session_date.today.beginning_of_year, session_date.today.end_of_year]).each do |data|
+        session_date.beginning_of_year, session_date.end_of_year]).each do |data|
 
       cat = data.form_id.to_i
       cat = cat > 4 ? ">5" : cat.to_s
