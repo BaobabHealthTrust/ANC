@@ -57,7 +57,8 @@ class ClinicController < GenericClinicController
 
   def overview
     @types = ["1", "2", "3", "4", ">5"]
-
+    session_date = session[:datetime].to_date rescue Date.today
+    
     @me = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, ">5" => 0}
     @today = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, ">5" => 0}
     @year = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, ">5" => 0}
@@ -68,7 +69,7 @@ class ClinicController < GenericClinicController
       :conditions => ["encounter_type = ? AND concept_id = ? AND (DATE(encounter_datetime) BETWEEN (?) AND (?))",
         EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
-        Date.today, Date.today]).each do |data|
+        session_date, session_date]).each do |data|
 
       cat = data.form_id.to_i
       cat = cat > 4 ? ">5" : cat.to_s
@@ -84,7 +85,7 @@ class ClinicController < GenericClinicController
       :conditions => ["encounter_type = ? AND concept_id = ? AND (DATE(encounter_datetime) BETWEEN (?) AND (?))",
         EncounterType.find_by_name("ANC VISIT TYPE").id,
         ConceptName.find_by_name("Reason for visit").concept_id,
-        Date.today.beginning_of_year, Date.today.end_of_year]).each do |data|
+        session_date.today.beginning_of_year, session_date.today.end_of_year]).each do |data|
 
       cat = data.form_id.to_i
       cat = cat > 4 ? ">5" : cat.to_s
