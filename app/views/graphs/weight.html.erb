@@ -80,53 +80,58 @@
 <script type="text/javascript">
   function graph() {
     var patient_data = [
-      <% @min = Time.now
-         @max = Time.now
-         @obs = @patient.person.observations.find_by_concept_name("WEIGHT (KG)")
-         
-		@minWeight = 0
-		@maxWeight = 0
-		if @currentWeight.to_f != 0.to_f
-		   @maxWeight = @currentWeight
-		end
-         @obs.sort_by{|obs| obs.obs_datetime}.each do |obs|
-			if (obs.value_numeric || obs.value_text).to_f <= @minWeight.to_f
-				@minWeight = (obs.value_numeric || obs.value_text)
-			end
-			if (obs.value_numeric || obs.value_text).to_f >= @maxWeight.to_f
-				@maxWeight =obs.value_numeric
-			end
-           @min = obs.obs_datetime if obs.obs_datetime < @min %>
+<%
+d = (session[:datetime].to_date rescue Date.today)
+t = Time.now
+session_date = DateTime.new(d.year, d.month, d.day, t.hour, t.min, t.sec)
+
+@min = session_date
+@max = session_date
+@obs = @patient.person.observations.find_by_concept_name("WEIGHT (KG)")
+
+@minWeight = 0
+@maxWeight = 0
+if @currentWeight.to_f != 0.to_f
+  @maxWeight = @currentWeight
+end
+@obs.sort_by{|obs| obs.obs_datetime}.each do |obs|
+  if (obs.value_numeric || obs.value_text).to_f <= @minWeight.to_f
+    @minWeight = (obs.value_numeric || obs.value_text)
+  end
+  if (obs.value_numeric || obs.value_text).to_f >= @maxWeight.to_f
+    @maxWeight =obs.value_numeric
+  end
+  @min = obs.obs_datetime if obs.obs_datetime < @min %>
         [<%= obs.obs_datetime.to_f -%>, <%= (obs.value_numeric || obs.value_text) -%>],<% end %>
-        <%if @currentWeight.to_f != 0.to_f%>
-        [<%=Time.now.to_f.round(0)%>, <%=@currentWeight%>],
-       <%end%>
+<%if @currentWeight.to_f != 0.to_f%>
+        [<%=  session_date.to_f.round(0)%>, <%=@currentWeight%>],
+<%end%>
     ];
-    <% @min = @max - 1.year if @min > @max - 1.year %>
+<% @min = @max - 1.year if @min > @max - 1.year %>
 
     var patient_ticks = [
-    <% @first = Time.mktime(@min.year, @min.month, 1) # move to the start of the month
-     @last = Time.mktime(@max.year + (@max.month == 12 ? 1 : 0), @max.month + (@max.month < 12 ? 1 : -11), 1)
-     while (@first <= @last) do -%>
-    [<%= @first.to_f -%>, "<div class='xLabel'><%= @first.strftime("%b") -%><br/><b><%= @first.strftime("%Y") if @first.month == 1 -%></b></div>"],
-    <% @first = Time.mktime(@first.year + (@first.month == 12 ? 1 : 0), @first.month + (@first.month < 12 ? 1 : -11), 1) -%>
-    <% end -%>
-];
+<% @first = Time.mktime(@min.year, @min.month, 1) # move to the start of the month
+@last = Time.mktime(@max.year + (@max.month == 12 ? 1 : 0), @max.month + (@max.month < 12 ? 1 : -11), 1)
+while (@first <= @last) do -%>
+        [<%= @first.to_f -%>, "<div class='xLabel'><%= @first.strftime("%b") -%><br/><b><%= @first.strftime("%Y") if @first.month == 1 -%></b></div>"],
+  <% @first = Time.mktime(@first.year + (@first.month == 12 ? 1 : 0), @first.month + (@first.month < 12 ? 1 : -11), 1) -%>
+<% end -%>
+    ];
 
     var range = <%= 1.year.to_f -%>;
     var min = <%= @min.to_f -%>;
     var max = <%= @max.to_f + 1-%>;
     var max_tick = "<%= @max.strftime("%d-%b") -%>";
-//    patient_data.push([max, 0]);
+    //    patient_data.push([max, 0]);
 
     function get_data(x1, x2) {
       return [{
-        color: "green",
-        data: patient_data,
-        points: { show: true},
-        lines: { show: true, fill: true, fillColor: "rgb(61,235,61)" },
-        bars: { show: true }
-      }]
+          color: "green",
+          data: patient_data,
+          points: { show: true},
+          lines: { show: true, fill: true, fillColor: "rgb(61,235,61)" },
+          bars: { show: true }
+        }]
     }
 
     var plot_options = {

@@ -113,7 +113,7 @@ class EncountersController < ApplicationController
     
     @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) # rescue nil
 
-    @preg_encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+    @preg_encounters = @patient.encounters.find(:all, :conditions => ["voided = 0 AND encounter_datetime >= ? AND encounter_datetime <= ?",
         @current_range[0]["START"], @current_range[0]["END"]]) rescue []
     
     @names = @preg_encounters.collect{|e|
@@ -129,16 +129,20 @@ class EncountersController < ApplicationController
   end
 
   def new
-    # raise @anc_patient.to_yaml
-    @current_range = @anc_patient.active_range((session[:datetime] ? session[:datetime].to_date : Date.today)) rescue nil
+
+    d = (session[:datetime].to_date rescue Date.today)
+    t = Time.now
+    session_date = DateTime.new(d.year, d.month, d.day, t.hour, t.min, t.sec)
+      
+    @current_range = @anc_patient.active_range(session_date.to_date) rescue nil
     
-    @weeks = @anc_patient.fundus rescue 12
+    @weeks = @anc_patient.fundus(session_date.to_date) rescue 12
        
-    @pregnancystart = (session[:datetime]? (session[:datetime].to_date rescue Date.today) : Date.today) - (@weeks.week rescue 0)
+    @pregnancystart = session_date.to_date - (@weeks rescue 0).week
     
-    @preg_encounters = @patient.encounters.active.find(:all, :conditions => ["encounter_datetime >= ? AND encounter_datetime <= ?", 
+    @preg_encounters = @patient.encounters.find(:all, :conditions => ["voided = 0 AND encounter_datetime >= ? AND encounter_datetime <= ?",
         @current_range[0]["START"], @current_range[0]["END"]]) rescue []
-    
+
     @names = @preg_encounters.collect{|e|
       e.name.upcase
     }.uniq
