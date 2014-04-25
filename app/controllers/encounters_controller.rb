@@ -136,7 +136,7 @@ class EncountersController < ApplicationController
       
     @current_range = @anc_patient.active_range(session_date.to_date) rescue nil
     
-    @weeks = @anc_patient.fundus(session_date.to_date) rescue 12
+    @weeks = @anc_patient.fundus(session_date.to_date).to_i rescue 0
        
     @pregnancystart = session_date.to_date - (@weeks rescue 0).week
     
