@@ -186,13 +186,14 @@
   <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
   <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
 
-    <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""],
+ <%= touch_select_tag "Bed Net", @patient, options_for_select([["", ""],
       ["Given Today", "Given Today"],
       ["Given during previous ANC visit for current pregnancy", "Given during previous ANC visit for current pregnancy"],
       ["Not given today or during current pregnancy", "Not given today or during current pregnancy"]
     ]),
     {:id => "bed_net",
     :tt_onLoad => "showCategory('Current Pregnancy');",
+    :condition => "getSelected().match(/Bed\sNet\sGiven\?/)",
     :helptext => "Bed Net" } %>
 
   <%= submit_tag 'Finish' %>
