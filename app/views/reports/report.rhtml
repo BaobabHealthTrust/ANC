@@ -72,7 +72,7 @@
                   <td style="width: 25%;">
                     ANC Site Name
                   </td>
-                  <td colspan="3" style="border-left: 1px solid #999; 
+                  <td colspan="3" style="border-left: 1px solid #999;
                       border-bottom: 1px solid #999; font-style: italic;">
                     <%= @facility %>&nbsp;
                   </td>
@@ -82,14 +82,14 @@
                   <td style="width: 25%;">
                     Reporting Year
                   </td>
-                  <td style="border-left: 1px solid #999; border-bottom: 1px solid #999; 
+                  <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;
                       font-style: italic;">
                     <%= @end_date.to_date.strftime("%Y") rescue "" %>&nbsp;
                   </td>
                   <td style="width: 25%; border-left: 1px solid #999; border-bottom: 1px solid #999;" align="right">
                     Reporting Month
                   </td>
-                  <td style="border-left: 1px solid #999; border-bottom: 1px solid #999; 
+                  <td style="border-left: 1px solid #999; border-bottom: 1px solid #999;
                       font-style: italic;">
                     <%= @end_date.to_date.strftime("%B") rescue "" %>&nbsp;
                   </td>
@@ -487,36 +487,36 @@
 
                             <tr>
                               <td>
-
+                                 12
                               </td>
                               <td style="border-top: 1px solid #999; border-left: 1px solid #999;
                                   border-bottom: 1px solid #999;">
                                 <form id="fefo__number_of_tablets_given_2" method="post" action="decompose">
                                   <input type="hidden" value="<%= @fefo__number_of_tablets_given_2.join(",") %>" name="patients" />
-                                  <span style="color: gray">Tot. received < 120 tabs</span>
+                                  Tot. received 120+ tabs
                                 </form>
                               </td>
                               <td style="border: 1px solid #999;">
                                 <a href="javascript:document.getElementById('fefo__number_of_tablets_given_2').submit()">
-                                  <span style="color: gray"><%= @fefo__number_of_tablets_given_2.length %></span>
+                                  <%= @fefo__number_of_tablets_given_2.length %>
                                 </a>
                               </td>
                             </tr>
 
                             <tr>
                               <td style="border-top: 0px">
-                                12
+                               &nbsp
                               </td>
                               <td style="border-top: 0px solid #999; border-left: 1px solid #999;
                                   border-bottom: 1px solid #999;">
                                 <form id="fefo__number_of_tablets_given_1" method="post" action="decompose">
                                   <input type="hidden" value="<%= @fefo__number_of_tablets_given_1.join(",") %>" name="patients" />
-                                  Tot. received 120+ tabs
+                                  <span style="color: gray"> Tot. received < 120 tabs </span>
                                 </form>
                               </td>
                               <td style="border: 1px solid #999; border-top: 0px">
                                 <a href="javascript:document.getElementById('fefo__number_of_tablets_given_1').submit()">
-                                  <%= @fefo__number_of_tablets_given_1.length %>
+                                  <span style="color: gray"> <%= @fefo__number_of_tablets_given_1.length %> </span>
                                 </a>
                               </td>
                             </tr>
