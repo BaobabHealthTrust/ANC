@@ -258,7 +258,7 @@ class Reports
       :conditions => ["drug.name = ? AND (DATE(encounter_datetime) >= ? " +
           "AND DATE(encounter_datetime) <= ?) AND encounter.patient_id IN (?)", "Fefol (1 tablet)",
         @startdate.to_date, (@startdate.to_date + @preg_range), @cohortpatients]).collect{|o|
-      [o.patient_id, o.orderer]}.delete_if{|x,y| y < 120}.collect{|p, c| p}
+      [o.patient_id, o.orderer]}.delete_if{|x,y| y >= 120}.collect{|p, c| p}
 
   end
 
@@ -271,7 +271,7 @@ class Reports
       :conditions => ["drug.name = ? AND (DATE(encounter_datetime) >= ? " +
           "AND DATE(encounter_datetime) <= ?) AND encounter.patient_id IN (?)", "Fefol (1 tablet)",
         @startdate.to_date, (@startdate.to_date + @preg_range), @cohortpatients]).collect{|o|
-      [o.patient_id, o.orderer]}.delete_if{|x,y| y >= 120}.collect{|p, c| p}
+      [o.patient_id, o.orderer]}.delete_if{|x,y|  y < 120}.collect{|p, c| p}
 
   end
 
