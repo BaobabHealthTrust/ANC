@@ -69,13 +69,13 @@ class Patient < ActiveRecord::Base
     
     checked_date = lmp.present?? lmp : (today.to_date - 9.months)
     
-    last_preg_visit = self.encounters.find(:last, :order => [:encounter_datetime], :select => ["encounter.encounter_datetime"], :joins => [:observations],
+    last_test_visit = self.encounters.find(:last, :order => [:encounter_datetime], :select => ["obs.value_datetime"], :joins => [:observations],
       :conditions => ["encounter.encounter_type = ? AND obs.concept_id = ? AND encounter.encounter_datetime > ?",
-        EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("HIV STATUS").concept_id,
-        checked_date.to_date]).encounter_datetime  rescue nil
+        EncounterType.find_by_name("LAB RESULTS").id, ConceptName.find_by_name("Hiv Test Date").concept_id,
+        checked_date.to_date]).value_datetime.to_date  rescue nil
 
     status = nil
-    status = "negative" if (last_preg_visit.to_date >= (today - 3.months) rescue false)
+    status = "negative" if (last_test_visit.to_date <= (today - 3.months) rescue false)
     status = "unknown" if status.blank?
     status
   end
