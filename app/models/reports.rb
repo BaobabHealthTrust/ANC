@@ -22,7 +22,7 @@ class Reports
 
     if @type == "cohort"
 
-      @cohortpatients = registrations(@startdate, @enddate)
+      @cohortpatients = registrations(@startdate.to_date.beginning_of_month, @enddate.to_date.end_of_month)
 
     else
 

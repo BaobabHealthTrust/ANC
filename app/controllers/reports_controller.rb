@@ -126,7 +126,7 @@ class ReportsController < ApplicationController
     end
 
     @type = params[:selType]
-
+   
 		case params[:selSelect]
 		when "day"
       @start_date = params[:day]
@@ -155,6 +155,14 @@ class ReportsController < ApplicationController
     @start_date = params[:start_date] if !params[:start_date].blank?
     @end_date = params[:end_date] if !params[:end_date].blank?
 
+    if @type == "cohort"
+      session[:report_start_date] = (@start_date.to_date - 6.months).beginning_of_month
+      session[:report_end_date] = (@start_date.to_date - 6.months).end_of_month
+    else
+      session[:report_start_date] = @start_date.to_date
+      session[:report_end_date] = @end_date.to_date
+    end
+    
 		report = Reports.new(@start_date, @end_date, @start_age, @end_age, @type, session_date)
 
     @new_women_registered = report.new_women_registered

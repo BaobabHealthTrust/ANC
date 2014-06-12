@@ -80,4 +80,10 @@ class Patient < ActiveRecord::Base
     status
   end
 
+  def date_registered(start_date, end_date)
+    
+    self.encounters.last(:select => ["encounter_datetime"], :conditions => ["encounter_type = ? AND DATE(encounter_datetime) BETWEEN (?) AND (?)",
+        EncounterType.find_by_name("Current Pregnancy").id, start_date.to_date, end_date.to_date]).encounter_datetime rescue nil
+  end
+  
 end
