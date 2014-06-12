@@ -141,7 +141,7 @@
                         <%= patient.name rescue "" %>
                       </div>
                       <div class="cell">
-                        <%= patient.patient.date_registered(session[:report_start_date], session[:report_end_date]).strftime("%d/%b/%Y") %>
+                        <%= patient.patient.date_registered(session[:report_start_date], session[:report_end_date]).strftime("%d/%b/%Y") rescue "&nbsp"%>
                       </div>
                       <div class="cell">
                         <%= patient.birthdate_formatted rescue "" %>
