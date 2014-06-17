@@ -558,7 +558,7 @@ class Reports
     paramz["end_date"] = @startdate.to_date + @preg_range
     paramz["id_visit_map"] = id_visit_map.join(",")
 
-    server = CoreService.get_global_property_value("remote_servers.parent")
+    server = CoreService.get_global_property_value("art_link")
 
     login = CoreService.get_global_property_value("remote_bart.username").split(/,/) rescue ""
     password = CoreService.get_global_property_value("remote_bart.password").split(/,/) rescue ""
