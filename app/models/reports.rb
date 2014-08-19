@@ -48,10 +48,12 @@ class Reports
     @bart_patients = on_art_in_bart
 
     @on_cpt = @bart_patients['on_cpt']
+    @no_art = @bart_patients['no_art']
     @on_art_before = @bart_patients['arv_before_visit_one']
 
     @bart_patients.delete("on_cpt")
     @bart_patients.delete("arv_before_visit_one")
+    @bart_patients.delete("no_art")
     @bart_patient_identifiers = @bart_patients.keys
   end
 
@@ -402,61 +404,34 @@ class Reports
 
   def not_on_art(hiv_patients = [])
 
-    if hiv_patients.blank?
-      local = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"],
-                             :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"],
-                             :conditions => ["concept_id = ? AND (value_coded = ? OR value_text = ?) AND (DATE(encounter_datetime) >= ? " +
-                                                 "AND DATE(encounter_datetime) <= ?) AND encounter.patient_id IN (?)",
-                                             ConceptName.find_by_name("HIV status").concept_id,
-                                             ConceptName.find_by_name("Positive").concept_id, "Positive",
-                                             @startdate.to_date, (@startdate.to_date + @preg_range), @cohortpatients]).collect { |e| e.patient_id }.uniq
-    else
-      local = hiv_patients
-    end
-
-    no_art = local - on_art_before
-    no_art = no_art.uniq
-    no_art = [] if no_art.to_s.blank?
+    no_art = @no_art.split(",").collect { |id|
+      PatientIdentifier.find_by_identifier(id).patient_id }.uniq rescue []
     return no_art
-
   end
 
   def on_art_before
 
-    #patients = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"],
-    # :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"],
-    # :conditions => ["concept_id = ? AND value_text = ? AND (encounter_datetime >= ? " +
-    #    "AND encounter_datetime <= ?) AND encounter.patient_id IN (?)",
-    # ConceptName.find_by_name("Date Antiretrovirals Started").concept_id,
-    # "Before This Pregnancy",
-    # @startdate, @end_date, @cohortpatients]).collect{|e| e.patient_id}  rescue []
-    ids = @bart_patient_identifiers.collect { |id| PatientIdentifier.find_by_identifier(id).patient_id }.uniq rescue []
+    ids =  @on_art_before.split(",").collect { |id|
+      PatientIdentifier.find_by_identifier(id).patient_id }.uniq rescue []
     return ids
   end
 
   def on_art_zero_to_27
 
-    local = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"],
-                           :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"],
-                           :conditions => ["concept_id = ? AND value_text = ? AND (DATE(encounter_datetime) >= ? " +
-                                               "AND DATE(encounter_datetime) <= ?) AND encounter.patient_id IN (?)",
-                                           ConceptName.find_by_name("Date Antiretrovirals Started").concept_id,
-                                           "At 0-27 weeks of Pregnancy",
-                                           @startdate.to_date, (@startdate.to_date + @preg_range), @cohortpatients]).collect { |e| e.patient_id } rescue []
-
-    @art_ids = "'" + @bart_patient_identifiers.join("','") + "'"
-
-    remote = Observation.find_by_sql("SELECT p.identifier, o.value_datetime, o.person_id FROM obs o
+    remote = []
+    Observation.find_by_sql(["SELECT p.identifier, o.value_datetime, o.person_id FROM obs o
 			JOIN patient_identifier p ON p.patient_id = o.person_id
 			WHERE o.concept_id = (SELECT concept_id FROM concept_name WHERE name = 'LAST MENSTRUAL PERIOD')
-			AND p.identifier IN (#{@art_ids})").collect { |ob|
+			AND p.patient_id IN (?) AND DATE(o.obs_datetime) BETWEEN ? AND ?",
+                                      @positive_patients, @startdate.to_date, (@startdate.to_date + @preg_range)]).collect { |ob|
       ident = ob.identifier
       if (!ob.value_datetime.blank? && @bart_patients["#{ident}"])
-        check = (@bart_patients["#{ident}"].to_date - (ob.value_datetime.to_date + 7.days)).days
-        ob.person_id if (check <= (27*7).days && check >= 0.days)
+        start_date = @bart_patients["#{ident}"].to_date
+        lmp = ob.value_datetime.to_date
+        remote << ob.person_id if  ((start_date >= lmp) && (start_date < (lmp + 28.weeks)))
       end
-    } rescue []
-    remote = remote.concat(local).uniq
+    }# rescue []
+
     remote = [] if remote.to_s.blank?
     return remote
 
@@ -464,25 +439,20 @@ class Reports
 
   def on_art_28_plus
 
-    local = Encounter.find(:all, :joins => [:observations], :group => ["patient_id"],
-                           :select => ["patient_id, MAX(encounter_datetime) encounter_datetime"],
-                           :conditions => ["concept_id = ? AND value_text = ? AND (DATE(encounter_datetime) >= ? " +
-                                               "AND DATE(encounter_datetime) <= ?) AND encounter.patient_id IN (?)",
-                                           ConceptName.find_by_name("Date Antiretrovirals Started").concept_id,
-                                           "At 28+ of Pregnancy",
-                                           @startdate.to_date, (@startdate.to_date + @preg_range), @cohortpatients]).collect { |e| e.patient_id } rescue []
-
-    @art_ids = "'" + @bart_patient_identifiers.join("','") + "'"
-    remote = Observation.find_by_sql("SELECT p.identifier, o.value_datetime, o.person_id FROM obs o
+    remote = []
+     Observation.find_by_sql(["SELECT p.identifier, o.value_datetime, o.person_id FROM obs o
 			JOIN patient_identifier p ON p.patient_id = o.person_id
 			WHERE o.concept_id = (SELECT concept_id FROM concept_name WHERE name = 'LAST MENSTRUAL PERIOD')
-			AND p.identifier IN (#{@art_ids})").collect { |ob|
+			AND p.patient_id IN (?) AND DATE(o.obs_datetime) BETWEEN ? AND ?",
+                                        @positive_patients, @startdate.to_date, (@startdate.to_date + @preg_range)]).each { |ob|
       ident = ob.identifier
       if (!ob.value_datetime.blank? && @bart_patients["#{ident}"])
-        ob.person_id if (@bart_patients["#{ident}"].to_date - (ob.value_datetime.to_date + 7.days)).days > (27*7).days
+        start_date = @bart_patients["#{ident}"].to_date
+        lmp = ob.value_datetime.to_date
+        remote << ob.person_id if  (start_date >= (lmp + 28.weeks))
       end
     } rescue []
-    remote = remote.concat(local).uniq
+
     remote = [] if remote.to_s.blank?
     return remote
   end
@@ -547,9 +517,10 @@ class Reports
       next if id.nil?
       patient_id = PatientIdentifier.find_by_identifier(id).patient_id
       if patient_id
-        date = Observation.find_by_sql("SELECT * FROM obs where person_id = #{patient_id}
-                AND concept_id = (SELECT concept_id FROM concept_name where name = 'TYPE OF VISIT'
-                 AND value_numeric = 1 order by date_created LIMIT 1)").first.date_created.strftime("%Y-%m-%d") rescue nil
+        date = Observation.find_by_sql(["SELECT value_datetime FROM obs WHERE person_id = ?
+                                        AND DATE(obs_datetime) BETWEEN ? AND ? AND concept_id = ?",
+                                       patient_id,  @startdate.to_date, (@startdate.to_date + @preg_range),
+                                       ConceptName.find_by_name("DATE OF LAST MENSTRUAL PERIOD").concept_id]).first.value_datetime.strftime("%Y-%m-%d") rescue nil
 
         value = "" + id + "|" + date if !date.nil?
         id_visit_map << value if !date.nil?
