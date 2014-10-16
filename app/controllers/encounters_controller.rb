@@ -33,7 +33,7 @@ class EncountersController < ApplicationController
       observation.delete(:value_text) unless observation[:value_coded_or_text].blank?
       
       observation[:encounter_id] = encounter.id
-      # observation[:obs_datetime] = encounter.encounter_datetime || Time.now()
+      observation[:obs_datetime] = encounter.encounter_datetime || Time.now()
       observation[:person_id] ||= encounter.patient_id
       observation[:concept_name] ||= "DIAGNOSIS" if encounter.type.name == "DIAGNOSIS"
       # Handle multiple select
