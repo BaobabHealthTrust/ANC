@@ -14,3 +14,4 @@ mockups
 nbproject
 .project
 *.lock
+.idea/*
