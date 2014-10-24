@@ -75,11 +75,11 @@ class Reports
 
     Encounter.find(:all, :joins => [:observations], :group => [:patient_id],
                    :select => ["MAX(value_datetime) lmp, patient_id"],
-                   :conditions => ["encounter_type = ? AND concept_id = ? AND encounter_datetime >= ? " +
-                                       "AND encounter_datetime <= ? AND encounter.voided = 0",
+                   :conditions => ["encounter_type = ? AND concept_id = ? AND DATE(encounter_datetime) >= ? " +
+                                       "AND DATE(encounter_datetime) <= ? AND encounter.voided = 0",
                                    EncounterType.find_by_name("Current Pregnancy").id,
                                    ConceptName.find_by_name("Date of Last Menstrual Period").concept_id,
-                                   start_dt, end_dt]).collect { |e| e.patient_id }.uniq
+                                   start_dt.to_date, end_dt.to_date]).collect { |e| e.patient_id }.uniq
 
   end
 
