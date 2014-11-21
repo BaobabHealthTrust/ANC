@@ -482,8 +482,8 @@ class PatientsController < ApplicationController
   end
    
   def tab_visit_summary
-      
-    @encounters = @patient.encounters.find(:all, 
+
+    @encounters = @patient.encounters.find(:all,
       :conditions => ["DATE(encounter_datetime) = ?", (session[:datetime] ? session[:datetime].to_date : Date.today)]) rescue []
 
     @external_encounters = []
@@ -517,7 +517,7 @@ class PatientsController < ApplicationController
       "Manage ART Prescriptions" => "TREATMENT", 
       "ART Drug Dispensations" => "DISPENSING"
     }
-    
+
     @roles = current_user.user_roles.collect{|r|r.role.downcase} rescue []
     
     activities = current_user.activities rescue []

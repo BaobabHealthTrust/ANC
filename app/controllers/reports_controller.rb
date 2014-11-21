@@ -261,19 +261,44 @@ class ReportsController < ApplicationController
 	def select
     render :layout => "application"
 	end
-
   def decompose
 
     @facility = Location.current_health_center.name rescue ''
 
-    @patients = []
+    @data = []
 
     if params[:patients]
       new_women = params[:patients].split(",")
-      @patients = Patient.find(:all, :conditions => ["patient_id IN (?)", new_women])
+      new_women = [-1] if new_women.blank?
+      patients =  Patient.find_by_sql(["SELECT * FROM patient WHERE patient_id IN (?)", new_women])
+      patients.each do |p|
+        patient = ANCService::ANC.new(p)
+        enc = Encounter.find_by_sql(["SELECT encounter_id FROM encounter WHERE patient_id = ?", p.id]).map(&:encounter_id)
+        @data << [patient.national_id,
+                  (patient.name rescue "&nbsp"),
+                  (patient.patient.date_registered(session[:report_start_date],
+                                                   session[:report_end_date]).strftime("%d/%b/%Y") rescue "&nbsp"),
+                  (patient.birthdate_formatted rescue "&nbsp"),
+                  enc,
+                  p.id]
+      end
     end
 
     render :layout => false
+  end
+
+  def patient_encounters
+    result = []
+    patient = Patient.find(params[:patient_id])
+
+    patient.encounters.each do |encounter|
+      result << {"eid" => encounter.encounter_id,
+                 "name" => encounter.name.titleize.gsub(/ANC\s/, "ANC"),
+                 "date" => encounter.encounter_datetime.strftime("%d/%b/%Y"),
+                 "obs" => encounter.to_s}
+    end
+
+    render :text => result.to_json
   end
 
   def print_report
